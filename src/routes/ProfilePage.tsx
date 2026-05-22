@@ -43,6 +43,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'สถานะบัญชีทดสอบ', icon: ShieldCheck, href: '/app/auth/status' },
   { label: 'กติกาเชื่อมบัญชี Phone + LINE', icon: Link2, href: '/app/auth/linking' },
   { label: 'ตรวจความพร้อม UX', icon: ClipboardCheck, href: '/app/qa' },
+  { label: 'ตัวอย่างผู้ดูแลเนื้อหา', icon: FileText, href: '/app/content-admin-preview' },
   { label: 'สถานะ Guest Sync', icon: CloudUpload, href: '/app/guest-sync-status' },
   { label: 'สำรองข้อมูลในอนาคต', icon: UserRound, href: '/app/account-preview' },
   { label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้', icon: Sprout, href: '/app/memory' },

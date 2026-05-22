@@ -192,7 +192,7 @@ function createArticleSavedItem(article: Article | SavedArticle): SavedItem {
     itemId: article.id,
     title: article.title,
     summary: article.excerpt,
-    sourceRoute: `/app/articles#${article.id}`,
+    sourceRoute: `/app/articles/${article.id}`,
     tags: [article.category],
     savedAt,
     updatedAt: savedAt,

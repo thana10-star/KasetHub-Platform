@@ -1,4 +1,5 @@
 import { Bookmark, BookOpenCheck, Check, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ShareButton } from '@/components/kaset/ShareButton';
 import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
 import { Badge } from '@/components/ui/Badge';
@@ -9,15 +10,16 @@ import type { Article } from '@/types/kaset';
 
 type ArticleCardProps = {
   article: Article;
+  detailHref?: string;
 };
 
-export function ArticleCard({ article }: ArticleCardProps) {
+export function ArticleCard({ article, detailHref = `/app/articles/${article.id}` }: ArticleCardProps) {
   const { isSaved, save, toggle } = useSavedArticles();
   const saved = isSaved(article.id);
 
   return (
     <Card className="overflow-hidden">
-      <div className="grid grid-cols-[112px_1fr]">
+      <Link aria-label={`อ่านบทความ ${article.title}`} className="grid grid-cols-[112px_1fr] text-current no-underline" to={detailHref}>
         <VisualPlaceholder className="h-full min-h-[132px] rounded-none" label={article.category} tone={article.imageTone} />
         <div className="min-w-0 p-4">
           <Badge className="mb-2" tone={article.category === 'ตลาด' ? 'gold' : 'green'}>
@@ -29,8 +31,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <Clock aria-hidden="true" className="h-3.5 w-3.5" />
             {article.readTime} · {article.publishedAt}
           </p>
+          <p className="mt-2 text-xs font-bold text-kaset-deep">อ่านบทความ</p>
         </div>
-      </div>
+      </Link>
 
       <div className="grid gap-2 border-t border-kaset-deep/8 p-3">
         <div className="grid grid-cols-2 gap-2">
@@ -49,7 +52,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           payload={{
             title: article.title,
             description: `${article.excerpt}\nบันทึกไว้สำหรับอ่านภายหลังบน KasetHub`,
-            url: `/app/articles#${article.id}`,
+            url: detailHref,
           }}
         />
       </div>

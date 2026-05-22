@@ -13,6 +13,7 @@ export type AppRoute =
   | '/app/community'
   | '/app/prices'
   | '/app/articles'
+  | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/profile'
   | '/app/account-preview'
@@ -93,6 +94,11 @@ export type Article = {
 export type SavedArticle = Article & {
   savedAt: string;
   offlineReady: boolean;
+  offlineAvailable?: boolean;
+  cachedAt?: string;
+  cacheVersion?: number;
+  bodyCachePreview?: string;
+  cacheSizeWarning?: string;
 };
 
 export type NotificationItem = {

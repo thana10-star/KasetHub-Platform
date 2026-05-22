@@ -18,6 +18,7 @@ import type {
   QuickAction,
   VideoCategory,
 } from '@/types/kaset';
+import { articleContents, contentToArticle } from '@/services/content/content-fixtures';
 
 export const quickActions: QuickAction[] = [
   {
@@ -222,48 +223,7 @@ export const cropPrices: CropPrice[] = [
   },
 ];
 
-export const articles: Article[] = [
-  {
-    id: 'article-001',
-    title: 'เช็กลิสต์เตรียมแปลงก่อนฤดูฝนสำหรับเกษตรกรรายย่อย',
-    category: 'องค์ความรู้',
-    excerpt: 'รวมขั้นตอนสำรวจดิน ระบบระบายน้ำ และแผนป้องกันโรคพืชก่อนฝนต่อเนื่อง',
-    author: 'ทีมบรรณาธิการ KasetHub',
-    readTime: 'อ่าน 4 นาที',
-    publishedAt: 'ข้อมูลตัวอย่าง 22 พ.ค. 2569',
-    imageTone: 'soil',
-  },
-  {
-    id: 'article-002',
-    title: 'แนวโน้มตลาดผลไม้ภาคตะวันออกและการวางแผนเก็บเกี่ยว',
-    category: 'ตลาด',
-    excerpt: 'มองภาพรวมราคา แรงงาน และโลจิสติกส์ เพื่อช่วยตัดสินใจช่วงผลผลิตออกมาก',
-    author: 'KasetHub Market Lab',
-    readTime: 'อ่าน 5 นาที',
-    publishedAt: 'ข้อมูลตัวอย่าง 21 พ.ค. 2569',
-    imageTone: 'market',
-  },
-  {
-    id: 'article-003',
-    title: 'AI ช่วยเกษตรกรได้อย่างไรโดยไม่แทนที่ประสบการณ์ในแปลง',
-    category: 'เทคโนโลยี',
-    excerpt: 'ทำความเข้าใจบทบาท AI ในการตั้งคำถาม วิเคราะห์ภาพ และจัดระบบความรู้',
-    author: 'KasetHub AI Team',
-    readTime: 'อ่าน 6 นาที',
-    publishedAt: 'ข้อมูลตัวอย่าง 20 พ.ค. 2569',
-    imageTone: 'tech',
-  },
-  {
-    id: 'article-004',
-    title: 'ชุมชนเกษตรออนไลน์กับการแลกเปลี่ยนความรู้ที่ปลอดภัย',
-    category: 'ชุมชน',
-    excerpt: 'หลักคิดเรื่องการยืนยันข้อมูล การรายงานโพสต์ และการช่วยกันตอบอย่างรับผิดชอบ',
-    author: 'ทีมชุมชน KasetHub',
-    readTime: 'อ่าน 3 นาที',
-    publishedAt: 'ข้อมูลตัวอย่าง 19 พ.ค. 2569',
-    imageTone: 'community',
-  },
-];
+export const articles: Article[] = articleContents.map(contentToArticle);
 
 export const notifications: NotificationItem[] = [
   {

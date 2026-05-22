@@ -16,6 +16,7 @@ import { AuthPhonePage } from '@/routes/AuthPhonePage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
 import { CommunityPage } from '@/routes/CommunityPage';
+import { ArticleDetailPage } from '@/routes/ArticleDetailPage';
 import { GuestSyncStatusPage } from '@/routes/GuestSyncStatusPage';
 import { ImagePrivacyPage } from '@/routes/ImagePrivacyPage';
 import { LandingPage } from '@/routes/LandingPage';
@@ -29,6 +30,7 @@ import { SavedArticlesPage } from '@/routes/SavedArticlesPage';
 import { SavedVideosPage } from '@/routes/SavedVideosPage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
 import { YoutubePage } from '@/routes/YoutubePage';
+import { ContentAdminPreviewPage } from '@/routes/ContentAdminPreviewPage';
 
 export default function App() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
         <Route path="community" element={<CommunityPage />} />
         <Route path="prices" element={<PricesPage />} />
         <Route path="articles" element={<ArticlesPage />} />
+        <Route path="articles/:articleId" element={<ArticleDetailPage />} />
+        <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="account-preview" element={<AccountPreviewPage />} />

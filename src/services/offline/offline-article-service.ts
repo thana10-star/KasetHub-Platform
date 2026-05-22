@@ -1,4 +1,5 @@
 import { articles } from '@/data/mockData';
+import { createOfflineArticleCachePreview } from '@/services/content/content-fixtures';
 import {
   createArticleMemoryItem,
   getState,
@@ -7,6 +8,22 @@ import {
   unsaveItem,
 } from '@/services/guest-memory/guest-memory-service';
 import type { Article, SavedArticle } from '@/types/kaset';
+
+function articleWithOfflineCache(article: Article | SavedArticle, cachedAt = new Date().toISOString()): SavedArticle {
+  const cache = createOfflineArticleCachePreview(article.id, cachedAt);
+  const existingSavedAt = 'savedAt' in article ? article.savedAt : cachedAt;
+
+  return {
+    ...article,
+    savedAt: existingSavedAt,
+    offlineReady: cache?.offlineAvailable ?? ('offlineReady' in article ? article.offlineReady : true),
+    offlineAvailable: cache?.offlineAvailable ?? ('offlineAvailable' in article ? article.offlineAvailable : undefined),
+    cachedAt: cache?.cachedAt ?? ('cachedAt' in article ? article.cachedAt : undefined),
+    cacheVersion: cache?.cacheVersion ?? ('cacheVersion' in article ? article.cacheVersion : undefined),
+    bodyCachePreview: cache?.bodyCachePreview ?? ('bodyCachePreview' in article ? article.bodyCachePreview : undefined),
+    cacheSizeWarning: cache?.sizeWarning ?? ('cacheSizeWarning' in article ? article.cacheSizeWarning : undefined),
+  };
+}
 
 function articleFromMemoryItem(item: ReturnType<typeof getState>['savedItems'][number]): SavedArticle | undefined {
   const articleFromMetadata = item.metadata.article as Article | SavedArticle | undefined;
@@ -17,11 +34,14 @@ function articleFromMemoryItem(item: ReturnType<typeof getState>['savedItems'][n
     return undefined;
   }
 
-  return {
+  const cachedAt = 'cachedAt' in article && typeof article.cachedAt === 'string' ? article.cachedAt : item.savedAt;
+  const articleWithSavedAt = {
     ...article,
     savedAt: item.savedAt,
     offlineReady: Boolean(item.metadata.offlineReady ?? true),
   };
+
+  return articleWithOfflineCache(articleWithSavedAt, cachedAt);
 }
 
 export function getSavedArticles() {
@@ -36,7 +56,7 @@ export function isArticleSaved(articleId: string) {
 }
 
 export function saveArticle(article: Article) {
-  saveItem(createArticleMemoryItem(article));
+  saveItem(createArticleMemoryItem(articleWithOfflineCache(article)));
   return getSavedArticles();
 }
 

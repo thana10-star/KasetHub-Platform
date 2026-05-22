@@ -57,6 +57,8 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'YouTube Hub', route: '/app/youtube' },
   { label: 'ชุมชน', route: '/app/community' },
   { label: 'ราคาพืชผล', route: '/app/prices' },
+  { label: 'บทความ', route: '/app/articles' },
+  { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
   { label: 'สมัคร/สำรองข้อมูล', route: '/app/auth' },
