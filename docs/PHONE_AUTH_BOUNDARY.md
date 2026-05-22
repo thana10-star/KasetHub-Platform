@@ -1,0 +1,136 @@
+# M17 Phone OTP Auth Boundary
+
+M17 creates a phone-first authentication boundary for KasetHub while staying mock-only by default. It proves that future Guest Memory sync should require an authenticated owner before any real cloud upload.
+
+## Product Principle
+
+- Guest mode remains the default.
+- Farmers can use the app without signup.
+- Phone login is the primary future account path.
+- Email is not required at first.
+- Sync should be offered when users want backup or cross-device access.
+
+## Current M17 Behavior
+
+M17 does not send SMS and does not call Supabase Auth.
+
+The local mock supports:
+
+- `requestOtp(phoneNumber)`
+- `verifyOtp(phoneNumber, otpCode)`
+- `getMockSession()`
+- `clearMockSession()`
+
+Demo OTP:
+
+```text
+123456
+```
+
+The mock session stores:
+
+- `mockUserId`
+- `phoneNumberMasked`
+- `provider: phone`
+- `createdAt`
+- `expiresAt`
+
+Session storage is localStorage only and versioned.
+
+## Feature Flags
+
+Defaults:
+
+```bash
+VITE_PHONE_AUTH_MODE=local_mock
+VITE_ENABLE_PHONE_AUTH=false
+VITE_ENABLE_PHONE_AUTH_LOCAL_MOCK=true
+```
+
+Modes:
+
+- `local_mock`: local-only mock OTP, no network.
+- `supabase_disabled`: disabled response.
+- `supabase_ready_mock`: future Supabase-ready test mode, still no network in M17.
+- `production_disabled`: disabled response.
+
+## Thai Phone Validation
+
+M17 accepts Thai mobile phone numbers in these shapes:
+
+- `0812345678`
+- `+66812345678`
+- `66812345678`
+
+The UI uses simple Thai copy and avoids technical terms.
+
+## Why Phone First
+
+Phone OTP is familiar for many Thai users and does not require email. It fits the farmer-friendly strategy:
+
+- “สมัครด้วยเบอร์โทรเมื่ออยากสำรองข้อมูล”
+- “ใช้งานต่อได้ ไม่ต้องสมัครตอนนี้”
+- “ข้อมูลที่บันทึกไว้ตอนนี้อยู่ในเครื่องนี้เท่านั้น”
+
+## SMS Cost Consideration
+
+Real SMS OTP has direct cost and abuse risk. Before production:
+
+- rate-limit OTP requests
+- add cooldown and resend limits
+- verify phone ownership server-side
+- avoid sending SMS on every screen visit
+- consider LINE Login as a secondary lower-friction path
+- log OTP attempts without exposing sensitive data
+
+## Future Supabase Phone OTP
+
+Future implementation should call Supabase Auth only from a clearly gated auth service. The browser may use the Supabase anon key, but service-role keys must never be exposed.
+
+Future real flow:
+
+1. User enters phone.
+2. Supabase sends OTP.
+3. User verifies OTP.
+4. App receives authenticated session.
+5. Guest Memory sync can run only after consent and authenticated ownership.
+
+## Sync Ownership Rule
+
+M17 updates `/app/auth/sync-preview` so dry-run sync requires a phone mock session. This proves the production rule:
+
+- no account owner, no cloud sync
+- local Guest Memory remains untouched
+- My Farm sync requires consent
+- AI question history sync is optional
+- failed sync must preserve local data
+
+## Security Notes
+
+- No service-role key in frontend.
+- No real OTP in M17.
+- No network calls by default.
+- No Supabase writes.
+- Mock sessions are for prototype testing only.
+
+## M18 Schema Link
+
+Future real phone auth should map into:
+
+- `profiles` for user-owned profile data
+- `auth_link_events` for account/provider audit events
+- `guest_sync_events` for backup/sync audit history
+
+The M17 local mock session is not a real Supabase Auth session. M18 SQL is still a draft and should only be tested in staging after phone auth and sync ownership rules are reviewed.
+
+## M19 LINE Linking
+
+Phone remains the primary recovery path. LINE can become a linked provider after the user confirms ownership.
+
+Rules:
+
+- Phone-only account can later link LINE.
+- Phone + LINE is a linking candidate, not a real linked account in M19.
+- LINE-only preview should recommend adding phone before backup.
+- Provider conflicts require explicit user confirmation.
+- No LINE SDK, redirect, token, Supabase write, or network call exists in M19.

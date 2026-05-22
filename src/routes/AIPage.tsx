@@ -1,0 +1,475 @@
+import {
+  AlertTriangle,
+  Bot,
+  Cpu,
+  ImageUp,
+  Leaf,
+  PlayCircle,
+  RotateCcw,
+  SendHorizonal,
+  Server,
+  ShieldAlert,
+  Sparkles,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { AICreditBalanceCard } from '@/components/kaset/AICreditBalanceCard';
+import { AILimitReachedSheet } from '@/components/kaset/AILimitReachedSheet';
+import { RewardedAdUnlockCard } from '@/components/kaset/RewardedAdUnlockCard';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { NoticeBox } from '@/components/ui/NoticeBox';
+import { assistantPrompts } from '@/data/mockData';
+import { useAICredits } from '@/hooks/useAICredits';
+import { useGuestMemory } from '@/hooks/useGuestMemory';
+import { aiProviderDefinitions } from '@/services/ai/ai-provider.types';
+import { buildAIRequestPlan } from '@/services/ai/ai-request-planner';
+import { askTextQuestion, getAIProxyAdapterStatus } from '@/services/ai-proxy/ai-proxy-adapter';
+import { aiMockScenarioDescriptions, aiMockScenarioLabels } from '@/services/ai-proxy/ai-proxy-fixtures';
+import type { AIMockScenario, AIProxyStatus, AITextProxyResponse } from '@/services/ai-proxy/ai-proxy.types';
+
+const promptIcons = [Leaf, ImageUp, Sparkles, PlayCircle];
+
+const aiScenarioOptions: AIMockScenario[] = [
+  'success',
+  'insufficient_credits',
+  'safety_blocked',
+  'failed_retryable',
+  'low_confidence',
+  'no_plant_detected',
+  'safety_warning',
+];
+
+const statusTone: Record<AIProxyStatus, 'green' | 'gold' | 'rose' | 'neutral'> = {
+  success: 'green',
+  rejected: 'gold',
+  insufficient_credits: 'rose',
+  safety_blocked: 'rose',
+  failed: 'rose',
+};
+
+const statusCopy: Record<AIProxyStatus, string> = {
+  success: 'สำเร็จ',
+  rejected: 'ถูกปฏิเสธ',
+  insufficient_credits: 'เครดิตไม่พอ',
+  safety_blocked: 'บล็อกเพื่อความปลอดภัย',
+  failed: 'ล้มเหลว',
+};
+
+function ScenarioSelector({
+  scenario,
+  setScenario,
+}: {
+  scenario: AIMockScenario;
+  setScenario: (scenario: AIMockScenario) => void;
+}) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+          <Server aria-hidden="true" className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-extrabold text-kaset-ink">โหมดจำลองสำหรับทดสอบ</h2>
+            <Badge tone="neutral">M11 Mock Proxy</Badge>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            ใช้ทดสอบ response แบบ backend โดยไม่มี network request หรือ provider key
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+        {aiScenarioOptions.map((option) => (
+          <button
+            className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-bold transition ${
+              scenario === option ? 'bg-kaset-deep text-white shadow-soft' : 'bg-kaset-mist text-kaset-deep'
+            }`}
+            key={option}
+            onClick={() => setScenario(option)}
+            type="button"
+          >
+            {aiMockScenarioLabels[option]}
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-xs leading-5 text-slate-600">
+        {aiMockScenarioDescriptions[scenario]}
+      </p>
+    </Card>
+  );
+}
+
+function ProxyResponseCard({ onRetry, response }: { onRetry: () => void; response: AITextProxyResponse }) {
+  const provider = aiProviderDefinitions[response.modelPlan.providerCandidate];
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="bg-kaset-deep p-5 text-white">
+        <div className="flex items-start gap-3">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+            <Bot aria-hidden="true" className="h-6 w-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap gap-2">
+              <Badge className="bg-white/15 text-white" tone="green">
+                backend-shaped mock
+              </Badge>
+              <Badge tone={statusTone[response.status]}>{statusCopy[response.status]}</Badge>
+            </div>
+            <h2 className="mt-3 text-lg font-extrabold leading-7">ผลตอบกลับจาก AI Mock Proxy</h2>
+            <p className="mt-1 break-all text-xs text-emerald-50/90">Request ID: {response.requestId}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 p-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-lg bg-kaset-mist p-3">
+            <p className="text-xs font-semibold text-slate-500">เครดิตที่ต้องใช้</p>
+            <p className="mt-1 text-xl font-extrabold text-kaset-deep">{response.creditCost}</p>
+          </div>
+          <div className="rounded-lg bg-kaset-mist p-3">
+            <p className="text-xs font-semibold text-slate-500">เครดิตที่มี</p>
+            <p className="mt-1 text-xl font-extrabold text-kaset-deep">{response.creditValidation.availableCredits}</p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-kaset-deep/10 bg-white p-3">
+          <div className="flex items-start gap-3">
+            <Cpu aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-kaset-deep" />
+            <div>
+              <p className="text-sm font-extrabold text-kaset-ink">แผนเลือกโมเดล</p>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                {provider.label} · {response.modelPlan.selectedModelTier} · {response.modelPlan.estimatedBackendEndpoint}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                สถานะเครดิต: {response.creditValidation.message}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {response.answer ? (
+          <div>
+            <h3 className="text-sm font-extrabold text-kaset-ink">{response.answer.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-700">{response.answer.answer}</p>
+            <div className="mt-3 grid gap-2">
+              {response.answer.bulletPoints.map((item) => (
+                <p className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={item}>
+                  {item}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-lg bg-rose-50 p-3 text-sm leading-6 text-rose-900">
+            ระบบจำลองไม่ส่งคำตอบเพราะสถานะคือ {statusCopy[response.status]}
+          </div>
+        )}
+
+        {response.warnings.length > 0 ? (
+          <div className="grid gap-2">
+            {response.warnings.map((warning) => (
+              <div className="flex gap-2 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900" key={warning}>
+                <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{warning}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+          <p className="font-extrabold">คำเตือนความปลอดภัย</p>
+          <ul className="mt-2 grid gap-1">
+            {response.safetyDisclaimers.map((disclaimer) => (
+              <li key={disclaimer}>{disclaimer}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+          <p className="font-extrabold text-slate-800">Logs preview</p>
+          <p className="mt-1">Network: {response.logsPreview.networkCalls ? 'yes' : 'no'}</p>
+          <p>Provider key: {response.logsPreview.providerKeyLocation}</p>
+          <p>Would write: {response.logsPreview.wouldWriteTables.join(', ')}</p>
+        </div>
+
+        {response.retryable ? (
+          <Button className="w-full" onClick={onRetry} variant="soft">
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            ลองส่งอีกครั้ง
+          </Button>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+function AIProxyModeCard() {
+  const status = getAIProxyAdapterStatus();
+
+  return (
+    <Card className="p-4">
+      <div className="flex gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+          <Server aria-hidden="true" className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-extrabold text-kaset-ink">AI Proxy Adapter</h2>
+            <Badge tone={status.mode === 'local_fixture' ? 'green' : 'gold'}>{status.modeLabel}</Badge>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{status.readinessLabel}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Backend proxy: {status.backendProxyEnabled ? 'เปิด flag แล้ว แต่ M13 ยังไม่ fetch' : 'ปิดอยู่'} · Provider keys: ไม่มีใน frontend
+          </p>
+          <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/ai-proxy-status">
+            ดูสถานะ proxy
+          </Link>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+export function AIPage() {
+  const [question, setQuestion] = useState('');
+  const [savedMessage, setSavedMessage] = useState('');
+  const [unlockMessage, setUnlockMessage] = useState('');
+  const [showLimitReached, setShowLimitReached] = useState(false);
+  const [scenario, setScenario] = useState<AIMockScenario>('success');
+  const [proxyResponse, setProxyResponse] = useState<AITextProxyResponse | null>(null);
+  const { addRecentAIQuestion, saveItem } = useGuestMemory();
+  const { addUsageLog, consumeCredits, grantRewardedCredit, summary } = useAICredits();
+  const requestPlan = useMemo(() => buildAIRequestPlan({ prompt: question, sourceRoute: '/app/ai' }), [question]);
+  const provider = aiProviderDefinitions[requestPlan.providerCandidate];
+
+  function handleRewardedUnlock() {
+    grantRewardedCredit({
+      credits: 1,
+      metadata: {
+        sourceRoute: '/app/ai',
+      },
+    });
+    setUnlockMessage('เพิ่มเครดิตจากโฆษณาจำลองแล้ว 1 คำถาม');
+    setShowLimitReached(false);
+  }
+
+  function persistSuccessfulAnswer(cleanQuestion: string, response: AITextProxyResponse) {
+    if (!response.answer) {
+      return;
+    }
+
+    const consumeResult = consumeCredits(response.creditCost);
+
+    if (!consumeResult.success || !consumeResult.source) {
+      setShowLimitReached(true);
+      setSavedMessage('เครดิตถาม AI ไม่พอ ระบบจึงยังไม่บันทึกคำตอบ');
+      return;
+    }
+
+    const id = response.requestId;
+    const answerSummary = response.answer.answer;
+    const metadata = {
+      creditSource: consumeResult.source,
+      creditSources: consumeResult.sources,
+      creditsConsumed: consumeResult.creditsConsumed,
+      aiProxyResponsePreview: response,
+    };
+
+    addRecentAIQuestion({
+      id,
+      question: cleanQuestion,
+      topic: 'AI ผู้ช่วยเกษตร',
+      sourceRoute: '/app/ai',
+      answerSummary,
+      metadata,
+    });
+    saveItem({
+      itemType: 'ai_answer',
+      itemId: id,
+      title: cleanQuestion,
+      summary: answerSummary,
+      sourceRoute: '/app/ai',
+      tags: ['AI', 'ผู้ช่วยเกษตร', 'mock-proxy'],
+      metadata,
+    });
+    addUsageLog({
+      id,
+      question: cleanQuestion,
+      topic: 'AI ผู้ช่วยเกษตร',
+      creditSource: consumeResult.source,
+      answerSummary,
+      metadata: {
+        sourceRoute: '/app/ai',
+        ...metadata,
+      },
+    });
+    setSavedMessage('บันทึกคำถาม ประวัติการใช้เครดิต และ response preview ไว้ในเครื่องนี้แล้ว');
+    setShowLimitReached(false);
+  }
+
+  function askMockAI(nextQuestion: string) {
+    const cleanQuestion = nextQuestion.trim();
+
+    if (!cleanQuestion) {
+      setSavedMessage('พิมพ์คำถามก่อนถาม AI');
+      return;
+    }
+
+    const response = askTextQuestion({
+      question: cleanQuestion,
+      creditSummary: summary,
+      scenario,
+    });
+
+    setProxyResponse(response);
+
+    if (response.status === 'insufficient_credits') {
+      setShowLimitReached(true);
+      setSavedMessage('Mock proxy ตรวจพบว่าเครดิตไม่พอ');
+      return;
+    }
+
+    if (response.status !== 'success') {
+      setShowLimitReached(false);
+      setSavedMessage(response.retryable ? 'Mock proxy ล้มเหลวแบบลองใหม่ได้' : 'Mock proxy ไม่อนุญาตให้ตอบคำขอนี้');
+      return;
+    }
+
+    persistSuccessfulAnswer(cleanQuestion, response);
+  }
+
+  return (
+    <div>
+      <PageHeader title="AI ผู้ช่วยเกษตร" subtitle="ทดสอบ request/response ผ่าน AI Mock Proxy ยังไม่เรียก AI จริง" showBack />
+      <div className="grid gap-5 px-5 pb-6">
+        <Card className="overflow-hidden bg-kaset-deep text-white">
+          <div className="relative p-5">
+            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10" />
+            <div className="relative flex gap-4">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                <Bot aria-hidden="true" className="h-7 w-7" />
+              </span>
+              <div>
+                <Badge className="bg-white/15 text-white" tone="green">
+                  ผู้ช่วยตัวอย่าง
+                </Badge>
+                <h2 className="mt-3 text-xl font-extrabold">สวัสดีครับ วันนี้แปลงของคุณเจอปัญหาอะไร</h2>
+                <p className="mt-2 text-sm leading-6 text-emerald-50/90">
+                  M11 จำลอง backend proxy เต็มรูปแบบ ทั้งเครดิต โมเดล คำเตือน และ logs preview โดยไม่ส่งข้อมูลออกจากเครื่อง
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <NoticeBox tone="info" title="ถามสั้น ๆ เป็นภาษาพูดได้เลย">
+          ตัวอย่าง: ใบข้าวมีจุดหลังฝนตก หรือดินแข็งควรเริ่มแก้อย่างไร เวอร์ชันนี้ยังใช้คำตอบจำลองและไม่เรียก AI จริง
+        </NoticeBox>
+
+        <AICreditBalanceCard showLink summary={summary} />
+
+        <AIProxyModeCard />
+
+        <ScenarioSelector scenario={scenario} setScenario={setScenario} />
+
+        <Card className="p-4">
+          <label className="text-sm font-bold text-kaset-ink" htmlFor="ai-question">
+            คำถามตัวอย่าง
+          </label>
+          <textarea
+            className="mt-3 min-h-28 w-full resize-none rounded-lg border border-kaset-deep/10 bg-kaset-mist p-4 text-sm leading-6 text-kaset-ink outline-none focus:border-kaset-leaf"
+            id="ai-question"
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="เช่น ใบข้าวมีจุดสีน้ำตาลหลังฝนตก ควรเริ่มตรวจอะไรบ้าง"
+            value={question}
+          />
+          <div className="mt-3 rounded-lg bg-kaset-mist p-3">
+            <div className="flex gap-3">
+              <Cpu aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-kaset-deep" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-kaset-ink">ระบบเลือกโมเดลอัตโนมัติ</h3>
+                  <Badge tone={requestPlan.safetyLevel === 'high' ? 'rose' : 'green'}>
+                    {requestPlan.creditCost} เครดิต
+                  </Badge>
+                </div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">
+                  {provider.label} · {requestPlan.selectedModelTier} · {requestPlan.estimatedBackendEndpoint}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  พรีวิวเท่านั้น ยังไม่เรียก backend หรือ AI จริง
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <p className="text-xs text-slate-500">
+              ประมาณ {requestPlan.creditCost} เครดิต · วันนี้ถามฟรีได้อีก {summary.dailyFreeRemaining} ครั้ง
+            </p>
+            <Button className="shrink-0 px-4" onClick={() => askMockAI(question)}>
+              <SendHorizonal aria-hidden="true" className="h-4 w-4" />
+              ส่ง
+            </Button>
+          </div>
+          {savedMessage ? <p className="mt-3 text-xs font-semibold text-kaset-deep">{savedMessage}</p> : null}
+        </Card>
+
+        {proxyResponse ? <ProxyResponseCard onRetry={() => askMockAI(question)} response={proxyResponse} /> : null}
+
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">เริ่มจากหัวข้อยอดนิยม</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {assistantPrompts.map((prompt, index) => {
+              const Icon = promptIcons[index];
+
+              return (
+                <button
+                  className="rounded-lg border border-white/90 bg-white p-4 text-left shadow-card ring-1 ring-kaset-deep/5"
+                  key={prompt}
+                  onClick={() => {
+                    setQuestion(prompt);
+                    askMockAI(prompt);
+                  }}
+                  type="button"
+                >
+                  <span className="mb-3 grid h-10 w-10 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                    <Icon aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <span className="block text-sm font-bold leading-5 text-kaset-ink">{prompt}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {showLimitReached ? <AILimitReachedSheet onUnlock={handleRewardedUnlock} /> : null}
+
+        <RewardedAdUnlockCard message={unlockMessage} onUnlock={handleRewardedUnlock} />
+
+        <Card className="border-amber-200 bg-amber-50 p-5 shadow-soft">
+          <div className="flex gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-soft">
+              <ShieldAlert aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div>
+              <h2 className="text-lg font-extrabold text-amber-950">คำแนะนำความปลอดภัย</h2>
+              <p className="mt-2 text-sm leading-6 text-amber-900">
+                สำหรับคำถามเกี่ยวกับโรคพืช สารเคมี ปุ๋ย หรือแมลง ควรตรวจสอบกับผู้เชี่ยวชาญก่อนใช้งานจริง
+              </p>
+              <Link to="/app/ai-credits">
+                <span className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-bold text-amber-800 transition hover:bg-amber-100">
+                  ดูรายละเอียดเครดิต AI
+                </span>
+              </Link>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
