@@ -221,6 +221,14 @@ Phone OTP should become the primary account creation path for non-tech farmers. 
 - `/app/notifications` includes mock crop price alert examples with demo/sample labels.
 - No real price API, push notification, backend job, Supabase write, or production price claim is enabled.
 
+## M22.5 Real Owner YouTube Channel Link
+
+- `src/config/channel.ts` stores the real owner YouTube channel URL: `https://www.youtube.com/@ruengkaset`.
+- `/app/youtube` uses the configured URL for the channel hero CTA.
+- The YouTube import planner exposes the configured owner handle and URL for future ownership checks.
+- `/app/content-admin-preview` shows the configured owner channel source.
+- This remains link/config only: no YouTube API call, API key, channel fetch, scraping, or mock-video replacement is added.
+
 ## Future Architecture
 
 ### Web App
@@ -278,6 +286,8 @@ The YouTube hub should later connect to curated channels or playlists through th
 ### YouTube API Boundary
 
 M03 does not call YouTube Data API. The adapter should eventually be replaced by a backend-backed service that fetches channel profile, playlist items, video snippets, durations, thumbnails, statistics, and pagination tokens. API keys, OAuth tokens, quota handling, and import jobs must live server-side. The frontend should consume normalized `YouTubeVideo` and `YouTubePlaylist` objects, not raw API responses.
+
+M22.5 adds only the real owner channel link as static config: `https://www.youtube.com/@ruengkaset`. The link helps route users and future import planning to the correct owner channel, but it does not validate ownership or fetch YouTube data.
 
 ### Saved Video Future
 

@@ -199,6 +199,13 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - Updates `/app/prices`, `/app/prices/:priceId`, `/app/profile`, and `/app/notifications` with local-only crop watch and mock alert UX
 - Docs: `docs/CROP_WATCH_PRICE_ALERT_UX.md`
 
+## M22.5 Real Owner YouTube Channel Link
+
+- Adds `src/config/channel.ts` with `youtubeChannelUrl = "https://www.youtube.com/@ruengkaset"`
+- Uses the configured owner channel URL in the `/app/youtube` channel hero CTA
+- Uses the configured owner handle/URL in the YouTube import planner and content admin preview
+- Keeps all mock videos unchanged and does not call YouTube API, fetch channel data, add API keys, scrape, or make network requests
+
 ## Routes
 
 - `/` - public landing and app preview

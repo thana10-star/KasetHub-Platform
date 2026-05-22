@@ -45,6 +45,15 @@ M20 does not add:
 
 All content is local fixture data.
 
+## Owner YouTube Channel Config
+
+M22.5 adds the real KasetHub owner channel link as static config:
+
+- `src/config/channel.ts`
+- `youtubeChannelUrl = "https://www.youtube.com/@ruengkaset"`
+
+The configured URL is used by the YouTube channel hero CTA, YouTube import planner, and content admin preview owner-channel source. It does not call YouTube API, fetch channel data, add API keys, scrape, or replace the current mock videos.
+
 ## Future CMS Requirements
 
 A real content system should add:
