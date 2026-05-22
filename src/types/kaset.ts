@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { CropPriceItem } from '@/services/crop-prices/crop-price.types';
 
 export type AppRoute =
   | '/app'
@@ -12,6 +13,7 @@ export type AppRoute =
   | '/app/image-privacy'
   | '/app/community'
   | '/app/prices'
+  | '/app/crop-watch'
   | '/app/articles'
   | '/app/content-admin-preview'
   | '/app/notifications'
@@ -66,17 +68,7 @@ export type CommunityPost = {
   comments: number;
 };
 
-export type CropPrice = {
-  id: string;
-  crop: string;
-  category: 'ข้าว' | 'ผลไม้' | 'พืชไร่' | 'ผัก';
-  market: string;
-  province: string;
-  unit: string;
-  price: number;
-  changePercent: number;
-  updatedAt: string;
-};
+export type CropPrice = CropPriceItem;
 
 export type ArticleCategory = 'ข่าวเกษตร' | 'องค์ความรู้' | 'เทคโนโลยี' | 'ตลาด' | 'ชุมชน';
 

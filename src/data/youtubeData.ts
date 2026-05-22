@@ -1,4 +1,5 @@
 import type { YouTubeChannelProfile, YouTubePlaylist, YouTubeVideo, VideoCategory } from '@/types/youtube';
+import { youtubeChannelHandle, youtubeChannelUrl } from '@/config/channel';
 
 export const youtubeCategories: Array<'ทั้งหมด' | VideoCategory> = [
   'ทั้งหมด',
@@ -13,7 +14,7 @@ export const youtubeCategories: Array<'ทั้งหมด' | VideoCategory> =
 export const youtubeChannelProfile: YouTubeChannelProfile = {
   channelId: 'mock-channel-kasethub-th',
   name: 'KasetHub เกษตรไทย',
-  handle: '@KasetHubThai',
+  handle: youtubeChannelHandle,
   subscriberCount: 35000,
   subscriberCountLabel: '35k',
   dailyViews: 20000,
@@ -28,7 +29,7 @@ export const youtubeChannelProfile: YouTubeChannelProfile = {
     'ราคาพืชผล',
     'เครื่องมือเกษตร',
   ],
-  youtubeUrl: 'https://www.youtube.com/@KasetHubThai',
+  youtubeUrl: youtubeChannelUrl,
   latestVideoId: 'sample-video-id',
   sourceStatus: 'api_ready',
 };

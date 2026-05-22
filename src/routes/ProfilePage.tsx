@@ -2,6 +2,7 @@ import {
   Bookmark,
   BookOpenCheck,
   Bot,
+  Bell,
   ChevronRight,
   ClipboardCheck,
   Clock3,
@@ -26,6 +27,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { demoUser, profileStats } from '@/data/mockData';
+import { useCropWatch } from '@/hooks/useCropWatch';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
@@ -37,6 +39,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'สถานะ AI Proxy', icon: Server, href: '/app/ai-proxy-status' },
   { label: 'ประวัติการใช้ AI', icon: Clock3, href: '/app/ai-credits' },
   { label: 'ประวัติพืชของฉัน', icon: Leaf, href: '/app/my-farm' },
+  { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
   { label: 'ประวัติวิเคราะห์ภาพ', icon: History, href: '/app/analysis-history' },
   { label: 'ความเป็นส่วนตัวของรูปภาพ', icon: FileLock2, href: '/app/image-privacy' },
   { label: 'สมัคร/สำรองข้อมูล', icon: ShieldCheck, href: '/app/auth' },
@@ -57,6 +60,7 @@ export function ProfilePage() {
   const { savedCount } = useSavedArticles();
   const { savedCount: savedVideoCount } = useSavedVideos();
   const { counts, state } = useGuestMemory();
+  const { counts: cropWatchCounts } = useCropWatch();
   const accountStatus = getAccountStatus(state);
 
   return (
@@ -86,6 +90,28 @@ export function ProfilePage() {
         <NoticeBox tone="success" title="โปรไฟล์ตัวอย่างแบบไม่บังคับสมัคร">
           ใช้งานฟีเจอร์หลักได้ก่อน ข้อมูลที่บันทึกไว้จะอยู่ในเครื่องนี้จนกว่าจะมีระบบสำรองข้อมูลจริง
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+              <Bell aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-extrabold text-kaset-ink">พืชที่ติดตามและแจ้งเตือนราคา</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {cropWatchCounts.enabledWatches} พืชที่เปิดติดตาม · {cropWatchCounts.enabledAlerts} preference แจ้งเตือนตัวอย่าง
+              </p>
+              <p className="mt-2 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+                ข้อมูลนี้อยู่ในเครื่องนี้เท่านั้น ยังไม่มี push notification หรือราคา API จริง
+              </p>
+            </div>
+          </div>
+          <Link to="/app/crop-watch">
+            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
+              เปิดพืชที่ติดตาม
+            </span>
+          </Link>
+        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">

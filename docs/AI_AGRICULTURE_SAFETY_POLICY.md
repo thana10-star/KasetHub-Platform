@@ -32,10 +32,22 @@ AI should not:
 - Promise future prices.
 - Tell users to sell or hold as guaranteed advice.
 - Present sample/mock prices as real-time market data.
+- Guarantee sale price, buyer acceptance, or final payment.
+
+AI must:
+
+- Cite the source label and source date/time when explaining any price.
+- Say “ราคาอ้างอิง” near the price value.
+- Mention that price can change by area, grade, moisture, season, and buyer.
+- Clearly mark demo/sample data as demo/sample.
 
 Required copy:
 
 > ราคาเป็นราคาอ้างอิงจากแหล่งข้อมูลที่ระบุ ควรตรวจสอบราคาหน้างานก่อนตัดสินใจขาย
+
+M21 required price disclaimer:
+
+> ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ
 
 ## User-Uploaded Images
 

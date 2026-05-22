@@ -23,6 +23,7 @@ import { LandingPage } from '@/routes/LandingPage';
 import { MemoryPage } from '@/routes/MemoryPage';
 import { MyFarmPage } from '@/routes/MyFarmPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
+import { PriceDetailPage } from '@/routes/PriceDetailPage';
 import { PricesPage } from '@/routes/PricesPage';
 import { ProfilePage } from '@/routes/ProfilePage';
 import { QAPage } from '@/routes/QAPage';
@@ -31,6 +32,7 @@ import { SavedVideosPage } from '@/routes/SavedVideosPage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
 import { YoutubePage } from '@/routes/YoutubePage';
 import { ContentAdminPreviewPage } from '@/routes/ContentAdminPreviewPage';
+import { CropWatchPage } from '@/routes/CropWatchPage';
 
 export default function App() {
   return (
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="image-privacy" element={<ImagePrivacyPage />} />
         <Route path="community" element={<CommunityPage />} />
         <Route path="prices" element={<PricesPage />} />
+        <Route path="prices/:priceId" element={<PriceDetailPage />} />
+        <Route path="crop-watch" element={<CropWatchPage />} />
         <Route path="articles" element={<ArticlesPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

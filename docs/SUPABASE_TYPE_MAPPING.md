@@ -86,11 +86,33 @@ Future YouTube imports should write through a backend job, not the browser.
 
 ## Crop Prices
 
-Price tracking maps into:
+M21 crop price source models map into:
 
+- `crop_price_sources`
 - `crop_price_snapshots`
+- `crop_price_import_jobs` future
+- `community_price_reports` future
 - `crop_price_watches`
+- `crop_price_alert_preferences` future
 - `followed_topics`
+- `saved_items`
 - `notifications`
 
-Snapshots are public read after source validation. Watches are private to the user.
+Type mapping:
+
+- `CropPriceSource` -> `crop_price_sources`
+- `CropPriceSnapshot` -> `crop_price_snapshots` plus import metadata
+- `CropPriceItem` -> latest or historical `crop_price_snapshots` rows
+- `CropPriceMarket` -> snapshot market fields now, possible normalized market table later
+- `CropPriceRegion` -> snapshot region/province fields now, possible geography table later
+- `CropPriceUnit` -> snapshot unit fields
+- `CropPriceQualityGrade` -> snapshot quality grade fields
+- `CropPriceReliabilityLevel` -> `reliability_level`
+- `CropPriceSourceStatus` -> source `status` and snapshot publication rules
+- `CropWatch` -> `crop_price_watches`
+- `CropWatchAlertPreference` -> `crop_price_alert_preferences`
+- `CropWatchAlertType` -> `alert_type`
+- Guest Memory followed crop topics -> `followed_topics`
+- Guest Memory saved price references -> `saved_items` with `item_type = crop_price`
+
+Snapshots are public read only after source validation. Watches and alert preferences are private to the user. Community reports remain private or clearly unverified until moderation. Real alert evaluation should be backend-owned and should never trust client-only preferences for delivery without auth, consent, and freshness checks.

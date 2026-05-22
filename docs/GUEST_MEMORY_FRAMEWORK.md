@@ -40,6 +40,15 @@ Keep feature metadata structured and small. Store enough information to render a
 
 For M10 plant image analysis, store lightweight result metadata only. Do not store raw uploaded photos or large base64 thumbnails in Guest Memory. Use file name, result summary, confidence, and a thumbnail tone marker until real storage exists.
 
+## Crop Watch Relationship
+
+M21/M22 price features use two local layers:
+
+- Guest Memory `followedTopics` records the broad interest signal, such as following a crop or price topic.
+- Crop Watch stores alert preferences, preferred market/region, enabled status, and target price preferences in `kasethub.cropWatch.v1`.
+
+Keep alert preferences out of generic Guest Memory until the schema is stable. Future account sync can merge Guest Memory followed topics and Crop Watch records into separate cloud tables.
+
 ## Supabase Sync Future
 
 Guest Memory maps cleanly to future cloud tables:
@@ -49,6 +58,8 @@ Guest Memory maps cleanly to future cloud tables:
 - `liked_items`
 - `followed_topics`
 - `recent_ai_questions`
+- `crop_price_watches`
+- `crop_price_alert_preferences`
 - `farm_history_records`
 - `plant_analysis_records`
 - `plant_analysis_images` in future cloud storage metadata

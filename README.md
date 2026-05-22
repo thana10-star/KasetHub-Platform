@@ -1,6 +1,6 @@
 # KasetHub Platform
 
-KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, and M20 adds the content management and publishing foundation without a real CMS, YouTube API, backend writes, or network calls.
+KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, M20 added the content management and publishing foundation, M21 added crop price data source foundations, and M22 adds local crop watch plus price alert UX without real price APIs, push notifications, backend writes, or network calls.
 
 ## Tech Stack
 
@@ -182,6 +182,23 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - Enriches saved/offline article metadata with local body cache preview fields while preserving Guest Memory behavior
 - Docs: `docs/CONTENT_MANAGEMENT_FOUNDATION.md`, `docs/YOUTUBE_IMPORT_CONTENT_STRATEGY.md`, and `docs/OFFLINE_ARTICLE_CACHE_STRATEGY.md`
 
+## M21 Crop Price Data Source Foundation
+
+- Adds typed crop price sources, snapshots, markets, regions, units, grades, reliability levels, and source statuses in `src/services/crop-prices`
+- Upgrades `/app/prices` with search, filters, source/reliability badges, save/share/follow actions, and demo/reference disclaimers
+- Adds `/app/prices/:priceId` for detail, mock trends, related content, AI CTA, and strong `ราคาอ้างอิง` safety copy
+- Plans OAE, DIT, ตลาดไท, local market manual reports, and future community reports without calling any real source
+- Docs: `docs/CROP_PRICE_DATA_SOURCE_FOUNDATION.md` and `docs/CROP_PRICE_SOURCE_INTEGRATION_PLAN.md`
+
+## M22 Crop Watch + Price Alert UX Foundation
+
+- Adds versioned local crop watch state in `src/services/crop-prices/crop-watch-service.ts`
+- Adds `useCropWatch()` for local followed crops, preferred market/region, enabled status, and alert preferences
+- Supports `price_up`, `price_down`, `target_price`, and `weekly_summary` preferences
+- Adds `/app/crop-watch` for followed crops, latest mock price, alert preferences, enable/disable, and remove actions
+- Updates `/app/prices`, `/app/prices/:priceId`, `/app/profile`, and `/app/notifications` with local-only crop watch and mock alert UX
+- Docs: `docs/CROP_WATCH_PRICE_ALERT_UX.md`
+
 ## Routes
 
 - `/` - public landing and app preview
@@ -197,6 +214,8 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - `/app/image-privacy` - image privacy and future upload consent explanation
 - `/app/community` - farmer community feed
 - `/app/prices` - crop price tracking
+- `/app/prices/:priceId` - crop price detail and watch preferences
+- `/app/crop-watch` - local crop watch and demo alert preferences
 - `/app/articles` - blog/news list
 - `/app/articles/:articleId` - article detail and offline body cache preview
 - `/app/content-admin-preview` - local content admin preview
@@ -275,4 +294,8 @@ M19 adds a local-only LINE Login mock and account-linking planner. It does not l
 
 M20 adds content planning screens and services only. It does not add a production CMS, YouTube import job, transcript fetch, backend write, Supabase content mutation, service worker, Cache API storage, or network request.
 
-All videos, posts, crop prices, articles, article bodies, content admin previews, YouTube import plans, offline cache previews, notifications, AI credit state, AI routing plans, AI proxy adapter status, AI mock proxy responses, local backend boundary responses, Guest Sync dry-run responses, phone auth mock sessions, LINE auth mock sessions, account-linking recommendations, local image previews, storage plans, image-analysis job previews, farm history, saved article state, saved video state, guest memory state, sync planning output, share state, auth screens, QA checks, SQL drafts, RLS drafts, and disease analysis outputs are demo/sample data. The app does not connect to YouTube Data API, AI providers, real auth, Supabase network operations or storage, real SMS OTP, LINE Login, LINE Messaging API, Google Login, Facebook SDK, analytics backend, real ads, payment, PWA service worker, Cache API, production CMS, or marketplace services in M20.
+## Crop Price and Alert Boundary
+
+M21-M22 price and watch features are local-only. They do not call OAE, DIT, ตลาดไท, market websites, push notification services, Supabase, or backend jobs. All prices and alerts are demo/reference samples and must use `ราคาอ้างอิง` language.
+
+All videos, posts, crop prices, crop watches, price alerts, articles, article bodies, content admin previews, YouTube import plans, offline cache previews, notifications, AI credit state, AI routing plans, AI proxy adapter status, AI mock proxy responses, local backend boundary responses, Guest Sync dry-run responses, phone auth mock sessions, LINE auth mock sessions, account-linking recommendations, local image previews, storage plans, image-analysis job previews, farm history, saved article state, saved video state, guest memory state, sync planning output, share state, auth screens, QA checks, SQL drafts, RLS drafts, and disease analysis outputs are demo/sample data. The app does not connect to YouTube Data API, AI providers, real auth, Supabase network operations or storage, real SMS OTP, LINE Login, LINE Messaging API, Google Login, Facebook SDK, analytics backend, real ads, payment, PWA service worker, Cache API, production CMS, real price APIs, push notifications, or marketplace services in M22.

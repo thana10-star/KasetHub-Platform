@@ -8,12 +8,13 @@ The planner lives in `src/services/content/youtube-import-planner.ts`.
 
 It reads local fixtures from:
 
+- `src/config/channel.ts`
 - `src/data/youtubeData.ts`
 - `src/services/content/content-fixtures.ts`
 
 It returns:
 
-- source channel identity from local fixtures
+- source channel identity from local config
 - import candidates
 - proposed content category
 - proposed difficulty
@@ -26,7 +27,7 @@ It returns:
 
 Future YouTube-to-content import should follow this flow:
 
-1. Confirm the source video belongs to the owner channel or a licensed partner.
+1. Confirm the source video belongs to the owner channel `https://www.youtube.com/@ruengkaset` or a licensed partner.
 2. Fetch metadata and transcript server-side only.
 3. Build an article outline from title, description, tags, transcript, and playlist context.
 4. Map category, difficulty, author/source, related videos, and tags.
@@ -45,6 +46,16 @@ M20 does not:
 - write CMS rows
 - write Supabase rows
 - perform network requests
+
+## Owner Channel Config
+
+The current owner channel URL is stored as a static config value:
+
+```ts
+export const youtubeChannelUrl = 'https://www.youtube.com/@ruengkaset';
+```
+
+This is used by the YouTube channel hero CTA, content admin preview, and import planner as the future owner channel source. It is not used to call the YouTube API, fetch channel data, validate ownership, or change the current mock videos.
 
 ## Future Backend Notes
 

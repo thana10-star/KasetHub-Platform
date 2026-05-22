@@ -55,6 +55,34 @@ Request:
 }
 ```
 
+For `price_explanation`, the request should include source context instead of asking the model to infer live prices:
+
+```json
+{
+  "requestType": "price_explanation",
+  "question": "ช่วยอธิบายราคาอ้างอิงข้าวหอมมะลิ 105",
+  "crop": "ข้าวหอมมะลิ 105",
+  "province": "ยโสธร",
+  "guestId": "guest_local_123",
+  "clientCreditPreview": 1,
+  "metadata": {
+    "sourceRoute": "/app/prices/price-rice-jasmine-105-yasothon-demo",
+    "priceReference": {
+      "priceId": "price-rice-jasmine-105-yasothon-demo",
+      "referencePriceLabel": "15,150 บาท/ตัน",
+      "sourceLabel": "OAE / สำนักงานเศรษฐกิจการเกษตร",
+      "sourceDateTimeLabel": "ข้อมูลตัวอย่าง 23 พ.ค. 2569 09:00",
+      "marketLabel": "ตลาดกลางตัวอย่างยโสธร",
+      "regionLabel": "ยโสธร",
+      "unitLabel": "บาท/ตัน",
+      "qualityGradeLabel": "ข้าวเปลือกหอมมะลิมาตรฐาน",
+      "reliabilityLevel": "official",
+      "isDemoSample": true
+    }
+  }
+}
+```
+
 Response:
 
 ```json
@@ -73,6 +101,15 @@ Response:
   "createdAt": "2026-05-22T10:00:00.000Z"
 }
 ```
+
+`price_explanation` responses must:
+
+- Say `ราคาอ้างอิง`.
+- Cite source label and source date/time.
+- Include market/region, unit, and grade when provided.
+- Avoid guaranteeing sale price or telling the user a sale decision is certain.
+- Include `ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ`.
+- Clearly say when the referenced price is demo/sample data.
 
 ## `POST /api/ai/analyze-plant-image`
 
@@ -220,7 +257,7 @@ Initial policy:
 
 ## Safety Disclaimers
 
-Responses involving disease, fertilizer, pesticide, chemicals, or plant health must include a Thai safety disclaimer. Price explanations must clearly state that prices are references only.
+Responses involving disease, fertilizer, pesticide, chemicals, or plant health must include a Thai safety disclaimer. Price explanations must clearly state that prices are references only, cite source label/date, and must not guarantee sale price.
 
 ## Logging Strategy
 

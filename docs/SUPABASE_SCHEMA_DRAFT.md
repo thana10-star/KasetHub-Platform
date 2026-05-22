@@ -228,27 +228,75 @@ Admin/moderation notes: Support curation status and featured flags later.
 
 ## `crop_price_watches`
 
-Purpose: User-specific watched crops/prices.
+Purpose: User-specific watched crops/prices and preferred reference context.
 
-Key columns: `id uuid`, `user_id`, `crop_name`, `category`, `province`, `market`, `threshold_above`, `threshold_below`, `created_at`, `updated_at`, `metadata jsonb`.
+Key columns: `id uuid`, `user_id`, `crop_key`, `crop_name`, `category`, `preferred_source_id nullable`, `preferred_market_key`, `preferred_market_label`, `preferred_region_key`, `preferred_region_label`, `enabled`, `created_at`, `updated_at`, `local_id`, `metadata jsonb`.
 
-Indexes: `user_id`, `crop_name`, `province`.
+Indexes: `user_id`, `(user_id, crop_key)` unique, `crop_name`, `preferred_region_key`, `enabled`.
 
 RLS notes: Users can CRUD their own watches.
 
-Admin/moderation notes: Price sources should be verified before alerts go live.
+Admin/moderation notes: Price sources should be verified before alerts go live. Admins do not need direct access to user watch preferences except support/debug views.
+
+## `crop_price_alert_preferences` Future
+
+Purpose: Per-watch alert preferences for price movement, target price, and weekly summaries.
+
+Key columns: `id uuid`, `watch_id`, `user_id`, `alert_type`, `enabled`, `target_price nullable`, `last_evaluated_snapshot_id nullable`, `last_triggered_at nullable`, `quiet_hours jsonb`, `delivery_channels text[]`, `created_at`, `updated_at`, `local_id`, `metadata jsonb`.
+
+Indexes: `watch_id`, `user_id`, `alert_type`, `enabled`, `last_triggered_at desc`.
+
+RLS notes: Users can CRUD their own alert preferences. Evaluation and delivery writes should be backend-owned.
+
+Admin/moderation notes: Do not send production alerts unless source freshness, attribution, and disclaimer rules pass.
+
+## `crop_price_sources`
+
+Purpose: Registry of official, market, manual, and community price sources.
+
+Key columns: `id uuid`, `source_key`, `label`, `short_label`, `thai_name`, `source_type`, `reliability_level`, `status`, `attribution_label`, `planned_connection_method`, `freshness_policy`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `source_key`, `source_type`, `status`, `reliability_level`.
+
+RLS notes: Public can read enabled source metadata. Admin/import services manage records.
+
+Admin/moderation notes: Source status controls whether rows can be published, imported, or shown only as planned.
 
 ## `crop_price_snapshots`
 
-Purpose: Historical crop price data.
+Purpose: Historical and latest crop price reference rows imported from verified source workflows.
 
-Key columns: `id uuid`, `crop_name`, `category`, `market`, `province`, `unit`, `price`, `change_percent`, `source`, `captured_at`, `metadata jsonb`.
+Key columns: `id uuid`, `source_id`, `import_job_id nullable`, `crop_key`, `crop_name`, `category`, `reference_price`, `currency`, `unit_label`, `unit_quantity_label`, `quality_grade_label`, `quality_grade_description`, `market_key`, `market_label`, `market_type`, `region_key`, `region_label`, `province`, `source_captured_at`, `source_published_at`, `imported_at`, `change_amount`, `change_percent`, `change_direction`, `reliability_level`, `publication_status`, `attribution_label`, `disclaimer`, `metadata jsonb`.
 
-Indexes: `crop_name`, `province`, `captured_at desc`.
+Indexes: `source_id`, `crop_key`, `crop_name`, `category`, `region_key`, `market_key`, `source_captured_at desc`, `publication_status`, `reliability_level`.
 
-RLS notes: Public read after source verification.
+RLS notes: Public read only for published and non-stale reference rows. Admin/import services insert and correct rows.
 
-Admin/moderation notes: Add source confidence and correction workflow.
+Admin/moderation notes: Add correction workflow, stale flags, reviewer notes, and immutable audit history before production alerts.
+
+## `crop_price_import_jobs` Future
+
+Purpose: Backend-owned source import lifecycle for APIs, approved feeds, CSV/manual imports, and future scheduled jobs.
+
+Key columns: `id uuid`, `source_id`, `job_type`, `status`, `started_at`, `completed_at`, `source_window_start`, `source_window_end`, `rows_received`, `rows_imported`, `rows_rejected`, `warning_count`, `error_message`, `reviewer_id nullable`, `published_at nullable`, `metadata jsonb`.
+
+Indexes: `source_id`, `status`, `started_at desc`, `job_type`.
+
+RLS notes: Backend/admin only. Users do not read raw import jobs.
+
+Admin/moderation notes: Required for idempotency, rollback, rejected row review, and source freshness dashboards.
+
+## `community_price_reports` Future
+
+Purpose: User-submitted local price reports before moderation and source validation.
+
+Key columns: `id uuid`, `reporter_user_id`, `crop_name`, `category`, `reported_price`, `currency`, `unit_label`, `quality_grade_label`, `market_label`, `province`, `reported_at`, `evidence_note`, `moderation_status`, `reviewer_id nullable`, `reviewed_at nullable`, `linked_snapshot_id nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `reporter_user_id`, `crop_name`, `province`, `reported_at desc`, `moderation_status`.
+
+RLS notes: Users can create and read their own reports. Public reads only after moderation and only if surfaced as community/unverified or reviewed reference data.
+
+Admin/moderation notes: Community reports must stay clearly separate from official data and should not drive AI or alerts until reviewed.
 
 ## `auth_link_events`
 

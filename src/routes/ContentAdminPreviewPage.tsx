@@ -107,6 +107,18 @@ export function ContentAdminPreviewPage() {
         <section className="grid gap-3">
           <h2 className="text-xl font-extrabold text-kaset-ink">YouTube import planner</h2>
           <Card className="p-4">
+            <div className="mb-4 rounded-lg bg-kaset-mist p-3">
+              <p className="text-xs font-bold text-slate-500">Owner channel source</p>
+              <p className="mt-1 break-all text-sm font-extrabold text-kaset-ink">{importPlan.channelHandle}</p>
+              <a
+                className="mt-2 inline-flex text-xs font-bold text-kaset-deep"
+                href={importPlan.channelUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {importPlan.channelUrl}
+              </a>
+            </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-xl font-extrabold text-kaset-ink">{importPlan.candidateCount}</p>

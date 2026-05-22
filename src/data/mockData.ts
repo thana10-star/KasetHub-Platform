@@ -10,7 +10,6 @@ import type {
   AiCreditState,
   Article,
   CommunityPost,
-  CropPrice,
   DiseaseAnalysisResult,
   FarmAnalysisRecord,
   KasetVideo,
@@ -19,6 +18,7 @@ import type {
   VideoCategory,
 } from '@/types/kaset';
 import { articleContents, contentToArticle } from '@/services/content/content-fixtures';
+import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 
 export const quickActions: QuickAction[] = [
   {
@@ -165,63 +165,7 @@ export const communityPosts: CommunityPost[] = [
   },
 ];
 
-export const cropPrices: CropPrice[] = [
-  {
-    id: 'price-001',
-    crop: 'ข้าวหอมมะลิ 105',
-    category: 'ข้าว',
-    market: 'ตลาดกลางตัวอย่าง',
-    province: 'ยโสธร',
-    unit: 'บาท/ตัน',
-    price: 15150,
-    changePercent: 1.8,
-    updatedAt: 'ข้อมูลตัวอย่าง วันนี้ 09:00',
-  },
-  {
-    id: 'price-002',
-    crop: 'มันสำปะหลังสด',
-    category: 'พืชไร่',
-    market: 'ลานมันตัวอย่าง',
-    province: 'นครราชสีมา',
-    unit: 'บาท/กก.',
-    price: 3.15,
-    changePercent: -0.7,
-    updatedAt: 'ข้อมูลตัวอย่าง วันนี้ 09:00',
-  },
-  {
-    id: 'price-003',
-    crop: 'ทุเรียนหมอนทอง',
-    category: 'ผลไม้',
-    market: 'ตลาดผลไม้ตัวอย่าง',
-    province: 'จันทบุรี',
-    unit: 'บาท/กก.',
-    price: 128,
-    changePercent: 2.4,
-    updatedAt: 'ข้อมูลตัวอย่าง วันนี้ 09:00',
-  },
-  {
-    id: 'price-004',
-    crop: 'พริกแดงจินดา',
-    category: 'ผัก',
-    market: 'ตลาดค้าส่งตัวอย่าง',
-    province: 'ราชบุรี',
-    unit: 'บาท/กก.',
-    price: 64,
-    changePercent: -1.2,
-    updatedAt: 'ข้อมูลตัวอย่าง วันนี้ 09:00',
-  },
-  {
-    id: 'price-005',
-    crop: 'ข้าวโพดเลี้ยงสัตว์',
-    category: 'พืชไร่',
-    market: 'จุดรับซื้ออย่างย่อ',
-    province: 'เพชรบูรณ์',
-    unit: 'บาท/กก.',
-    price: 8.75,
-    changePercent: 0.5,
-    updatedAt: 'ข้อมูลตัวอย่าง วันนี้ 09:00',
-  },
-];
+export const cropPrices = cropPriceItems;
 
 export const articles: Article[] = articleContents.map(contentToArticle);
 
@@ -236,8 +180,8 @@ export const notifications: NotificationItem[] = [
   },
   {
     id: 'notice-002',
-    title: 'ราคาทุเรียนปรับขึ้น',
-    body: 'ราคาตัวอย่างทุเรียนหมอนทอง จันทบุรี เพิ่มขึ้น 2.4%',
+    title: 'ราคาอ้างอิงทุเรียนปรับขึ้น',
+    body: 'ข้อมูลตัวอย่างเดโม: ทุเรียนหมอนทอง จันทบุรี เพิ่มขึ้น 2.4% จาก mock data',
     time: 'ตัวอย่าง 38 นาทีที่แล้ว',
     type: 'price',
     unread: true,

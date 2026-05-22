@@ -1,4 +1,5 @@
 import { youtubeChannelProfile, youtubeVideos } from '@/data/youtubeData';
+import { youtubeChannelHandle, youtubeChannelUrl } from '@/config/channel';
 import { mapYoutubeCategoryToContentCategory, videoContentItems } from '@/services/content/content-fixtures';
 import type { ContentCategory, ContentDifficulty, VideoContent } from '@/services/content/content.types';
 import type { YouTubeVideo } from '@/types/youtube';
@@ -20,6 +21,7 @@ export type YouTubeImportPlan = {
   mode: 'mock_no_network';
   channelId: string;
   channelHandle: string;
+  channelUrl: string;
   sourceVideoCount: number;
   candidateCount: number;
   readyForOutlineCount: number;
@@ -73,14 +75,15 @@ export function buildYouTubeImportPlan(): YouTubeImportPlan {
   return {
     mode: 'mock_no_network',
     channelId: youtubeChannelProfile.channelId,
-    channelHandle: youtubeChannelProfile.handle,
+    channelHandle: youtubeChannelHandle,
+    channelUrl: youtubeChannelUrl,
     sourceVideoCount: youtubeVideos.length,
     candidateCount: candidates.length,
     readyForOutlineCount: candidates.filter((candidate) => candidate.editorReview === 'ready_for_outline').length,
     needsTranscriptCount: candidates.filter((candidate) => candidate.editorReview === 'needs_transcript').length,
     candidates,
     workflow: [
-      'Confirm the video belongs to the owner channel or a licensed source.',
+      `Confirm the video belongs to the owner channel ${youtubeChannelHandle} or a licensed source.`,
       'Create an article outline from title, description, tags, and future transcript.',
       'Map content category, difficulty, related videos, and safety notes.',
       'Send disease, pesticide, fertilizer, and pricing claims through editor review before publishing.',
