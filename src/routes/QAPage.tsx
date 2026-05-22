@@ -56,6 +56,8 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'วิเคราะห์โรคพืช', route: '/app/analyze' },
   { label: 'YouTube Hub', route: '/app/youtube' },
   { label: 'ชุมชน', route: '/app/community' },
+  { label: 'กติกาชุมชน', route: '/app/community-rules' },
+  { label: 'ศูนย์รายงานชุมชน', route: '/app/moderation-center' },
   { label: 'ราคาพืชผล', route: '/app/prices' },
   { label: 'บทความ', route: '/app/articles' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },

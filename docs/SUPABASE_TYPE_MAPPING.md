@@ -70,8 +70,26 @@ Mock community posts map into:
 - `community_comments`
 - `likes`
 - `saved_items`
+- `community_reports` future
+- `hidden_content` future
+- `moderation_actions` future
+- `moderator_queue` future
+- `community_rules` future
 
 Public reads should only show visible/moderated content. Authenticated users can create and update their own posts/comments.
+
+M23 local moderation models map conceptually into:
+
+- `CommunityRule` -> `community_rules`
+- `CommunityReportReason` -> `community_reports.reason` and `moderator_queue.reason`
+- `CommunityReport` -> `community_reports`
+- `ModerationStatus` -> `community_reports.status`, `moderator_queue.status`, and post/comment `moderation_status`
+- `ModerationAction` -> `moderation_actions.action` and `moderator_queue.recommended_action`
+- `HiddenContentRecord` -> `hidden_content`
+- `CommunitySafetyNotice` -> `community_rules` or future safety content config
+- `ModeratorQueueItem` -> `moderator_queue`
+
+M23 state stays in `kasethub.communityModeration.v1` only. Production reports, hidden content, and moderator actions must be backend-owned, rate limited, audited, and protected by RLS. Personal hidden content should remain private to the user, while global moderation actions require moderator/admin roles.
 
 ## Content and YouTube
 

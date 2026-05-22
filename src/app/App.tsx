@@ -16,11 +16,13 @@ import { AuthPhonePage } from '@/routes/AuthPhonePage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
 import { CommunityPage } from '@/routes/CommunityPage';
+import { CommunityRulesPage } from '@/routes/CommunityRulesPage';
 import { ArticleDetailPage } from '@/routes/ArticleDetailPage';
 import { GuestSyncStatusPage } from '@/routes/GuestSyncStatusPage';
 import { ImagePrivacyPage } from '@/routes/ImagePrivacyPage';
 import { LandingPage } from '@/routes/LandingPage';
 import { MemoryPage } from '@/routes/MemoryPage';
+import { ModerationCenterPage } from '@/routes/ModerationCenterPage';
 import { MyFarmPage } from '@/routes/MyFarmPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
 import { PriceDetailPage } from '@/routes/PriceDetailPage';
@@ -50,6 +52,8 @@ export default function App() {
         <Route path="analysis-history" element={<AnalysisHistoryPage />} />
         <Route path="image-privacy" element={<ImagePrivacyPage />} />
         <Route path="community" element={<CommunityPage />} />
+        <Route path="community-rules" element={<CommunityRulesPage />} />
+        <Route path="moderation-center" element={<ModerationCenterPage />} />
         <Route path="prices" element={<PricesPage />} />
         <Route path="prices/:priceId" element={<PriceDetailPage />} />
         <Route path="crop-watch" element={<CropWatchPage />} />

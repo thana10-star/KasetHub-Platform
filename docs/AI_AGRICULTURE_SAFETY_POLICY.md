@@ -70,6 +70,17 @@ Block, refuse, or escalate prompts that request:
 - Market manipulation or guaranteed profit claims.
 - Personal data extraction from uploaded images.
 
+## Community Moderation Safety
+
+Community reports involving agricultural advice should be treated as safety signals, not final judgments. M23 stores these reports locally only, but future AI or backend review must follow these rules:
+
+- Do not use AI moderation as the only decision maker for removing farmer content.
+- Escalate chemical, pesticide, fertilizer, disease, and dangerous-advice reports to human/expert review when possible.
+- Keep “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ” visible near risky community advice.
+- Do not expose reporter identity, private notes, or queue internals to the public feed.
+- Do not let AI rewrite community experience into official guidance unless a trusted source is cited.
+- Scam/fake sale and personal-data reports should be prioritized by a backend-owned moderation queue before marketplace features go live.
+
 ## Safe Response Shape
 
 Recommended response sections:

@@ -40,6 +40,8 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'ประวัติการใช้ AI', icon: Clock3, href: '/app/ai-credits' },
   { label: 'ประวัติพืชของฉัน', icon: Leaf, href: '/app/my-farm' },
   { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
+  { label: 'กติกาชุมชน', icon: ShieldCheck, href: '/app/community-rules' },
+  { label: 'ศูนย์รายงานชุมชน', icon: ClipboardCheck, href: '/app/moderation-center' },
   { label: 'ประวัติวิเคราะห์ภาพ', icon: History, href: '/app/analysis-history' },
   { label: 'ความเป็นส่วนตัวของรูปภาพ', icon: FileLock2, href: '/app/image-privacy' },
   { label: 'สมัคร/สำรองข้อมูล', icon: ShieldCheck, href: '/app/auth' },

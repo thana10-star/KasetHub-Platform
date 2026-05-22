@@ -12,6 +12,8 @@ export type AppRoute =
   | '/app/analysis-history'
   | '/app/image-privacy'
   | '/app/community'
+  | '/app/community-rules'
+  | '/app/moderation-center'
   | '/app/prices'
   | '/app/crop-watch'
   | '/app/articles'

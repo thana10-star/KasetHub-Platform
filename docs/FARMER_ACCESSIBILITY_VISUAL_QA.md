@@ -56,6 +56,8 @@ M15 focuses on making KasetHub easier for older and non-tech Thai farmers to und
 - Plant disease analysis is preliminary.
 - Chemical, pesticide, fertilizer, and disease guidance should encourage local expert confirmation.
 - Price information must be labeled as sample/reference data unless connected to a trusted real source.
+- Community reports and hidden posts should say they are local-only until a real moderation team exists.
+- Community chemical or disease advice should repeat: “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ”.
 
 ## Image Upload Clarity
 
@@ -87,6 +89,8 @@ M15 focuses on making KasetHub easier for older and non-tech Thai farmers to und
 - `/app/analyze`
 - `/app/youtube`
 - `/app/community`
+- `/app/community-rules`
+- `/app/moderation-center`
 - `/app/prices`
 - `/app/profile`
 - `/app/memory`
@@ -102,6 +106,9 @@ When doing visual QA, capture mobile screenshots for:
 - AI assistant
 - Plant analysis
 - YouTube Hub
+- Community
+- Community rules
+- Moderation center
 - Profile
 - Memory
 - Auth

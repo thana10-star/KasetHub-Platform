@@ -2,7 +2,7 @@
 
 ## Product Vision
 
-KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant image analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX without real price APIs, push notifications, backend writes, or network calls.
+KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant image analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations without real backend, Supabase writes, moderation APIs, AI moderation, or network calls.
 
 ## M01 Foundation
 
@@ -229,6 +229,16 @@ Phone OTP should become the primary account creation path for non-tech farmers. 
 - `/app/content-admin-preview` shows the configured owner channel source.
 - This remains link/config only: no YouTube API call, API key, channel fetch, scraping, or mock-video replacement is added.
 
+## M23 Community Moderation Foundation
+
+- `src/services/community-moderation` defines community rules, report reasons, local reports, hidden content records, statuses, actions, notices, and mock queue items.
+- `useCommunityModeration()` wraps versioned localStorage state at `kasethub.communityModeration.v1`.
+- `/app/community` now supports report, hide, undo, local-only notices, community rules summary, and agricultural safety warnings.
+- `/app/community-rules` explains respectful discussion, scam/fake sale boundaries, dangerous chemical advice, personal data, responsible photos, source guidance, and reporting.
+- `/app/moderation-center` shows local reports, hidden posts, mock queue statuses, and future admin/moderator notes.
+- `/app/profile` and `/app/qa` link to the moderation surfaces.
+- No real backend, Supabase write, real account requirement, moderation API, AI moderation provider, or network call is enabled.
+
 ## Future Architecture
 
 ### Web App
@@ -335,6 +345,8 @@ M08 includes local rewarded-ad UX only. A real ad reward system should integrate
 
 Community features should include reporting, keyword filters, moderator queues, user reputation, expert verification, rate limits, and audit logs. Agricultural advice should be clearly separated from verified expert guidance.
 
+M23 rehearses this locally with report/hide actions, a rules route, and a mock moderation center. Future production moderation should add authenticated reports, duplicate grouping, admin review, action history, appeals/corrections, expert escalation for chemical and disease advice, and strict RLS. Client-side hidden state must not be treated as production moderation.
+
 ### Marketplace Future
 
 Marketplace should remain out of M01. A later version can add listings, seller profiles, product reviews, inquiry chat, order intent, and payment integrations after trust, moderation, and compliance foundations are ready.
@@ -360,8 +372,8 @@ M19 adds a local-only LINE Login mock and account-linking planner. LINE is treat
 
 ## Suggested Milestone Path
 
-1. M23: Crop price admin/import job contract and review workflow
-2. M24: Real content management for videos and articles, plus offline article body caching plan
-3. M25: AI vision upload, My Farm persistence, and analysis history
-4. M26: Admin dashboard MVP and mobile app extraction plan
-5. M27: Field usability test iteration and production-readiness hardening
+1. M24: Crop price admin/import job contract and moderation review workflow
+2. M25: Real content management for videos and articles, plus offline article body caching plan
+3. M26: AI vision upload, My Farm persistence, and analysis history
+4. M27: Admin dashboard MVP and mobile app extraction plan
+5. M28: Field usability test iteration and production-readiness hardening

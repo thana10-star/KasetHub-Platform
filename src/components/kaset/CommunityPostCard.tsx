@@ -1,18 +1,29 @@
-import { Bookmark, Check, Heart, MessageCircle, MapPin } from 'lucide-react';
+import { Bookmark, Check, EyeOff, Flag, Heart, MessageCircle, MapPin } from 'lucide-react';
 import { ShareButton } from '@/components/kaset/ShareButton';
+import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import type { CommunityPost } from '@/types/kaset';
 
 type CommunityPostCardProps = {
   post: CommunityPost;
   compact?: boolean;
+  isHidden?: boolean;
+  moderationStatusLabel?: string;
+  onHide?: (post: CommunityPost) => void;
+  onReport?: (post: CommunityPost) => void;
 };
 
-export function CommunityPostCard({ post, compact = false }: CommunityPostCardProps) {
+export function CommunityPostCard({
+  post,
+  compact = false,
+  isHidden = false,
+  moderationStatusLabel,
+  onHide,
+  onReport,
+}: CommunityPostCardProps) {
   const { isLiked, isSaved, saveItem, toggleLike, unsaveItem } = useGuestMemory();
   const liked = isLiked('community_post', post.id);
   const saved = isSaved('community_post', post.id);
@@ -37,7 +48,7 @@ export function CommunityPostCard({ post, compact = false }: CommunityPostCardPr
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={isHidden ? 'overflow-hidden opacity-70' : 'overflow-hidden'} id={post.id}>
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-kaset-mint text-sm font-extrabold text-kaset-deep">
@@ -47,8 +58,10 @@ export function CommunityPostCard({ post, compact = false }: CommunityPostCardPr
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-bold text-kaset-ink">{post.author}</h3>
               <Badge tone="neutral">{post.topic}</Badge>
+              <Badge tone="sky">ตัวอย่างโพสต์</Badge>
+              {moderationStatusLabel ? <Badge tone="gold">{moderationStatusLabel}</Badge> : null}
             </div>
-            <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+            <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-slate-500">
               <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
               {post.province} · {post.role} · {post.postedAt}
             </p>
@@ -82,6 +95,18 @@ export function CommunityPostCard({ post, compact = false }: CommunityPostCardPr
             {post.comments}
           </span>
         </div>
+        {onReport ? (
+          <Button className="min-h-9 px-3 text-xs" onClick={() => onReport(post)} variant="secondary">
+            <Flag aria-hidden="true" className="h-3.5 w-3.5" />
+            รายงาน
+          </Button>
+        ) : null}
+        {onHide ? (
+          <Button className="min-h-9 px-3 text-xs" onClick={() => onHide(post)} variant="ghost">
+            <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+            ซ่อน
+          </Button>
+        ) : null}
         <Button className="min-h-9 px-3 text-xs" onClick={handleSavePost} variant={saved ? 'soft' : 'secondary'}>
           {saved ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Bookmark aria-hidden="true" className="h-3.5 w-3.5" />}
           {saved ? 'บันทึกแล้ว' : 'บันทึกโพสต์'}

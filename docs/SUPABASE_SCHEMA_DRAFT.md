@@ -202,6 +202,66 @@ RLS notes: Public can read visible comments. Authenticated users can create.
 
 Admin/moderation notes: Support report and expert answer flags later.
 
+## `community_reports` Future
+
+Purpose: User-submitted reports for posts, comments, sale claims, dangerous advice, personal data, or other community safety concerns.
+
+Key columns: `id uuid`, `reporter_user_id nullable`, `guest_session_id nullable`, `target_type`, `target_id`, `reason`, `note`, `status`, `created_at`, `updated_at`, `reviewer_id nullable`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `target_type`, `target_id`, `reason`, `status`, `reporter_user_id`, `created_at desc`.
+
+RLS notes: Authenticated users can create reports and read their own reports. Public users should not read report details. Moderator/admin roles can read and update review fields through server-owned policies.
+
+Admin/moderation notes: Duplicate reports should be grouped. Reporter identity and notes must be protected. Production report writes should be rate limited and audited.
+
+## `hidden_content` Future
+
+Purpose: Per-user hidden post/comment records and backend moderation visibility overrides.
+
+Key columns: `id uuid`, `owner_user_id nullable`, `guest_session_id nullable`, `target_type`, `target_id`, `hide_scope`, `reason`, `hidden_at`, `expires_at nullable`, `created_by_role`, `metadata jsonb`.
+
+Indexes: `owner_user_id`, `guest_session_id`, `target_type`, `target_id`, `hide_scope`, `hidden_at desc`.
+
+RLS notes: Users can read and manage their own personal hidden content. Global or moderator hidden records require backend/admin role policies.
+
+Admin/moderation notes: Personal hide is not the same as production content removal. Moderator hidden records need audit trails and appeal/correction paths.
+
+## `moderation_actions` Future
+
+Purpose: Immutable action log for warnings, hides, removals, dismissals, escalations, and reversals.
+
+Key columns: `id uuid`, `actor_user_id`, `actor_role`, `target_type`, `target_id`, `report_id nullable`, `action`, `reason`, `status_before`, `status_after`, `created_at`, `metadata jsonb`.
+
+Indexes: `target_type`, `target_id`, `report_id`, `actor_user_id`, `action`, `created_at desc`.
+
+RLS notes: End users should not read broad action logs. Admin/moderator reads should be role-gated. Public content state should be exposed through posts/comments, not raw logs.
+
+Admin/moderation notes: Keep actions append-only for auditability. Corrections should add a new reversal/correction action rather than deleting history.
+
+## `moderator_queue` Future
+
+Purpose: Review queue for reports, risky agricultural advice, scam/fake sale flags, and personal data exposure.
+
+Key columns: `id uuid`, `target_type`, `target_id`, `primary_report_id nullable`, `reason`, `priority`, `status`, `assigned_to nullable`, `recommended_action`, `created_at`, `updated_at`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `status`, `priority`, `reason`, `assigned_to`, `created_at desc`.
+
+RLS notes: Queue items are moderator/admin only. Client apps should receive only user-safe content status, not queue internals.
+
+Admin/moderation notes: Chemical/pesticide and disease advice reports should support expert escalation before any official-looking recommendation is shown.
+
+## `community_rules` Future
+
+Purpose: Admin-managed community rules, safety copy, and localized user-facing policy text.
+
+Key columns: `id uuid`, `slug`, `title`, `summary`, `detail`, `priority`, `status`, `locale`, `effective_from`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `slug + locale`, `status`, `priority`.
+
+RLS notes: Public can read active rules. Admin/editor roles can manage draft and retired rules through backend-controlled policies.
+
+Admin/moderation notes: Rule changes should be versioned so reports can reference the rule text active at the time of the report.
+
 ## `articles`
 
 Purpose: Blog/news content.
