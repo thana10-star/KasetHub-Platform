@@ -274,7 +274,7 @@ export function NextPhasePage() {
                 public read: {m44Review.publicReadVerificationStatus} · RLS: {m44Review.rlsReviewStatus}
               </p>
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                blockers: {m44Review.blockers.slice(0, 3).join(' · ')}
+                blockers: {m44Review.blockers.slice(0, 3).join(' · ') || 'none'}
               </p>
             </div>
           </div>

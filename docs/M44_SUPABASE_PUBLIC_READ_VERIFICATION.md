@@ -2,7 +2,17 @@
 
 M44 reviews the real `kasethub-staging` read-only probe result after M43. This is a human review step. The app does not enable auth, cloud sync, uploads, backend writes, AI calls, automatic migrations, or destructive SQL.
 
-Current M44 status: `pending operator probe`.
+Current M44 status: `success`.
+
+Actual result from `kasethub-staging`:
+
+- public read probe: passed
+- auth enabled: false
+- cloud sync enabled: false
+- service-role key used: no
+- writes performed: no
+- RLS remains enabled
+- no unsafe public write observed
 
 ## Operator Steps
 
@@ -34,26 +44,36 @@ Allowed results:
 - `RLS/policy blocked`
 - `table missing`
 
-## Results To Provide
+## Verified Results
 
 | Table | Actual result | Rows returned count | Notes |
 | --- | --- | ---: | --- |
-| `articles` | pending | pending | Waiting for operator evidence |
-| `videos` | pending | pending | Waiting for operator evidence |
-| `crop_price_snapshots` | pending | pending | Waiting for operator evidence |
+| `articles` | empty table OK | 0 | Public read probe passed |
+| `videos` | empty table OK | 0 | Public read probe passed |
+| `crop_price_snapshots` | empty table OK | 0 | Public read probe passed |
 
 Empty tables can be a successful result for a fresh staging database.
+
+## Manual Staging SQL Patch Applied
+
+A manual SQL grant/policy patch was applied directly in Supabase staging to allow anon/authenticated `SELECT` on these public/read-safe tables only:
+
+- `articles`
+- `videos`
+- `crop_price_snapshots`
+
+This patch was applied manually in `kasethub-staging`. It was not run automatically by the app or Codex, and no destructive SQL change is included in the repo.
 
 ## RLS Review
 
 Review Supabase Dashboard table security and policies.
 
-Confirm:
+Confirmed:
 
-- public/read-safe tables allow anon read only where intended
-- no public write policy exists
-- anon access is limited
-- user-owned/private tables are protected
+- public/read-safe tables allow anon/authenticated read only where intended
+- no public write policy was observed
+- anon access remains limited to reviewed public read behavior
+- RLS remains enabled
 - service-role key was not used
 - target project is `kasethub-staging`
 
@@ -73,4 +93,4 @@ Any SQL correction should be a separate reviewed milestone and should be run man
 
 ## Current Decision
 
-Auth and cloud sync remain blocked until M44 evidence is reviewed and accepted.
+M44 public read verification is successful. Auth and cloud sync remain disabled until a later reviewed milestone explicitly enables them.

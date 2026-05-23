@@ -201,7 +201,7 @@ export function SupabaseReadonlyProbePage() {
                   RLS review: {m44Review.rlsReviewStatus}
                 </p>
                 <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                  blockers: {m44Review.blockers.slice(0, 2).join(' · ')}
+                  blockers: {m44Review.blockers.slice(0, 2).join(' · ') || 'none'}
                 </p>
               </div>
             </div>

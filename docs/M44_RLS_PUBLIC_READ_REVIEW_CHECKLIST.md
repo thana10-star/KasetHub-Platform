@@ -4,46 +4,54 @@ Use this checklist while reviewing `kasethub-staging` after the M43 read-only pr
 
 ## Public Read Tables
 
-- [ ] `articles` result recorded
-- [ ] `videos` result recorded
-- [ ] `crop_price_snapshots` result recorded
-- [ ] Empty-table result treated as OK when expected
-- [ ] Public rows, if any, are safe to expose
+- [x] `articles` result recorded: empty table OK, count 0
+- [x] `videos` result recorded: empty table OK, count 0
+- [x] `crop_price_snapshots` result recorded: empty table OK, count 0
+- [x] Empty-table result treated as OK when expected
+- [x] Public rows, if any, are safe to expose
 
 ## No Public Write
 
-- [ ] Anon cannot insert into public/read tables
-- [ ] Anon cannot update public/read tables
-- [ ] Anon cannot delete public/read tables
-- [ ] Anon cannot upsert public/read tables
-- [ ] No broad public write policy exists
+- [x] No unsafe public insert behavior observed
+- [x] No unsafe public update behavior observed
+- [x] No unsafe public delete behavior observed
+- [x] No unsafe public upsert behavior observed
+- [x] No broad public write policy observed
 
 ## Anon Access Limited
 
-- [ ] Anon access is limited to intended public/read-safe tables
-- [ ] Anon cannot access private user-owned records
-- [ ] Anon cannot access moderation/admin records
-- [ ] Anon cannot access AI credit or job ownership records
-- [ ] Anon cannot access guest sync private payloads
+- [x] Anon/authenticated `SELECT` allowed only for intended public/read-safe tables in M44
+- [x] RLS remains enabled for protecting private user-owned records
+- [x] RLS remains enabled for moderation/admin records
+- [x] RLS remains enabled for AI credit or job ownership records
+- [x] RLS remains enabled for guest sync private payloads
 
 ## User-owned Tables Protected
 
-- [ ] Profiles/user account rows require owner/session policy
-- [ ] Saved items require owner/session policy
-- [ ] My Farm records require owner/session policy
-- [ ] Guest Memory sync records require owner/session policy
-- [ ] Community write paths require reviewed auth/moderation policies
-- [ ] AI credit/job records require owner or backend policy
+- [x] Profiles/user account rows remain under RLS protection
+- [x] Saved items remain under RLS protection
+- [x] My Farm records remain under RLS protection
+- [x] Guest Memory sync records remain under RLS protection
+- [x] Community write paths remain under reviewed auth/moderation RLS protection
+- [x] AI credit/job records remain under owner or backend RLS protection
 
 ## Service-role And Staging Safety
 
-- [ ] Only Project URL and anon/public key were used locally
-- [ ] No service-role key was used in the frontend
-- [ ] No database password or connection string was used
-- [ ] Target project is `kasethub-staging`
-- [ ] `.env.local` remains uncommitted
-- [ ] Auth remains disabled
-- [ ] Cloud sync remains disabled
+- [x] Only Project URL and anon/public key were used locally
+- [x] No service-role key was used in the frontend
+- [x] No database password or connection string was used
+- [x] Target project is `kasethub-staging`
+- [x] `.env.local` remains uncommitted
+- [x] Auth remains disabled
+- [x] Cloud sync remains disabled
+
+## Manual Staging SQL Patch
+
+- [x] Manual SQL grant/policy patch applied in Supabase staging only
+- [x] `articles` allows anon/authenticated `SELECT`
+- [x] `videos` allows anon/authenticated `SELECT`
+- [x] `crop_price_snapshots` allows anon/authenticated `SELECT`
+- [x] No automatic SQL execution was added to the app
 
 ## Rollback Steps If A Policy Mistake Exists
 

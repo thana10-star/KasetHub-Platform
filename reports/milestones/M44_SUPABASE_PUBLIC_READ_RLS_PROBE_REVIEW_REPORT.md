@@ -2,11 +2,13 @@
 
 ## Summary
 
-M44 adds a pending review layer for the real `kasethub-staging` public read probe and RLS review. It asks the operator to run `/app/supabase-readonly-probe` with local staging env, record results for `articles`, `videos`, and `crop_price_snapshots`, and confirm that RLS protects private/user-owned tables with no unsafe public write behavior.
+M44 records the successful real `kasethub-staging` public read probe and RLS review. The operator ran `/app/supabase-readonly-probe` with local staging env, recorded results for `articles`, `videos`, and `crop_price_snapshots`, and confirmed that auth/cloud sync remained disabled with no service-role key, no writes, RLS still enabled, and no unsafe public write behavior observed.
 
-No actual probe results were provided during this implementation, so M44 remains `pending operator probe`.
+M44 status is now `success`.
 
-No real keys, `.env.local`, service-role key, auth enablement, cloud sync, uploads, AI calls, Edge Function calls, backend writes, automatic migrations, destructive SQL, or production behavior were added.
+A manual SQL grant/policy patch was applied directly in Supabase staging to allow anon/authenticated `SELECT` on `articles`, `videos`, and `crop_price_snapshots`. The app did not run SQL automatically.
+
+No real keys, `.env.local`, service-role key, auth enablement, cloud sync, uploads, AI calls, Edge Function calls, backend writes, automatic migrations, destructive SQL, or production behavior were added to the repo or app.
 
 ## Current Branch
 
@@ -40,9 +42,9 @@ Each route now surfaces:
 - M44 verification status
 - public read verification status
 - RLS review status
-- blockers while operator evidence is missing
+- successful empty-table probe results
 
-## Operator Evidence Requested
+## Operator Evidence Received
 
 Using local `.env.local` only:
 
@@ -57,39 +59,52 @@ Open:
 
 - `/app/supabase-readonly-probe`
 
-Provide results for:
+Actual results received for:
 
-- `articles`
-- `videos`
-- `crop_price_snapshots`
+- `articles`: empty table OK, count 0
+- `videos`: empty table OK, count 0
+- `crop_price_snapshots`: empty table OK, count 0
 
-Allowed result categories:
+Additional confirmation:
 
-- `empty table OK`
-- `read OK`
-- `RLS/policy blocked`
-- `table missing`
+- auth enabled: false
+- cloud sync enabled: false
+- service-role key used: no
+- writes performed: no
+- public read probe: passed
+- RLS remains enabled
+- no unsafe public write observed
 
 ## Probe Review Status
 
 | Table | Status | Notes |
 | --- | --- | --- |
-| `articles` | pending | Waiting for operator probe result |
-| `videos` | pending | Waiting for operator probe result |
-| `crop_price_snapshots` | pending | Waiting for operator probe result |
+| `articles` | empty table OK | count 0; public read probe passed |
+| `videos` | empty table OK | count 0; public read probe passed |
+| `crop_price_snapshots` | empty table OK | count 0; public read probe passed |
+
+## Manual Staging SQL Patch
+
+A manual SQL grant/policy patch was applied in Supabase staging to allow anon/authenticated `SELECT` on:
+
+- `articles`
+- `videos`
+- `crop_price_snapshots`
+
+This patch was applied manually in `kasethub-staging`. No SQL was run automatically by the app or Codex, and no SQL migration file was changed in this milestone.
 
 ## RLS Review Status
 
-Current status: pending.
+Current status: success.
 
-Still needs evidence for:
+Reviewed evidence:
 
-- public read tables allowed only as intended
-- no public write policy
-- anon access limited
-- user-owned tables protected
+- public read tables allowed as intended for anon/authenticated `SELECT`
+- no unsafe public write observed
+- anon access limited to reviewed public read behavior
+- RLS remains enabled
 - service-role not used
-- staging project confirmed
+- staging project confirmed as `kasethub-staging`
 
 ## Safety Notes
 
@@ -106,7 +121,7 @@ Still needs evidence for:
 - No automatic migrations.
 - No destructive SQL changes.
 - App still works with no `.env.local`.
-- Auth/cloud sync remain blocked until M44 evidence is reviewed.
+- Auth/cloud sync remain disabled after successful M44 review.
 
 ## Verification Commands
 
@@ -133,13 +148,19 @@ Passed:
 - `/app/next-phase`
 - `/app/profile`
 
-Each checked route rendered the expected page title and M44 status content where applicable. `/app/profile` was also checked to confirm the existing profile page still rendered. The local Vite server and headless Chrome process were stopped after verification.
+After marking M44 successful, route checks were re-run for:
+
+- `/app/supabase-readonly-probe`
+- `/app/supabase-readiness`
+- `/app/admin`
+- `/app/next-phase`
+
+Each checked route rendered the expected page title plus M44 `success`, empty-table OK, and `blockers: none` content where applicable. The local Vite server and headless Chrome process were stopped after verification.
 
 ## Known Limitations
 
 - Codex did not inspect the real Supabase Dashboard.
 - Codex did not run the real read-only probe with project keys.
-- M44 remains pending until the operator provides actual probe results and RLS evidence.
 - The frontend probe does not prove every RLS policy.
 - Empty public tables can be successful for fresh staging.
 - A policy that filters all rows can look like zero visible rows.
@@ -147,8 +168,4 @@ Each checked route rendered the expected page title and M44 status content where
 
 ## Next Recommended Milestone
 
-After the operator provides M44 evidence:
-
-- If all public read results are expected and RLS/no-public-write evidence is clean, mark M44 `success`.
-- If a public read table is unexpectedly blocked or missing, document whether this is expected and decide whether a small policy/table fix is needed.
-- If anon can write or private/user-owned data is exposed, keep M44 `blocked` and create a minimal SQL policy fix milestone before enabling auth or cloud sync.
+M45 should keep auth/cloud sync disabled and decide the next safe step: either focused private-table RLS evidence review, or phone auth staging prep. If any future anon write or private/user-owned exposure is discovered, create a minimal SQL policy fix milestone before enabling auth or cloud sync.
