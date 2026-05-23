@@ -16,11 +16,16 @@ Use this checklist before any real Supabase staging experiment. M38 adds the che
 ## Before Running SQL
 
 - [ ] Confirm Supabase dashboard project name clearly says staging.
+- [ ] Recommended staging project name is `kasethub-staging`.
+- [ ] Read `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`.
+- [ ] Read `docs/M40_SQL_RUN_PREP_CHECKLIST.md`.
+- [ ] Read `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`.
 - [ ] Read `docs/SUPABASE_SQL_STAGING_EXECUTION_GUIDE.md`.
 - [ ] Run schema SQL first.
 - [ ] Run RLS SQL second.
 - [ ] Verify tables, indexes, constraints, triggers, and RLS policies.
 - [ ] Keep rollback/manual cleanup notes.
+- [ ] Stop immediately if SQL Editor returns an error.
 
 ## Before Enabling Auth
 

@@ -470,6 +470,18 @@ VITE_ENABLE_CLOUD_SYNC=false
 
 `.env.local`, `.env.production`, and `.env.staging` remain ignored. Do not commit real keys. Do not use service-role keys in frontend env. The app must still run with no `.env.local`.
 
+## M40 Supabase Project Creation And SQL Run Prep
+
+M40 adds manual setup docs for creating the real staging project and preparing SQL/RLS execution:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+The recommended staging project name is `kasethub-staging`. Create it manually in Supabase, choose a region close to Thailand/Singapore if available, and save only the Project URL plus anon key locally. Never copy the service-role key into frontend env.
+
+The app surfaces M40 guidance on `/app/supabase-sql-checklist`, `/app/supabase-readiness`, `/app/supabase-connection`, `/app/env-safety`, and `/app/admin`. M40 still does not connect Supabase, run SQL, add real keys, commit `.env.local`, enable auth, enable cloud sync, or write backend data.
+
 ## Community Moderation Boundary
 
 M23 moderation features are local/mock only. Reports and hidden posts stay on the current device. There is no real admin queue, no Supabase write, no moderation API, no AI moderation provider, and no network request. User-facing copy must keep “รายงานนี้ยังเป็นข้อมูลในเครื่องเท่านั้น”, “ยังไม่มีผู้ดูแลระบบจริงในเวอร์ชันนี้”, and “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ” visible near risky actions.

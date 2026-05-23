@@ -523,3 +523,16 @@ M39 keeps work on `staging/supabase` and prepares the local env workflow for a f
 The app can now show whether staging URL and anon key are present, whether values look like placeholders, whether a service-role-like key was accidentally placed in frontend env, and whether dangerous flags such as auth/cloud sync/network probe are enabled too early. The check is local-only and masks values; it does not call Supabase.
 
 M39 still does not connect Supabase, add real keys, commit `.env.local`, run SQL, enable auth, enable cloud sync, or write backend data.
+
+## M40 Supabase Staging Project Creation And SQL Run Prep
+
+M40 prepares the human-run Supabase staging step. It adds:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+- `src/services/supabase/supabase-staging-project-checklist.ts`
+
+The recommended project name is `kasethub-staging`. The manual order is: create staging project, save Project URL and anon key locally only, open SQL Editor, run `supabase/migrations/0001_kasethub_core_schema.sql`, then run `supabase/policies/0001_kasethub_rls_policies.sql`, then verify tables, RLS, policies, indexes, and triggers.
+
+M40 is still guide/prep only. It does not create a Supabase project, connect the app, run migrations, add keys, commit `.env.local`, enable auth/cloud sync, or write backend data.

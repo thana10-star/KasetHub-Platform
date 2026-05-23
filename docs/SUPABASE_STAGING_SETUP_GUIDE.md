@@ -216,3 +216,25 @@ Before any real Supabase staging connection work:
 7. Continue to `/app/supabase-connection` only if env safety has no blockers.
 
 Do not add service-role keys or production credentials to any frontend env file.
+
+## M40 Manual Project And SQL Run Prep
+
+M40 prepares the actual Supabase staging project creation and manual SQL/RLS run. It still does not connect the app.
+
+Manual sequence:
+
+1. Create a new Supabase project named `kasethub-staging`.
+2. Choose a region close to Thailand/Singapore if available.
+3. Save Project URL and anon key locally only.
+4. Open SQL Editor.
+5. Run `supabase/migrations/0001_kasethub_core_schema.sql`.
+6. Run `supabase/policies/0001_kasethub_rls_policies.sql`.
+7. Verify tables, RLS, policies, indexes, and triggers.
+
+Required docs:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+Keep auth, cloud sync, storage uploads, Edge Functions, AI, and app writes disabled.

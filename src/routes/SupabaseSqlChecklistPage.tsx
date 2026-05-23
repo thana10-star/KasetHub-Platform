@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
+import type { SupabaseStagingChecklistItem } from '@/services/supabase/supabase-staging-project-checklist.types';
 import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft-validator';
 import type { SupabaseSqlExpectedArtifact } from '@/services/supabase/supabase-sql-draft-validator.types';
 
@@ -58,8 +60,31 @@ function ChecklistSection({ icon: Icon, items, title }: { icon: typeof CheckCirc
   );
 }
 
+function M40ChecklistSection({ icon: Icon, items, title }: { icon: typeof CheckCircle2; items: SupabaseStagingChecklistItem[]; title: string }) {
+  return (
+    <section className="grid gap-3">
+      <div className="flex items-center gap-2">
+        <Icon aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+        <h2 className="text-lg font-extrabold text-kaset-ink">{title}</h2>
+      </div>
+      {items.map((item) => (
+        <Card className="p-4" key={item.id}>
+          <h3 className="font-extrabold leading-6 text-kaset-ink">{item.title}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{item.detail}</p>
+          {item.evidence ? (
+            <p className="mt-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+              เก็บหลักฐาน: {item.evidence}
+            </p>
+          ) : null}
+        </Card>
+      ))}
+    </section>
+  );
+}
+
 export function SupabaseSqlChecklistPage() {
   const validation = useMemo(() => validateSupabaseSqlDraft(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
 
   return (
     <div>
@@ -89,6 +114,30 @@ export function SupabaseSqlChecklistPage() {
           หยุดทันทีถ้าไม่แน่ใจว่า project เป็น staging, ถ้าเห็น production data, ถ้าพบ service-role key ใน frontend, หรือถ้ายังไม่มี rollback plan
         </NoticeBox>
 
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M40 Supabase staging project + SQL run prep</h2>
+                <StatusPill tone="warning">manual guide only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ขั้นตอนนี้ยังเป็นคู่มือ ยังไม่ได้เชื่อมต่อจริง รัน SQL เฉพาะ staging เท่านั้น และหยุดทันทีถ้า SQL Editor แสดง error
+              </p>
+              <div className="mt-3 grid gap-2">
+                {m40Checklist.docLinks.slice(0, 3).map((doc) => (
+                  <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950" key={doc.path}>
+                    {doc.label}: {doc.path}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-3 text-center">
             <Database aria-hidden="true" className="mx-auto h-5 w-5 text-kaset-deep" />
@@ -111,6 +160,10 @@ export function SupabaseSqlChecklistPage() {
             <p className="text-[11px] font-bold text-slate-500">triggers</p>
           </Card>
         </section>
+
+        <M40ChecklistSection icon={Database} items={m40Checklist.projectCreationChecklist} title="M40 project creation checklist" />
+        <M40ChecklistSection icon={ClipboardList} items={m40Checklist.sqlExecutionChecklist} title="M40 SQL run prep checklist" />
+        <M40ChecklistSection icon={CheckCircle2} items={m40Checklist.postSqlVerificationChecklist} title="M40 post-SQL verification checklist" />
 
         <ChecklistSection icon={ClipboardList} items={validation.executionOrder} title="SQL execution order" />
         <ChecklistSection icon={CheckCircle2} items={validation.manualVerificationChecklist} title="Manual verification checklist" />

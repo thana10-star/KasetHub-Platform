@@ -128,3 +128,12 @@ Stop before continuing if:
 - dry-run network check is enabled without a reviewed public/read-only target
 - the app fails to run with no `.env.local`
 
+## M40 Project Creation Note
+
+M40 adds the manual project creation pack. Before using `.env.local` values for a real staging project, create a staging-only Supabase project manually, preferably named:
+
+```text
+kasethub-staging
+```
+
+Use only the Project URL and anon public key in `.env.local`. Do not copy the service-role key into frontend env. Keep `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`, `VITE_ENABLE_AUTH=false`, and `VITE_ENABLE_CLOUD_SYNC=false` until SQL/RLS verification and later auth milestones pass.

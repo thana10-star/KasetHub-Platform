@@ -49,6 +49,7 @@ import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-s
 import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
 import { runSupabaseConnectionDryRun } from '@/services/supabase/supabase-connection-dry-run';
 import { runSupabaseReadinessAudit } from '@/services/supabase/supabase-readiness-audit';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft-validator';
 import { weatherAlertMocks, weatherLocations } from '@/services/weather/weather-fixtures';
 import { useAICredits } from '@/hooks/useAICredits';
@@ -200,6 +201,7 @@ export function AdminDashboardPage() {
   const supabaseReadiness = useMemo(() => runSupabaseReadinessAudit(), []);
   const supabaseConnection = useMemo(() => runSupabaseConnectionDryRun(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const supabaseSqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
@@ -269,6 +271,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={Video} label="YouTube candidates" value={dashboard.summary.youtubeImportCandidates} />
               <SummaryCard icon={Database} label="Supabase readiness" value={`${supabaseReadiness.score}%`} />
               <SummaryCard icon={LockKeyhole} label="env safety" value={envSafety.blockers.length > 0 ? 'blocked' : envSafety.warnings.length > 0 ? 'review' : 'safe'} />
+              <SummaryCard icon={ClipboardList} label="M40 SQL prep" value={m40Checklist.sqlExecutionChecklist.length} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
@@ -308,8 +311,31 @@ export function AdminDashboardPage() {
                     Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
                   </p>
                   <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                    Next milestone: M39 Supabase Staging Env Local Setup. ยังไม่เชื่อม Supabase ไม่เปิด auth/cloud sync และไม่เขียน backend
+                    Current milestone: M40 Supabase project creation + SQL run prep. ยังไม่เชื่อม Supabase ไม่เปิด auth/cloud sync และไม่เขียน backend
                   </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-amber-950">M40 Supabase project creation + SQL prep</h2>
+                    <StatusPill tone="warning">manual only</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-amber-900">
+                    ขั้นตอนนี้ยังเป็นคู่มือ ยังไม่ได้เชื่อมต่อจริง · สร้าง project {m40Checklist.recommendedProjectName} ด้วยมือ · รัน SQL เฉพาะ staging เท่านั้น
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                    อ่าน {m40Checklist.docLinks[0].path}, {m40Checklist.docLinks[1].path}, และ {m40Checklist.docLinks[2].path}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                    เปิด SQL run prep checklist
+                  </Link>
                 </div>
               </div>
             </Card>

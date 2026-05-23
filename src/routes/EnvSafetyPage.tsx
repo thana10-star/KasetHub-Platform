@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   CheckCircle2,
+  ClipboardList,
   Database,
   KeyRound,
   LockKeyhole,
@@ -17,6 +18,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import type { EnvSafetyItem, EnvSafetySeverity, EnvSafetyStatus } from '@/services/config/env-safety.types';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 
 const statusTone: Record<EnvSafetyStatus, 'success' | 'warning' | 'danger' | 'info' | 'neutral'> = {
   mock_only_safe: 'info',
@@ -77,6 +79,7 @@ function FlagCard({ enabled, label }: { enabled: boolean; label: string }) {
 
 export function EnvSafetyPage() {
   const safety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
 
   return (
     <div>
@@ -104,6 +107,29 @@ export function EnvSafetyPage() {
           หน้านี้ไม่แสดงค่า secret เต็ม และใช้เฉพาะค่า Vite public env ที่ frontend มองเห็นอยู่แล้ว ห้ามใส่ service-role key,
           SMS provider secret, AI provider key, หรือ production secret ใน `.env.local`, `.env.example`, docs, หรือ Cloudflare public env
         </NoticeBox>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M40 manual project + SQL prep</h2>
+                <StatusPill tone="warning">คู่มือเท่านั้น</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ขั้นตอนนี้ยังเป็นคู่มือ ยังไม่ได้เชื่อมต่อจริง ใช้ project {m40Checklist.recommendedProjectName} และรัน SQL เฉพาะ staging เท่านั้น
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                อ่าน {m40Checklist.docLinks[0].path} และ {m40Checklist.docLinks[1].path} ก่อนนำค่า Supabase มาใส่ใน `.env.local`
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                เปิด SQL run prep checklist
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">

@@ -24,6 +24,7 @@ import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import {
   runSupabaseConnectionDryRun,
 } from '@/services/supabase/supabase-connection-dry-run';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import {
   runSupabaseReadinessAudit,
   supabaseReadinessAreaLabels,
@@ -88,6 +89,7 @@ export function SupabaseReadinessPage() {
   const audit = useMemo(() => runSupabaseReadinessAudit(), []);
   const connectionDryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const sqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
@@ -139,7 +141,7 @@ export function SupabaseReadinessPage() {
                 Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
               </p>
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                Next milestone: M39 Supabase Staging Env Local Setup. ห้ามใส่ service-role key, ห้าม commit `.env.local`, และห้ามใช้ production project
+                Current milestone: M40 Supabase project creation + SQL run prep. ห้ามใส่ service-role key, ห้าม commit `.env.local`, และห้ามใช้ production project
               </p>
             </div>
           </div>
@@ -162,6 +164,29 @@ export function SupabaseReadinessPage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
                 เปิด Env Safety
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M40 project creation + SQL run prep</h2>
+                <StatusPill tone="warning">manual only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ขั้นตอนนี้ยังเป็นคู่มือ ยังไม่ได้เชื่อมต่อจริง · recommended project: {m40Checklist.recommendedProjectName} · รัน SQL เฉพาะ staging เท่านั้น
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                เปิดเอกสาร {m40Checklist.docLinks[0].path}, {m40Checklist.docLinks[1].path}, และ {m40Checklist.docLinks[2].path} ก่อนใช้ SQL Editor
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                เปิด SQL run prep checklist
               </Link>
             </div>
           </div>

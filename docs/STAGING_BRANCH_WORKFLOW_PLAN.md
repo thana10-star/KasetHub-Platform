@@ -21,7 +21,7 @@ M38 creates and works from `staging/supabase` as the first experiment branch. Th
 - no backend writes
 - no production behavior changes
 
-Next milestone: M39 Supabase Staging Env Local Setup.
+Current staging milestone: M40 Supabase Staging Project Creation + SQL Run Prep.
 
 ## Merge Rules
 

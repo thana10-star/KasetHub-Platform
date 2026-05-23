@@ -179,7 +179,7 @@ export function NextPhasePage() {
                 Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
               </p>
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                Next milestone: M39 Supabase Staging Env Local Setup. ยังไม่เชื่อม Supabase ยังไม่เพิ่ม `.env.local` และยังไม่เปิด auth/cloud sync
+                Current milestone: M40 Supabase project creation + SQL run prep. ยังไม่เชื่อม Supabase ยังไม่เพิ่ม `.env.local` และยังไม่เปิด auth/cloud sync
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export function NextPhasePage() {
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-kaset-ink">M39 Supabase Staging Env Local Setup</h2>
+                <h2 className="font-extrabold text-kaset-ink">M39/M40 Supabase staging setup</h2>
                 <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
                   {envSafety.statusLabel}
                 </StatusPill>

@@ -106,3 +106,18 @@ VITE_ENABLE_GUEST_SYNC_EDGE=false
 ```
 
 Restart Vite after editing env values and verify `/app/env-safety` before opening `/app/supabase-connection`.
+
+## M40 Manual Project And SQL Prep
+
+M40 is the next manual staging setup pack. Stay on `staging/supabase` and read:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+Create the Supabase project manually with a staging-only name such as `kasethub-staging`. Run SQL manually only after confirming the dashboard project is staging:
+
+1. `supabase/migrations/0001_kasethub_core_schema.sql`
+2. `supabase/policies/0001_kasethub_rls_policies.sql`
+
+Do not run SQL on production. Do not enable auth or cloud sync during M40.

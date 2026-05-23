@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   CloudUpload,
+  ClipboardList,
   Database,
   KeyRound,
   ListChecks,
@@ -25,6 +26,7 @@ import {
   runSupabaseConnectionDryRun,
   runSupabasePublicReadProbe,
 } from '@/services/supabase/supabase-connection-dry-run';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import type {
   SupabaseConnectionHealth,
   SupabasePublicReadProbeResult,
@@ -104,6 +106,7 @@ function ProbeStatusCard({ probe }: { probe: SupabasePublicReadProbeResult | nul
 export function SupabaseConnectionPage() {
   const dryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const [probeResult, setProbeResult] = useState<SupabasePublicReadProbeResult | null>(null);
@@ -179,6 +182,29 @@ export function SupabaseConnectionPage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
                 เปิด Env Safety
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M40 SQL run prep</h2>
+                <StatusPill tone="warning">ยังไม่เชื่อมต่อจริง</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                สร้าง project {m40Checklist.recommendedProjectName} ด้วยมือก่อน แล้วรัน schema SQL ก่อน RLS SQL เฉพาะ staging เท่านั้น
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                Schema: {m40Checklist.schemaSqlPath} · RLS: {m40Checklist.rlsSqlPath}
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                เปิด SQL run prep checklist
               </Link>
             </div>
           </div>
