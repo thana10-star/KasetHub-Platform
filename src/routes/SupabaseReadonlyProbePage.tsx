@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import {
   buildSupabaseReadonlyProbePlan,
   runSupabaseReadonlyProbe,
@@ -93,6 +94,7 @@ function TableResultCard({ result }: { result: SupabaseReadonlyProbeTableResult 
 
 export function SupabaseReadonlyProbePage() {
   const plan = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
+  const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
   const [probe, setProbe] = useState<SupabaseReadonlyProbeResult | null>(null);
 
   useEffect(() => {
@@ -179,6 +181,32 @@ export function SupabaseReadonlyProbePage() {
         <NoticeBox tone="warning" icon={ShieldCheck} title="ยังไม่เปิด auth/cloud sync">
           M43 keeps auth, phone OTP, cloud sync, uploads, AI proxy, Edge Functions, and backend writes disabled. Empty public tables are OK.
         </NoticeBox>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <ListChecks aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M44 public read + RLS review</h2>
+                <StatusPill tone={m44Review.statusTone}>{m44Review.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">{m44Review.summary}</p>
+              <div className="mt-3 grid gap-2">
+                <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                  public read verification: {m44Review.publicReadVerificationStatus}
+                </p>
+                <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                  RLS review: {m44Review.rlsReviewStatus}
+                </p>
+                <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                  blockers: {m44Review.blockers.slice(0, 2).join(' · ')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">

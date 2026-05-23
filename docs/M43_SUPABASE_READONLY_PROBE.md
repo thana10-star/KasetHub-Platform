@@ -82,3 +82,5 @@ Empty tables are OK.
 M43 is a staging-only read probe. It does not replace Supabase Dashboard verification and does not prove every RLS rule. If a public table is unexpectedly blocked, review the table grants and public read policies before enabling auth or cloud sync.
 
 Keep `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false` when not actively checking staging.
+
+After running the probe, use M44 to record the actual table results and RLS/no-public-write review evidence before enabling auth or cloud sync.

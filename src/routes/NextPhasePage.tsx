@@ -21,6 +21,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
+import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import type {
@@ -139,6 +140,7 @@ export function NextPhasePage() {
   const plan = useMemo(() => runPhaseDecisionPlan(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
+  const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
@@ -253,6 +255,27 @@ export function NextPhasePage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
                 Open M43 read-only probe
               </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M44 public read verification + RLS review</h2>
+                <StatusPill tone={m44Review.statusTone}>{m44Review.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">{m44Review.summary}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                public read: {m44Review.publicReadVerificationStatus} · RLS: {m44Review.rlsReviewStatus}
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                blockers: {m44Review.blockers.slice(0, 3).join(' · ')}
+              </p>
             </div>
           </div>
         </Card>
