@@ -515,3 +515,11 @@ M36 does not connect Supabase, enable auth, run SQL, call AI APIs, add keys, add
 M38 moves the real Supabase path into a branch-safe setup step. The working branch is `staging/supabase`; `main` remains the stable M36 prototype snapshot. M38 adds branch guide and safety checklist docs and surfaces static branch mode copy on Next Phase, Supabase Readiness, and Admin Dashboard.
 
 Boundaries remain strict: no real Supabase connection, no real keys, no `.env.local`, no SQL execution, no auth, no cloud sync, no backend writes, and no production behavior changes. M39 should prepare local-only staging env setup next.
+
+## M39 Supabase Staging Env Local Setup
+
+M39 keeps work on `staging/supabase` and prepares the local env workflow for a future staging Supabase project. It adds `/app/env-safety`, `src/services/config/env-safety-check.ts`, and `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`.
+
+The app can now show whether staging URL and anon key are present, whether values look like placeholders, whether a service-role-like key was accidentally placed in frontend env, and whether dangerous flags such as auth/cloud sync/network probe are enabled too early. The check is local-only and masks values; it does not call Supabase.
+
+M39 still does not connect Supabase, add real keys, commit `.env.local`, run SQL, enable auth, enable cloud sync, or write backend data.

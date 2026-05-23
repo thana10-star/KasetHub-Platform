@@ -136,3 +136,16 @@ Production remains blocked until:
 - service-role boundaries are implemented server-side
 - admin roles and audit logs are enforced
 - backup and rollback are rehearsed
+
+## M39 Env Safety Page
+
+M39 adds `/app/env-safety` before any real dry-run network probe. Use it to confirm:
+
+- staging URL is present only in `.env.local`
+- anon key is present and masked
+- service-role-like key is not detected
+- placeholders are not used for a real staging run
+- auth/cloud sync/Guest Sync Edge flags are disabled
+- `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`
+
+The env safety page is local-only and does not call Supabase. If it reports blockers, fix `.env.local` before using `/app/supabase-connection`.

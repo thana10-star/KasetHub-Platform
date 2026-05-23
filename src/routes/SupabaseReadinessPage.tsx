@@ -20,6 +20,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import {
   runSupabaseConnectionDryRun,
 } from '@/services/supabase/supabase-connection-dry-run';
@@ -86,6 +87,7 @@ function ReadinessItemCard({ item }: { item: SupabaseReadinessItem }) {
 export function SupabaseReadinessPage() {
   const audit = useMemo(() => runSupabaseReadinessAudit(), []);
   const connectionDryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const sqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
@@ -139,6 +141,28 @@ export function SupabaseReadinessPage() {
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
                 Next milestone: M39 Supabase Staging Env Local Setup. ห้ามใส่ service-role key, ห้าม commit `.env.local`, และห้ามใช้ production project
               </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M39 Env Safety</h2>
+                <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                  {envSafety.statusLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ตรวจ `.env.local` เฉพาะในเครื่อง ไม่แสดงค่า secret เต็ม และย้ำว่า Supabase readiness ยังไม่เรียก network โดยค่าเริ่มต้น
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                เปิด Env Safety
+              </Link>
             </div>
           </div>
         </Card>

@@ -202,3 +202,17 @@ Run real Supabase work on `staging/supabase`, not directly on `main`.
 - `staging/supabase` can hold staging URL/anon env wiring, SQL/RLS verification UI changes, phone auth staging, and Guest Sync Edge Function work.
 - Never commit `.env.local`, service-role keys, SMS provider secrets, or production project credentials.
 - Merge back only after `npm run lint`, `npm run build`, manual route checks, RLS verification, and rollback notes are complete.
+
+## M39 Local Env Setup Step
+
+Before any real Supabase staging connection work:
+
+1. Read `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`.
+2. Copy `.env.example` to `.env.local` on your machine only.
+3. Add only the staging Project URL and anon public key.
+4. Keep network dry-run, auth, cloud sync, and Guest Sync Edge disabled.
+5. Restart Vite.
+6. Open `/app/env-safety`.
+7. Continue to `/app/supabase-connection` only if env safety has no blockers.
+
+Do not add service-role keys or production credentials to any frontend env file.

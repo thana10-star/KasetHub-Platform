@@ -7,6 +7,7 @@ export type AppRoute =
   | '/app/supabase-readiness'
   | '/app/supabase-connection'
   | '/app/supabase-sql-checklist'
+  | '/app/env-safety'
   | '/app/youtube'
   | '/app/ai'
   | '/app/ai-proxy-status'

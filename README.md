@@ -453,6 +453,23 @@ M38 creates the safe branch workflow for Supabase staging experiments on `stagin
 
 M38 does not connect Supabase, add real keys, create `.env.local`, run SQL migrations, enable auth, enable cloud sync, write backend data, or change production behavior. The next recommended milestone is M39 Supabase Staging Env Local Setup.
 
+## M39 Supabase Staging Env Local Setup
+
+M39 adds `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`, a local env safety checker, and `/app/env-safety`. The route checks staging env presence, placeholder values, anon-key format-ish shape, service-role-like key risk, and dangerous feature flags without displaying full secret values and without making network calls.
+
+Safe M39 staging readiness uses only local `.env.local` values:
+
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_CLOUD_SYNC=false
+```
+
+`.env.local`, `.env.production`, and `.env.staging` remain ignored. Do not commit real keys. Do not use service-role keys in frontend env. The app must still run with no `.env.local`.
+
 ## Community Moderation Boundary
 
 M23 moderation features are local/mock only. Reports and hidden posts stay on the current device. There is no real admin queue, no Supabase write, no moderation API, no AI moderation provider, and no network request. User-facing copy must keep “รายงานนี้ยังเป็นข้อมูลในเครื่องเท่านั้น”, “ยังไม่มีผู้ดูแลระบบจริงในเวอร์ชันนี้”, and “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ” visible near risky actions.

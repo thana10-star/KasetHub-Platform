@@ -150,3 +150,19 @@ VITE_AUTH_STAGING_LABEL=local
 ```
 
 Only a later controlled staging test should set a redirect URL and turn on phone auth flags. Service-role keys and SMS provider secrets must never be placed in frontend ENV.
+
+## M39 Local Env Safety
+
+M39 adds `/app/env-safety` and `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`.
+
+Use it when preparing `.env.local` on `staging/supabase`:
+
+- copy `.env.example` locally
+- set only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+- set `VITE_ENABLE_SUPABASE=true` only for local staging readiness
+- keep `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`
+- keep `VITE_ENABLE_AUTH=false`
+- keep `VITE_ENABLE_CLOUD_SYNC=false`
+- keep Guest Sync backend/Edge flags disabled
+
+The env safety page masks values and performs local checks only. It does not call Supabase, verify schema, authenticate a user, write data, or upload files.

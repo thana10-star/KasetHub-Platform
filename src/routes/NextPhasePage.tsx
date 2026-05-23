@@ -7,6 +7,7 @@ import {
   GitBranch,
   ImageUp,
   ListChecks,
+  LockKeyhole,
   Phone,
   ShieldCheck,
   Smartphone,
@@ -18,6 +19,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import type {
   NextPhaseOption,
@@ -133,6 +135,7 @@ function OptionCard({ option }: { option: NextPhaseOption }) {
 
 export function NextPhasePage() {
   const plan = useMemo(() => runPhaseDecisionPlan(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -178,6 +181,28 @@ export function NextPhasePage() {
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
                 Next milestone: M39 Supabase Staging Env Local Setup. ยังไม่เชื่อม Supabase ยังไม่เพิ่ม `.env.local` และยังไม่เปิด auth/cloud sync
               </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M39 Supabase Staging Env Local Setup</h2>
+                <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                  {envSafety.statusLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ใส่ staging URL และ anon key ได้เฉพาะใน `.env.local`; network check, auth, cloud sync, และ Guest Sync Edge ต้องยังปิดอยู่
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                เปิด Env Safety
+              </Link>
             </div>
           </div>
         </Card>

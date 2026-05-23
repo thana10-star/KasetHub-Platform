@@ -20,6 +20,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import {
   runSupabaseConnectionDryRun,
   runSupabasePublicReadProbe,
@@ -102,6 +103,7 @@ function ProbeStatusCard({ probe }: { probe: SupabasePublicReadProbeResult | nul
 
 export function SupabaseConnectionPage() {
   const dryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const [probeResult, setProbeResult] = useState<SupabasePublicReadProbeResult | null>(null);
@@ -159,6 +161,28 @@ export function SupabaseConnectionPage() {
         <NoticeBox tone="warning" title="ทดสอบแบบไม่เขียนข้อมูล">
           หน้านี้ใช้เฉพาะ anon-key/client-safe checks ไม่มี service-role key ไม่มี auth ไม่มี cloud sync ไม่มี upload และไม่มี insert/update/delete
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M39 Env Safety</h2>
+                <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                  {envSafety.statusLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ตรวจค่า `.env.local` แบบไม่แสดง secret เต็ม network check ยังปิดโดยค่าเริ่มต้น และห้ามใส่ service-role key ใน frontend
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                เปิด Env Safety
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">

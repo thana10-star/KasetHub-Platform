@@ -62,6 +62,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Supabase readiness', route: '/app/supabase-readiness' },
   { label: 'Supabase connection dry run', route: '/app/supabase-connection' },
   { label: 'Supabase SQL checklist', route: '/app/supabase-sql-checklist' },
+  { label: 'Env safety', route: '/app/env-safety' },
   { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },
   { label: 'Guest Sync Edge plan', route: '/app/guest-sync-edge' },
   { label: 'My Farm Hub', route: '/app/my-farm' },

@@ -92,6 +92,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/supabase-readiness', label: 'Supabase readiness', milestone: 'M25-M29', notes: 'audit local-only ไม่มี connection', manualCheckPath: '/app/supabase-readiness' },
       { route: '/app/supabase-connection', label: 'Supabase connection dry run', milestone: 'M26-M29', notes: 'network check ปิดโดยค่าเริ่มต้น', manualCheckPath: '/app/supabase-connection' },
       { route: '/app/supabase-sql-checklist', label: 'SQL staging checklist', milestone: 'M27', notes: 'manual verification pack ยังไม่รัน SQL จริง', manualCheckPath: '/app/supabase-sql-checklist' },
+      { route: '/app/env-safety', label: 'Env safety', milestone: 'M39', notes: 'local-only env safety check, masks values, no network calls', manualCheckPath: '/app/env-safety' },
     ],
   },
   {

@@ -9,6 +9,9 @@ Use this checklist before any real Supabase staging experiment. M38 adds the che
 - [ ] Confirm `.env.local` is local only and not staged.
 - [ ] Confirm only Project URL and anon public key are used in frontend env.
 - [ ] Confirm `VITE_ENABLE_SUPABASE=false` remains default in `.env.example`.
+- [ ] Open `/app/env-safety` and confirm there are no blockers.
+- [ ] Confirm `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`.
+- [ ] Confirm auth, cloud sync, Guest Sync backend, and Guest Sync Edge flags are disabled.
 
 ## Before Running SQL
 
@@ -40,6 +43,7 @@ Use this checklist before any real Supabase staging experiment. M38 adds the che
 - [ ] Run `npm run lint`.
 - [ ] Run `npm run build`.
 - [ ] Confirm no `.env.local`, `.env.production`, or `.env.staging` is staged.
+- [ ] Confirm `.env.example` contains placeholders only.
 - [ ] Run a secret scan for service-role/provider keys.
 - [ ] Confirm app still runs with no `.env.local`.
 
@@ -57,4 +61,3 @@ Service-role keys must never appear in:
 ## Production Project Warning
 
 Do not use a production Supabase project for M39-M40 staging tests. Stop immediately if the Supabase dashboard, Project URL, or env label does not clearly identify a staging project.
-

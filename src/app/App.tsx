@@ -49,6 +49,7 @@ import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
 import { YoutubePage } from '@/routes/YoutubePage';
 import { ContentAdminPreviewPage } from '@/routes/ContentAdminPreviewPage';
 import { CropWatchPage } from '@/routes/CropWatchPage';
+import { EnvSafetyPage } from '@/routes/EnvSafetyPage';
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="supabase-readiness" element={<SupabaseReadinessPage />} />
         <Route path="supabase-connection" element={<SupabaseConnectionPage />} />
         <Route path="supabase-sql-checklist" element={<SupabaseSqlChecklistPage />} />
+        <Route path="env-safety" element={<EnvSafetyPage />} />
         <Route path="youtube/:videoId" element={<YoutubeVideoDetailPage />} />
         <Route path="ai" element={<AIPage />} />
         <Route path="ai-proxy-status" element={<AIProxyStatusPage />} />

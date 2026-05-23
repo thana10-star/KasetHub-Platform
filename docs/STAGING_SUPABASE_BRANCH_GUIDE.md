@@ -79,3 +79,30 @@ Merge back to `main` only when all are true:
 
 M39 should prepare local-only Supabase staging env setup using `.env.example` as the template. It should still avoid committing `.env.local`, service-role keys, migrations, auth enablement, cloud sync, or backend writes.
 
+## M39 Local Env Setup
+
+Use `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md` before adding any staging values locally.
+
+Recommended local-only flow:
+
+```bash
+Copy-Item .env.example .env.local
+```
+
+Then add only:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Keep these flags safe:
+
+```bash
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_CLOUD_SYNC=false
+VITE_ENABLE_GUEST_SYNC_BACKEND=false
+VITE_ENABLE_GUEST_SYNC_EDGE=false
+```
+
+Restart Vite after editing env values and verify `/app/env-safety` before opening `/app/supabase-connection`.
