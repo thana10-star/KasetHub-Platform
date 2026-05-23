@@ -447,6 +447,12 @@ M36 adds `/app/next-phase` and static phase-planning services for deciding the s
 
 M36 is planning only. It does not connect Supabase, enable auth, run migrations, call AI APIs, add API keys, add network calls, write backend data, or add production behavior. `main` remains the stable prototype; real integration experiments should use `staging/supabase`, `staging/ai-proxy`, and `staging/mobile`.
 
+## M38 Supabase Staging Branch Setup
+
+M38 creates the safe branch workflow for Supabase staging experiments on `staging/supabase`. `main` remains the stable prototype. The branch setup adds `docs/STAGING_SUPABASE_BRANCH_GUIDE.md`, `docs/STAGING_SUPABASE_SAFETY_CHECKLIST.md`, and static branch-status copy on `/app/next-phase`, `/app/supabase-readiness`, and `/app/admin`.
+
+M38 does not connect Supabase, add real keys, create `.env.local`, run SQL migrations, enable auth, enable cloud sync, write backend data, or change production behavior. The next recommended milestone is M39 Supabase Staging Env Local Setup.
+
 ## Community Moderation Boundary
 
 M23 moderation features are local/mock only. Reports and hidden posts stay on the current device. There is no real admin queue, no Supabase write, no moderation API, no AI moderation provider, and no network request. User-facing copy must keep “รายงานนี้ยังเป็นข้อมูลในเครื่องเท่านั้น”, “ยังไม่มีผู้ดูแลระบบจริงในเวอร์ชันนี้”, and “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ” visible near risky actions.

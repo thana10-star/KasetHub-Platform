@@ -27,6 +27,13 @@ Check these routes before and after real backend work. The app must still work w
 - `/app/supabase-connection`
 - `/app/supabase-sql-checklist`
 
+M38 branch-mode checks:
+
+- `/app/next-phase` shows recommended branch `staging/supabase`.
+- `/app/supabase-readiness` shows Supabase staging experiment mode.
+- `/app/admin` shows M38 branch setup status.
+- No route should require `.env.local`.
+
 ## AI / Image Analysis
 
 - `/app/ai`
@@ -61,4 +68,3 @@ Check these routes before and after real backend work. The app must still work w
 - `/app/qa`
 - `/app/mvp-snapshot`
 - `/app/next-phase`
-

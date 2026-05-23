@@ -290,6 +290,26 @@ export function AdminDashboardPage() {
               </div>
             </Card>
 
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <GitBranch aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M38 Supabase staging branch</h2>
+                    <Badge tone="sky">staging/supabase</Badge>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">
+                    Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    Next milestone: M39 Supabase Staging Env Local Setup. ยังไม่เชื่อม Supabase ไม่เปิด auth/cloud sync และไม่เขียน backend
+                  </p>
+                </div>
+              </div>
+            </Card>
+
             <Card className="p-4">
               <div className="flex gap-3">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">

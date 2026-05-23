@@ -9,6 +9,20 @@ M36 keeps `main` as the stable local/mock prototype and uses separate staging br
 - `staging/ai-proxy`: AI text proxy and later plant vision proxy experiments.
 - `staging/mobile`: PWA/offline/mobile shell and closed-device testing experiments.
 
+## M38 Branch Status
+
+M38 creates and works from `staging/supabase` as the first experiment branch. This branch is still setup/documentation only:
+
+- no Supabase connection
+- no real keys
+- no `.env.local`
+- no SQL migrations
+- no auth/cloud sync
+- no backend writes
+- no production behavior changes
+
+Next milestone: M39 Supabase Staging Env Local Setup.
+
 ## Merge Rules
 
 - Run `npm run lint` and `npm run build`.
@@ -40,4 +54,3 @@ npm run build
 ```
 
 Manual route checks must include the changed module plus `/app`, `/app/profile`, `/app/qa`, `/app/admin`, and `/app/mvp-snapshot`.
-

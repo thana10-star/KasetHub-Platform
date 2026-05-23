@@ -509,3 +509,9 @@ Branch strategy:
 - `staging/mobile` is for PWA/mobile shell experiments.
 
 M36 does not connect Supabase, enable auth, run SQL, call AI APIs, add keys, add network calls, or write backend data.
+
+## M38 Supabase Staging Branch Creation
+
+M38 moves the real Supabase path into a branch-safe setup step. The working branch is `staging/supabase`; `main` remains the stable M36 prototype snapshot. M38 adds branch guide and safety checklist docs and surfaces static branch mode copy on Next Phase, Supabase Readiness, and Admin Dashboard.
+
+Boundaries remain strict: no real Supabase connection, no real keys, no `.env.local`, no SQL execution, no auth, no cloud sync, no backend writes, and no production behavior changes. M39 should prepare local-only staging env setup next.
