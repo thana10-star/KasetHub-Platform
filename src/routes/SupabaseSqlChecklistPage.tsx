@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { buildSupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import type { SupabaseStagingChecklistItem } from '@/services/supabase/supabase-staging-project-checklist.types';
@@ -87,6 +88,7 @@ export function SupabaseSqlChecklistPage() {
   const validation = useMemo(() => validateSupabaseSqlDraft(), []);
   const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
+  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
 
   return (
     <div>
@@ -159,6 +161,27 @@ export function SupabaseSqlChecklistPage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
                 เปิด M41 setup guide
               </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M42 SQL execution review</h2>
+                <StatusPill tone={executionReview.statusTone}>{executionReview.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                If SQL errors are provided, record the exact error and propose a minimal manual SQL correction. Do not run SQL automatically.
+              </p>
+              <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
+              </p>
             </div>
           </div>
         </Card>

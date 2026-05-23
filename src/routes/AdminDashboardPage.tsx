@@ -48,6 +48,7 @@ import { communityReportReasonLabels } from '@/services/community-moderation/com
 import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
 import { runSupabaseConnectionDryRun } from '@/services/supabase/supabase-connection-dry-run';
+import { buildSupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review';
 import { runSupabaseReadinessAudit } from '@/services/supabase/supabase-readiness-audit';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
@@ -204,6 +205,7 @@ export function AdminDashboardPage() {
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
+  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
   const supabaseSqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
@@ -275,6 +277,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={LockKeyhole} label="env safety" value={envSafety.blockers.length > 0 ? 'blocked' : envSafety.warnings.length > 0 ? 'review' : 'safe'} />
               <SummaryCard icon={ClipboardList} label="M40 SQL prep" value={m40Checklist.sqlExecutionChecklist.length} />
               <SummaryCard icon={ClipboardList} label="M41 setup" value={`${setupProgress.completedCount}/${setupProgress.totalCount}`} />
+              <SummaryCard icon={ClipboardList} label="M42 review" value={executionReview.statusLabel} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
@@ -362,6 +365,27 @@ export function AdminDashboardPage() {
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
                     เปิด M41 setup guide
                   </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M42 Supabase manual execution review</h2>
+                    <StatusPill tone={executionReview.statusTone}>{executionReview.statusLabel}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    {executionReview.nextSafeStep} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                    Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
+                  </p>
                 </div>
               </div>
             </Card>

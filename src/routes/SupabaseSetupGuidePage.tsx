@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { buildSupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review';
 import {
   readSupabaseSetupProgress,
   resetSupabaseSetupProgress,
@@ -95,6 +96,7 @@ function ProgressStepCard({
 export function SupabaseSetupGuidePage() {
   const [progress, setProgress] = useState(() => readSupabaseSetupProgress());
   const summary = useMemo(() => summarizeSupabaseSetupProgress(progress), [progress]);
+  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(progress), [progress]);
 
   return (
     <div>
@@ -127,6 +129,27 @@ export function SupabaseSetupGuidePage() {
         <NoticeBox tone="warning" icon={AlertTriangle} title="ใช้ staging เท่านั้น">
           สร้าง project ใหม่ชื่อ `kasethub-staging` หรือชื่อที่ระบุชัดว่าเป็น staging หยุดทันทีถ้าเห็น production data หรือไม่แน่ใจว่า project ถูกต้อง
         </NoticeBox>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M42 manual execution review</h2>
+                <StatusPill tone={executionReview.statusTone}>{executionReview.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                Next safe step: {executionReview.nextSafeStep}
+              </p>
+              <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
+              </p>
+            </div>
+          </div>
+        </Card>
 
         <section className="grid grid-cols-3 gap-3">
           <Card className="p-3 text-center">
@@ -245,6 +268,35 @@ export function SupabaseSetupGuidePage() {
         <NoticeBox tone="danger" title="หยุดก่อนเปิด auth/cloud sync">
           STOP POINT: หยุดหลัง verification รอบนี้ ห้ามเปิด auth, cloud sync, uploads, AI proxy, Edge Functions หรือ backend writes จนกว่าจะมี milestone ถัดไป
         </NoticeBox>
+
+        <section className="grid gap-3">
+          <div className="flex items-center gap-2">
+            <ClipboardList aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+            <h2 className="text-lg font-extrabold text-kaset-ink">M42 evidence needed</h2>
+          </div>
+          {executionReview.requestedEvidence.map((item) => (
+            <Card className="p-3" key={item}>
+              <p className="text-sm font-bold leading-6 text-kaset-ink">{item}</p>
+            </Card>
+          ))}
+        </section>
+
+        <section className="grid gap-3">
+          <div className="flex items-center gap-2">
+            <ListChecks aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+            <h2 className="text-lg font-extrabold text-kaset-ink">M42 review status meanings</h2>
+          </div>
+          {executionReview.statusOptions.map((option) => (
+            <Card className="p-3" key={option.status}>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusPill tone={option.status === 'success' ? 'success' : option.status === 'blocked' ? 'danger' : 'warning'}>
+                  {option.label}
+                </StatusPill>
+                <p className="text-sm font-bold leading-6 text-kaset-ink">{option.detail}</p>
+              </div>
+            </Card>
+          ))}
+        </section>
 
         <Card className="p-4">
           <div className="grid gap-2">
