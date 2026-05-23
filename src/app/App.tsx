@@ -43,6 +43,7 @@ import { SavedArticlesPage } from '@/routes/SavedArticlesPage';
 import { SavedVideosPage } from '@/routes/SavedVideosPage';
 import { SupabaseConnectionPage } from '@/routes/SupabaseConnectionPage';
 import { SupabaseReadinessPage } from '@/routes/SupabaseReadinessPage';
+import { SupabaseSetupGuidePage } from '@/routes/SupabaseSetupGuidePage';
 import { SupabaseSqlChecklistPage } from '@/routes/SupabaseSqlChecklistPage';
 import { WeatherPage } from '@/routes/WeatherPage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="admin" element={<AdminDashboardPage />} />
         <Route path="supabase-readiness" element={<SupabaseReadinessPage />} />
         <Route path="supabase-connection" element={<SupabaseConnectionPage />} />
+        <Route path="supabase-setup-guide" element={<SupabaseSetupGuidePage />} />
         <Route path="supabase-sql-checklist" element={<SupabaseSqlChecklistPage />} />
         <Route path="env-safety" element={<EnvSafetyPage />} />
         <Route path="youtube/:videoId" element={<YoutubeVideoDetailPage />} />

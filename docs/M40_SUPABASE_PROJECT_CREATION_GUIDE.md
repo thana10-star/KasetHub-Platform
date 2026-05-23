@@ -77,9 +77,13 @@ Do not include keys or connection strings in screenshots.
 
 ## Next Step
 
-After project creation, read:
+After project creation, continue with the M41 guided walkthrough and keep the M40 prep docs open:
 
+- `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`
+- `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`
 - `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
 - `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+- `/app/supabase-setup-guide`
 - `/app/supabase-sql-checklist`
 
+M41 may be used while manually creating the real staging project, but it still must not expose service-role keys, commit `.env.local`, enable auth/cloud sync, or run SQL automatically from the app.

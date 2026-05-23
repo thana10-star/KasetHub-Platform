@@ -4,6 +4,8 @@
 
 KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, admin operations, weather planning, farm area planning, My Farm workspace, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations. M24 adds a local/mock Admin Dashboard foundation. M25 adds a Supabase staging setup checklist plus readiness audit. M26 adds a safe Supabase staging connection dry-run boundary. M27 adds the manual SQL staging execution guide and verification checklist. M28 adds a Supabase Auth phone OTP staging plan. M29 adds the Guest Sync Edge Function staging contract. M30 adds the Internal MVP snapshot. M31 adds local image compression/preflight. M32 adds agriculture weather forecast UX with local fixtures only. M33 adds local/mock farm area measurement planning. M34 upgrades My Farm into a local-first farmer workspace with no backend writes, Supabase writes, real auth requirement, AI/weather API, GPS/map, sync, destructive data loss, or network calls by default.
 
+M35-M41 extend the safe path toward real staging by adding local notifications, backend phase planning, a Supabase staging branch workflow, local env safety checks, manual project/SQL preparation, and the M41 real Supabase staging setup walkthrough with localStorage-only progress. These milestones still keep service-role keys out of the frontend, keep `.env.local` out of git, avoid automatic SQL execution, and stop before auth/cloud sync/uploads/AI proxy.
+
 ## M01 Foundation
 
 - React + TypeScript + Vite web app
@@ -381,7 +383,7 @@ Supabase is a practical next step for authentication, Postgres data storage, row
 
 M06 adds only a browser-safe client scaffold. The client is disabled unless `VITE_ENABLE_SUPABASE=true` and public Supabase ENV values are present. Auth and cloud sync remain separately gated by `VITE_ENABLE_AUTH` and `VITE_ENABLE_CLOUD_SYNC`. No service-role key, admin secret, phone OTP call, or data write should ever be placed in the frontend.
 
-M25 adds `/app/supabase-readiness`, `.env.example`, and staging setup docs so the first staging project can be reviewed safely. M26 adds `/app/supabase-connection` and a dry-run service that can detect configured staging anon settings without writes. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Supabase Edge Function contract. M30 adds `/app/mvp-snapshot` so route coverage, readiness, and production blockers are visible before the first real staging implementation. Network probing is disabled by default and must stay public/read-only when explicitly enabled. These milestones still do not run migrations, deploy/call Edge Functions, enable real auth, send OTP SMS, enable cloud sync, add secrets, write data, or upload files.
+M25 adds `/app/supabase-readiness`, `.env.example`, and staging setup docs so the first staging project can be reviewed safely. M26 adds `/app/supabase-connection` and a dry-run service that can detect configured staging anon settings without writes. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Supabase Edge Function contract. M30 adds `/app/mvp-snapshot` so route coverage, readiness, and production blockers are visible before the first real staging implementation. M41 adds `/app/supabase-setup-guide` with a localStorage-only progress checklist for manual project/env/SQL verification. Network probing is disabled by default and must stay public/read-only when explicitly enabled. These milestones still do not run migrations automatically, deploy/call Edge Functions, enable real auth, send OTP SMS, enable cloud sync, add secrets to the repo, write data, or upload files.
 
 ### Auth-Ready Sync Planning
 
@@ -492,11 +494,12 @@ M19 adds a local-only LINE Login mock and account-linking planner. LINE is treat
 
 1. M35 Notification Center Upgrade Foundation. Completed as local/mock in-app notification center.
 2. M36 Real Backend Phase Decision + Staging Branch Plan. Completed as planning only.
-3. M37 Supabase staging SQL/RLS execution and verification on `staging/supabase`.
-4. M38 Phone Auth staging after schema/RLS checks.
-5. M39 Guest Sync Edge Function staging after real session ownership.
-6. M40 AI text proxy staging, then plant vision and mobile/PWA work.
-6. M40 AI backend proxy and plant image upload staging.
+3. M38-M41 Supabase staging branch, env safety, project creation, SQL/RLS walkthrough, and verification.
+4. Phone Auth staging after schema/RLS checks.
+5. Guest Sync Edge Function staging after real session ownership.
+6. AI text proxy staging with backend-owned secrets.
+7. Plant vision proxy and mobile/PWA work after storage/auth boundaries are proven.
+
 ## M36 Real Backend Phase Decision
 
 M36 adds the planning layer for the first real implementation phase after the M01-M35 local/mock prototype. `/app/next-phase` ranks the options and recommends this order: Supabase staging + SQL/RLS, phone auth staging, Guest Sync staging, AI text proxy, plant vision proxy, then PWA/mobile shell. AI text proxy can move earlier if demo value is the priority, but it must stay on `staging/ai-proxy` with backend-owned secrets, cost caps, rate limits, safety logs, and fixture fallback.
@@ -536,3 +539,16 @@ M40 prepares the human-run Supabase staging step. It adds:
 The recommended project name is `kasethub-staging`. The manual order is: create staging project, save Project URL and anon key locally only, open SQL Editor, run `supabase/migrations/0001_kasethub_core_schema.sql`, then run `supabase/policies/0001_kasethub_rls_policies.sql`, then verify tables, RLS, policies, indexes, and triggers.
 
 M40 is still guide/prep only. It does not create a Supabase project, connect the app, run migrations, add keys, commit `.env.local`, enable auth/cloud sync, or write backend data.
+
+## M41 Real Supabase Staging Setup Walkthrough
+
+M41 prepares the first controlled real staging setup. It adds:
+
+- `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`
+- `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`
+- `/app/supabase-setup-guide`
+- `src/services/supabase/supabase-setup-progress.ts`
+
+The route tracks project created, env added, schema SQL run, RLS SQL run, tables verified, and staging verified using localStorage only. It surfaces the next safe step, blockers, and explicit warnings: ห้ามใช้ service-role key, ใช้ staging เท่านั้น, ยังไม่เปิด auth, ยังไม่เปิด cloud sync, and หยุดก่อนเปิด auth/cloud sync.
+
+M41 may guide the human operator through creating `kasethub-staging` and manually running SQL/RLS, but the app still does not create Supabase resources, run SQL, commit keys, expose service-role credentials, enable auth/cloud sync/uploads/AI proxy, or write backend data.

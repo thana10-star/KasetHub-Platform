@@ -46,6 +46,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'Internal MVP Snapshot', icon: ClipboardCheck, href: '/app/mvp-snapshot' },
   { label: 'Next Phase Decision', icon: GitBranch, href: '/app/next-phase' },
   { label: 'Supabase staging readiness', icon: Server, href: '/app/supabase-readiness' },
+  { label: 'Supabase staging setup guide', icon: ClipboardCheck, href: '/app/supabase-setup-guide' },
   { label: 'Phone OTP staging checklist', icon: ShieldCheck, href: '/app/auth/phone-staging' },
   { label: 'ประวัติการใช้ AI', icon: Clock3, href: '/app/ai-credits' },
   { label: 'ประวัติพืชของฉัน', icon: Leaf, href: '/app/my-farm' },

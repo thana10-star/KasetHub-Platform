@@ -121,3 +121,14 @@ Create the Supabase project manually with a staging-only name such as `kasethub-
 2. `supabase/policies/0001_kasethub_rls_policies.sql`
 
 Do not run SQL on production. Do not enable auth or cloud sync during M40.
+
+## M41 Real Staging Setup Walkthrough
+
+M41 is the first guided workflow for manually creating the real staging project and running the existing SQL/RLS drafts. Stay on `staging/supabase` and read:
+
+- `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`
+- `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`
+
+Use `/app/supabase-setup-guide` to track local-only progress. The progress checklist writes only to localStorage and does not inspect Supabase automatically.
+
+M41 still must not commit real keys, commit `.env.local`, expose service-role keys, run SQL automatically, enable auth, enable cloud sync, enable uploads, enable AI proxy, or write backend data.

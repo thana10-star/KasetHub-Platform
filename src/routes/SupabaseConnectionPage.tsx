@@ -26,6 +26,7 @@ import {
   runSupabaseConnectionDryRun,
   runSupabasePublicReadProbe,
 } from '@/services/supabase/supabase-connection-dry-run';
+import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import type {
   SupabaseConnectionHealth,
@@ -107,6 +108,7 @@ export function SupabaseConnectionPage() {
   const dryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
+  const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const [probeResult, setProbeResult] = useState<SupabasePublicReadProbeResult | null>(null);
@@ -205,6 +207,29 @@ export function SupabaseConnectionPage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
                 เปิด SQL run prep checklist
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M41 staging setup progress</h2>
+                <StatusPill tone={setupProgress.nextStep ? 'warning' : 'success'}>
+                  {setupProgress.completedCount}/{setupProgress.totalCount}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Next safe step: {setupProgress.nextSafeStep}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-kaset-deep">
+                blockers: {setupProgress.blockers.slice(0, 2).join(' · ') || 'ไม่มี blocker ใน local checklist'} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+                เปิด M41 setup guide
               </Link>
             </div>
           </div>

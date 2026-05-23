@@ -61,6 +61,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Next Phase Decision', route: '/app/next-phase' },
   { label: 'Supabase readiness', route: '/app/supabase-readiness' },
   { label: 'Supabase connection dry run', route: '/app/supabase-connection' },
+  { label: 'Supabase setup guide', route: '/app/supabase-setup-guide' },
   { label: 'Supabase SQL checklist', route: '/app/supabase-sql-checklist' },
   { label: 'Env safety', route: '/app/env-safety' },
   { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },

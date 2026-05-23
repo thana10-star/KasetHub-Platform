@@ -2,6 +2,8 @@
 
 Use this guide after manually running the schema SQL and RLS SQL on the staging project. It is a verification guide only. The frontend still does not connect or write data by default.
 
+For M41, also use `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md` and `/app/supabase-setup-guide` to record local progress and screenshot evidence without secrets.
+
 ## Expected Tables
 
 Core identity and Guest Memory:
@@ -127,3 +129,4 @@ If staging needs reset:
 
 Production remains blocked until staging SQL/RLS verification passes and later auth/session tests prove ownership boundaries.
 
+After M41 verification, stop. Do not enable auth, cloud sync, uploads, AI proxy, Edge Functions, or frontend writes until a later milestone explicitly scopes that work.

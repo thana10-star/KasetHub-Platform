@@ -17,10 +17,13 @@ Use this checklist before any real Supabase staging experiment. M38 adds the che
 
 - [ ] Confirm Supabase dashboard project name clearly says staging.
 - [ ] Recommended staging project name is `kasethub-staging`.
+- [ ] Read `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`.
+- [ ] Read `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`.
 - [ ] Read `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`.
 - [ ] Read `docs/M40_SQL_RUN_PREP_CHECKLIST.md`.
 - [ ] Read `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`.
 - [ ] Read `docs/SUPABASE_SQL_STAGING_EXECUTION_GUIDE.md`.
+- [ ] Open `/app/supabase-setup-guide` and use the local checklist for progress only.
 - [ ] Run schema SQL first.
 - [ ] Run RLS SQL second.
 - [ ] Verify tables, indexes, constraints, triggers, and RLS policies.
@@ -65,4 +68,8 @@ Service-role keys must never appear in:
 
 ## Production Project Warning
 
-Do not use a production Supabase project for M39-M40 staging tests. Stop immediately if the Supabase dashboard, Project URL, or env label does not clearly identify a staging project.
+Do not use a production Supabase project for M39-M41 staging tests. Stop immediately if the Supabase dashboard, Project URL, or env label does not clearly identify a staging project.
+
+## M41 Stop Point
+
+After creating the staging project, running schema SQL, running RLS SQL, and verifying tables/RLS/indexes/triggers, stop. Do not enable auth, cloud sync, uploads, AI proxy, Edge Functions, service-role-backed jobs, frontend writes, or production redirects.

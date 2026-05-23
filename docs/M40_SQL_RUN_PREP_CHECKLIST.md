@@ -2,6 +2,12 @@
 
 This checklist prepares manual SQL execution on the Supabase staging project. Do not run this on production. Do not automate this step in the app.
 
+For the first real staging run, use this together with:
+
+- `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`
+- `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`
+- `/app/supabase-setup-guide`
+
 ## Before Opening SQL Editor
 
 - [ ] Current Git branch is `staging/supabase`.
@@ -78,3 +84,4 @@ Do not test yet:
 - frontend writes
 - service-role behavior
 
+These remain blocked in M41 too. M41 records the first staging setup progress and screenshot evidence, but still stops before auth, cloud sync, uploads, AI proxy, Edge Functions, frontend writes, or service-role behavior.
