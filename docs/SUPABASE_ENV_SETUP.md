@@ -12,12 +12,15 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-placeholder
 VITE_ENABLE_SUPABASE=false
 VITE_ENABLE_AUTH=false
 VITE_ENABLE_CLOUD_SYNC=false
+VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false
 VITE_GUEST_SYNC_MODE=local_fixture
 VITE_ENABLE_GUEST_SYNC_BACKEND=false
 VITE_ENABLE_LOCAL_GUEST_SYNC_HANDLER=false
 VITE_PHONE_AUTH_MODE=local_mock
 VITE_ENABLE_PHONE_AUTH=false
 VITE_ENABLE_PHONE_AUTH_LOCAL_MOCK=true
+VITE_SUPABASE_AUTH_REDIRECT_URL=
+VITE_AUTH_STAGING_LABEL=local
 VITE_LINE_AUTH_MODE=local_mock
 VITE_ENABLE_LINE_AUTH=false
 VITE_ENABLE_LINE_AUTH_LOCAL_MOCK=true
@@ -30,12 +33,15 @@ Keep all flags `false` by default. With these defaults the app makes no Supabase
 - `VITE_ENABLE_SUPABASE=false`: Supabase client helper returns `null`; app stays in guest/local mode.
 - `VITE_ENABLE_AUTH=false`: no real signup, login, OTP, LINE Login, or Google Login can run.
 - `VITE_ENABLE_CLOUD_SYNC=false`: Guest Memory is not uploaded to cloud.
+- `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`: Supabase connection dry-run does local checks only and makes no network call by default.
 - `VITE_GUEST_SYNC_MODE=local_fixture`: Guest Sync uses no-network local fixture behavior.
 - `VITE_ENABLE_GUEST_SYNC_BACKEND=false`: backend sync boundary is disabled.
 - `VITE_ENABLE_LOCAL_GUEST_SYNC_HANDLER=false`: in-process guest sync handler is disabled unless explicitly testing `backend_test_ready`.
 - `VITE_PHONE_AUTH_MODE=local_mock`: Phone Auth uses local mock behavior.
 - `VITE_ENABLE_PHONE_AUTH=false`: no real phone auth or Supabase Auth call can run.
 - `VITE_ENABLE_PHONE_AUTH_LOCAL_MOCK=true`: demo OTP local mock is available for prototype testing.
+- `VITE_SUPABASE_AUTH_REDIRECT_URL=`: reserved for a future staging-safe Auth redirect URL.
+- `VITE_AUTH_STAGING_LABEL=local`: labels the current auth readiness context.
 - `VITE_LINE_AUTH_MODE=local_mock`: LINE Auth uses local mock behavior.
 - `VITE_ENABLE_LINE_AUTH=false`: no real LINE SDK, redirect, OAuth token, or provider connection can run.
 - `VITE_ENABLE_LINE_AUTH_LOCAL_MOCK=true`: LINE mock session is available for prototype testing.
@@ -93,3 +99,54 @@ M18 adds draft migration files under `supabase/`:
 - `supabase/policies/0001_kasethub_rls_policies.sql`
 
 Do not run these against production. Review them in a staging project, verify RLS with anon/authenticated users, and keep service-role keys out of all frontend ENV values.
+
+## M25 Staging Readiness
+
+M25 adds `.env.example`, `/app/supabase-readiness`, `docs/SUPABASE_STAGING_SETUP_GUIDE.md`, and `docs/SUPABASE_READINESS_AUDIT.md`.
+
+Use `.env.example` as the source of placeholder names only. The real `.env.local` must stay local to the developer or staging deployment environment and should start with:
+
+```bash
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_CLOUD_SYNC=false
+```
+
+Only the Supabase Project URL and anon public key are allowed in frontend Vite ENV. Never add a service-role key to any `VITE_` variable. `/app/supabase-readiness` is a local audit page only; it does not call Supabase, fetch schema, run migrations, enable auth, or write data.
+
+## M26 Connection Dry Run
+
+M26 adds `/app/supabase-connection` and `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`.
+
+With the default flag, the page checks only local config and never calls Supabase. If a future staging test sets both `VITE_ENABLE_SUPABASE=true` and `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true`, the only allowed probe is a public/read-only check. Missing schema should be reported as `schema_not_applied_yet`, not as an app failure. Auth, cloud sync, writes, uploads, and service-role keys remain forbidden.
+
+## M27 SQL Staging Checklist
+
+M27 adds `/app/supabase-sql-checklist`, `docs/SUPABASE_SQL_STAGING_EXECUTION_GUIDE.md`, and `docs/SUPABASE_MANUAL_VERIFICATION_PACK.md`.
+
+These artifacts help a human operator run the draft SQL later, but they do not need extra environment variables and do not connect to Supabase. The app must still work with no `.env.local`.
+
+Before any staging SQL execution:
+
+- Confirm `.env.local` contains only Project URL and anon key.
+- Confirm no service-role key appears in any `VITE_` variable.
+- Keep `VITE_ENABLE_AUTH=false`.
+- Keep `VITE_ENABLE_CLOUD_SYNC=false`.
+- Keep `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false` unless a public/read-only probe is explicitly being tested.
+- Run schema SQL first and RLS SQL second, manually, in the staging project only.
+
+## M28 Phone OTP Staging Plan
+
+M28 adds `/app/auth/phone-staging` and phone OTP staging docs. These do not send SMS and do not enable real auth.
+
+Keep defaults:
+
+```bash
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_PHONE_AUTH=false
+VITE_PHONE_AUTH_MODE=local_mock
+VITE_SUPABASE_AUTH_REDIRECT_URL=
+VITE_AUTH_STAGING_LABEL=local
+```
+
+Only a later controlled staging test should set a redirect URL and turn on phone auth flags. Service-role keys and SMS provider secrets must never be placed in frontend ENV.

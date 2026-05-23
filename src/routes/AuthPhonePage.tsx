@@ -1,4 +1,4 @@
-import { CheckCircle2, Lock, MessageSquareText, Phone, RotateCcw, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, ClipboardList, Lock, MessageSquareText, Phone, RotateCcw, ShieldCheck } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -80,6 +80,13 @@ export function AuthPhonePage() {
 
         <NoticeBox tone="warning" title="รหัสทดสอบคือ 123456">
           ยังไม่ส่ง OTP จริง ไม่มี SMS ไม่มี Supabase Auth และไม่มี network request ในเวอร์ชันนี้
+        </NoticeBox>
+
+        <NoticeBox tone="info" icon={ClipboardList} title="Real Phone OTP ต้องผ่าน staging checklist ก่อน">
+          ตอนนี้ยังเป็น local mock เท่านั้น การส่ง OTP จริงด้วย Supabase Auth ต้องตั้งค่า staging, SMS provider, redirect URL, rate limit และ session ownership ก่อน
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
+            เปิด Phone OTP staging checklist
+          </Link>
         </NoticeBox>
 
         <Card className="p-4">

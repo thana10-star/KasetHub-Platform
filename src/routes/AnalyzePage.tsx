@@ -5,8 +5,10 @@ import {
   Coins,
   Database,
   FileLock2,
+  Gauge,
   History,
   ImagePlus,
+  ListChecks,
   Loader2,
   Microscope,
   RefreshCw,
@@ -27,9 +29,11 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
+import { useImageCompression } from '@/hooks/useImageCompression';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { buildAIRequestPlan } from '@/services/ai/ai-request-planner';
 import { formatFileSize } from '@/services/image-analysis/image-upload-service';
+import { runImagePreflight } from '@/services/image-analysis/image-preflight-service';
 import { buildPlantImageAnalysisJobPreview } from '@/services/image-analysis/image-analysis-job-planner';
 import { analyzePlantImage, getAIProxyAdapterStatus } from '@/services/ai-proxy/ai-proxy-adapter';
 import { aiMockScenarioDescriptions, aiMockScenarioLabels } from '@/services/ai-proxy/ai-proxy-fixtures';
@@ -40,6 +44,7 @@ import type {
   AIPlantImageProxyResponse,
   AIProxyStatus,
 } from '@/services/ai-proxy/ai-proxy.types';
+import type { ImagePreflightResult } from '@/services/image-analysis/image-preflight.types';
 
 const analyzeScenarioOptions: AIMockScenario[] = [
   'success',
@@ -146,6 +151,148 @@ function ScenarioSelector({
       <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-xs leading-5 text-slate-600">
         {aiMockScenarioDescriptions[scenario]}
       </p>
+    </Card>
+  );
+}
+
+function PreflightCompressionPanel({
+  compression,
+  isPreflightLoading,
+  preflightResult,
+}: {
+  compression: ReturnType<typeof useImageCompression>;
+  isPreflightLoading: boolean;
+  preflightResult: ImagePreflightResult | null;
+}) {
+  if (!preflightResult && compression.status === 'idle' && !isPreflightLoading) {
+    return null;
+  }
+
+  const warningIssues = preflightResult?.issues.filter((issue) => issue.severity !== 'pass') ?? [];
+  const passCount = preflightResult?.issues.filter((issue) => issue.severity === 'pass').length ?? 0;
+  const readinessTone =
+    preflightResult?.readinessLevel === 'ready'
+      ? 'green'
+      : preflightResult?.readinessLevel === 'blocked'
+        ? 'rose'
+        : 'gold';
+
+  return (
+    <Card className="p-4">
+      <div className="flex gap-3">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+          <Gauge aria-hidden="true" className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-extrabold text-kaset-ink">ลดขนาดรูปก่อนวิเคราะห์</h2>
+            <Badge tone="green">local only</Badge>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            รูปยังไม่ถูกส่งออกจากเครื่องในเวอร์ชันนี้ ระบบตรวจคุณภาพและย่อรูปในเบราว์เซอร์เท่านั้น
+          </p>
+          <Link className="mt-2 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/image-preflight">
+            อ่านวิธีถ่ายรูปให้พร้อมวิเคราะห์
+          </Link>
+        </div>
+      </div>
+
+      {isPreflightLoading ? (
+        <div className="mt-4 rounded-lg bg-kaset-mist p-3 text-sm font-bold text-slate-600">
+          กำลังตรวจชนิดไฟล์ ขนาดภาพ และความพร้อมเบื้องต้น...
+        </div>
+      ) : null}
+
+      {preflightResult ? (
+        <div className="mt-4 grid gap-3">
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg bg-kaset-mist p-3">
+              <p className="text-xl font-extrabold text-kaset-deep">{preflightResult.readinessScore}</p>
+              <p className="text-[11px] font-bold text-slate-500">readiness</p>
+            </div>
+            <div className="rounded-lg bg-kaset-mist p-3">
+              <p className="text-sm font-extrabold text-kaset-deep">
+                {preflightResult.width && preflightResult.height ? `${preflightResult.width}×${preflightResult.height}` : 'ไม่ทราบ'}
+              </p>
+              <p className="text-[11px] font-bold text-slate-500">pixels</p>
+            </div>
+            <div className="rounded-lg bg-kaset-mist p-3">
+              <p className="text-xl font-extrabold text-kaset-deep">{passCount}</p>
+              <p className="text-[11px] font-bold text-slate-500">ผ่าน</p>
+            </div>
+          </div>
+          <Badge tone={readinessTone}>{preflightResult.readinessLabel}</Badge>
+          {warningIssues.length > 0 ? (
+            <div className="grid gap-2">
+              {warningIssues.map((issue) => (
+                <div
+                  className={
+                    issue.severity === 'error'
+                      ? 'rounded-lg bg-rose-50 p-3 text-sm leading-6 text-rose-900'
+                      : issue.severity === 'warning'
+                        ? 'rounded-lg bg-amber-50 p-3 text-sm leading-6 text-amber-900'
+                        : 'rounded-lg bg-sky-50 p-3 text-sm leading-6 text-sky-900'
+                  }
+                  key={`${issue.code}-${issue.title}`}
+                >
+                  <p className="font-extrabold">{issue.title}</p>
+                  <p>{issue.message}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div className="rounded-lg bg-kaset-mist p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <ListChecks aria-hidden="true" className="h-4 w-4 text-kaset-deep" />
+              <p className="text-sm font-extrabold text-kaset-ink">เช็กรูปก่อนกดวิเคราะห์</p>
+            </div>
+            <div className="grid gap-2">
+              {preflightResult.checklist.map((item) => (
+                <p className="text-xs font-bold leading-5 text-slate-600" key={item.id}>
+                  {item.label} — {item.tip}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mt-4 rounded-lg border border-kaset-deep/10 bg-white p-3">
+        {compression.status === 'compressing' ? (
+          <p className="text-sm font-bold leading-6 text-slate-600">กำลังลดขนาดรูปในเครื่อง...</p>
+        ) : null}
+        {compression.status === 'failed' ? (
+          <div className="text-sm leading-6 text-amber-900">
+            <p className="font-extrabold">ลดขนาดรูปไม่สำเร็จ</p>
+            <p>{compression.error?.message}</p>
+          </div>
+        ) : null}
+        {compression.result ? (
+          <div className="grid gap-3">
+            <img
+              alt="ตัวอย่างรูปที่ลดขนาดแล้ว"
+              className="h-32 w-full rounded-lg object-cover"
+              src={compression.result.previewUrl}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg bg-kaset-mist p-3 text-center">
+                <p className="text-lg font-extrabold text-kaset-deep">{formatFileSize(compression.result.originalSizeBytes)}</p>
+                <p className="text-[11px] font-bold text-slate-500">ขนาดเดิม</p>
+              </div>
+              <div className="rounded-lg bg-kaset-mist p-3 text-center">
+                <p className="text-lg font-extrabold text-kaset-deep">{formatFileSize(compression.result.optimizedSizeBytes)}</p>
+                <p className="text-[11px] font-bold text-slate-500">หลังย่อ</p>
+              </div>
+            </div>
+            <p className="rounded-lg bg-emerald-50 p-3 text-sm font-bold leading-6 text-emerald-900">
+              ลดลงประมาณ {compression.result.sizeReductionPercent}% · {compression.result.costReductionLabel}
+            </p>
+            <p className="text-xs leading-5 text-slate-500">
+              ขนาดภาพหลังย่อ {compression.result.optimizedWidth}×{compression.result.optimizedHeight}px · format {compression.result.outputFormat}
+            </p>
+          </div>
+        ) : null}
+      </div>
     </Card>
   );
 }
@@ -405,12 +552,16 @@ function FutureBackendFlowPanel({
 
 export function AnalyzePage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const preflightRunRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [savedResultId, setSavedResultId] = useState('');
   const [scenario, setScenario] = useState<AIMockScenario>('success');
   const [proxyResponse, setProxyResponse] = useState<AIPlantImageProxyResponse | null>(null);
+  const [preflightResult, setPreflightResult] = useState<ImagePreflightResult | null>(null);
+  const [isPreflightLoading, setIsPreflightLoading] = useState(false);
   const { addFarmRecord, saveItem, state } = useGuestMemory();
   const { summary } = useAICredits();
+  const imageCompression = useImageCompression();
   const { removeImage, retry, selectedImage, selectFile, startAnalysis, status, warnings } = useImageUpload();
   const recentAnalysisItems = state.savedItems.filter((item) => item.itemType === 'analysis_result').slice(0, 3);
   const hasImage = Boolean(selectedImage);
@@ -453,13 +604,13 @@ export function AnalyzePage() {
     setProxyResponse(
       analyzePlantImage({
         fileName: selectedImage.fileName,
-        fileSize: selectedImage.fileSize,
+        fileSize: imageCompression.result?.optimizedSizeBytes ?? selectedImage.fileSize,
         fileType: selectedImage.fileType,
         creditSummary: summary,
         scenario,
       }),
     );
-  }, [scenario, selectedImage, status, summary]);
+  }, [imageCompression.result?.optimizedSizeBytes, scenario, selectedImage, status, summary]);
 
   function openFilePicker() {
     inputRef.current?.click();
@@ -468,12 +619,44 @@ export function AnalyzePage() {
   function handleSelectFile(file: File | undefined) {
     setProxyResponse(null);
     setSavedResultId('');
+    setPreflightResult(null);
+    setIsPreflightLoading(false);
+    imageCompression.reset();
+
+    if (file) {
+      const runId = preflightRunRef.current + 1;
+      preflightRunRef.current = runId;
+      setIsPreflightLoading(true);
+
+      void runImagePreflight(file)
+        .then((result) => {
+          if (preflightRunRef.current === runId) {
+            setPreflightResult(result);
+          }
+        })
+        .finally(() => {
+          if (preflightRunRef.current === runId) {
+            setIsPreflightLoading(false);
+          }
+        });
+      void imageCompression.compress(file, {
+        maxWidth: 1280,
+        maxHeight: 1280,
+        quality: 0.78,
+        outputFormat: 'image/jpeg',
+      });
+    }
+
     selectFile(file);
   }
 
   function handleRemoveImage() {
     setProxyResponse(null);
     setSavedResultId('');
+    preflightRunRef.current += 1;
+    setPreflightResult(null);
+    setIsPreflightLoading(false);
+    imageCompression.reset();
     removeImage();
   }
 
@@ -509,6 +692,8 @@ export function AnalyzePage() {
         aiProxyResponsePreview: proxyResponse,
         imageName: selectedImage.fileName,
         imageSize: selectedImage.fileSize,
+        optimizedImageSize: imageCompression.result?.optimizedSizeBytes,
+        imagePreflightScore: preflightResult?.readinessScore,
         thumbnailTone: 'leaf-scan',
         savedToFarm: true,
       },
@@ -523,6 +708,9 @@ export function AnalyzePage() {
       metadata: {
         aiProxyResponsePreview: proxyResponse,
         imageName: selectedImage.fileName,
+        imageSize: selectedImage.fileSize,
+        optimizedImageSize: imageCompression.result?.optimizedSizeBytes,
+        imagePreflightScore: preflightResult?.readinessScore,
         thumbnailTone: 'leaf-scan',
         savedToFarm: true,
       },
@@ -557,6 +745,18 @@ export function AnalyzePage() {
         <NoticeBox tone="success" title="รูปยังอยู่ในเครื่องนี้">
           เวอร์ชันนี้แสดงตัวอย่างรูปในเครื่องเท่านั้น ยังไม่อัปโหลดรูปไป Supabase หรือส่งเข้า AI จริง
         </NoticeBox>
+
+        <Link to="/app/image-preflight">
+          <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep shadow-card ring-1 ring-kaset-deep/10">
+            ลดขนาดรูปก่อนวิเคราะห์: ดูวิธีเตรียมรูป
+          </span>
+        </Link>
+
+        <Link to="/app/my-farm">
+          <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-kaset-mint px-4 text-sm font-extrabold text-kaset-deep">
+            กลับไป My Farm Hub
+          </span>
+        </Link>
 
         <ScenarioSelector scenario={scenario} setScenario={setScenario} />
 
@@ -639,6 +839,12 @@ export function AnalyzePage() {
             </button>
           )}
         </Card>
+
+        <PreflightCompressionPanel
+          compression={imageCompression}
+          isPreflightLoading={isPreflightLoading}
+          preflightResult={preflightResult}
+        />
 
         <Card className="border-amber-200 bg-amber-50 p-4">
           <div className="flex gap-3">

@@ -5,6 +5,7 @@ export type PlantImageModerationStatus = 'not_started' | 'pending_future' | 'app
 export type PlantAnalysisWarningCode =
   | 'unsupported_file'
   | 'file_too_large'
+  | 'file_very_large'
   | 'image_blurry'
   | 'no_plant_detected'
   | 'low_confidence'

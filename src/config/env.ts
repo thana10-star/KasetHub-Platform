@@ -7,15 +7,20 @@ export type PublicRuntimeEnv = {
   enableSupabase: boolean;
   enableAuth: boolean;
   enableCloudSync: boolean;
+  enableSupabaseDryRunNetworkCheck: boolean;
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
   enableLocalAIProxyHandler: boolean;
   guestSyncMode: string;
   enableGuestSyncBackend: boolean;
+  enableGuestSyncEdge: boolean;
+  guestSyncEdgeMode: string;
   enableLocalGuestSyncHandler: boolean;
   phoneAuthMode: string;
   enablePhoneAuth: boolean;
   enablePhoneAuthLocalMock: boolean;
+  supabaseAuthRedirectUrl: string;
+  authStagingLabel: string;
   lineAuthMode: string;
   enableLineAuth: boolean;
   enableLineAuthLocalMock: boolean;
@@ -49,15 +54,20 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   enableSupabase: readBooleanEnv('VITE_ENABLE_SUPABASE', false),
   enableAuth: readBooleanEnv('VITE_ENABLE_AUTH', false),
   enableCloudSync: readBooleanEnv('VITE_ENABLE_CLOUD_SYNC', false),
+  enableSupabaseDryRunNetworkCheck: readBooleanEnv('VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK', false),
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),
   enableLocalAIProxyHandler: readBooleanEnv('VITE_ENABLE_LOCAL_AI_PROXY_HANDLER', false),
   guestSyncMode: readStringEnv('VITE_GUEST_SYNC_MODE') || 'local_fixture',
   enableGuestSyncBackend: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_BACKEND', false),
+  enableGuestSyncEdge: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_EDGE', false),
+  guestSyncEdgeMode: readStringEnv('VITE_GUEST_SYNC_EDGE_MODE') || 'disabled',
   enableLocalGuestSyncHandler: readBooleanEnv('VITE_ENABLE_LOCAL_GUEST_SYNC_HANDLER', false),
   phoneAuthMode: readStringEnv('VITE_PHONE_AUTH_MODE') || 'local_mock',
   enablePhoneAuth: readBooleanEnv('VITE_ENABLE_PHONE_AUTH', false),
   enablePhoneAuthLocalMock: readBooleanEnv('VITE_ENABLE_PHONE_AUTH_LOCAL_MOCK', true),
+  supabaseAuthRedirectUrl: readStringEnv('VITE_SUPABASE_AUTH_REDIRECT_URL'),
+  authStagingLabel: readStringEnv('VITE_AUTH_STAGING_LABEL') || 'local',
   lineAuthMode: readStringEnv('VITE_LINE_AUTH_MODE') || 'local_mock',
   enableLineAuth: readBooleanEnv('VITE_ENABLE_LINE_AUTH', false),
   enableLineAuthLocalMock: readBooleanEnv('VITE_ENABLE_LINE_AUTH_LOCAL_MOCK', true),

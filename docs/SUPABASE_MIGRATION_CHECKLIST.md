@@ -62,3 +62,39 @@ This checklist is for the future staging migration. M18 only creates draft SQL f
 - Validate moderation queue filters.
 - Validate plant analysis job status queries.
 - Validate share source/ref queries.
+
+## M25 Staging Readiness Gate
+
+Before the first staging run:
+
+- Open `/app/supabase-readiness` and review blockers, warnings, and next safe steps.
+- Confirm `.env.example` contains placeholders only.
+- Confirm `.env.local` is not committed.
+- Confirm only Project URL and anon key are used in frontend ENV.
+- Confirm `VITE_ENABLE_AUTH=false` and `VITE_ENABLE_CLOUD_SYNC=false` for the first staging pass.
+- Confirm `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false` unless explicitly testing a public/read-only probe.
+- Confirm service-role key is available only to future backend/Edge Function secret storage, not the browser.
+- Read `docs/SUPABASE_STAGING_SETUP_GUIDE.md` and `docs/SUPABASE_READINESS_AUDIT.md` before running SQL.
+- Keep production untouched until staging RLS tests pass.
+
+## M26 Connection Dry Run Gate
+
+Before running SQL, `/app/supabase-connection` may show `schema applied: unknown/not checked`; that is expected. After SQL/RLS is applied on staging, a future public-read probe can be enabled to check only a public/read-only target. If the probe returns `schema_not_applied_yet`, review the migration state instead of treating the frontend as broken. The probe must never write data or query private tables.
+
+## M27 Manual SQL Execution Pack
+
+Before opening the Supabase SQL editor, review:
+
+- `docs/SUPABASE_SQL_STAGING_EXECUTION_GUIDE.md`
+- `docs/SUPABASE_MANUAL_VERIFICATION_PACK.md`
+- `/app/supabase-sql-checklist`
+
+Execution order for staging:
+
+1. Confirm the selected Supabase project is staging, not production.
+2. Run `supabase/migrations/0001_kasethub_core_schema.sql`.
+3. Run `supabase/policies/0001_kasethub_rls_policies.sql`.
+4. Verify tables, triggers, indexes, constraints, and RLS manually.
+5. Capture dashboard screenshots for the staging execution record.
+
+Stop if project identity, SQL file version, service-role handling, or rollback approach is unclear.

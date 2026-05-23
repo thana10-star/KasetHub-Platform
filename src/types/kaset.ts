@@ -3,14 +3,24 @@ import type { CropPriceItem } from '@/services/crop-prices/crop-price.types';
 
 export type AppRoute =
   | '/app'
+  | '/app/admin'
+  | '/app/supabase-readiness'
+  | '/app/supabase-connection'
+  | '/app/supabase-sql-checklist'
   | '/app/youtube'
   | '/app/ai'
   | '/app/ai-proxy-status'
   | '/app/ai-credits'
   | '/app/qa'
+  | '/app/mvp-snapshot'
+  | '/app/next-phase'
+  | '/app/weather'
+  | '/app/farm-area'
+  | '/app/farm-area-guide'
   | '/app/analyze'
   | '/app/analysis-history'
   | '/app/image-privacy'
+  | '/app/image-preflight'
   | '/app/community'
   | '/app/community-rules'
   | '/app/moderation-center'
@@ -19,18 +29,22 @@ export type AppRoute =
   | '/app/articles'
   | '/app/content-admin-preview'
   | '/app/notifications'
+  | '/app/notification-settings'
   | '/app/profile'
   | '/app/account-preview'
+  | '/app/guest-sync-edge'
   | '/app/guest-sync-status'
   | '/app/auth'
   | '/app/auth/status'
   | '/app/auth/linking'
   | '/app/auth/phone'
+  | '/app/auth/phone-staging'
   | '/app/auth/line'
   | '/app/auth/google'
   | '/app/auth/sync-preview'
   | '/app/memory'
   | '/app/my-farm'
+  | '/app/my-farm/settings'
   | '/app/saved-articles'
   | '/app/saved-videos';
 
@@ -100,7 +114,7 @@ export type NotificationItem = {
   title: string;
   body: string;
   time: string;
-  type: 'ai' | 'price' | 'community' | 'content';
+  type: 'ai' | 'price' | 'community' | 'content' | 'weather';
   unread?: boolean;
 };
 

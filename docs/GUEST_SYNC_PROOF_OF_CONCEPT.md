@@ -106,3 +106,40 @@ A real implementation should move sync handling to a backend API route or Supaba
 - return the same response shape as the M16 mock handler
 - preserve local data on client failure
 - retry safely without creating duplicates
+## M25 Supabase Staging Readiness Note
+
+Guest Sync remains local/dry-run during M25. `/app/supabase-readiness` treats Guest Sync as ready for planning only when it confirms:
+
+- no backend writes are enabled
+- no network calls are made
+- no service-role key is available in the frontend
+- `VITE_GUEST_SYNC_MODE=local_fixture`
+- `VITE_ENABLE_GUEST_SYNC_BACKEND=false`
+
+Do not enable cloud sync in staging until auth ownership, consent, merge rules, RLS, idempotency, rollback, and audit logging have been tested.
+
+## M28 Phone OTP Staging Gate
+
+M28 adds `/app/auth/phone-staging` and a local readiness audit for future Supabase Auth phone OTP.
+
+Guest Sync must stay local/dry-run until:
+
+- real phone OTP succeeds on staging
+- Supabase session ownership is verified with `auth.uid()`
+- RLS owner policies pass for user-owned tables
+- consent is recorded before upload
+- rollback and retry behavior are tested
+- SMS cost/rate limits are configured
+
+The M16 dry run remains useful because it shows what would sync without writing anything.
+
+## M29 Edge Function Staging Plan
+
+M29 keeps the M16 dry run unchanged and adds the future Edge Function contract for `guest-memory-sync`.
+
+- `/app/guest-sync-edge` shows contract readiness, idempotency rules, service-role boundary, and staging blockers.
+- `/app/auth/sync-preview` now labels the current dry run as local only and previews the future Edge Function path.
+- `VITE_ENABLE_GUEST_SYNC_EDGE=false` and `VITE_GUEST_SYNC_EDGE_MODE=disabled` remain safe defaults.
+- No Edge Function is deployed or called in M29.
+
+Real sync must still wait for staging auth, SQL/RLS verification, idempotent merge tests, audit logging, and rollback checks.

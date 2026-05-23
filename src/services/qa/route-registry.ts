@@ -1,0 +1,108 @@
+import type { MvpRouteGroup } from '@/services/qa/mvp-readiness.types';
+
+export const mvpRouteGroups: MvpRouteGroup[] = [
+  {
+    id: 'core_app',
+    label: 'Core app',
+    description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
+    routes: [
+      { route: '/app', label: 'App home', milestone: 'M01-M15', notes: 'หน้าแรกของแอปแบบ mobile-first', manualCheckPath: '/app' },
+      { route: '/app/profile', label: 'Profile', milestone: 'M02-M29', notes: 'โปรไฟล์ตัวอย่างและจุดเข้า route สำคัญ', manualCheckPath: '/app/profile' },
+      { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
+      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34', notes: 'ศูนย์รวมข้อมูลฟาร์ม local จาก Guest Memory, crop watch, weather, และ farm area', manualCheckPath: '/app/my-farm' },
+      { route: '/app/my-farm/settings', label: 'My Farm settings', milestone: 'M34', notes: 'สถานะข้อมูล local และแผน cloud sync ในอนาคต', manualCheckPath: '/app/my-farm/settings' },
+      { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32', notes: 'สภาพอากาศเกษตร mock/local ไม่มี weather API หรือ geolocation จริง', manualCheckPath: '/app/weather' },
+      { route: '/app/farm-area', label: 'Farm area planner', milestone: 'M33', notes: 'คำนวณพื้นที่แปลงและแปลงหน่วยที่ดินไทยแบบ local-only', manualCheckPath: '/app/farm-area' },
+      { route: '/app/farm-area-guide', label: 'Farm area guide', milestone: 'M33', notes: 'คู่มือวัดพื้นที่ด้วยสายวัด สูตรพื้นที่ และคำเตือนเรื่องรังวัด', manualCheckPath: '/app/farm-area-guide' },
+      { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery', manualCheckPath: '/app/notifications' },
+      { route: '/app/notification-settings', label: 'Notification settings', milestone: 'M35', notes: 'ตั้งค่า preference แจ้งเตือนแบบ localStorage เท่านั้น', manualCheckPath: '/app/notification-settings' },
+      { route: '/app/saved-articles', label: 'Saved articles', milestone: 'M02/M04', notes: 'รายการบันทึกในเครื่อง', manualCheckPath: '/app/saved-articles' },
+      { route: '/app/saved-videos', label: 'Saved videos', milestone: 'M03/M04', notes: 'วิดีโอที่บันทึกใน Guest Memory', manualCheckPath: '/app/saved-videos' },
+    ],
+  },
+  {
+    id: 'content_youtube',
+    label: 'Content / YouTube',
+    description: 'บทความ วิดีโอ YouTube และตัวอย่างหลังบ้านคอนเทนต์',
+    routes: [
+      { route: '/app/youtube', label: 'YouTube hub', milestone: 'M03/M22.5', notes: 'ใช้ fixture และ owner channel URL config', manualCheckPath: '/app/youtube' },
+      { route: '/app/youtube/:videoId', label: 'YouTube video detail', milestone: 'M03', notes: 'หน้ารายละเอียดวิดีโอ mock', manualCheckPath: '/app/youtube/sample-video-id' },
+      { route: '/app/articles', label: 'Articles', milestone: 'M01/M20', notes: 'บทความตัวอย่างและ save action', manualCheckPath: '/app/articles' },
+      { route: '/app/articles/:articleId', label: 'Article detail', milestone: 'M20', notes: 'หน้ารายละเอียดบทความตัวอย่าง', manualCheckPath: '/app/articles/article-001' },
+      { route: '/app/content-admin-preview', label: 'Content admin preview', milestone: 'M20/M22.5', notes: 'หลังบ้านคอนเทนต์ mock ไม่มี publish จริง', manualCheckPath: '/app/content-admin-preview' },
+    ],
+  },
+  {
+    id: 'ai_plant_analysis',
+    label: 'AI / Plant analysis',
+    description: 'AI ผู้ช่วยเกษตร เครดิต mock และวิเคราะห์ภาพพืชแบบ local fixture',
+    routes: [
+      { route: '/app/ai', label: 'AI assistant', milestone: 'M08-M14', notes: 'ถามตอบผ่าน mock proxy fixture', manualCheckPath: '/app/ai' },
+      { route: '/app/ai-credits', label: 'AI credits', milestone: 'M08', notes: 'เครดิตใน localStorage ไม่มีระบบชำระเงินจริง', manualCheckPath: '/app/ai-credits' },
+      { route: '/app/ai-proxy-status', label: 'AI proxy status', milestone: 'M09-M14', notes: 'สถานะ adapter/backend boundary แบบไม่เรียก provider จริง', manualCheckPath: '/app/ai-proxy-status' },
+      { route: '/app/analyze', label: 'Plant image analysis', milestone: 'M10-M14', notes: 'พรีวิวภาพในเครื่อง ไม่มี upload จริง', manualCheckPath: '/app/analyze' },
+      { route: '/app/analysis-history', label: 'Analysis history', milestone: 'M10', notes: 'ประวัติจาก Guest Memory', manualCheckPath: '/app/analysis-history' },
+      { route: '/app/image-privacy', label: 'Image privacy', milestone: 'M12/M15', notes: 'นโยบายภาพและ future storage', manualCheckPath: '/app/image-privacy' },
+      { route: '/app/image-preflight', label: 'Image preflight', milestone: 'M31', notes: 'ลดขนาดและตรวจคุณภาพรูปในเครื่อง ไม่มี upload/AI จริง', manualCheckPath: '/app/image-preflight' },
+    ],
+  },
+  {
+    id: 'prices_crop_watch',
+    label: 'Prices / Crop watch',
+    description: 'ราคาอ้างอิงตัวอย่าง พืชที่ติดตาม และ alert preference ในเครื่อง',
+    routes: [
+      { route: '/app/prices', label: 'Crop prices', milestone: 'M21/M22', notes: 'ราคาอ้างอิง demo/sample ไม่มี API ราคา', manualCheckPath: '/app/prices' },
+      { route: '/app/prices/:priceId', label: 'Price detail', milestone: 'M21/M22', notes: 'รายละเอียดราคาตัวอย่างและคำเตือน', manualCheckPath: '/app/prices/price-rice-jasmine-105-yasothon-demo' },
+      { route: '/app/crop-watch', label: 'Crop watch', milestone: 'M22', notes: 'ติดตามพืชและตั้ง alert preference ใน localStorage', manualCheckPath: '/app/crop-watch' },
+    ],
+  },
+  {
+    id: 'community_moderation',
+    label: 'Community / Moderation',
+    description: 'ชุมชน กติกา report/hide ในเครื่อง และ moderation center mock',
+    routes: [
+      { route: '/app/community', label: 'Community', milestone: 'M01/M23', notes: 'โพสต์ตัวอย่าง report/hide local-only', manualCheckPath: '/app/community' },
+      { route: '/app/community-rules', label: 'Community rules', milestone: 'M23', notes: 'กติกาและ safety policy สำหรับชุมชน', manualCheckPath: '/app/community-rules' },
+      { route: '/app/moderation-center', label: 'Moderation center', milestone: 'M23', notes: 'ศูนย์รายงาน mock/local ไม่มี admin action จริง', manualCheckPath: '/app/moderation-center' },
+    ],
+  },
+  {
+    id: 'auth_account_sync',
+    label: 'Auth / Account / Sync',
+    description: 'auth mock, account preview, sync preview และแผน Edge Function',
+    routes: [
+      { route: '/app/auth', label: 'Auth entry', milestone: 'M07', notes: 'สมัครภายหลังแบบ mock', manualCheckPath: '/app/auth' },
+      { route: '/app/auth/status', label: 'Auth status', milestone: 'M17-M19', notes: 'สถานะบัญชี mock', manualCheckPath: '/app/auth/status' },
+      { route: '/app/auth/linking', label: 'Account linking', milestone: 'M19', notes: 'กติกาเชื่อม Phone + LINE แบบ local', manualCheckPath: '/app/auth/linking' },
+      { route: '/app/auth/phone', label: 'Phone auth mock', milestone: 'M17/M28', notes: 'OTP mock ไม่มี SMS จริง', manualCheckPath: '/app/auth/phone' },
+      { route: '/app/auth/phone-staging', label: 'Phone OTP staging plan', milestone: 'M28', notes: 'checklist staging ยังไม่เปิด auth จริง', manualCheckPath: '/app/auth/phone-staging' },
+      { route: '/app/auth/line', label: 'LINE auth mock', milestone: 'M19', notes: 'ไม่มี LINE Login SDK/redirect จริง', manualCheckPath: '/app/auth/line' },
+      { route: '/app/auth/google', label: 'Google auth mock', milestone: 'M07', notes: 'ไม่มี OAuth จริง', manualCheckPath: '/app/auth/google' },
+      { route: '/app/auth/sync-preview', label: 'Sync preview', milestone: 'M07/M16/M29', notes: 'dry-run payload local-only', manualCheckPath: '/app/auth/sync-preview' },
+      { route: '/app/account-preview', label: 'Account preview', milestone: 'M05-M29', notes: 'สถานะบัญชีและ backend readiness', manualCheckPath: '/app/account-preview' },
+      { route: '/app/guest-sync-status', label: 'Guest sync status', milestone: 'M16/M29', notes: 'adapter status ไม่มี cloud sync จริง', manualCheckPath: '/app/guest-sync-status' },
+      { route: '/app/guest-sync-edge', label: 'Guest Sync Edge plan', milestone: 'M29', notes: 'contract/readiness ไม่มี endpoint call', manualCheckPath: '/app/guest-sync-edge' },
+    ],
+  },
+  {
+    id: 'supabase_staging',
+    label: 'Supabase / Staging',
+    description: 'readiness audit, connection dry-run boundary และ SQL checklist',
+    routes: [
+      { route: '/app/supabase-readiness', label: 'Supabase readiness', milestone: 'M25-M29', notes: 'audit local-only ไม่มี connection', manualCheckPath: '/app/supabase-readiness' },
+      { route: '/app/supabase-connection', label: 'Supabase connection dry run', milestone: 'M26-M29', notes: 'network check ปิดโดยค่าเริ่มต้น', manualCheckPath: '/app/supabase-connection' },
+      { route: '/app/supabase-sql-checklist', label: 'SQL staging checklist', milestone: 'M27', notes: 'manual verification pack ยังไม่รัน SQL จริง', manualCheckPath: '/app/supabase-sql-checklist' },
+    ],
+  },
+  {
+    id: 'admin_qa',
+    label: 'Admin / QA',
+    description: 'Admin Dashboard, Visual QA และ Internal MVP Snapshot',
+    routes: [
+      { route: '/app/admin', label: 'Admin dashboard', milestone: 'M24-M30', notes: 'dashboard mock/local ไม่มี admin auth', manualCheckPath: '/app/admin' },
+      { route: '/app/qa', label: 'QA page', milestone: 'M15/M30', notes: 'visual QA และ route coverage', manualCheckPath: '/app/qa' },
+      { route: '/app/mvp-snapshot', label: 'Internal MVP snapshot', milestone: 'M30', notes: 'สรุป prototype และ production blockers', manualCheckPath: '/app/mvp-snapshot' },
+      { route: '/app/next-phase', label: 'Next phase decision', milestone: 'M36', notes: 'แผน branch/staging และลำดับ real backend phase แบบ planning only', manualCheckPath: '/app/next-phase' },
+    ],
+  },
+];

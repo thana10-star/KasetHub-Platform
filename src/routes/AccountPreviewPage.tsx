@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { getGuestSyncAdapterStatus } from '@/services/backend/guest-sync-adapter';
+import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { createGuestToCloudSyncPlan } from '@/services/backend/guest-to-cloud-sync-planner';
 import { getAccountStatus } from '@/services/account/account-status-service';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
@@ -48,6 +49,7 @@ export function AccountPreviewPage() {
   const accountStatus = getAccountStatus(state);
   const supabaseStatus = accountStatus.supabase;
   const guestSyncStatus = getGuestSyncAdapterStatus();
+  const guestSyncEdge = runGuestSyncStagingReadiness();
 
   return (
     <div>
@@ -79,6 +81,24 @@ export function AccountPreviewPage() {
 
         <NoticeBox tone="info" title="SQL schema draft ready">
           M18 เตรียมร่าง SQL migration และ RLS policy แล้ว แต่ยังไม่ได้เชื่อมต่อ Supabase จริง และยังไม่ได้รัน migration
+        </NoticeBox>
+
+        <NoticeBox tone="warning" title="Supabase staging readiness">
+          ยังไม่ได้เชื่อมต่อ Supabase จริง ห้ามใส่ service-role key ใน frontend และต้องทดสอบบน staging ก่อน production
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-readiness">
+              เปิด readiness checklist
+            </Link>
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-connection">
+              เปิด connection dry run
+            </Link>
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
+              เปิด Phone OTP staging checklist
+            </Link>
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/guest-sync-edge">
+              เปิด Guest Sync Edge plan
+            </Link>
+          </div>
         </NoticeBox>
 
         {accountStatus.phoneMockSession ? (
@@ -189,6 +209,9 @@ export function AccountPreviewPage() {
                 backend flag: {guestSyncStatus.backendSyncEnabled ? 'เปิด' : 'ปิด'} · local handler:{' '}
                 {guestSyncStatus.localHandlerEnabled ? 'เปิด' : 'ปิด'} · service role: ไม่มีใน frontend
               </p>
+              <p className="mt-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+                Edge Function plan: {guestSyncEdge.endpointName} · {guestSyncEdge.levelLabel} · ยังไม่เรียก endpoint จริง
+              </p>
               <div className="mt-4 grid gap-2">
                 <Link to="/app/auth/sync-preview">
                   <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
@@ -198,6 +221,11 @@ export function AccountPreviewPage() {
                 <Link to="/app/guest-sync-status">
                   <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-kaset-mint px-4 text-sm font-bold text-kaset-deep transition hover:bg-emerald-100">
                     ดูสถานะ Guest Sync
+                  </span>
+                </Link>
+                <Link to="/app/guest-sync-edge">
+                  <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-4 text-sm font-bold text-kaset-deep ring-1 ring-kaset-deep/10 transition hover:bg-kaset-mist">
+                    ดู Guest Sync Edge plan
                   </span>
                 </Link>
               </div>

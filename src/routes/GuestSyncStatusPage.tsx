@@ -1,5 +1,6 @@
 import { CloudUpload, Database, KeyRound, Phone, PlayCircle, ShieldCheck, Smartphone, UsersRound } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
@@ -9,6 +10,7 @@ import {
   getGuestSyncAdapterStatus,
   runGuestMemorySyncDryRun,
 } from '@/services/backend/guest-sync-adapter';
+import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { buildGuestSyncPayloadPreview } from '@/services/backend/guest-sync-payload-builder';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import type {
@@ -53,6 +55,7 @@ export function GuestSyncStatusPage() {
   const { state } = useGuestMemory();
   const [response, setResponse] = useState<MockGuestSyncResponse | null>(null);
   const syncStatus = getGuestSyncAdapterStatus();
+  const edgeReadiness = useMemo(() => runGuestSyncStagingReadiness(), []);
   const payloadPreview = useMemo(
     () =>
       buildGuestSyncPayloadPreview(
@@ -140,6 +143,31 @@ export function GuestSyncStatusPage() {
         <NoticeBox tone="success" title="กฎความปลอดภัยของข้อมูล">
           Local Guest Memory จะไม่ถูกลบหลัง sync failure และในระบบจริงควร mark ว่าซิงก์แล้วหลัง backend ยืนยัน success เท่านั้น
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <CloudUpload aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">Guest Sync Edge Function plan</h2>
+                <StatusPill tone={edgeReadiness.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                  {edgeReadiness.levelLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                เตรียม contract สำหรับ POST /functions/v1/{edgeReadiness.endpointName} แต่ยังไม่ deploy ไม่เรียก network และยังไม่เปิด cloud sync
+              </p>
+              <p className="mt-2 text-xs font-bold leading-5 text-slate-500">
+                edge flag: {edgeReadiness.flags.enableGuestSyncEdge ? 'เปิด' : 'ปิด'} · mode: {edgeReadiness.flags.guestSyncEdgeMode}
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/guest-sync-edge">
+                เปิด Edge Function staging plan
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <h2 className="font-extrabold text-kaset-ink">รองรับใน proof of concept</h2>

@@ -262,6 +262,90 @@ RLS notes: Public can read active rules. Admin/editor roles can manage draft and
 
 Admin/moderation notes: Rule changes should be versioned so reports can reference the rule text active at the time of the report.
 
+## `admin_roles` Future
+
+Purpose: Role assignments for owner, admin, editor, moderator, expert reviewer, and support users.
+
+Key columns: `id uuid`, `user_id`, `role`, `scope`, `status`, `granted_by`, `granted_at`, `revoked_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `role`, `status`, `scope`.
+
+RLS notes: Owner/admin role management must be backend-owned. Users should not be able to grant themselves roles from the client.
+
+Admin/moderation notes: Role changes must create audit log rows and should support emergency revoke.
+
+## `admin_audit_logs` Future
+
+Purpose: Append-only record of admin, editor, moderator, support, and expert reviewer actions.
+
+Key columns: `id uuid`, `actor_user_id`, `actor_role`, `module`, `action`, `target_type`, `target_id`, `reason`, `status`, `created_at`, `metadata jsonb`.
+
+Indexes: `actor_user_id`, `actor_role`, `module`, `target_type`, `target_id`, `created_at desc`.
+
+RLS notes: Audit logs are admin/owner read only. Inserts should be backend-owned and append-only.
+
+Admin/moderation notes: Do not delete audit logs for corrections. Add reversal/correction records instead.
+
+## `moderation_queue` Future
+
+Purpose: Unified queue for community reports, scam/fake sale flags, chemical/pesticide risk, dangerous advice, and personal-data exposure.
+
+Key columns: `id uuid`, `source_report_id nullable`, `target_type`, `target_id`, `reason`, `priority`, `status`, `assigned_to nullable`, `assigned_role`, `recommended_action`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `status`, `priority`, `assigned_to`, `assigned_role`, `reason`, `created_at desc`.
+
+RLS notes: Queue internals should be visible only to moderator/admin/expert roles. Public feeds should only read final visible content state.
+
+Admin/moderation notes: This can eventually replace or merge with the earlier `moderator_queue` draft name after schema review.
+
+## `expert_review_requests` Future
+
+Purpose: Escalations for plant disease, chemical, pesticide, fertilizer, crop price, and other high-risk agriculture guidance.
+
+Key columns: `id uuid`, `request_type`, `target_type`, `target_id`, `requested_by`, `assigned_expert_id nullable`, `status`, `risk_summary`, `expert_notes`, `created_at`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `request_type`, `status`, `assigned_expert_id`, `target_type`, `target_id`, `created_at desc`.
+
+RLS notes: Expert review requests are role-gated. Users may see safe summaries only when product policy allows.
+
+Admin/moderation notes: Use for AI safety, plant analysis escalation, crop price validation, and dangerous community advice.
+
+## `content_review_tasks` Future
+
+Purpose: Editorial review tasks for articles, video import outlines, safety notes, and publish readiness.
+
+Key columns: `id uuid`, `content_id`, `content_type`, `status`, `assigned_to nullable`, `review_stage`, `due_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `content_id`, `status`, `assigned_to`, `review_stage`, `created_at desc`.
+
+RLS notes: Editors/admins can read and update assigned tasks through backend policies. Public users cannot read review tasks.
+
+Admin/moderation notes: Publish actions should require a completed task and create audit log rows.
+
+## `crop_price_review_tasks` Future
+
+Purpose: Review tasks for price sources, snapshots, community price reports, stale-data flags, and correction/rollback decisions.
+
+Key columns: `id uuid`, `source_id nullable`, `snapshot_id nullable`, `community_report_id nullable`, `status`, `assigned_to nullable`, `freshness_status`, `review_notes`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `source_id`, `snapshot_id`, `community_report_id`, `status`, `freshness_status`, `created_at desc`.
+
+RLS notes: Price review tasks are admin/expert only. Public reads should only use approved snapshots.
+
+Admin/moderation notes: Never let client-only price rows drive production alerts or AI price explanations.
+
+## `ai_safety_review_logs` Future
+
+Purpose: Review logs for AI questions, risky prompts, blocked responses, plant-analysis escalation, and price explanation safety.
+
+Key columns: `id uuid`, `ai_request_id nullable`, `request_type`, `risk_type`, `status`, `reviewer_id nullable`, `reviewer_role`, `decision`, `created_at`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `ai_request_id`, `request_type`, `risk_type`, `status`, `reviewer_id`, `created_at desc`.
+
+RLS notes: AI safety logs may contain sensitive user content and should be tightly role-gated with retention/redaction policy.
+
+Admin/moderation notes: Logs should cite source labels/dates for price explanations and preserve safety decisions for audit.
+
 ## `articles`
 
 Purpose: Blog/news content.
@@ -358,6 +442,150 @@ RLS notes: Users can create and read their own reports. Public reads only after 
 
 Admin/moderation notes: Community reports must stay clearly separate from official data and should not drive AI or alerts until reviewed.
 
+## `weather_locations` Future
+
+Purpose: User-selectable weather locations and source mapping for province/district-level forecast display.
+
+Key columns: `id uuid`, `location_key`, `label`, `province`, `district nullable`, `region`, `latitude nullable`, `longitude nullable`, `source_location_ref nullable`, `status`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `location_key`, `province`, `district`, `region`, `status`.
+
+RLS notes: Public can read active coarse locations. Admin/import jobs manage source mapping. Precise user geolocation should not be stored here.
+
+Admin/moderation notes: Keep location privacy guidance separate from provider source mapping and support manual selection first.
+
+## `weather_forecast_snapshots` Future
+
+Purpose: Cached forecast snapshots from official/provider sources before display, AI explanation, or alert evaluation.
+
+Key columns: `id uuid`, `location_id`, `source_key`, `source_label`, `forecast_date`, `forecast_hour nullable`, `temperature_c`, `rain_chance_percent`, `rain_amount_mm nullable`, `humidity_percent`, `wind_kph`, `uv_index nullable`, `risk_labels text[]`, `source_published_at nullable`, `imported_at`, `freshness_status`, `disclaimer`, `metadata jsonb`.
+
+Indexes: `location_id`, `source_key`, `forecast_date`, `forecast_hour`, `imported_at desc`, `freshness_status`, GIN `risk_labels`.
+
+RLS notes: Public read only for active, non-stale snapshots that pass attribution/freshness rules. Inserts and corrections are backend/import-job only.
+
+Admin/moderation notes: Do not let stale or unreviewed provider rows drive production alerts or AI weather explanations.
+
+## `weather_alert_preferences` Future
+
+Purpose: User preferences for weather alerts such as heavy rain, heat, high humidity, wind, or weekly summaries.
+
+Key columns: `id uuid`, `user_id`, `location_id`, `alert_type`, `enabled`, `threshold_config jsonb`, `quiet_hours jsonb`, `delivery_channels text[]`, `last_triggered_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `location_id`, `alert_type`, `enabled`, `last_triggered_at desc`.
+
+RLS notes: Users can CRUD their own alert preferences after real auth. Alert evaluation and delivery writes are backend-owned.
+
+Admin/moderation notes: Alerts require consent, freshness checks, dedupe, quiet hours, and delivery audit logs.
+
+## `weather_alert_events` Future
+
+Purpose: Backend-created weather alert events generated from approved forecast snapshots and user preferences.
+
+Key columns: `id uuid`, `user_id`, `location_id`, `forecast_snapshot_id nullable`, `alert_type`, `title`, `body`, `severity`, `source_label`, `source_timestamp`, `status`, `delivery_channel`, `created_at`, `delivered_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `location_id`, `alert_type`, `severity`, `status`, `created_at desc`.
+
+RLS notes: Users can read their own alert events. Inserts and delivery status updates are backend-owned.
+
+Admin/moderation notes: Alert bodies must include source/date and should never guarantee field conditions or crop outcomes.
+
+## `farm_plots` Future
+
+Purpose: User-owned farm plot profile records created from manual estimates or future GPS/map measurement flows.
+
+Key columns: `id uuid`, `user_id`, `name`, `crop_context nullable`, `province nullable`, `district nullable`, `measurement_method`, `accuracy_level`, `latest_area_square_meters`, `latest_area_rai`, `latest_measurement_id nullable`, `status`, `created_at`, `updated_at`, `local_id`, `metadata jsonb`.
+
+Indexes: `user_id`, `(user_id, name)`, `measurement_method`, `accuracy_level`, `status`, `created_at desc`.
+
+RLS notes: Users can CRUD their own plot records after real auth. Admin/support access should be role-gated and audited.
+
+Admin/moderation notes: Plot records must not imply official land ownership or official survey status.
+
+## `farm_plot_measurements` Future
+
+Purpose: Calculation and measurement history for a plot, including manual rectangle/square/triangle estimates and future GPS/map outputs.
+
+Key columns: `id uuid`, `plot_id`, `user_id`, `shape`, `measurement_method`, `accuracy_level`, `input_dimensions jsonb`, `area_square_meters`, `area_square_wa`, `area_ngan`, `area_rai`, `area_hectare`, `area_acre`, `formula_label`, `disclaimer`, `measured_at`, `created_at`, `metadata jsonb`.
+
+Indexes: `plot_id`, `user_id`, `measurement_method`, `shape`, `measured_at desc`.
+
+RLS notes: Users can read/create their own measurements. Updates should usually create a new measurement row rather than overwrite history.
+
+Admin/moderation notes: Keep the disclaimer with each measurement so exports and AI explanations do not detach area values from their accuracy boundary.
+
+## `farm_plot_boundaries` Future
+
+Purpose: Private GPS/map polygon geometry for future plot boundary measurement.
+
+Key columns: `id uuid`, `plot_id`, `user_id`, `boundary_source`, `geometry_geojson`, `point_count`, `accuracy_meters nullable`, `provider_label nullable`, `captured_at`, `created_at`, `updated_at`, `deleted_at nullable`, `metadata jsonb`.
+
+Indexes: `plot_id`, `user_id`, `boundary_source`, `captured_at desc`, `deleted_at`.
+
+RLS notes: Precise boundary coordinates are private user data. Users can read/delete their own boundaries. Public read is disabled by default.
+
+Admin/moderation notes: Geolocation and map-provider access must be opt-in, audited when shared/exported, and never loaded as a side effect of opening the calculator page.
+
+## `farm_plot_notes` Future
+
+Purpose: User notes tied to a farm plot for crop planning, irrigation, weather context, or area calculation reminders.
+
+Key columns: `id uuid`, `plot_id`, `user_id`, `note_type`, `body`, `linked_crop_key nullable`, `linked_weather_location_id nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `plot_id`, `user_id`, `note_type`, `created_at desc`.
+
+RLS notes: Users can CRUD their own notes. Backend-generated notes should be labeled separately from user-entered notes.
+
+Admin/moderation notes: Future support/admin views should avoid broad access to private plot notes unless explicit support consent and audit logging exist.
+
+## `farm_profiles` Future
+
+Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.
+
+Key columns: `id uuid`, `user_id`, `display_name`, `primary_province nullable`, `crop_focus text[]`, `default_weather_location_id nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `primary_province`, GIN `crop_focus`.
+
+RLS notes: Users can CRUD their own farm profile. Public read is disabled by default.
+
+Admin/moderation notes: Farm profile data can reveal business/location context and should not be broadly visible to support/admin roles without purpose and audit logging.
+
+## `farm_dashboard_preferences` Future
+
+Purpose: Per-user dashboard settings for My Farm section order, hidden modules, default quick actions, and local-to-cloud sync preferences.
+
+Key columns: `id uuid`, `user_id`, `section_order text[]`, `hidden_sections text[]`, `default_quick_actions text[]`, `sync_preferences jsonb`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `user_id`.
+
+RLS notes: Users can read/update their own preferences. Backend may initialize defaults after signup.
+
+Admin/moderation notes: Preferences should not grant permissions or override backend safety rules.
+
+## `farm_timeline_events` Future
+
+Purpose: Backend-generated My Farm timeline events derived from owned records such as plant analyses, plot measurements, crop watches, saved content, and AI questions.
+
+Key columns: `id uuid`, `user_id`, `event_type`, `source_table`, `source_id`, `title`, `subtitle`, `event_at`, `route_hint`, `visibility`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `event_type`, `event_at desc`, `(source_table, source_id)`.
+
+RLS notes: Users can read their own events. Events should be generated by backend jobs/functions or safe triggers, not trusted from frontend summaries.
+
+Admin/moderation notes: Timeline events should be rebuildable from source records and avoid duplicating sensitive payloads such as raw images or precise boundaries.
+
+## `farm_insights` Future
+
+Purpose: Generated farmer-facing insight cards for My Farm, such as stale analysis reminders, watched-crop summaries, weather context, and plot planning prompts.
+
+Key columns: `id uuid`, `user_id`, `insight_type`, `title`, `body`, `severity`, `source_refs jsonb`, `generated_at`, `expires_at nullable`, `dismissed_at nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `insight_type`, `severity`, `generated_at desc`, `expires_at`, `dismissed_at`.
+
+RLS notes: Users can read and dismiss their own insights. Generation should be backend-owned and respect source freshness/safety rules.
+
+Admin/moderation notes: Insights must cite source context when they mention prices/weather and must not imply guaranteed yield, price, disease diagnosis, or official land measurement.
+
 ## `auth_link_events`
 
 Purpose: Audit guest-to-account linking and provider changes.
@@ -418,6 +646,54 @@ RLS notes: Users can read their own sync history. Inserts should be backend-only
 
 Admin/moderation notes: Useful for support and fraud review, but should not expose raw private payloads broadly.
 
+## `notification_preferences` Future
+
+Purpose: Store user-owned notification category/channel preferences after real auth and consent exist.
+
+Key columns: `id uuid`, `user_id`, `notification_type`, `channel`, `enabled`, `quiet_hours_start nullable`, `quiet_hours_end nullable`, `consent_version`, `updated_at`, `created_at`, `metadata jsonb`.
+
+Indexes: unique `(user_id, notification_type, channel)`, `user_id`, `notification_type`, `channel`, `enabled`.
+
+RLS notes: Users can read/update their own preferences. Backend may initialize defaults. Local M35 preferences in `kasethub.notificationCenter.v1` are not production consent.
+
+Admin/moderation notes: Admins should not override opt-out except for legally required system notices.
+
+## `notification_events` Future
+
+Purpose: Store backend-generated notification events from weather, crop price, My Farm, moderation, content, account/sync, and system sources.
+
+Key columns: `id uuid`, `user_id nullable`, `event_type`, `priority`, `source_table nullable`, `source_id nullable`, `title`, `body`, `cta_route`, `source_label`, `source_timestamp nullable`, `status`, `created_at`, `expires_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `event_type`, `priority`, `status`, `created_at desc`, `(source_table, source_id)`.
+
+RLS notes: Users can read their own events. Public/system events need carefully scoped public-read policies or backend fan-out.
+
+Admin/moderation notes: Events mentioning prices/weather must cite source context and should be generated only after freshness and safety checks.
+
+## `notification_deliveries` Future
+
+Purpose: Track delivery attempts for push, LINE, email, SMS, and in-app delivery channels.
+
+Key columns: `id uuid`, `event_id`, `user_id`, `channel`, `provider`, `delivery_status`, `attempt_count`, `last_attempt_at`, `delivered_at nullable`, `failure_code nullable`, `failure_message nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `event_id`, `user_id`, `channel`, `delivery_status`, `last_attempt_at desc`.
+
+RLS notes: Users may read limited delivery status for their own notifications. Provider payloads and failure details should be redacted or admin-only.
+
+Admin/moderation notes: Delivery logs need rate-limit and abuse review but must never expose provider secrets.
+
+## `notification_digest_jobs` Future
+
+Purpose: Batch low-priority events into daily/weekly digests based on user preferences and quiet hours.
+
+Key columns: `id uuid`, `user_id`, `digest_type`, `status`, `event_ids uuid[]`, `scheduled_for`, `sent_at nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `digest_type`, `status`, `scheduled_for`.
+
+RLS notes: Backend-owned writes only. Users can read digest status if surfaced.
+
+Admin/moderation notes: Digest jobs should respect opt-out and should not hide urgent safety notices.
+
 ## M18 SQL Draft Pack
 
 M18 turns this schema plan into draft SQL files:
@@ -437,3 +713,14 @@ The current draft supports LINE linking through:
 - `guest_sync_events.provider = line`
 
 A future `account_provider_links` table may be added if KasetHub needs detailed provider verification status, conflict status, revocation history, or multiple linked provider records per account. Phone should remain the recommended recovery path while LINE acts as an important secondary provider for Thai users.
+## M25 Staging Readiness Notes
+
+M25 does not change the SQL draft and does not run migrations. It adds a readiness audit that checks whether this schema planning is ready for a first staging project review.
+
+Before staging:
+
+- Treat `supabase/migrations/0001_kasethub_core_schema.sql` as a draft to run manually in staging only.
+- Apply `supabase/policies/0001_kasethub_rls_policies.sql` only after table creation.
+- Keep auth, phone OTP, LINE Login, and cloud sync disabled for the first staging pass.
+- Verify public read tables, user-owned tables, backend-only tables, admin review tables, crop price review tables, and community moderation tables separately.
+- Keep service-role keys out of frontend ENV and reserve them for future Edge Functions/backend jobs.

@@ -126,3 +126,18 @@ The frontend should never be trusted to decide final visibility for production c
 - No report abuse controls.
 - No production content removal.
 - No AI moderation or automated classification.
+
+## M24 Admin Dashboard Connection
+
+M24 surfaces community moderation state in `/app/admin`:
+
+- local reports from `kasethub.communityModeration.v1`
+- hidden posts count
+- mock moderator queue summary
+- moderation risks and future admin tasks
+
+The admin dashboard does not perform real moderation actions. It only previews what a future backend-owned admin dashboard should monitor.
+
+## M35 Notification Center Connection
+
+M35 surfaces local community reports and mock moderator queue items inside `/app/notifications`. These notices are local/demo only and must not imply a real moderator has reviewed or acted on content. Future production moderation notifications require authenticated reports, backend-owned moderation status, delivery consent, rate limits, and audit logs.

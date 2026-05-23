@@ -8,7 +8,8 @@ import type {
 import { getAICreditCost } from '@/services/ai/ai-credit-cost-policy';
 
 export const supportedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-export const maxImageFileSizeBytes = 5 * 1024 * 1024;
+export const recommendedImageFileSizeBytes = 5 * 1024 * 1024;
+export const maxImageFileSizeBytes = 12 * 1024 * 1024;
 
 function now() {
   return new Date().toISOString();
@@ -48,6 +49,13 @@ export function validateImageFile(file: File): ImageValidationResult {
       title: 'ไฟล์ใหญ่เกินไป',
       message: `ขนาดสูงสุด ${formatFileSize(maxImageFileSizeBytes)} กรุณาลองเลือกรูปที่เล็กลง`,
       severity: 'error',
+    });
+  } else if (file.size > recommendedImageFileSizeBytes) {
+    warnings.push({
+      code: 'file_very_large',
+      title: 'รูปใหญ่มาก ควรลดขนาดก่อนวิเคราะห์',
+      message: `รูปเกิน ${formatFileSize(recommendedImageFileSizeBytes)} ระบบ M31 จะลองลดขนาดในเครื่องก่อนวิเคราะห์ตัวอย่าง`,
+      severity: 'warning',
     });
   }
 

@@ -16,6 +16,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { LargeActionButton } from '@/components/ui/LargeActionButton';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { cx } from '@/components/ui/classNames';
 import { useCropWatch } from '@/hooks/useCropWatch';
@@ -78,6 +79,14 @@ export function CropWatchPage() {
         <NoticeBox tone="warning" title="ยังไม่มีแจ้งเตือนจริง">
           {cropWatchLocalOnlyNotice} ทุกตัวเลขเป็นราคาอ้างอิงตัวอย่าง ไม่ใช่ราคาตลาดจริง
         </NoticeBox>
+
+        <LargeActionButton
+          description="ดูพืชที่ติดตามร่วมกับแปลง อากาศ บทความ และคำถาม AI"
+          icon={Leaf}
+          label="กลับไป My Farm Hub"
+          to="/app/my-farm"
+          variant="white"
+        />
 
         {watches.length > 0 ? (
           <section className="grid gap-3">

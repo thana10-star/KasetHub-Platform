@@ -207,3 +207,16 @@ Required checks:
 - Keep phone as the primary recovery path when both phone and LINE exist.
 - Write `auth_link_events` for provider link/unlink attempts.
 - Preserve local Guest Memory on failed or rejected sync.
+
+## M29 Edge Function Contract
+
+M29 narrows the first real sync endpoint plan to a Supabase Edge Function:
+
+- endpoint name: `guest-memory-sync`
+- method: `POST`
+- future path: `/functions/v1/guest-memory-sync`
+- auth requirement: valid Supabase user session
+- service-role boundary: service-role key only inside the Edge Function
+- frontend: anon key only, no service-role key, no endpoint call in M29
+
+The Edge Function must validate `auth.uid()`, consent, payload version, owner id, idempotency key, duplicate merge rules, and rollback/audit behavior before writing. See `docs/GUEST_SYNC_EDGE_FUNCTION_CONTRACT.md` and `docs/GUEST_SYNC_STAGING_TEST_PLAN.md`.

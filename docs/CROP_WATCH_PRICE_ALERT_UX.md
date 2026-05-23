@@ -70,8 +70,9 @@ The service uses a versioned localStorage key and safe migration fallback. Scree
 
 `/app/notifications`:
 
-- includes mock crop price alert examples
-- labels them as demo/sample
+- is upgraded in M35 into the unified local Notification Center
+- includes crop price alert examples from Crop Watch or fixture fallback
+- labels them as `ราคาอ้างอิง` demo/sample
 - does not claim any push delivery occurred
 
 ## Guest Memory Relationship
@@ -82,6 +83,10 @@ Future sync should map both:
 
 - Guest Memory followed topic: interest signal.
 - Crop Watch: alert and market/region preference state.
+
+## My Farm Hub Relationship
+
+M34 reads Crop Watch records into `/app/my-farm` so followed crops and mock price alert preferences appear beside plots, weather, saved content, and AI history. The hub does not evaluate alerts, call price APIs, or convert local watch state into trusted production notifications.
 
 ## Future Backend Requirements
 
@@ -107,3 +112,4 @@ The browser must not decide trusted alert delivery or write production alert rec
 - No server state.
 - No Supabase writes.
 - No cross-device sync.
+- No real notification delivery; M35 preferences are in-app local filters only.

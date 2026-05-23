@@ -2,7 +2,7 @@
 
 ## Product Vision
 
-KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant image analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations without real backend, Supabase writes, moderation APIs, AI moderation, or network calls.
+KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, admin operations, weather planning, farm area planning, My Farm workspace, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations. M24 adds a local/mock Admin Dashboard foundation. M25 adds a Supabase staging setup checklist plus readiness audit. M26 adds a safe Supabase staging connection dry-run boundary. M27 adds the manual SQL staging execution guide and verification checklist. M28 adds a Supabase Auth phone OTP staging plan. M29 adds the Guest Sync Edge Function staging contract. M30 adds the Internal MVP snapshot. M31 adds local image compression/preflight. M32 adds agriculture weather forecast UX with local fixtures only. M33 adds local/mock farm area measurement planning. M34 upgrades My Farm into a local-first farmer workspace with no backend writes, Supabase writes, real auth requirement, AI/weather API, GPS/map, sync, destructive data loss, or network calls by default.
 
 ## M01 Foundation
 
@@ -239,6 +239,106 @@ Phone OTP should become the primary account creation path for non-tech farmers. 
 - `/app/profile` and `/app/qa` link to the moderation surfaces.
 - No real backend, Supabase write, real account requirement, moderation API, AI moderation provider, or network call is enabled.
 
+## M24 Admin Dashboard Foundation
+
+- `src/services/admin` defines admin roles, module statuses, dashboard summary, tasks, risks, audit log previews, review queues, and health status.
+- `/app/admin` provides one local/mock route with Overview, Content, Moderation, Crop Prices, AI Safety, and System tabs.
+- The dashboard summarizes M20 content, YouTube import readiness, M23 moderation reports, M21 crop price sources, M22 crop watches, AI proxy/credit status, Guest Sync/Auth readiness, and Supabase status.
+- `/app/profile` and `/app/qa` link to the admin preview.
+- `docs/ADMIN_DASHBOARD_FOUNDATION.md` and `docs/ADMIN_ROLES_AND_PERMISSIONS_PLAN.md` define future RBAC, permissions, audit logs, and review workflows.
+- No real admin auth, backend write, Supabase write, destructive action, moderation action, AI provider, YouTube API, or network call is enabled.
+
+## M25 Supabase Staging Setup Readiness Audit
+
+- `src/services/supabase/supabase-readiness-*` aggregates environment, feature flag, SQL/RLS draft, auth, guest sync, storage, AI proxy, admin role, crop price, and community moderation readiness.
+- `/app/supabase-readiness` shows a local readiness score, checklist sections, blockers, warnings, ready items, next safe steps, and production blockers.
+- `/app/admin`, `/app/account-preview`, `/app/profile`, and `/app/qa` link to the readiness route.
+- `.env.example` contains placeholders only and no real keys.
+- `docs/SUPABASE_STAGING_SETUP_GUIDE.md` and `docs/SUPABASE_READINESS_AUDIT.md` define the first staging connection checklist.
+- No Supabase connection, migration, auth, cloud sync, phone OTP, backend write, service-role key, or network call is enabled.
+
+## M26 Supabase Staging Connection Dry Run
+
+- `src/services/supabase/supabase-connection-*` checks staging env presence, anon-key safety, feature flags, no-write guarantees, and optional public-read probe eligibility.
+- `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false` keeps network checks off by default.
+- `/app/supabase-connection` shows current flags, local dry-run result, env/anon key status, warnings, no-write guarantees, and manual staging checklist.
+- `/app/supabase-readiness`, `/app/admin`, `/app/account-preview`, and `/app/qa` link to the connection dry run.
+- Optional future network probe is guarded by Supabase enabled, dry-run network flag enabled, valid URL, and usable anon key.
+- No real keys, service-role key, migration, auth, phone OTP, cloud sync, Supabase write, upload, backend write, or default network call is enabled.
+
+## M27 Supabase SQL Staging Execution Guide
+
+- `docs/SUPABASE_SQL_STAGING_EXECUTION_GUIDE.md` defines the manual staging execution sequence.
+- `docs/SUPABASE_MANUAL_VERIFICATION_PACK.md` defines table, trigger, RLS, policy, storage, crop price, community, admin/audit, auth, and Edge Function checks.
+- `src/services/supabase/supabase-sql-draft-validator-*` exposes a static browser-safe list of expected SQL/RLS artifacts.
+- `/app/supabase-sql-checklist` shows execution order, expected tables, policies, indexes, triggers, manual checklist, warnings, and production blockers.
+- `/app/supabase-readiness`, `/app/supabase-connection`, `/app/admin`, and `/app/qa` link to the SQL checklist.
+- No Supabase connection, migration execution, key, write, filesystem access, or network call is enabled.
+
+## M28 Supabase Auth Phone OTP Staging Plan
+
+- `src/services/auth/phone-auth-staging-*` audits Supabase env readiness, phone flags, redirect URL readiness, SMS provider setup, OTP rate-limit policy, test phone number planning, session ownership, Guest Sync dependency, rollback, and production blockers.
+- `/app/auth/phone-staging` shows a Thai staging checklist with current flags, setup steps, SMS cost warnings, session ownership rules, rollback checklist, and production blockers.
+- `/app/auth/phone`, `/app/auth/status`, and `/app/auth/sync-preview` keep local mock status visible and link to the staging checklist.
+- `/app/supabase-readiness`, `/app/supabase-connection`, `/app/admin`, `/app/account-preview`, `/app/profile`, and `/app/qa` expose the phone OTP staging link/status.
+- Docs cover Supabase phone provider setup, redirect URLs, SMS cost/rate limits, test phone numbers, Thai UX copy, logout/session behavior, rollback, and service-role safety.
+- No real auth, OTP SMS, Supabase write, cloud sync, LINE/Google real login, real key, service-role key, or default network call is enabled.
+
+## M29 Guest Sync Edge Function Staging Plan
+
+- `src/services/backend/guest-sync-edge.types.ts` defines the future Edge Function request, response, auth context, idempotency key, validation result, merge result, rollback plan, and readiness output.
+- `src/services/backend/guest-sync-staging-readiness.ts` audits feature flags, auth/session dependency, service-role boundary, idempotency, merge rules, consent, rollback, schema/RLS dependency, and production blockers without network calls.
+- `/app/guest-sync-edge` shows the future `POST /functions/v1/guest-memory-sync` contract, current disabled flags, idempotency preview, merge rules, staging test checklist, and security boundaries.
+- `/app/auth/sync-preview`, `/app/guest-sync-status`, `/app/supabase-readiness`, `/app/supabase-connection`, `/app/admin`, `/app/account-preview`, `/app/profile`, and `/app/qa` link to the Edge Function plan.
+- `.env.example` adds `VITE_ENABLE_GUEST_SYNC_EDGE=false` and `VITE_GUEST_SYNC_EDGE_MODE=disabled`.
+- `docs/GUEST_SYNC_EDGE_FUNCTION_CONTRACT.md` and `docs/GUEST_SYNC_STAGING_TEST_PLAN.md` define the staging-only contract and manual verification pack.
+- No Edge Function deployment, endpoint call, service-role key, Supabase write, cloud sync, auth enabling, OTP, or default network call is enabled.
+
+## M30 Internal MVP QA + Prototype Snapshot
+
+- `src/services/qa/route-registry.ts` groups routes by Core app, Content/YouTube, AI/Plant analysis, Prices/Crop watch, Community/Moderation, Auth/Account/Sync, Supabase/Staging, and Admin/QA.
+- `src/services/qa/mvp-readiness-*` returns module readiness, risk level, route coverage, storage mode, production blockers, and next-phase options without network calls.
+- `/app/mvp-snapshot` shows the Internal MVP / Prototype state and clearly says it is not a Production App.
+- `/app/admin`, `/app/qa`, and `/app/profile` link to the M30 snapshot.
+- `docs/M30_INTERNAL_MVP_SNAPSHOT.md`, `docs/M30_INTERNAL_QA_CHECKLIST.md`, `docs/M30_NEXT_PHASE_DECISION.md`, and `docs/M30_ROUTE_CHECKLIST.md` define the handoff pack for the next backend/staging phase.
+- No backend, Supabase connection, migration, auth, cloud sync, real AI API, upload, major feature, or network call is added.
+
+## M31 Image Compression + Preflight Quality Foundation
+
+- `src/services/image-analysis/image-compression-*` adds local browser-based resize/compression with default max 1280px and JPEG/WebP output planning.
+- `src/services/image-analysis/image-preflight-*` checks file type, size, dimensions, too-small/very-large warnings, blur placeholder guidance, and plant-photo checklist without AI.
+- `useImageCompression()` manages optimized preview object URLs and revokes them safely.
+- `/app/analyze` now shows local preflight readiness, warning cards, compression preview, original vs optimized size, and retake tips before mock analysis.
+- `/app/image-preflight` explains why resizing can reduce future AI cost, recommended photo tips, future backend upload flow, and privacy boundaries.
+- No real AI API, upload, Supabase Storage, backend write, raw image/base64 persistence, or network call is added.
+
+## M32 Weather Forecast Agriculture UX Foundation
+
+- `src/services/weather/weather-*` adds local weather models, fixtures, source metadata, agriculture risk labels, and mock alerts.
+- `useWeather()` exposes fixed sample locations and forecast fixtures without localStorage, geolocation, fetch, Supabase, or backend behavior.
+- `/app/weather` shows location selection, today details, hourly rain chance mock, 7-day forecast mock, crop-work recommendations, risk badges, demo notices, and AI CTA.
+- `/app/notifications` includes mock weather alerts for heavy rain, heat, and high humidity/disease risk.
+- Home quick actions, Profile, QA, and Admin link to the weather route.
+- No real weather API, geolocation permission request, backend write, Supabase write, push notification, production weather claim, or network call is added.
+
+## M33 Farm Area Measurement Planner Foundation
+
+- `src/services/farm-area/farm-area-*` adds local farm area models, fixtures, calculator utilities, unit conversion rules, and local saved plot records.
+- `useFarmArea()` exposes rectangle, square, triangle, and custom polygon mock calculations plus versioned localStorage under `kasethub.farmArea.v1`.
+- `/app/farm-area` shows large inputs, shape selection, Thai land unit conversion, save/remove local plot actions, local-only notices, and the official-survey disclaimer.
+- `/app/farm-area-guide` explains manual measuring, tape measure tips, rectangle/triangle formulas, Thai land unit rules, safety/accuracy notes, and future GPS/map boundaries.
+- Home quick actions, My Farm, Profile, QA, and Admin link to farm area planning.
+- No real GPS, map API, geolocation permission request, backend write, Supabase write, official land survey claim, or network call is added.
+
+## M34 My Farm Hub Upgrade Foundation
+
+- `src/services/my-farm/my-farm-*` adds My Farm hub models and a local aggregation service.
+- `useMyFarmHub()` combines Guest Memory, saved plant analysis summaries, farm area saved plots, crop watch preferences, weather fixtures, saved articles/videos, and recent AI questions.
+- `/app/my-farm` is now a Thai-first farmer dashboard with hero summary, local-only notice, quick actions, overview cards, next actions, local data sections, and timeline.
+- `/app/my-farm/settings` shows local data status, backup account CTA, image privacy link, Guest Memory link, future cloud sync guidance, and no new destructive action.
+- Analyze, Farm Area, Weather, Crop Watch, Profile, QA, and route registry now link back to My Farm.
+- No real backend, Supabase write, auth requirement, real AI/weather API, GPS/map, cloud sync, destructive clear action, or network call is added.
+
 ## Future Architecture
 
 ### Web App
@@ -273,21 +373,27 @@ Shared URLs currently target web routes. Later mobile app and PWA milestones sho
 
 A separate admin surface should support content moderation, article publishing, YouTube playlist curation, crop price data review, AI prompt evaluation, reports, and user management. It should use role-based access control from the backend.
 
+M24 adds this as a local/mock preview at `/app/admin`. Future implementation must add admin auth, route guards, server-side permission checks, role claims, RLS, append-only audit logs, review task tables, and safe rollback/correction paths before any publish, hide, import, review, support, or price action becomes real.
+
 ### Backend and Supabase
 
 Supabase is a practical next step for authentication, Postgres data storage, row-level security, file storage, and realtime community updates. Initial tables can include users, profiles, posts, comments, videos, articles, crop prices, notifications, AI sessions, image analyses, and moderation reports.
 
 M06 adds only a browser-safe client scaffold. The client is disabled unless `VITE_ENABLE_SUPABASE=true` and public Supabase ENV values are present. Auth and cloud sync remain separately gated by `VITE_ENABLE_AUTH` and `VITE_ENABLE_CLOUD_SYNC`. No service-role key, admin secret, phone OTP call, or data write should ever be placed in the frontend.
 
+M25 adds `/app/supabase-readiness`, `.env.example`, and staging setup docs so the first staging project can be reviewed safely. M26 adds `/app/supabase-connection` and a dry-run service that can detect configured staging anon settings without writes. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Supabase Edge Function contract. M30 adds `/app/mvp-snapshot` so route coverage, readiness, and production blockers are visible before the first real staging implementation. Network probing is disabled by default and must stay public/read-only when explicitly enabled. These milestones still do not run migrations, deploy/call Edge Functions, enable real auth, send OTP SMS, enable cloud sync, add secrets, write data, or upload files.
+
 ### Auth-Ready Sync Planning
 
 M05 keeps Guest Memory as active storage. When phone, LINE, or Google auth is added, the app should ask consent, upload local memory to a backend sync endpoint, merge saved items by `itemType + itemId`, preserve farm timestamps, and sync AI question history only if the user allows.
 
-M07 makes that flow visible without enabling it. The future sync endpoint must be backend-owned, validate auth server-side, apply consent rules, and use service role only inside a secure API route or Edge Function.
+M07 makes that flow visible without enabling it. M29 narrows the first real endpoint plan to a future Supabase Edge Function named `guest-memory-sync`. The future sync endpoint must be backend-owned, validate auth server-side, apply consent rules, enforce idempotency, audit sync attempts, and use service-role credentials only inside the Edge Function/backend boundary.
 
 ### My Farm Data Model Future
 
 My Farm should become a user-owned plant and plot history system. Future tables can include farms, plots, crops, crop seasons, image analysis records, diagnosis status, treatment plans, follow-up reminders, attached images, and expert review notes. M02 keeps this as typed mock records so the UX and data contracts can mature before backend work.
+
+M34 makes My Farm the central workspace while staying local-only. Future cloud My Farm should use `farm_profiles`, dashboard preferences, timeline events, and generated insight records as views over user-owned source data rather than trusting a frontend-only dashboard summary.
 
 ### YouTube API
 
@@ -366,14 +472,40 @@ The draft covers profiles, Guest Memory sync, saved items, My Farm, AI credits, 
 
 M21-M22 keep all price and alert behavior local. Future production price alerts should require verified source snapshots, stale-data checks, user consent, backend alert evaluation jobs, quiet-hour controls, delivery logs, and disclaimers in every notification body. The frontend should never own trusted price imports or production alert delivery.
 
+### Weather Forecast Future
+
+M32 keeps all weather behavior local/mock. Future production weather should connect through a backend-owned import/cache layer, cite source label and timestamp, respect location privacy, keep geolocation opt-in, and distinguish official/provider forecasts from app-generated crop-work recommendations. Weather alerts should require user consent, freshness checks, quiet hours, delivery logs, and clear disclaimers before any push or LINE notification is enabled.
+
+### Farm Area Measurement Future
+
+M33 keeps area measurement local/mock. Future production farm area tools should support authenticated user-owned plots, private GPS/map boundaries, opt-in geolocation only after a user action, map provider attribution, export/share consent, delete controls, and clear accuracy labels. KasetHub should never present app estimates as official land surveying.
+
+### Notification Center Future
+
+M35 keeps notifications as a local/mock in-app center. Future production delivery should use backend-generated `notification_events`, per-channel preferences, quiet hours, rate limits, digest jobs, and delivery logs. Browser local preferences are not production consent. Price/weather notifications must cite source context and stay clear about `ราคาอ้างอิง` or forecast uncertainty before push, LINE, SMS, or email delivery is enabled.
+
 ### LINE Login and Account Linking Boundary
 
 M19 adds a local-only LINE Login mock and account-linking planner. LINE is treated as a secondary provider for Thai users, while phone remains the recommended recovery path. Future production work should confirm user ownership, ask before linking providers, keep LINE secrets server-side, and sync Guest Memory only after account ownership is clear.
 
 ## Suggested Milestone Path
 
-1. M24: Crop price admin/import job contract and moderation review workflow
-2. M25: Real content management for videos and articles, plus offline article body caching plan
-3. M26: AI vision upload, My Farm persistence, and analysis history
-4. M27: Admin dashboard MVP and mobile app extraction plan
-5. M28: Field usability test iteration and production-readiness hardening
+1. M35 Notification Center Upgrade Foundation. Completed as local/mock in-app notification center.
+2. M36 Real Backend Phase Decision + Staging Branch Plan. Completed as planning only.
+3. M37 Supabase staging SQL/RLS execution and verification on `staging/supabase`.
+4. M38 Phone Auth staging after schema/RLS checks.
+5. M39 Guest Sync Edge Function staging after real session ownership.
+6. M40 AI text proxy staging, then plant vision and mobile/PWA work.
+6. M40 AI backend proxy and plant image upload staging.
+## M36 Real Backend Phase Decision
+
+M36 adds the planning layer for the first real implementation phase after the M01-M35 local/mock prototype. `/app/next-phase` ranks the options and recommends this order: Supabase staging + SQL/RLS, phone auth staging, Guest Sync staging, AI text proxy, plant vision proxy, then PWA/mobile shell. AI text proxy can move earlier if demo value is the priority, but it must stay on `staging/ai-proxy` with backend-owned secrets, cost caps, rate limits, safety logs, and fixture fallback.
+
+Branch strategy:
+
+- `main` remains the stable prototype.
+- `staging/supabase` is for Supabase/Auth/Guest Sync experiments.
+- `staging/ai-proxy` is for AI provider experiments.
+- `staging/mobile` is for PWA/mobile shell experiments.
+
+M36 does not connect Supabase, enable auth, run SQL, call AI APIs, add keys, add network calls, or write backend data.

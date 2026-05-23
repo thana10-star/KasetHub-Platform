@@ -1,4 +1,4 @@
-import { CheckCircle2, CloudUpload, Info, Link2, Lock, MessageCircle, RotateCcw, ShieldCheck, Server } from 'lucide-react';
+import { CheckCircle2, CloudUpload, Info, KeyRound, Link2, ListChecks, Lock, MessageCircle, Phone, RotateCcw, ShieldCheck, Server } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -10,6 +10,10 @@ import {
   getGuestSyncAdapterStatus,
   runGuestMemorySyncDryRun,
 } from '@/services/backend/guest-sync-adapter';
+import {
+  createGuestSyncIdempotencyKeyPreview,
+  runGuestSyncStagingReadiness,
+} from '@/services/backend/guest-sync-staging-readiness';
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
 import { getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
@@ -176,6 +180,11 @@ export function AuthSyncPreviewPage() {
     lineSession: lineAuthStatus.session,
   });
   const payloadPreview = useMemo(() => buildGuestSyncPayloadPreview(state, consent, provider), [consent, provider, state]);
+  const edgeReadiness = useMemo(() => runGuestSyncStagingReadiness(), []);
+  const idempotencyKeyPreview = useMemo(
+    () => createGuestSyncIdempotencyKeyPreview(payloadPreview.payload.guestId),
+    [payloadPreview.payload.guestId],
+  );
   const selectedScenario = scenarioOptions.find((item) => item.value === scenario) ?? scenarioOptions[0];
   const summaryRows = [
     { label: 'บันทึกไว้', value: counts.savedItems },
@@ -225,6 +234,13 @@ export function AuthSyncPreviewPage() {
 
         <NoticeBox tone="success" title="ข้อมูลในเครื่องจะไม่หาย">
           ต่อให้ทดสอบแล้วล้มเหลว Guest Memory ยังอยู่ครบ ระบบจริงในอนาคตควรทำเครื่องหมายว่าซิงก์แล้วหลัง backend ยืนยันสำเร็จเท่านั้น
+        </NoticeBox>
+
+        <NoticeBox tone="info" icon={Phone} title="Real sync ต้องรอ session ownership จริง">
+          ตอนนี้ phone auth ยังเป็น local mock และยังไม่เปิด Supabase Auth จริง การ sync cloud ต้องรอ phone OTP staging ผ่าน, auth.uid() ตรงกับ owner, และผู้ใช้ยินยอมก่อน
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
+            เปิด Phone OTP staging checklist
+          </Link>
         </NoticeBox>
 
         {phoneAuthStatus.session ? (
@@ -288,6 +304,54 @@ export function AuthSyncPreviewPage() {
             </div>
           </div>
         </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <CloudUpload aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">Edge Function readiness</h2>
+                <StatusPill tone={edgeReadiness.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                  {edgeReadiness.levelLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                แผนจริงในอนาคตคือ <span className="font-bold text-kaset-deep">POST /functions/v1/{edgeReadiness.endpointName}</span> หลังมี Supabase session เจ้าของบัญชีจริงเท่านั้น
+              </p>
+              <p className="mt-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+                ตอนนี้ยังเป็น dry-run local เท่านั้น ไม่มี endpoint call ไม่มี cloud write และไม่ลบ Guest Memory
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/guest-sync-edge">
+                เปิด Guest Sync Edge Function plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <KeyRound aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-kaset-deep" />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-extrabold text-kaset-ink">Idempotency key preview</h2>
+              <p className="mt-2 break-all rounded-lg bg-kaset-mist p-3 text-sm font-bold leading-6 text-kaset-deep">
+                {idempotencyKeyPreview}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                ระบบจริงต้องใช้ key นี้เพื่อให้ retry เดิมไม่สร้างข้อมูลซ้ำ และต้องผูกกับ userId เจ้าของบัญชีบน server
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <NoticeBox tone="warning" icon={ListChecks} title="Staging-only checklist">
+          <ul className="grid gap-2">
+            <li>ต้องมี staging Supabase project, SQL/RLS และ phone auth session จริงก่อน</li>
+            <li>service-role key อยู่ใน Edge Function เท่านั้น ห้ามอยู่ใน frontend</li>
+            <li>ทดสอบ duplicate merge, partial success, auth missing และ rollback ก่อนเปิด cloud sync</li>
+          </ul>
+        </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">
           {summaryRows.map((row) => (
@@ -374,7 +438,7 @@ export function AuthSyncPreviewPage() {
             <div className="min-w-0 flex-1">
               <h2 className="font-extrabold text-kaset-ink">Payload preview</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Endpoint ในอนาคต: <span className="font-bold text-kaset-deep">POST /api/guest-memory/sync</span>
+                Endpoint ในอนาคต: <span className="font-bold text-kaset-deep">POST /functions/v1/{edgeReadiness.endpointName}</span>
               </p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className="rounded-lg bg-kaset-mist p-3">

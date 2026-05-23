@@ -9,6 +9,7 @@ export type SupabaseConfigCheck = {
   enableSupabaseFlag: boolean;
   enableAuthFlag: boolean;
   enableCloudSyncFlag: boolean;
+  enableDryRunNetworkCheckFlag: boolean;
   canCreateClient: boolean;
   warnings: string[];
 };
@@ -65,6 +66,10 @@ export function checkSupabaseConfig(env: PublicRuntimeEnv = publicEnv): Supabase
     warnings.push('Auth หรือ Cloud Sync จะไม่ทำงานจนกว่า VITE_ENABLE_SUPABASE=true');
   }
 
+  if (env.enableSupabaseDryRunNetworkCheck && (!env.enableSupabase || !hasRequiredEnv)) {
+    warnings.push('VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true แต่ Supabase ยังไม่พร้อม จึงไม่ควรรัน network probe');
+  }
+
   return {
     hasUrl,
     hasAnonKey,
@@ -74,6 +79,7 @@ export function checkSupabaseConfig(env: PublicRuntimeEnv = publicEnv): Supabase
     enableSupabaseFlag: env.enableSupabase,
     enableAuthFlag: env.enableAuth,
     enableCloudSyncFlag: env.enableCloudSync,
+    enableDryRunNetworkCheckFlag: env.enableSupabaseDryRunNetworkCheck,
     canCreateClient: env.enableSupabase && hasRequiredEnv && urlLooksValid && anonKeyLooksUsable,
     warnings,
   };

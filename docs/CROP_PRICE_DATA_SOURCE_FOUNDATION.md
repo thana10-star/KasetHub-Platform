@@ -108,3 +108,14 @@ Future production snapshots should store:
 - No admin review workflow.
 - No real price alert engine or push notification.
 - No automated freshness validation.
+
+## M24 Admin Dashboard Connection
+
+M24 surfaces crop price source readiness in `/app/admin` using the M21/M22 local data:
+
+- source status counts for OAE, DIT, ตลาดไท, manual reports, and community reports
+- demo price item count
+- future crop price review task preview
+- crop watch count from local M22 state
+
+The admin dashboard does not approve sources, import prices, write snapshots, trigger alerts, or validate production freshness.

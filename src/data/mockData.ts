@@ -1,9 +1,11 @@
 import {
   Bot,
+  CloudSun,
   Coins,
   MessageCircleQuestion,
   Microscope,
   PlaySquare,
+  Ruler,
   Sprout,
 } from 'lucide-react';
 import type {
@@ -55,6 +57,20 @@ export const quickActions: QuickAction[] = [
     href: '/app/prices',
     icon: Coins,
     accent: 'earth',
+  },
+  {
+    label: 'สภาพอากาศเกษตร',
+    description: 'ฝน แดด ลม ตัวอย่าง',
+    href: '/app/weather',
+    icon: CloudSun,
+    accent: 'sky',
+  },
+  {
+    label: 'วัดพื้นที่แปลง',
+    description: 'แปลงเป็นไร่ งาน ตารางวา',
+    href: '/app/farm-area',
+    icon: Ruler,
+    accent: 'green',
   },
 ];
 

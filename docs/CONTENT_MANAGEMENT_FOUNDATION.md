@@ -45,6 +45,17 @@ M20 does not add:
 
 All content is local fixture data.
 
+## M24 Admin Dashboard Connection
+
+M24 adds `/app/admin` as a local/mock overview for content operations. The dashboard reads M20 article/video fixtures and the YouTube import planner to show:
+
+- draft/review/published counts
+- YouTube import readiness
+- content review tasks
+- audit log previews
+
+This does not publish content, approve imports, write CMS records, call YouTube, fetch transcripts, or change server state.
+
 ## Owner YouTube Channel Config
 
 M22.5 adds the real KasetHub owner channel link as static config:

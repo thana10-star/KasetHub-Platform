@@ -102,6 +102,14 @@ Article and YouTube models map into:
 
 Future YouTube imports should write through a backend job, not the browser.
 
+M24 admin content review maps conceptually into:
+
+- content counts -> `content_review_tasks`
+- video import readiness -> `content_review_tasks` and `admin_audit_logs`
+- future publish approval -> `admin_audit_logs` plus article/video status changes
+
+The M24 dashboard is read-only and does not create review tasks.
+
 ## Crop Prices
 
 M21 crop price source models map into:
@@ -134,3 +142,142 @@ Type mapping:
 - Guest Memory saved price references -> `saved_items` with `item_type = crop_price`
 
 Snapshots are public read only after source validation. Watches and alert preferences are private to the user. Community reports remain private or clearly unverified until moderation. Real alert evaluation should be backend-owned and should never trust client-only preferences for delivery without auth, consent, and freshness checks.
+
+## Weather
+
+M32 weather models map conceptually into:
+
+- `weather_locations`
+- `weather_forecast_snapshots`
+- `weather_alert_preferences`
+- `weather_alert_events`
+- `notifications`
+
+Type mapping:
+
+- `WeatherLocation` -> `weather_locations`
+- `WeatherSource` -> source metadata on `weather_forecast_snapshots` or a future normalized source registry
+- `WeatherForecastDay` -> daily rows or JSON detail in `weather_forecast_snapshots`
+- `WeatherForecastHour` -> hourly rows in `weather_forecast_snapshots`
+- `AgricultureWeatherRisk` -> `risk_labels`
+- `CropWorkRecommendation` -> derived recommendation output, not trusted source data
+- `WeatherAlertMock` -> future `weather_alert_events`
+- `WeatherReliabilityLevel` -> future source/reliability metadata
+
+M32 state is fixture-only and does not store raw weather data in localStorage. Production forecast snapshots should be imported/cached by backend jobs, public only after source/freshness rules pass, and cited by source label/timestamp. Weather alert preferences and events are private to the authenticated user and must be backend-owned for delivery.
+
+## Farm Area
+
+M33 farm area models map conceptually into:
+
+- `farm_plots`
+- `farm_plot_measurements`
+- `farm_plot_boundaries`
+- `farm_plot_notes`
+
+Type mapping:
+
+- `FarmPlotRecord` -> `farm_plots` plus latest measurement summary fields
+- `FarmAreaCalculationInput` -> `farm_plot_measurements.input_dimensions`
+- `FarmAreaCalculationResult` -> `farm_plot_measurements` area fields and formula/disclaimer fields
+- `FarmAreaShape` -> `farm_plot_measurements.shape`
+- `FarmAreaMeasurementMethod` -> `measurement_method`
+- `FarmAreaAccuracyLevel` -> `accuracy_level`
+- Future GPS/map polygon data -> `farm_plot_boundaries`
+- Future My Farm planning notes -> `farm_plot_notes`
+
+M33 state is localStorage-only under `kasethub.farmArea.v1`. Production persistence requires real auth, owner-scoped RLS, private boundary defaults, deletion controls, and clear copy that estimates are not official land surveys. Precise GPS/map geometry should never be public-read by default.
+
+## My Farm Hub
+
+M34 My Farm hub models map conceptually into generated dashboard views and user-owned preferences:
+
+- `farm_profiles`
+- `farm_dashboard_preferences`
+- `farm_timeline_events`
+- `farm_insights`
+
+Type mapping:
+
+- `MyFarmHubSummary` -> computed dashboard summary, not a trusted client-written row
+- `MyFarmQuickAction` -> frontend/default preference or future `farm_dashboard_preferences`
+- `MyFarmTimelineItem` -> `farm_timeline_events`
+- `MyFarmInsightCard` -> `farm_insights`
+- `MyFarmLocalDataWarning` -> frontend safety copy, not a database table
+- `MyFarmNextAction` -> computed recommendation from owned records and feature readiness
+
+M34 does not persist My Farm hub data. It reads Guest Memory, Crop Watch, Farm Area, and Weather fixture state locally. Production My Farm should rebuild summaries/timelines server-side from user-owned source records under RLS. Client-only counts must not grant permissions, trigger notifications, or drive trusted AI/weather/price decisions.
+
+## Notification Center
+
+M35 notification models map conceptually into:
+
+- `notification_preferences`
+- `notification_events`
+- `notification_deliveries`
+- `notification_digest_jobs`
+
+Type mapping:
+
+- `NotificationItem` -> `notification_events` plus user delivery/read state
+- `NotificationType` -> `notification_events.event_type`
+- `NotificationPriority` -> `notification_events.priority`
+- `NotificationSource` -> `notification_events.source_table/source_id` or source metadata
+- `NotificationStatus` -> in-app user state or delivery/inbox state
+- `NotificationPreference` -> `notification_preferences`
+- `NotificationDigestPreview` -> `notification_digest_jobs` preview/output
+
+M35 state is localStorage-only under `kasethub.notificationCenter.v1`. Production notification events must be backend-generated from trusted source records and must not treat browser local preferences as delivery consent. Delivery channels such as push, LINE, SMS, and email need explicit consent, quiet hours, rate limits, and delivery logs.
+
+## Admin Dashboard
+
+M24 admin models map conceptually into:
+
+- `AdminRole` -> `admin_roles.role`
+- `AdminDashboardSummary` -> computed backend/admin dashboard view
+- `AdminModuleStatus` -> computed module health/readiness view
+- `AdminTask` -> `content_review_tasks`, `crop_price_review_tasks`, `expert_review_requests`, or future admin task table
+- `AdminRiskItem` -> `ai_safety_review_logs`, `expert_review_requests`, or computed risk view
+- `AdminAuditLogPreview` -> `admin_audit_logs`
+- `AdminReviewQueueSummary` -> `moderation_queue`, `content_review_tasks`, `crop_price_review_tasks`, and `expert_review_requests`
+- `AdminHealthStatus` -> computed system health view
+
+Future admin-related tables:
+
+- `admin_roles`
+- `admin_audit_logs`
+- `moderation_queue`
+- `expert_review_requests`
+- `content_review_tasks`
+- `crop_price_review_tasks`
+- `ai_safety_review_logs`
+
+Admin permissions must be enforced server-side. The frontend dashboard should never be the source of truth for role claims, publish permission, moderation action, price approval, AI safety decision, or support access.
+## M25 Staging Readiness Mapping Notes
+
+M25 adds frontend-only readiness audit models, not database tables:
+
+- `SupabaseReadinessAudit`
+- `SupabaseReadinessItem`
+- `SupabaseReadinessAreaSummary`
+- `SupabaseReadinessAction`
+- `SupabaseProductionBlocker`
+
+These types summarize staging readiness for existing schema drafts. They should not be persisted until a later admin/audit milestone decides whether readiness checks belong in `admin_audit_logs`, `system_health_checks`, or a deployment checklist table.
+
+The future database mapping remains unchanged: `admin_roles`, `admin_audit_logs`, `moderation_queue`, `expert_review_requests`, `content_review_tasks`, `crop_price_review_tasks`, and `ai_safety_review_logs` are still future backend/admin tables and must be protected by RLS plus server-side role checks.
+
+## M29 Guest Sync Edge Function Mapping Notes
+
+M29 adds Edge Function contract types only:
+
+- `GuestSyncEdgeRequest` -> future Edge Function request body for `guest-memory-sync`
+- `GuestSyncEdgeResponse` -> future Edge Function response body
+- `GuestSyncAuthContext` -> authenticated session context derived server-side from Supabase Auth
+- `GuestSyncIdempotencyKey` -> future idempotency key stored with sync event/audit records
+- `GuestSyncValidationResult` -> server validation summary
+- `GuestSyncMergeResult` -> created/merged/skipped counts by Guest Memory section
+- `GuestSyncRollbackPlan` -> staging rollback/manual cleanup guidance
+- `GuestSyncStagingReadiness` -> frontend planning output only, not a database table
+
+Future persistence should map sync attempts into `guest_sync_events` or a backend-owned audit table with `user_id`, `guest_id`, `idempotency_key`, request hash, consent snapshot, status, counts, error code, and timestamps. The frontend must not persist service-role credentials, trusted owner claims, or admin-only audit decisions.

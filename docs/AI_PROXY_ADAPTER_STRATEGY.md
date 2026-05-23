@@ -135,3 +135,12 @@ Frontend screens should continue to consume:
 ## M13 Boundary
 
 M13 is an adapter and contract layer. It makes no real network calls and does not enable real AI, Supabase writes, uploads, auth, or provider keys.
+
+## M30 Internal MVP Snapshot
+
+M30 classifies AI / Plant analysis as `needs_real_api` with critical risk in the MVP readiness audit. This is intentional: the UI and contracts are ready for controlled staging work, but the product must not imply real AI diagnosis, real image upload, or production model behavior.
+
+Before any AI staging endpoint is enabled, keep provider keys backend-owned, enforce credits server-side, log safety events, and preserve the existing disabled/local fixture fallback.
+## M36 Phase Decision Note
+
+M36 recommends Supabase staging first, then phone auth and Guest Sync, before AI provider work. If demo value is the priority, AI text proxy can move earlier on `staging/ai-proxy`, but only with backend-owned provider secrets, cost caps, rate limits, safety logs, and fixture fallback. Plant vision should wait until text proxy, image privacy, upload/storage, and expert escalation boundaries are ready.

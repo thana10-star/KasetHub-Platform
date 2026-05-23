@@ -6,12 +6,15 @@ import {
   ChevronRight,
   ClipboardCheck,
   Clock3,
+  CloudSun,
   FileLock2,
   FileText,
+  GitBranch,
   History,
   Leaf,
   Link2,
   LogOut,
+  Ruler,
   Server,
   ShieldCheck,
   Settings,
@@ -29,27 +32,40 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { demoUser, profileStats } from '@/data/mockData';
 import { useCropWatch } from '@/hooks/useCropWatch';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
+import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import type { AppRoute } from '@/types/kaset';
 
 const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> = [
   { label: 'เครดิตและประวัติ AI', icon: Bot, href: '/app/ai-credits' },
   { label: 'สถานะ AI Proxy', icon: Server, href: '/app/ai-proxy-status' },
+  { label: 'Admin Dashboard ตัวอย่าง', icon: ShieldCheck, href: '/app/admin' },
+  { label: 'Internal MVP Snapshot', icon: ClipboardCheck, href: '/app/mvp-snapshot' },
+  { label: 'Next Phase Decision', icon: GitBranch, href: '/app/next-phase' },
+  { label: 'Supabase staging readiness', icon: Server, href: '/app/supabase-readiness' },
+  { label: 'Phone OTP staging checklist', icon: ShieldCheck, href: '/app/auth/phone-staging' },
   { label: 'ประวัติการใช้ AI', icon: Clock3, href: '/app/ai-credits' },
   { label: 'ประวัติพืชของฉัน', icon: Leaf, href: '/app/my-farm' },
+  { label: 'ตั้งค่า My Farm', icon: Settings, href: '/app/my-farm/settings' },
+  { label: 'ตั้งค่าการแจ้งเตือน', icon: Bell, href: '/app/notification-settings' },
   { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
+  { label: 'สภาพอากาศเกษตรตัวอย่าง', icon: CloudSun, href: '/app/weather' },
+  { label: 'คำนวณพื้นที่แปลง', icon: Ruler, href: '/app/farm-area' },
   { label: 'กติกาชุมชน', icon: ShieldCheck, href: '/app/community-rules' },
   { label: 'ศูนย์รายงานชุมชน', icon: ClipboardCheck, href: '/app/moderation-center' },
   { label: 'ประวัติวิเคราะห์ภาพ', icon: History, href: '/app/analysis-history' },
   { label: 'ความเป็นส่วนตัวของรูปภาพ', icon: FileLock2, href: '/app/image-privacy' },
+  { label: 'เตรียมรูปก่อนวิเคราะห์', icon: FileLock2, href: '/app/image-preflight' },
   { label: 'สมัคร/สำรองข้อมูล', icon: ShieldCheck, href: '/app/auth' },
   { label: 'สถานะบัญชีทดสอบ', icon: ShieldCheck, href: '/app/auth/status' },
   { label: 'กติกาเชื่อมบัญชี Phone + LINE', icon: Link2, href: '/app/auth/linking' },
   { label: 'ตรวจความพร้อม UX', icon: ClipboardCheck, href: '/app/qa' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', icon: FileText, href: '/app/content-admin-preview' },
   { label: 'สถานะ Guest Sync', icon: CloudUpload, href: '/app/guest-sync-status' },
+  { label: 'แผน Guest Sync Edge Function', icon: CloudUpload, href: '/app/guest-sync-edge' },
   { label: 'สำรองข้อมูลในอนาคต', icon: UserRound, href: '/app/account-preview' },
   { label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้', icon: Sprout, href: '/app/memory' },
   { label: 'บทความที่บันทึกไว้', icon: BookOpenCheck, href: '/app/saved-articles' },
@@ -63,7 +79,9 @@ export function ProfilePage() {
   const { savedCount: savedVideoCount } = useSavedVideos();
   const { counts, state } = useGuestMemory();
   const { counts: cropWatchCounts } = useCropWatch();
+  const notificationCenter = useNotificationCenter();
   const accountStatus = getAccountStatus(state);
+  const phaseDecision = runPhaseDecisionPlan();
 
   return (
     <div>
@@ -92,6 +110,53 @@ export function ProfilePage() {
         <NoticeBox tone="success" title="โปรไฟล์ตัวอย่างแบบไม่บังคับสมัคร">
           ใช้งานฟีเจอร์หลักได้ก่อน ข้อมูลที่บันทึกไว้จะอยู่ในเครื่องนี้จนกว่าจะมีระบบสำรองข้อมูลจริง
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <Bell aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">ศูนย์แจ้งเตือน</h2>
+                <StatusPill tone={notificationCenter.digest.unreadCount > 0 ? 'warning' : 'success'}>
+                  {notificationCenter.digest.unreadCount} ยังไม่อ่าน
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {notificationCenter.digest.totalCount} รายการ local/mock · ไม่มี push, LINE, SMS หรือ email จริง
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/notifications">
+                  เปิดแจ้งเตือน
+                </Link>
+                <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/notification-settings">
+                  ตั้งค่า
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <GitBranch aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">แผนขั้นต่อไป</h2>
+                <StatusPill tone="warning">prototype only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {phaseDecision.recommendation.title} · ยังไม่เปิด backend/API/auth จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/next-phase">
+                เปิด Next Phase Decision
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">

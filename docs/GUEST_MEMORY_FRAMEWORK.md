@@ -49,6 +49,22 @@ M21/M22 price features use two local layers:
 
 Keep alert preferences out of generic Guest Memory until the schema is stable. Future account sync can merge Guest Memory followed topics and Crop Watch records into separate cloud tables.
 
+## My Farm Hub Relationship
+
+M34 makes `/app/my-farm` a dashboard over existing local stores. It does not create a new memory store.
+
+The hub reads:
+
+- Guest Memory farm records.
+- Guest Memory saved analysis results.
+- Guest Memory saved articles and videos.
+- Guest Memory recent AI questions.
+- Crop Watch records from `kasethub.cropWatch.v1`.
+- Farm area plot records from `kasethub.farmArea.v1`.
+- Weather fixture context.
+
+Future sync should keep these records in their own backend tables and generate My Farm summaries/timeline items from trusted server-side ownership, not from client-only dashboard counts.
+
 ## Supabase Sync Future
 
 Guest Memory maps cleanly to future cloud tables:
@@ -63,6 +79,9 @@ Guest Memory maps cleanly to future cloud tables:
 - `farm_history_records`
 - `plant_analysis_records`
 - `plant_analysis_images` in future cloud storage metadata
+- `farm_timeline_events`
+- `farm_dashboard_preferences`
+- `farm_insights`
 - `memory_migrations`
 
 When auth exists, the app can upload local memory after consent, merge by `itemType + itemId`, and preserve local timestamps. Server-side sync should handle deduplication, device IDs, and conflict resolution.

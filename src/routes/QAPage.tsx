@@ -1,7 +1,9 @@
 import {
   BookOpenCheck,
   CheckCircle2,
+  ClipboardCheck,
   Eye,
+  GitBranch,
   Hand,
   ImageUp,
   ListChecks,
@@ -15,6 +17,8 @@ import { Card } from '@/components/ui/Card';
 import { LargeActionButton } from '@/components/ui/LargeActionButton';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
+import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
 import type { AppRoute } from '@/types/kaset';
 
 const checklist = [
@@ -52,8 +56,24 @@ const checklist = [
 
 const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'หน้าแรก', route: '/app' },
+  { label: 'Admin Dashboard', route: '/app/admin' },
+  { label: 'Internal MVP snapshot', route: '/app/mvp-snapshot' },
+  { label: 'Next Phase Decision', route: '/app/next-phase' },
+  { label: 'Supabase readiness', route: '/app/supabase-readiness' },
+  { label: 'Supabase connection dry run', route: '/app/supabase-connection' },
+  { label: 'Supabase SQL checklist', route: '/app/supabase-sql-checklist' },
+  { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },
+  { label: 'Guest Sync Edge plan', route: '/app/guest-sync-edge' },
+  { label: 'My Farm Hub', route: '/app/my-farm' },
+  { label: 'My Farm settings', route: '/app/my-farm/settings' },
+  { label: 'Notification Center', route: '/app/notifications' },
+  { label: 'Notification settings', route: '/app/notification-settings' },
+  { label: 'สภาพอากาศเกษตร', route: '/app/weather' },
+  { label: 'คำนวณพื้นที่แปลง', route: '/app/farm-area' },
+  { label: 'คู่มือวัดพื้นที่แปลง', route: '/app/farm-area-guide' },
   { label: 'AI ผู้ช่วยเกษตร', route: '/app/ai' },
   { label: 'วิเคราะห์โรคพืช', route: '/app/analyze' },
+  { label: 'Image preflight', route: '/app/image-preflight' },
   { label: 'YouTube Hub', route: '/app/youtube' },
   { label: 'ชุมชน', route: '/app/community' },
   { label: 'กติกาชุมชน', route: '/app/community-rules' },
@@ -82,6 +102,9 @@ const nextTasks = [
 ];
 
 export function QAPage() {
+  const mvpAudit = runMvpReadinessAudit();
+  const phaseDecision = runPhaseDecisionPlan();
+
   return (
     <div>
       <PageHeader title="ตรวจความพร้อม UX" subtitle="เช็กความอ่านง่ายและความชัดเจนสำหรับเกษตรกรไทย" showBack />
@@ -109,6 +132,70 @@ export function QAPage() {
         <NoticeBox tone="success" title="หลักการของ M15">
           ใช้คำสั้นลง ปุ่มใหญ่ขึ้น และบอกสถานะสำคัญให้ตรงไปตรงมา เช่น ข้อมูลอยู่ในเครื่องนี้ ยังไม่อัปโหลดรูปจริง และ AI เป็นคำแนะนำเบื้องต้น
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <ClipboardCheck aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M30 Internal MVP Snapshot</h2>
+                <StatusPill tone="warning">ยังไม่ใช่ Production App</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {mvpAudit.routeCount} routes · {mvpAudit.routeGroups.length} groups · {mvpAudit.highRiskCount} high-risk modules · ยังเป็น Internal MVP / Prototype
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg bg-kaset-mist p-2">
+              <p className="font-extrabold text-kaset-deep">{mvpAudit.statusCounts.ready_mock}</p>
+              <p className="text-[11px] font-bold text-slate-500">ready mock</p>
+            </div>
+            <div className="rounded-lg bg-amber-50 p-2">
+              <p className="font-extrabold text-amber-900">{mvpAudit.statusCounts.needs_backend + mvpAudit.statusCounts.needs_real_api}</p>
+              <p className="text-[11px] font-bold text-amber-900">needs backend/API</p>
+            </div>
+            <div className="rounded-lg bg-rose-50 p-2">
+              <p className="font-extrabold text-rose-800">{mvpAudit.statusCounts.blocked}</p>
+              <p className="text-[11px] font-bold text-rose-800">blocked</p>
+            </div>
+          </div>
+          <LargeActionButton
+            className="mt-4"
+            icon={ClipboardCheck}
+            label="เปิด Internal MVP Snapshot"
+            description="ดู route coverage, module readiness, production blockers และ next phase"
+            to="/app/mvp-snapshot"
+            variant="soft"
+          />
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <GitBranch aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M36 Next Phase Decision</h2>
+                <StatusPill tone="warning">ยังไม่เปิดระบบจริง</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {phaseDecision.recommendation.title} · {phaseDecision.overallReadiness.score}% readiness · main ยังเป็น stable prototype
+              </p>
+            </div>
+          </div>
+          <LargeActionButton
+            className="mt-4"
+            icon={GitBranch}
+            label="เปิด Next Phase Decision"
+            description="ดู recommended order, staging branch plan, blockers และ risk register"
+            to="/app/next-phase"
+            variant="soft"
+          />
+        </Card>
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
@@ -180,6 +267,19 @@ export function QAPage() {
         <NoticeBox tone="info" icon={MessageCircle} title="หมายเหตุสำหรับ prototype">
           ยังไม่มี backend, auth, AI จริง, Supabase write หรือ upload รูปจริง การตรวจนี้เน้นความชัดเจนของหน้าจอและความพร้อมก่อนทดสอบกับผู้ใช้จริง
         </NoticeBox>
+        <Card className="p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <ClipboardCheck aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+            <h2 className="font-extrabold text-kaset-ink">Next phase checklist</h2>
+          </div>
+          <div className="grid gap-2">
+            {mvpAudit.qaChecklist.map((task) => (
+              <p className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={task}>
+                {task}
+              </p>
+            ))}
+          </div>
+        </Card>
       </div>
     </div>
   );

@@ -134,3 +134,58 @@ Rules:
 - LINE-only preview should recommend adding phone before backup.
 - Provider conflicts require explicit user confirmation.
 - No LINE SDK, redirect, token, Supabase write, or network call exists in M19.
+## M25 Supabase Staging Readiness Note
+
+Phone Auth remains local/mock during M25. The staging readiness checklist requires:
+
+- `VITE_ENABLE_PHONE_AUTH=false`
+- `VITE_PHONE_AUTH_MODE=local_mock`
+- no real SMS or Supabase Auth call
+- no phone auth secrets in frontend ENV
+- no cloud sync based on phone ownership until staging RLS passes
+
+Real phone OTP should be enabled only in a later staging auth milestone with rate limits, abuse controls, recovery rules, and server-side audit logging.
+
+## M28 Phone OTP Staging Plan
+
+M28 adds planning only:
+
+- `/app/auth/phone-staging`
+- `src/services/auth/phone-auth-staging-readiness.ts`
+- `docs/SUPABASE_AUTH_PHONE_OTP_STAGING_PLAN.md`
+- `docs/SUPABASE_AUTH_REDIRECT_URL_CHECKLIST.md`
+- `docs/SMS_PROVIDER_COST_AND_RATE_LIMIT_NOTES.md`
+
+The app still does not send OTP SMS and does not call Supabase Auth.
+
+Required defaults remain:
+
+```bash
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_PHONE_AUTH=false
+VITE_PHONE_AUTH_MODE=local_mock
+VITE_SUPABASE_AUTH_REDIRECT_URL=
+VITE_AUTH_STAGING_LABEL=local
+```
+
+Before a real staging OTP test:
+
+- configure Supabase Auth phone provider in a staging project only
+- add local, Cloudflare preview, staging, and production redirect URLs deliberately
+- configure SMS provider cost limits and OTP rate limits
+- use private test phone numbers only
+- confirm Supabase session ownership with `auth.uid()`
+- keep `VITE_ENABLE_CLOUD_SYNC=false` until RLS ownership tests pass
+- keep service-role keys out of frontend forever
+
+## M29 Guest Sync Edge Dependency
+
+The future `guest-memory-sync` Edge Function must not run from a phone mock session. It requires a real Supabase Auth session from staging first.
+
+Phone auth staging must prove:
+
+- OTP sign-in creates a valid session.
+- `auth.uid()` maps to the account owner.
+- Guest Sync consent is explicit.
+- Cloud sync remains off until the Edge Function idempotency, merge, audit, and rollback tests pass.
+- service-role remains server-side only.

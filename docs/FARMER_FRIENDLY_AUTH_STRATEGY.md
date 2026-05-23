@@ -129,3 +129,23 @@ Rules:
 - Guest Memory should sync only after account ownership is clear.
 
 M19 keeps this mock-only with no LINE SDK, redirect, token, network call, or Supabase write.
+
+## M28 Phone OTP Staging UX
+
+M28 keeps the user-facing phone path local/mock, but adds `/app/auth/phone-staging` so the team can prepare a controlled Supabase Auth phone OTP staging test.
+
+User-facing Thai copy must remain direct:
+
+- "ยังไม่ส่ง OTP จริง"
+- "ยังไม่เปิด auth จริง"
+- "รอสักครู่ก่อนขอรหัสใหม่"
+- "ข้อมูลในเครื่องจะยังไม่ถูกสำรองจนกว่าคุณจะยืนยันบัญชี"
+
+Before real SMS is enabled, the team must verify:
+
+- redirect URL returns to a clear account status screen
+- SMS resend copy is calm and senior-friendly
+- failed OTP attempts explain what to do next
+- logout is obvious on shared devices
+- Guest Sync remains disabled until session ownership is real
+- service-role keys and SMS provider secrets never appear in frontend

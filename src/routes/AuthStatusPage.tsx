@@ -1,4 +1,4 @@
-import { KeyRound, Link2, Lock, MessageCircle, Phone, RotateCcw, ShieldCheck, Smartphone } from 'lucide-react';
+import { ClipboardList, KeyRound, Link2, Lock, MessageCircle, Phone, RotateCcw, ShieldCheck, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -94,6 +94,23 @@ export function AuthStatusPage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-extrabold text-kaset-ink">Phone OTP staging checklist</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                โหมดปัจจุบันยังเป็น local mock การเปิด Supabase phone OTP จริงต้องตั้งค่า staging, SMS provider, redirect URLs และ rate limit ก่อน
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/auth/phone-staging">
+                เปิด checklist ก่อนทดสอบ OTP จริง
+              </Link>
             </div>
           </div>
         </Card>

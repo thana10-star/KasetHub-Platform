@@ -152,3 +152,32 @@ Rules:
 - Provider conflicts should block sync until the user confirms ownership.
 - `auth_link_events` should record future provider linking actions.
 - `guest_sync_events` should record sync attempts and merge summaries.
+
+## M28 Phone OTP Staging Dependency
+
+M28 does not enable real sync. It prepares the first phone OTP staging checklist at `/app/auth/phone-staging`.
+
+Before Guest Memory can sync to cloud:
+
+- Supabase phone OTP must pass staging with real session ownership.
+- `auth.uid()` must match the owner in RLS.
+- Redirect URLs must return users to a clear account status screen.
+- SMS provider cost and rate limits must be configured.
+- `VITE_ENABLE_CLOUD_SYNC=false` must remain until ownership, consent, merge, rollback, and audit rules pass.
+- The frontend must never hold a service-role key.
+
+## M29 Guest Sync Edge Function Dependency
+
+The first real cloud sync endpoint should be a backend-owned Supabase Edge Function named `guest-memory-sync`.
+
+Before enabling it:
+
+- Deploy only to staging.
+- Require a valid Supabase user session.
+- Keep the service-role key only inside the Edge Function.
+- Require an idempotency key for every sync attempt.
+- Store a sync audit event with consent snapshot and merge counts.
+- Reject missing auth, invalid payloads, cross-owner attempts, and duplicate idempotency misuse.
+- Keep local Guest Memory preserved after success, partial success, or rejection until a later synced-marker policy is implemented.
+
+M29 adds the contract and test plan only. It does not deploy or call the endpoint.

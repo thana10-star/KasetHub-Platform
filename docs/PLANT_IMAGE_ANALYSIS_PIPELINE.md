@@ -128,6 +128,10 @@ Image analysis can be slower than text AI. Future backend work should support:
 
 M10 is local UX only. It uses object URLs for preview, mock analysis results, and Guest Memory summaries. No real upload, backend call, AI vision model, moderation service, Supabase Storage, or hidden API key exists.
 
+## My Farm Hub Relationship
+
+M34 surfaces saved analysis summaries and Guest Memory farm records inside `/app/my-farm`. The hub reads lightweight metadata only. It does not persist raw images, upload files, call AI vision, or create cloud My Farm records.
+
 ## M11 Mock Proxy Fixture Layer
 
 M11 keeps the image local but replaces the old static analysis result with a backend-shaped mock proxy response.
@@ -191,3 +195,16 @@ The job planner previews:
 - `deletion_requested`
 
 `/app/analyze` now shows this future backend flow as explanatory UI. The current version still keeps raw images local and stores only lightweight result metadata in Guest Memory.
+
+## M31 Image Compression + Preflight
+
+M31 adds a local preflight layer before mock plant analysis:
+
+- check file type, file size, and image dimensions in the browser
+- warn if the image is too small, very large, unsupported, or possibly blurry
+- resize/compress the image locally with a default max side of 1280px
+- show original size vs optimized size and estimated future AI/upload cost reduction
+- show photo tips before analysis
+- link to `/app/image-preflight`
+
+This still does not upload images, call AI Vision, write Supabase Storage, or persist raw image/base64 data. Guest Memory may store only lightweight metadata such as file name, approximate sizes, readiness score, and result summary.

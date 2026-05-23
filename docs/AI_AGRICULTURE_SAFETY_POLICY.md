@@ -81,6 +81,19 @@ Community reports involving agricultural advice should be treated as safety sign
 - Do not let AI rewrite community experience into official guidance unless a trusted source is cited.
 - Scam/fake sale and personal-data reports should be prioritized by a backend-owned moderation queue before marketplace features go live.
 
+## M24 Admin AI Safety Review
+
+M24 previews AI safety/risk logs in `/app/admin` using local AI proxy warnings and local AI credit usage. This is not a real AI safety backend.
+
+Future admin review must:
+
+- keep AI provider logs server-side
+- protect user privacy and redact sensitive content
+- route chemical, pesticide, fertilizer, disease, price, and plant-analysis escalations to expert reviewers
+- record reviewer role, source, timestamp, decision, and correction notes
+- keep audit logs append-only
+- prevent frontend-only “approve” actions from changing production behavior
+
 ## Safe Response Shape
 
 Recommended response sections:
@@ -129,3 +142,17 @@ Avoid:
 - Long legal-style disclaimers in small text.
 - Technical provider/model language on normal user screens.
 - Claims such as “ตรวจพบแน่นอน” or “รักษาได้แน่นอน”.
+
+## M31 Image Preflight Safety
+
+M31 adds local image compression and preflight checks before mock plant analysis. These checks are not AI moderation and must not be described as diagnosis.
+
+Required behavior:
+
+- Say “รูปยังไม่ถูกส่งออกจากเครื่องในเวอร์ชันนี้”.
+- Warn that blurry, dark, too-small, or obstructed photos may reduce result quality.
+- Remind users not to include faces, house signs, documents, or other personal data in plant photos.
+- Keep raw images and base64 strings out of Guest Memory.
+- Treat readiness score as a UX estimate only.
+
+Future AI Vision must still run backend-side safety checks, moderation, consent, provider-key protection, and expert escalation for risky pesticide, disease, fertilizer, or chemical advice.

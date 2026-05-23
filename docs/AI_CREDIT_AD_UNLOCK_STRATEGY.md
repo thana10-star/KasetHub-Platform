@@ -144,3 +144,14 @@ It simulates backend ownership by:
 - returning the same response contract as the adapter
 
 The frontend still consumes local credits after a successful adapter response in mock mode. Real credit mutation must happen server-side in a future milestone.
+
+## M31 Image Cost Reduction Preparation
+
+M31 adds local image compression and preflight quality checks before mock plant analysis. This does not change credit balances or call AI, but it prepares for lower future AI Vision costs by:
+
+- resizing large images before upload/AI
+- estimating original vs optimized file size
+- warning when an image is too small or likely unsuitable
+- showing a cost-reduction label before analysis
+
+Future backend credit pricing should consider optimized image size, model choice, retries, and whether the image passes preflight/moderation before charging or calling a provider.
