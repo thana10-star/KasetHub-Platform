@@ -384,6 +384,9 @@ export function AdminDashboardPage() {
                     {executionReview.nextSafeStep} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
                   </p>
                   <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                    Verified: {executionReview.verifiedResults.slice(0, 6).join(' / ')}
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
                     Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
                   </p>
                 </div>

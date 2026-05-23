@@ -2,7 +2,7 @@
 
 ## Summary
 
-M42 adds a pending manual execution review layer for the first real Supabase staging setup. It asks the operator to provide the actual `kasethub-staging` project result, schema SQL result, RLS SQL result, screenshots or copied SQL errors, Table Editor status, and RLS status before KasetHub proceeds.
+M42 records the first successful manual Supabase staging setup result. The operator confirmed that `kasethub-staging` was created, schema SQL ran successfully, 23 tables are visible in Table Editor, RLS policy SQL ran successfully, RLS is enabled from Supabase table security, and SQL errors were `none`.
 
 No real Supabase project was created by the app. No SQL was run automatically. No real keys, `.env.local`, service-role key, auth enablement, cloud sync, uploads, AI proxy, backend writes, destructive SQL, or production behavior were added.
 
@@ -28,7 +28,7 @@ No real Supabase project was created by the app. No SQL was run automatically. N
 - `/app/supabase-readiness`
 - `/app/admin`
 
-Each route now surfaces the M42 review status and the allowed status choices:
+Each route now surfaces the M42 review status, verified result notes, and the allowed status choices:
 
 - `pending`
 - `success`
@@ -37,20 +37,24 @@ Each route now surfaces the M42 review status and the allowed status choices:
 
 ## Review Status
 
-Current status: `pending`
+Current status: `success`
 
-Reason: the user has not yet provided confirmed Supabase Dashboard evidence, SQL success screenshots, or copied SQL errors for this milestone.
+Reason: the user provided the actual Supabase manual execution result and no SQL errors were reported.
 
-## Information Requested From User
+## Actual Manual Execution Result
 
-M42 is waiting for:
+Confirmed:
 
-- whether Supabase project was created
-- whether schema SQL ran successfully
-- whether RLS SQL ran successfully
-- screenshots or copied SQL errors, if any
-- whether tables appear in Table Editor
-- whether RLS appears enabled
+- Supabase project created: yes
+- Project name: `kasethub-staging`
+- Schema SQL ran successfully: yes
+- Tables visible in Table Editor: yes
+- Table count: 23
+- RLS policy SQL ran successfully: yes
+- RLS enabled: yes, confirmed from Supabase table security
+- SQL errors: none
+
+No service-role key, `.env.local`, database password, connection string, or real key value was recorded.
 
 ## Setup Walkthrough Notes
 
@@ -68,9 +72,9 @@ Manual SQL order remains:
 1. `supabase/migrations/0001_kasethub_core_schema.sql`
 2. `supabase/policies/0001_kasethub_rls_policies.sql`
 
-No SQL error was provided during this milestone. No SQL file was changed. No automatic SQL execution was added.
+No SQL error was reported during this milestone. No SQL file was changed. No automatic SQL execution was added.
 
-If SQL errors are provided later, the exact error text should be documented and only the smallest safe correction should be proposed.
+No schema/RLS correction is needed for M42. If SQL errors appear later, the exact error text should be documented and only the smallest safe correction should be proposed.
 
 ## Safety Notes
 
@@ -111,7 +115,7 @@ Passed:
 - `/app/supabase-readiness`
 - `/app/admin`
 
-Each checked route rendered its expected page title plus M42 status content. The local Vite server and headless Chrome process were stopped after verification.
+Each checked route rendered its expected page title plus M42 `success` status content, `kasethub-staging`, the 23-table result, and `SQL errors: none` where applicable. The local Vite server and headless Chrome process were stopped after verification.
 
 ## Known Limitations
 
@@ -119,13 +123,13 @@ Each checked route rendered its expected page title plus M42 status content. The
 - Codex did not inspect the Supabase Dashboard.
 - Codex did not run SQL in Supabase.
 - The app does not verify remote tables/RLS/indexes automatically.
-- Current M42 status is pending until the operator provides evidence.
+- M42 status is based on the operator-provided Dashboard result, not an automatic remote database inspection by the app.
 - Auth, cloud sync, uploads, Edge Functions, AI proxy, and frontend writes remain disabled/out of scope.
 
 ## Next Recommended Milestone
 
-After the operator provides manual execution evidence:
+After this successful manual staging execution:
 
-- If schema/RLS succeeded and dashboard checks are safe, mark M42 `success` and plan the next safe staging milestone.
-- If SQL failed, create a minimal SQL-fix milestone before rerunning manually.
-- If secrets, production data, broad public writes, or unclear project selection appear, keep M42 `blocked` until corrected.
+- Keep auth/cloud sync disabled until the next reviewed milestone.
+- Review the safe next staging step, likely phone auth staging planning or a focused RLS/public policy verification milestone.
+- If later evidence shows secrets, production data, broad public writes, or unclear project selection, reopen M42 and treat it as `blocked` until corrected.

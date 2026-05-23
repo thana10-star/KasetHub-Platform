@@ -1,6 +1,4 @@
-import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import type { SupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review.types';
-import type { SupabaseSetupProgressState } from '@/services/supabase/supabase-setup-progress.types';
 
 export const supabaseManualExecutionReviewStatusOptions: SupabaseManualExecutionReview['statusOptions'] = [
   {
@@ -25,21 +23,24 @@ export const supabaseManualExecutionReviewStatusOptions: SupabaseManualExecution
   },
 ];
 
-export function buildSupabaseManualExecutionReview(
-  setupState?: SupabaseSetupProgressState,
-): SupabaseManualExecutionReview {
-  const setupProgress = summarizeSupabaseSetupProgress(setupState);
-  const setupComplete = setupProgress.completedCount === setupProgress.totalCount;
-
+export function buildSupabaseManualExecutionReview(): SupabaseManualExecutionReview {
   return {
     milestone: 'M42',
-    status: 'pending',
-    statusLabel: 'pending',
-    statusTone: 'warning',
-    statusDetail: setupComplete
-      ? 'local M41 checklist ครบแล้ว แต่ยังรอหลักฐานจาก Supabase Dashboard เพื่อสรุปผล M42'
-      : 'ยังรอผล manual Supabase staging execution และหลักฐานจากผู้ทำ setup',
-    nextSafeStep: 'ส่งผล manual setup หรือ SQL error มาให้ review ก่อนเปิด auth/cloud sync',
+    status: 'success',
+    statusLabel: 'success',
+    statusTone: 'success',
+    statusDetail: 'kasethub-staging created, schema SQL succeeded, 23 tables are visible, RLS SQL succeeded, and RLS is enabled from Supabase table security.',
+    nextSafeStep: 'บันทึกผลสำเร็จแล้ว และยังหยุดก่อนเปิด auth/cloud sync จนกว่า milestone ถัดไปจะ review',
+    verifiedResults: [
+      'Supabase project created: yes',
+      'Project name: kasethub-staging',
+      'Schema SQL ran successfully: yes',
+      'Tables visible in Table Editor: yes',
+      'Table count: 23',
+      'RLS policy SQL ran successfully: yes',
+      'RLS enabled: yes, confirmed from Supabase table security',
+      'SQL errors: none',
+    ],
     requestedEvidence: [
       'Supabase project created? yes/no',
       'schema SQL ran successfully? yes/no',
@@ -48,18 +49,15 @@ export function buildSupabaseManualExecutionReview(
       'tables appear in Table Editor? yes/no',
       'RLS appears enabled? yes/no',
     ],
-    blockers: [
-      'ยังไม่มีผล manual execution ที่ยืนยันจาก Dashboard',
-      'ยังไม่มี screenshot หรือ copied SQL error สำหรับ review',
-      'ยังไม่ควรเปิด auth หรือ cloud sync จนกว่า M42 review จะเป็น success',
-    ],
+    blockers: [],
     sqlErrorNotes: [
-      'No SQL error has been provided in the repo yet.',
-      'If an error is provided, document the exact text and propose the smallest safe correction.',
+      'SQL errors: none reported.',
+      'No minimal SQL correction is needed for M42.',
     ],
     proposedFixNotes: [
-      'No schema/RLS change is proposed until an exact SQL error is reviewed.',
+      'No schema/RLS change is proposed.',
       'Do not run SQL automatically from the app or Codex.',
+      'Keep future SQL changes manual, reviewed, and staging-only.',
     ],
     safetyNotes: [
       'No real keys in repo.',

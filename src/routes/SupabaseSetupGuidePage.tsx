@@ -96,7 +96,7 @@ function ProgressStepCard({
 export function SupabaseSetupGuidePage() {
   const [progress, setProgress] = useState(() => readSupabaseSetupProgress());
   const summary = useMemo(() => summarizeSupabaseSetupProgress(progress), [progress]);
-  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(progress), [progress]);
+  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
 
   return (
     <div>
@@ -143,6 +143,9 @@ export function SupabaseSetupGuidePage() {
               <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
                 Next safe step: {executionReview.nextSafeStep}
+              </p>
+              <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                Verified: {executionReview.verifiedResults.slice(0, 4).join(' / ')}
               </p>
               <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
                 Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
@@ -272,9 +275,9 @@ export function SupabaseSetupGuidePage() {
         <section className="grid gap-3">
           <div className="flex items-center gap-2">
             <ClipboardList aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-            <h2 className="text-lg font-extrabold text-kaset-ink">M42 evidence needed</h2>
+            <h2 className="text-lg font-extrabold text-kaset-ink">M42 verified result</h2>
           </div>
-          {executionReview.requestedEvidence.map((item) => (
+          {executionReview.verifiedResults.map((item) => (
             <Card className="p-3" key={item}>
               <p className="text-sm font-bold leading-6 text-kaset-ink">{item}</p>
             </Card>

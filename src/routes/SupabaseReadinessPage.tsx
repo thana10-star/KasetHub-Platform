@@ -234,6 +234,9 @@ export function SupabaseReadinessPage() {
                 {executionReview.nextSafeStep}
               </p>
               <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                Verified: {executionReview.verifiedResults.slice(0, 6).join(' / ')}
+              </p>
+              <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
                 Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
               </p>
             </div>

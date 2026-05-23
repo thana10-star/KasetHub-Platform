@@ -13,6 +13,7 @@ export type SupabaseManualExecutionReview = {
   statusTone: 'success' | 'warning' | 'danger' | 'info';
   statusDetail: string;
   nextSafeStep: string;
+  verifiedResults: string[];
   requestedEvidence: string[];
   blockers: string[];
   sqlErrorNotes: string[];

@@ -177,7 +177,10 @@ export function SupabaseSqlChecklistPage() {
               </div>
               <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
-                If SQL errors are provided, record the exact error and propose a minimal manual SQL correction. Do not run SQL automatically.
+                SQL errors: none. No minimal SQL correction is needed for M42. Do not run SQL automatically.
+              </p>
+              <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                Verified: {executionReview.verifiedResults.slice(2, 8).join(' / ')}
               </p>
               <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
                 Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
