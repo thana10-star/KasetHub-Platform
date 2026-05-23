@@ -25,6 +25,7 @@ import {
   runSupabaseConnectionDryRun,
 } from '@/services/supabase/supabase-connection-dry-run';
 import { buildSupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review';
+import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import {
@@ -90,6 +91,7 @@ function ReadinessItemCard({ item }: { item: SupabaseReadinessItem }) {
 export function SupabaseReadinessPage() {
   const audit = useMemo(() => runSupabaseReadinessAudit(), []);
   const connectionDryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
+  const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
   const envSafety = useMemo(() => runEnvSafetyCheck(), []);
   const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
@@ -147,6 +149,29 @@ export function SupabaseReadinessPage() {
               <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
                 Current milestone: M40 Supabase project creation + SQL run prep. ห้ามใส่ service-role key, ห้าม commit `.env.local`, และห้ามใช้ production project
               </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M43 read-only public table probe</h2>
+                <StatusPill tone={readonlyProbe.statusTone}>{readonlyProbe.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                {readonlyProbe.connectionStatus} Tables: {readonlyProbe.tables.map((table) => table.name).join(' / ')}
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                empty table is OK · no writes · ยังไม่เปิด auth/cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
+                Open M43 read-only probe
+              </Link>
             </div>
           </div>
         </Card>

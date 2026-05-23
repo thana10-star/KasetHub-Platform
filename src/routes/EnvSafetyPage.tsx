@@ -18,6 +18,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import type { EnvSafetyItem, EnvSafetySeverity, EnvSafetyStatus } from '@/services/config/env-safety.types';
+import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 
@@ -80,6 +81,7 @@ function FlagCard({ enabled, label }: { enabled: boolean; label: string }) {
 
 export function EnvSafetyPage() {
   const safety = useMemo(() => runEnvSafetyCheck(), []);
+  const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
   const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
 
@@ -209,6 +211,29 @@ export function EnvSafetyPage() {
           </div>
         </section>
 
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M43 read-only probe env</h2>
+                <StatusPill tone={readonlyProbe.statusTone}>{readonlyProbe.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                Requires local staging URL + anon key, `VITE_ENABLE_SUPABASE=true`, and `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true`.
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                no service-role key · no writes · ยังไม่เปิด auth/cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
+                Open M43 read-only probe
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-4">
           <h2 className="font-extrabold text-kaset-ink">Recommended safe values for M39</h2>
           <div className="mt-3 grid gap-2">
@@ -252,6 +277,9 @@ export function EnvSafetyPage() {
             </Link>
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mint px-4 text-sm font-extrabold text-kaset-deep" to="/app/supabase-readiness">
               เปิด Supabase readiness
+            </Link>
+            <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/supabase-readonly-probe">
+              Open M43 read-only probe
             </Link>
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/admin">
               กลับ Admin

@@ -265,7 +265,7 @@ Phone OTP should become the primary account creation path for non-tech farmers. 
 - `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false` keeps network checks off by default.
 - `/app/supabase-connection` shows current flags, local dry-run result, env/anon key status, warnings, no-write guarantees, and manual staging checklist.
 - `/app/supabase-readiness`, `/app/admin`, `/app/account-preview`, and `/app/qa` link to the connection dry run.
-- Optional future network probe is guarded by Supabase enabled, dry-run network flag enabled, valid URL, and usable anon key.
+- Optional network probe is guarded by Supabase enabled, dry-run network flag enabled, valid URL, and usable anon key.
 - No real keys, service-role key, migration, auth, phone OTP, cloud sync, Supabase write, upload, backend write, or default network call is enabled.
 
 ## M27 Supabase SQL Staging Execution Guide
@@ -383,7 +383,7 @@ Supabase is a practical next step for authentication, Postgres data storage, row
 
 M06 adds only a browser-safe client scaffold. The client is disabled unless `VITE_ENABLE_SUPABASE=true` and public Supabase ENV values are present. Auth and cloud sync remain separately gated by `VITE_ENABLE_AUTH` and `VITE_ENABLE_CLOUD_SYNC`. No service-role key, admin secret, phone OTP call, or data write should ever be placed in the frontend.
 
-M25 adds `/app/supabase-readiness`, `.env.example`, and staging setup docs so the first staging project can be reviewed safely. M26 adds `/app/supabase-connection` and a dry-run service that can detect configured staging anon settings without writes. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Supabase Edge Function contract. M30 adds `/app/mvp-snapshot` so route coverage, readiness, and production blockers are visible before the first real staging implementation. M41 adds `/app/supabase-setup-guide` with a localStorage-only progress checklist for manual project/env/SQL verification. Network probing is disabled by default and must stay public/read-only when explicitly enabled. These milestones still do not run migrations automatically, deploy/call Edge Functions, enable real auth, send OTP SMS, enable cloud sync, add secrets to the repo, write data, or upload files.
+M25 adds `/app/supabase-readiness`, `.env.example`, and staging setup docs so the first staging project can be reviewed safely. M26 adds `/app/supabase-connection` and a dry-run service that can detect configured staging anon settings without writes. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Supabase Edge Function contract. M30 adds `/app/mvp-snapshot` so route coverage, readiness, and production blockers are visible before the first real staging implementation. M41 adds `/app/supabase-setup-guide` with a localStorage-only progress checklist for manual project/env/SQL verification. M43 adds `/app/supabase-readonly-probe` for explicit-flag reads against public/read-safe tables only. Network probing is disabled by default and must stay public/read-only when explicitly enabled. These milestones still do not run migrations automatically, deploy/call Edge Functions, enable real auth, send OTP SMS, enable cloud sync, add secrets to the repo, write data, or upload files.
 
 ### Auth-Ready Sync Planning
 
@@ -552,3 +552,11 @@ M41 prepares the first controlled real staging setup. It adds:
 The route tracks project created, env added, schema SQL run, RLS SQL run, tables verified, and staging verified using localStorage only. It surfaces the next safe step, blockers, and explicit warnings: ห้ามใช้ service-role key, ใช้ staging เท่านั้น, ยังไม่เปิด auth, ยังไม่เปิด cloud sync, and หยุดก่อนเปิด auth/cloud sync.
 
 M41 may guide the human operator through creating `kasethub-staging` and manually running SQL/RLS, but the app still does not create Supabase resources, run SQL, commit keys, expose service-role credentials, enable auth/cloud sync/uploads/AI proxy, or write backend data.
+
+## M43 Supabase Read-only Probe
+
+M43 adds `/app/supabase-readonly-probe` plus `src/services/supabase/supabase-readonly-probe.ts` and `.types.ts`.
+
+The route creates an anon Supabase client only when local staging env is present and `VITE_ENABLE_SUPABASE=true` plus `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true`. It probes only `articles`, `videos`, and `crop_price_snapshots` with read-only count checks. Empty tables are OK. RLS/policy blocked, table missing, network disabled, config missing, and safe error states are shown without exposing keys.
+
+M43 does not commit `.env.local`, add real keys, use service-role credentials, write Supabase data, enable auth, enable cloud sync, upload files, call Edge Functions, call AI APIs, or change production behavior.

@@ -102,6 +102,8 @@ M42 is recorded as successful.
 
 Next safe step: plan the next reviewed staging milestone while keeping auth, phone OTP, cloud sync, uploads, AI proxy, Edge Functions, and backend writes disabled.
 
+M43 may perform an explicit-flag read-only probe against `articles`, `videos`, and `crop_price_snapshots` using only Project URL and anon key. Empty tables are OK. No writes, auth, cloud sync, uploads, AI calls, Edge Functions, or service-role keys are allowed.
+
 No automatic SQL execution should be added as a result of this milestone.
 
 If later evidence shows secrets, production data, broad public writes, or unclear project selection, M42 should be re-opened and treated as `blocked` until corrected.

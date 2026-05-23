@@ -43,6 +43,7 @@ import { SavedArticlesPage } from '@/routes/SavedArticlesPage';
 import { SavedVideosPage } from '@/routes/SavedVideosPage';
 import { SupabaseConnectionPage } from '@/routes/SupabaseConnectionPage';
 import { SupabaseReadinessPage } from '@/routes/SupabaseReadinessPage';
+import { SupabaseReadonlyProbePage } from '@/routes/SupabaseReadonlyProbePage';
 import { SupabaseSetupGuidePage } from '@/routes/SupabaseSetupGuidePage';
 import { SupabaseSqlChecklistPage } from '@/routes/SupabaseSqlChecklistPage';
 import { WeatherPage } from '@/routes/WeatherPage';
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="admin" element={<AdminDashboardPage />} />
         <Route path="supabase-readiness" element={<SupabaseReadinessPage />} />
         <Route path="supabase-connection" element={<SupabaseConnectionPage />} />
+        <Route path="supabase-readonly-probe" element={<SupabaseReadonlyProbePage />} />
         <Route path="supabase-setup-guide" element={<SupabaseSetupGuidePage />} />
         <Route path="supabase-sql-checklist" element={<SupabaseSqlChecklistPage />} />
         <Route path="env-safety" element={<EnvSafetyPage />} />

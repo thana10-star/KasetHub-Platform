@@ -73,22 +73,24 @@ It only reports whether the browser could safely create a Supabase anon client i
 
 ## Optional Public-Read Probe
 
-If a later staging test enables:
+M43 adds `/app/supabase-readonly-probe`. If a staging test enables:
 
 ```bash
 VITE_ENABLE_SUPABASE=true
 VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true
 ```
 
-and the URL/anon key are valid, the optional probe may read only a future public/read-only table:
+and the URL/anon key are valid, the optional probe may read only these public/read-safe tables:
 
-- `public_readiness_checks`
+- `articles`
+- `videos`
+- `crop_price_snapshots`
 
-The probe must not query private/user tables and must not write data.
+The probe uses read-only count checks, may report empty tables as OK, must not query private/user tables, and must not write data.
 
 ## If Schema Is Not Applied Yet
 
-If the public-read table does not exist, the app should show:
+If a public-read table does not exist, the app should show:
 
 - `schema_not_applied_yet`
 
@@ -148,4 +150,4 @@ M39 adds `/app/env-safety` before any real dry-run network probe. Use it to conf
 - auth/cloud sync/Guest Sync Edge flags are disabled
 - `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`
 
-The env safety page is local-only and does not call Supabase. If it reports blockers, fix `.env.local` before using `/app/supabase-connection`.
+The env safety page is local-only and does not call Supabase. If it reports blockers, fix `.env.local` before using `/app/supabase-connection` or `/app/supabase-readonly-probe`.

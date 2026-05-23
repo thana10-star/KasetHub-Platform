@@ -195,7 +195,7 @@ export function validateSupabaseSqlDraft(): SupabaseSqlDraftValidationResult {
     ],
     missingDraftNotes: [
       'M21-M24 future tables such as crop_price_sources, crop_price_import_jobs, community_reports, moderation_actions, admin_roles, admin_audit_logs, review task tables, and ai_safety_review_logs are documented for later migrations but are not part of the M18 SQL file.',
-      'The public_readiness_checks probe table from M26 is a future optional public-read target and is not required before first SQL/RLS staging execution.',
+      'M43 public-read probes use articles, videos, and crop_price_snapshots only; no extra public_readiness_checks table is required.',
       'Profile bootstrap trigger is intentionally commented out until auth provider behavior is selected and tested.',
     ],
     stagingExecutionWarnings: [

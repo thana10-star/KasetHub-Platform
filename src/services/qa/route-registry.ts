@@ -91,6 +91,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     routes: [
       { route: '/app/supabase-readiness', label: 'Supabase readiness', milestone: 'M25-M29', notes: 'audit local-only ไม่มี connection', manualCheckPath: '/app/supabase-readiness' },
       { route: '/app/supabase-connection', label: 'Supabase connection dry run', milestone: 'M26-M29', notes: 'network check ปิดโดยค่าเริ่มต้น', manualCheckPath: '/app/supabase-connection' },
+      { route: '/app/supabase-readonly-probe', label: 'Supabase read-only probe', milestone: 'M43', notes: 'explicit-flag public table read probe only, no writes', manualCheckPath: '/app/supabase-readonly-probe' },
       { route: '/app/supabase-setup-guide', label: 'Real Supabase staging setup guide', milestone: 'M41', notes: 'manual setup walkthrough with localStorage progress only, no SQL automation', manualCheckPath: '/app/supabase-setup-guide' },
       { route: '/app/supabase-sql-checklist', label: 'SQL staging checklist', milestone: 'M27/M40', notes: 'manual SQL/RLS execution prep and verification pack, no SQL run by app', manualCheckPath: '/app/supabase-sql-checklist' },
       { route: '/app/env-safety', label: 'Env safety', milestone: 'M39', notes: 'local-only env safety check, masks values, no network calls', manualCheckPath: '/app/env-safety' },
