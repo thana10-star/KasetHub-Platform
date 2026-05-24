@@ -1,5 +1,6 @@
 import {
   BookOpenCheck,
+  Calculator,
   CheckCircle2,
   ClipboardCheck,
   Eye,
@@ -72,6 +73,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Notification settings', route: '/app/notification-settings' },
   { label: 'สภาพอากาศเกษตร', route: '/app/weather' },
   { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
+  { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
   { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
@@ -201,6 +203,31 @@ export function QAPage() {
             label="เปิด Next Phase Decision"
             description="ดู recommended order, staging branch plan, blockers และ risk register"
             to="/app/next-phase"
+            variant="soft"
+          />
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <Calculator aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M50 Calculator QA</h2>
+                <StatusPill tone="success">local fixtures</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ตรวจสูตรผสมยา ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
+              </p>
+            </div>
+          </div>
+          <LargeActionButton
+            className="mt-4"
+            icon={Calculator}
+            label="เปิด QA เครื่องคำนวณ"
+            description="ดู test case deterministic, pass/warn/fail และขอบเขตความปลอดภัย"
+            to="/app/calculators/qa"
             variant="soft"
           />
         </Card>

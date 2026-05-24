@@ -1,5 +1,5 @@
-import { Calculator, ChevronRight, History, ShieldCheck, Star } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Calculator, ChevronRight, Copy, History, RotateCcw, Share2, ShieldCheck, Star } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -8,7 +8,14 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { calculatorCards } from '@/services/agri-calculators/agri-calculator-fixtures';
-import type { CalculatorCategory, CalculatorHistoryRecord } from '@/services/agri-calculators/agri-calculator.types';
+import { createCalculatorShareSummary } from '@/services/agri-calculators/agri-calculator-service';
+import type {
+  AgriCalculatorInputByCategory,
+  AgriCalculatorResultByCategory,
+  CalculatorCategory,
+  CalculatorHistoryRecord,
+} from '@/services/agri-calculators/agri-calculator.types';
+import { shareContent } from '@/services/share/share-service';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
 
 type NumberFieldProps = {
@@ -71,7 +78,17 @@ export function SelectField<T extends string | number>({ label, onChange, option
   );
 }
 
-export function ResultMetric({ label, tone = 'green', value }: { label: string; tone?: 'green' | 'gold' | 'sky' | 'rose'; value: string }) {
+export function ResultMetric({
+  featured = false,
+  label,
+  tone = 'green',
+  value,
+}: {
+  featured?: boolean;
+  label: string;
+  tone?: 'green' | 'gold' | 'sky' | 'rose';
+  value: string;
+}) {
   const toneClass = {
     green: 'bg-kaset-mint text-kaset-deep',
     gold: 'bg-amber-50 text-amber-900',
@@ -80,9 +97,9 @@ export function ResultMetric({ label, tone = 'green', value }: { label: string; 
   };
 
   return (
-    <div className={cx('rounded-lg p-3', toneClass[tone])}>
+    <div className={cx('rounded-lg', featured ? 'p-4' : 'p-3', toneClass[tone])}>
       <p className="text-xs font-bold leading-5 opacity-80">{label}</p>
-      <p className="mt-1 text-xl font-extrabold leading-7">{value}</p>
+      <p className={cx('mt-1 font-extrabold', featured ? 'text-2xl leading-8' : 'text-xl leading-7')}>{value}</p>
     </div>
   );
 }
@@ -142,7 +159,19 @@ export function SafetyNotice({ children }: { children?: ReactNode }) {
   );
 }
 
-export function WarningList({ warnings }: { warnings: string[] }) {
+export function WarningList({ isValid = true, warnings }: { isValid?: boolean; warnings: string[] }) {
+  if (!isValid) {
+    return (
+      <NoticeBox tone="danger" title="ยังคำนวณไม่ได้">
+        <ul className="grid gap-2">
+          {(warnings.length > 0 ? warnings : ['กรอกข้อมูลให้ครบและตรวจตัวเลขก่อนกดคำนวณอีกครั้ง']).map((warning) => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+      </NoticeBox>
+    );
+  }
+
   if (warnings.length === 0) {
     return (
       <NoticeBox tone="success" title="ตรวจตัวเลขแล้ว">
@@ -168,6 +197,87 @@ export function CalculatorSubmitButton({ children }: { children: ReactNode }) {
       <Calculator aria-hidden="true" className="h-5 w-5" />
       {children}
     </Button>
+  );
+}
+
+export function CalculatorResetButton({ onReset }: { onReset: () => void }) {
+  return (
+    <Button className="min-h-[52px] w-full" onClick={onReset} variant="secondary">
+      <RotateCcw aria-hidden="true" className="h-5 w-5" />
+      คำนวณใหม่
+    </Button>
+  );
+}
+
+export function CalculatorShareActions<C extends CalculatorCategory>({
+  category,
+  input,
+  result,
+}: {
+  category: C;
+  input: AgriCalculatorInputByCategory[C];
+  result: AgriCalculatorResultByCategory[C];
+}) {
+  const [message, setMessage] = useState('');
+  const card = calculatorCards.find((item) => item.id === category);
+  const summary = createCalculatorShareSummary(category, input, result);
+
+  if (!result.isValid) {
+    return (
+      <NoticeBox tone="neutral" title="ยังไม่เปิดแชร์สรุป">
+        ตรวจข้อมูลให้ครบและไม่มีข้อผิดพลาดก่อน ระบบจึงจะให้คัดลอกหรือแชร์สรุปผลคำนวณ
+      </NoticeBox>
+    );
+  }
+
+  const copySummary = async () => {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        setMessage('อุปกรณ์นี้ยังไม่รองรับการคัดลอกอัตโนมัติ');
+        return;
+      }
+
+      await navigator.clipboard.writeText(summary);
+      setMessage('คัดลอกสรุปผลแล้ว');
+    } catch {
+      setMessage('คัดลอกไม่สำเร็จ ลองเลือกข้อความจากสรุปแทน');
+    }
+  };
+
+  const shareSummary = async () => {
+    const shareResult = await shareContent({
+      title: 'สรุปผลคำนวณเบื้องต้น',
+      description: summary,
+      url: card?.route ?? '/app/calculators',
+      source: 'native',
+    });
+
+    setMessage(shareResult.message);
+  };
+
+  return (
+    <Card className="p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="font-extrabold text-kaset-ink">สรุปสำหรับแชร์</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">local-only ไม่มีไฟล์ PDF และไม่บันทึกขึ้นระบบ</p>
+        </div>
+      </div>
+      <div className="mt-3 rounded-lg bg-kaset-mist p-3 text-sm font-bold leading-6 text-kaset-deep">
+        สรุปผลคำนวณเบื้องต้น · ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Button className="min-h-[52px] px-3 text-sm" onClick={copySummary} variant="secondary">
+          <Copy aria-hidden="true" className="h-5 w-5" />
+          คัดลอก
+        </Button>
+        <Button className="min-h-[52px] px-3 text-sm" onClick={shareSummary} variant="soft">
+          <Share2 aria-hidden="true" className="h-5 w-5" />
+          แชร์สรุป
+        </Button>
+      </div>
+      {message ? <p className="mt-3 text-sm font-bold leading-6 text-kaset-deep">{message}</p> : null}
+    </Card>
   );
 }
 

@@ -13,6 +13,8 @@ import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
   CalculatorHero,
+  CalculatorResetButton,
+  CalculatorShareActions,
   CalculatorSubmitButton,
   NumberField,
   RecentCalculations,
@@ -47,6 +49,8 @@ export function SprayMixCalculatorPage() {
     });
   };
 
+  const resetInput = () => setInput(defaultSprayMixInput);
+
   return (
     <div>
       <PageHeader title="คำนวณผสมยา" subtitle="คำนวณตามอัตราบนฉลาก" showBack />
@@ -63,7 +67,7 @@ export function SprayMixCalculatorPage() {
           className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            calculators.calculateAndSave('spray_mix', input);
+            if (result.isValid) calculators.calculateAndSave('spray_mix', input);
           }}
         >
           <Card className="p-4">
@@ -103,20 +107,23 @@ export function SprayMixCalculatorPage() {
                 value={input.dosageWaterLiters}
               />
               <CalculatorSubmitButton>คำนวณและบันทึกในเครื่อง</CalculatorSubmitButton>
+              <CalculatorResetButton onReset={resetInput} />
             </div>
           </Card>
         </form>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
           <div className="mt-3 grid gap-3">
-            <ResultMetric label="ต้องใช้ยา/สาร" tone="rose" value={result.requiredAmountLabel} />
+            <ResultMetric featured label="ต้องใช้ยา/สาร" tone="rose" value={result.requiredAmountLabel} />
             <ResultMetric label="ความเข้มข้นต่อ 1 ลิตร" tone={result.isConcentrationHigh ? 'rose' : 'green'} value={result.concentrationLabel} />
             <ResultMetric label="ขนาดถังที่ใช้คิด" tone="sky" value={`${formatAgriNumber(result.tankLiters, 0)} ลิตร`} />
           </div>
         </Card>
 
-        <WarningList warnings={result.warnings} />
+        <WarningList isValid={result.isValid} warnings={result.warnings} />
+
+        <CalculatorShareActions category="spray_mix" input={input} result={result} />
 
         <NoticeBox tone="info" title="บันทึกแบบ local-only">
           เมื่อกดคำนวณ ระบบจะเก็บประวัติและค่าล่าสุดไว้ใน localStorage ของเครื่องนี้เท่านั้น ไม่มีการส่งข้อมูลไป Supabase หรือบริการภายนอก

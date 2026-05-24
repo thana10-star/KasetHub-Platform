@@ -1,6 +1,6 @@
 # Agriculture Calculator Foundation
 
-M49 adds the first real agriculture calculator foundation for KasetHub. It introduces typed, reusable calculation utilities and mobile-first Thai UI for common farm planning math while staying fully local-only.
+M49 adds the first real agriculture calculator foundation for KasetHub. M50 hardens that foundation with validation helpers, deterministic QA fixtures, safer warning states, and local share summaries while staying fully local-only.
 
 ## Current Scope
 
@@ -12,10 +12,12 @@ M49 adds the first real agriculture calculator foundation for KasetHub. It intro
 - No payment or sponsor transaction.
 - No network call is required.
 - Recent calculations, favorite calculators, and last inputs are stored only in `kasethub.agriCalculators.v1`.
+- Share summaries are generated on device only and are not uploaded or saved to a backend.
 
 ## Routes
 
 - `/app/calculators`
+- `/app/calculators/qa`
 - `/app/calculators/spray-mix`
 - `/app/calculators/fertilizer`
 - `/app/calculators/plant-spacing`
@@ -31,6 +33,8 @@ Files:
 - `src/services/agri-calculators/agri-calculator.types.ts`
 - `src/services/agri-calculators/agri-calculator-fixtures.ts`
 - `src/services/agri-calculators/agri-calculator-service.ts`
+- `src/services/agri-calculators/agri-calculator-validation.ts`
+- `src/services/agri-calculators/agri-calculator-test-fixtures.ts`
 - `src/hooks/useAgriCalculators.ts`
 
 Core types:
@@ -63,7 +67,14 @@ Every calculator must keep clear copy that:
 - Results are not a replacement for an agronomist, product label, soil test, expert review, or official land survey.
 - Spray mixing must say `ควรอ่านฉลากจริงก่อนใช้`.
 - Fertilizer must say `เป็นการคำนวณเบื้องต้น`.
+- Share summaries must say `สรุปผลคำนวณเบื้องต้น` and `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง`.
 - Local history is stored only on the current device.
+
+## M50 QA And Validation
+
+`/app/calculators/qa` runs deterministic expected-vs-actual checks for spray mix, plant spacing, fertilizer helper, yield estimate, and cost estimate. It shows pass/warn/fail status and known limitations.
+
+Validation now handles empty/zero/negative/non-number values, corrupted or missing units, extremely high values, unsafe concentration warnings, area too small/large warnings, and divide-by-zero prevention. Invalid results should not be saved into local history.
 
 ## Local Storage
 

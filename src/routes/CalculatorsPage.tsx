@@ -9,7 +9,7 @@ import { calculatorCards, calculatorLocalOnlyDisclaimer } from '@/services/agri-
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import { RecentCalculations } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
-import { Star } from 'lucide-react';
+import { FlaskConical, Star } from 'lucide-react';
 
 export function CalculatorsPage() {
   const calculators = useAgriCalculators();
@@ -47,6 +47,24 @@ export function CalculatorsPage() {
         <NoticeBox tone="warning" title="ยังไม่ใช่คำแนะนำจากผู้เชี่ยวชาญ">
           {calculatorLocalOnlyDisclaimer} ผลลัพธ์เป็นการคำนวณเบื้องต้นและไม่รับประกันผลในแปลงจริง
         </NoticeBox>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <FlaskConical aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">QA เครื่องคำนวณ</h2>
+                <StatusPill tone="info">M50</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">ดู test case, expected vs actual และคำเตือนของสูตรหลักแบบ local-only</p>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-sky-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
+                เปิด QA เครื่องคำนวณ
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         {favoriteCards.length > 0 ? (
           <section className="grid gap-3">

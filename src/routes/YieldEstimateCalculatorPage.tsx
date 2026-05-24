@@ -9,6 +9,8 @@ import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
   CalculatorHero,
+  CalculatorResetButton,
+  CalculatorShareActions,
   CalculatorSubmitButton,
   NumberField,
   RecentCalculations,
@@ -37,6 +39,8 @@ export function YieldEstimateCalculatorPage() {
     }));
   };
 
+  const resetInput = () => setInput(defaultYieldEstimateInput);
+
   return (
     <div>
       <PageHeader title="คำนวณผลผลิต" subtitle="ประมาณกิโลกรัม ตัน และต่อไร่" showBack />
@@ -53,7 +57,7 @@ export function YieldEstimateCalculatorPage() {
           className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            calculators.calculateAndSave('yield_estimate', input);
+            if (result.isValid) calculators.calculateAndSave('yield_estimate', input);
           }}
         >
           <Card className="p-4">
@@ -91,15 +95,16 @@ export function YieldEstimateCalculatorPage() {
                 value={input.estimatedTotalUnits}
               />
               <CalculatorSubmitButton>คำนวณและบันทึกในเครื่อง</CalculatorSubmitButton>
+              <CalculatorResetButton onReset={resetInput} />
             </div>
           </Card>
         </form>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
           <div className="mt-3 grid gap-3">
             <ResultMetric label="น้ำหนักตัวอย่างรวม" tone="sky" value={`${formatAgriNumber(result.sampleTotalKg, 2)} กก.`} />
-            <ResultMetric label="ผลผลิตรวมประมาณ" value={`${formatAgriNumber(result.estimatedTotalKg, 2)} กก.`} />
+            <ResultMetric featured label="ผลผลิตรวมประมาณ" value={`${formatAgriNumber(result.estimatedTotalKg, 2)} กก.`} />
             <ResultMetric label="เทียบเป็นตัน" tone="gold" value={`${formatAgriNumber(result.estimatedTotalTon, 3)} ตัน`} />
             <ResultMetric label="ผลผลิตต่อไร่" tone="rose" value={`${formatAgriNumber(result.yieldPerRaiKg, 2)} กก./ไร่`} />
           </div>
@@ -113,7 +118,9 @@ export function YieldEstimateCalculatorPage() {
           </div>
         </Card>
 
-        <WarningList warnings={result.warnings} />
+        <WarningList isValid={result.isValid} warnings={result.warnings} />
+
+        <CalculatorShareActions category="yield_estimate" input={input} result={result} />
 
         <NoticeBox tone="info" title="หมายเหตุการสุ่มตัวอย่าง">
           ควรชั่งตัวอย่างจากหลายจุดในแปลงและจดช่วงเวลาเก็บเกี่ยวจริง เพื่อให้ตัวเลขใกล้เคียงกว่าเดิม

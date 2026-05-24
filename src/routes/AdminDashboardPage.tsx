@@ -44,6 +44,7 @@ import type {
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
+import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-calculator-test-fixtures';
 import { cropWatchAlertLabels } from '@/services/crop-prices/crop-watch-service';
 import { communityReportReasonLabels } from '@/services/community-moderation/community-moderation-fixtures';
 import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
@@ -218,6 +219,7 @@ export function AdminDashboardPage() {
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const mvpReadiness = useMemo(() => runMvpReadinessAudit(), []);
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
+  const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -320,14 +322,19 @@ export function AdminDashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-kaset-ink">M49 Agriculture calculators</h2>
-                    <StatusPill tone="success">local-only</StatusPill>
+                    <h2 className="font-extrabold text-kaset-ink">M50 Agriculture calculators</h2>
+                    <StatusPill tone={calculatorQa.failCount > 0 ? 'danger' : calculatorQa.warnCount > 0 ? 'warning' : 'success'}>
+                      {calculatorQa.failCount > 0 ? 'QA fail' : calculatorQa.warnCount > 0 ? 'QA warn' : 'QA pass'}
+                    </StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {agriCalculators.counts.recentCalculations} recent calculations · favorites {agriCalculators.counts.favorites} · no Supabase writes
+                    {agriCalculators.counts.recentCalculations} recent calculations · favorites {agriCalculators.counts.favorites} · QA {calculatorQa.passCount}/{calculatorQa.totalCount} passed · no Supabase writes
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators">
                     เปิดเครื่องคำนวณเกษตร
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/qa">
+                    เปิด QA เครื่องคำนวณ
                   </Link>
                 </div>
               </div>

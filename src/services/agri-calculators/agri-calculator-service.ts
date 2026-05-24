@@ -12,6 +12,7 @@ import {
   fertilizerFoundationDisclaimer,
   mixAmountUnitLabels,
   sprayMixSafetyDisclaimer,
+  thaiAreaUnitLabels,
 } from '@/services/agri-calculators/agri-calculator-fixtures';
 import type {
   AgriCalculatorInputByCategory,
@@ -34,6 +35,17 @@ import type {
   YieldEstimateInput,
   YieldEstimateResult,
 } from '@/services/agri-calculators/agri-calculator.types';
+import {
+  calculatorValidationLimits,
+  hasValidationErrors,
+  normalizeMixAmountUnit,
+  normalizeNonNegativeNumber,
+  normalizePercent,
+  normalizePositiveNumber,
+  normalizeTankSizeOption,
+  normalizeThaiAreaUnit,
+  validationMessagesToWarnings,
+} from '@/services/agri-calculators/agri-calculator-validation';
 
 const currentVersion = 1 as const;
 const maxHistoryRecords = 20;
@@ -75,20 +87,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function isCalculatorCategory(value: unknown): value is CalculatorCategory {
   return typeof value === 'string' && categoryIds.includes(value as CalculatorCategory);
-}
-
-function asFiniteNumber(value: unknown, fallback = 0) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-}
-
-function asPositiveNumber(value: unknown) {
-  const numberValue = asFiniteNumber(value);
-  return numberValue > 0 ? numberValue : 0;
-}
-
-function clampPercent(value: number, fallback = 0) {
-  if (!Number.isFinite(value)) return fallback;
-  return Math.min(Math.max(value, 0), 100);
 }
 
 function round(value: number, decimals = 2) {
@@ -140,8 +138,44 @@ export function createAreaLabels(squareMeters: number): AreaLabels {
   };
 }
 
-function getAreaSquareMeters(value: number, unit: ThaiAreaUnit) {
-  return asPositiveNumber(value) * squareMetersPerAreaUnit[unit];
+function normalizeArea(value: unknown, unit: unknown, label = 'พื้นที่') {
+  const areaUnit = normalizeThaiAreaUnit(unit);
+  const areaValue = normalizePositiveNumber(value, label, {
+    id: 'area-value',
+  });
+  const squareMeters = areaValue.value * squareMetersPerAreaUnit[areaUnit.value];
+  const messages = [...areaUnit.messages, ...areaValue.messages];
+
+  if (squareMeters > 0 && squareMeters < calculatorValidationLimits.tinyAreaSquareMeters) {
+    messages.push({
+      id: 'area:tiny',
+      severity: 'warning',
+      message: 'พื้นที่เล็กมาก ควรตรวจหน่วยพื้นที่อีกครั้ง',
+    });
+  }
+
+  if (squareMeters > calculatorValidationLimits.largeAreaSquareMeters) {
+    messages.push({
+      id: 'area:large',
+      severity: 'warning',
+      message: 'พื้นที่ใหญ่มาก ควรตรวจหน่วยพื้นที่และตัวเลขอีกครั้ง',
+    });
+  }
+
+  if (squareMeters > calculatorValidationLimits.hugeAreaSquareMeters) {
+    messages.push({
+      id: 'area:huge',
+      severity: 'warning',
+      message: 'พื้นที่สูงผิดปกติมาก ควรแยกแปลงหรือใช้ข้อมูลรังวัด/บัญชีฟาร์มที่ตรวจแล้ว',
+    });
+  }
+
+  return {
+    squareMeters,
+    rai: convertThaiArea(squareMeters, 'square_meter', 'rai'),
+    unit: areaUnit.value,
+    messages,
+  };
 }
 
 function createEmptyState(): AgriCalculatorState {
@@ -255,37 +289,55 @@ function persistState(state: AgriCalculatorState) {
 }
 
 export function calculateSprayMix(input: SprayMixInput): SprayMixResult {
-  const tankLiters = asPositiveNumber(input.tankLiters);
-  const dosageAmount = asPositiveNumber(input.dosageAmount);
-  const dosageWaterLiters = asPositiveNumber(input.dosageWaterLiters);
-  const warnings: string[] = [];
+  const tankSizeOption = normalizeTankSizeOption(input.tankSizeOption);
+  const dosageUnit = normalizeMixAmountUnit(input.dosageUnit);
+  const tank = normalizePositiveNumber(input.tankLiters, 'น้ำในถัง', {
+    id: 'spray-tank-liters',
+    maxWarning: calculatorValidationLimits.hugeSprayTankLiters,
+    maxWarningMessage: 'ขนาดถังสูงผิดปกติ ควรแบ่งรอบผสมและตรวจตัวเลขลิตรอีกครั้ง',
+  });
+  const dosage = normalizePositiveNumber(input.dosageAmount, 'ปริมาณยา/สารตามฉลาก', {
+    id: 'spray-dosage-amount',
+  });
+  const dosageWater = normalizePositiveNumber(input.dosageWaterLiters, 'น้ำอ้างอิงบนฉลาก', {
+    id: 'spray-dosage-water',
+  });
+  const messages = [...tankSizeOption.messages, ...dosageUnit.messages, ...tank.messages, ...dosage.messages, ...dosageWater.messages];
+  const tankLiters = tank.value;
+  const dosageAmount = dosage.value;
+  const dosageWaterLiters = dosageWater.value;
 
-  if (!tankLiters) warnings.push('กรอกขนาดถังเป็นลิตรก่อนคำนวณ');
-  if (!dosageAmount) warnings.push('กรอกปริมาณยาหรือสารตามฉลากก่อนคำนวณ');
-  if (!dosageWaterLiters) warnings.push('กรอกปริมาณน้ำอ้างอิงบนฉลากก่อนคำนวณ');
-
-  const requiredAmount = tankLiters && dosageAmount && dosageWaterLiters ? (dosageAmount / dosageWaterLiters) * tankLiters : 0;
+  const requiredAmount = tankLiters > 0 && dosageAmount > 0 && dosageWaterLiters > 0 ? (dosageAmount / dosageWaterLiters) * tankLiters : 0;
   const concentrationPerLiter = tankLiters > 0 ? requiredAmount / tankLiters : 0;
-  const concentrationLimit = input.dosageUnit === 'gram' ? 20 : 10;
+  const concentrationLimit =
+    dosageUnit.value === 'gram' ? calculatorValidationLimits.highSprayGramPerLiter : calculatorValidationLimits.highSprayCcOrMlPerLiter;
   const isConcentrationHigh = concentrationPerLiter > concentrationLimit;
 
   if (isConcentrationHigh) {
-    warnings.push('อัตราผสมต่อ 1 ลิตรสูงกว่าค่าที่ควรตรวจซ้ำ กรุณาอ่านฉลากและถามผู้เชี่ยวชาญก่อนใช้');
+    messages.push({
+      id: 'spray-concentration:high',
+      severity: 'warning',
+      message: 'อัตราผสมต่อ 1 ลิตรสูงกว่าค่าที่ควรตรวจซ้ำ กรุณาอ่านฉลากและถามผู้เชี่ยวชาญก่อนใช้',
+    });
   }
 
-  if (tankLiters > 200) {
-    warnings.push('ขนาดถังใหญ่มาก ควรแบ่งผสมและคนให้เข้ากันตามคำแนะนำบนฉลาก');
+  if (tankLiters > calculatorValidationLimits.largeSprayTankLiters) {
+    messages.push({
+      id: 'spray-tank:large',
+      severity: 'warning',
+      message: 'ขนาดถังใหญ่มาก ควรแบ่งผสมและคนให้เข้ากันตามคำแนะนำบนฉลาก',
+    });
   }
 
   return {
-    isValid: tankLiters > 0 && dosageAmount > 0 && dosageWaterLiters > 0,
+    isValid: tankLiters > 0 && dosageAmount > 0 && dosageWaterLiters > 0 && !hasValidationErrors(messages),
     tankLiters,
     requiredAmount,
-    requiredAmountLabel: `${formatAgriNumber(requiredAmount, 2)} ${mixAmountUnitLabels[input.dosageUnit]}`,
+    requiredAmountLabel: `${formatAgriNumber(requiredAmount, 2)} ${mixAmountUnitLabels[dosageUnit.value]}`,
     concentrationPerLiter,
-    concentrationLabel: `${formatAgriNumber(concentrationPerLiter, 2)} ${mixAmountUnitLabels[input.dosageUnit]} / ลิตร`,
+    concentrationLabel: `${formatAgriNumber(concentrationPerLiter, 2)} ${mixAmountUnitLabels[dosageUnit.value]} / ลิตร`,
     isConcentrationHigh,
-    warnings,
+    warnings: validationMessagesToWarnings(messages),
     disclaimer: sprayMixSafetyDisclaimer,
     safetyNotes: [
       'ควรอ่านฉลากจริงก่อนใช้',
@@ -330,36 +382,78 @@ function percentForNutrient(input: FertilizerMixInput, nutrient: FertilizerBaseN
 }
 
 export function calculateFertilizerMix(input: FertilizerMixInput): FertilizerMixResult {
-  const areaSquareMeters = getAreaSquareMeters(input.areaValue, input.areaUnit);
-  const areaRai = convertThaiArea(areaSquareMeters, 'square_meter', 'rai');
-  const fertilizerNPercent = clampPercent(input.fertilizerNPercent);
-  const fertilizerPPercent = clampPercent(input.fertilizerPPercent);
-  const fertilizerKPercent = clampPercent(input.fertilizerKPercent);
+  const area = normalizeArea(input.areaValue, input.areaUnit, 'พื้นที่');
+  const targetNitrogen = normalizeNonNegativeNumber(input.targetNitrogenKgPerRai, 'เป้าหมาย N ต่อไร่', {
+    id: 'fertilizer-target-n',
+  });
+  const targetPhosphorus = normalizeNonNegativeNumber(input.targetPhosphorusKgPerRai, 'เป้าหมาย P ต่อไร่', {
+    id: 'fertilizer-target-p',
+  });
+  const targetPotassium = normalizeNonNegativeNumber(input.targetPotassiumKgPerRai, 'เป้าหมาย K ต่อไร่', {
+    id: 'fertilizer-target-k',
+  });
+  const fertilizerN = normalizePercent(input.fertilizerNPercent, 'เปอร์เซ็นต์ N', { id: 'fertilizer-n-percent' });
+  const fertilizerP = normalizePercent(input.fertilizerPPercent, 'เปอร์เซ็นต์ P', { id: 'fertilizer-p-percent' });
+  const fertilizerK = normalizePercent(input.fertilizerKPercent, 'เปอร์เซ็นต์ K', { id: 'fertilizer-k-percent' });
+  const baseNutrient: FertilizerBaseNutrient =
+    input.baseNutrient === 'nitrogen' || input.baseNutrient === 'phosphorus' || input.baseNutrient === 'potassium' || input.baseNutrient === 'auto'
+      ? input.baseNutrient
+      : 'auto';
+  const messages = [
+    ...area.messages,
+    ...targetNitrogen.messages,
+    ...targetPhosphorus.messages,
+    ...targetPotassium.messages,
+    ...fertilizerN.messages,
+    ...fertilizerP.messages,
+    ...fertilizerK.messages,
+  ];
+  const areaSquareMeters = area.squareMeters;
+  const areaRai = area.rai;
+  const fertilizerNPercent = fertilizerN.value;
+  const fertilizerPPercent = fertilizerP.value;
+  const fertilizerKPercent = fertilizerK.value;
   const normalizedInput = {
     ...input,
     fertilizerNPercent,
     fertilizerPPercent,
     fertilizerKPercent,
+    baseNutrient,
   };
-  const warnings: string[] = [];
 
-  if (!areaSquareMeters) warnings.push('กรอกพื้นที่ก่อนคำนวณ');
   if (fertilizerNPercent + fertilizerPPercent + fertilizerKPercent <= 0) {
-    warnings.push('กรอกสูตรปุ๋ย NPK อย่างน้อยหนึ่งตัว');
+    messages.push({
+      id: 'fertilizer-npk:missing',
+      severity: 'error',
+      message: 'กรอกสูตรปุ๋ย NPK อย่างน้อยหนึ่งตัว',
+    });
   }
 
   const targetTotalKg: Record<NutrientKey, number> = {
-    nitrogen: Math.max(0, input.targetNitrogenKgPerRai) * areaRai,
-    phosphorus: Math.max(0, input.targetPhosphorusKgPerRai) * areaRai,
-    potassium: Math.max(0, input.targetPotassiumKgPerRai) * areaRai,
+    nitrogen: targetNitrogen.value * areaRai,
+    phosphorus: targetPhosphorus.value * areaRai,
+    potassium: targetPotassium.value * areaRai,
   };
+
+  if (targetTotalKg.nitrogen + targetTotalKg.phosphorus + targetTotalKg.potassium <= 0) {
+    messages.push({
+      id: 'fertilizer-target:missing',
+      severity: 'error',
+      message: 'กรอกเป้าหมาย N, P หรือ K อย่างน้อยหนึ่งรายการ',
+    });
+  }
+
   const limitingNutrient = selectFertilizerBaseNutrient(normalizedInput, targetTotalKg);
   const targetForBase = limitingNutrient === 'auto' ? 0 : targetTotalKg[limitingNutrient];
   const percentForBase = percentForNutrient(normalizedInput, limitingNutrient);
   const estimatedFertilizerKg = targetForBase > 0 && percentForBase > 0 ? targetForBase / (percentForBase / 100) : 0;
 
   if (limitingNutrient !== 'auto' && targetForBase > 0 && percentForBase <= 0) {
-    warnings.push(`สูตรปุ๋ยนี้ไม่มี ${nutrientLabels[limitingNutrient]} จึงคำนวณจากธาตุนี้ไม่ได้`);
+    messages.push({
+      id: `fertilizer-base:${limitingNutrient}:missing`,
+      severity: 'error',
+      message: `สูตรปุ๋ยนี้ไม่มี ${nutrientLabels[limitingNutrient]} จึงคำนวณจากธาตุนี้ไม่ได้`,
+    });
   }
 
   if (estimatedFertilizerKg > 0) {
@@ -368,13 +462,21 @@ export function calculateFertilizerMix(input: FertilizerMixInput): FertilizerMix
       const supplied = estimatedFertilizerKg * (percentForNutrient(normalizedInput, nutrient) / 100);
 
       if (target > 0 && supplied < target * 0.8) {
-        warnings.push(`ปริมาณ ${nutrientLabels[nutrient]} ที่ได้อาจต่ำกว่าเป้าหมาย ควรตรวจสูตรปุ๋ยอีกครั้ง`);
+        messages.push({
+          id: `fertilizer-supplied:${nutrient}:low`,
+          severity: 'warning',
+          message: `ปริมาณ ${nutrientLabels[nutrient]} ที่ได้อาจต่ำกว่าเป้าหมาย ควรตรวจสูตรปุ๋ยอีกครั้ง`,
+        });
       }
     });
   }
 
-  if (estimatedFertilizerKg > 1000) {
-    warnings.push('ตัวเลขปุ๋ยสูงมาก ควรตรวจหน่วยพื้นที่และปรึกษานักวิชาการเกษตร');
+  if (estimatedFertilizerKg > calculatorValidationLimits.highFertilizerKg) {
+    messages.push({
+      id: 'fertilizer-estimate:large',
+      severity: 'warning',
+      message: 'ตัวเลขปุ๋ยสูงมาก ควรตรวจหน่วยพื้นที่และปรึกษานักวิชาการเกษตร',
+    });
   }
 
   const suppliedTotalKg: Record<NutrientKey, number> = {
@@ -384,7 +486,7 @@ export function calculateFertilizerMix(input: FertilizerMixInput): FertilizerMix
   };
 
   return {
-    isValid: areaSquareMeters > 0 && estimatedFertilizerKg > 0,
+    isValid: areaSquareMeters > 0 && estimatedFertilizerKg > 0 && !hasValidationErrors(messages),
     areaSquareMeters,
     areaRai,
     areaLabels: createAreaLabels(areaSquareMeters),
@@ -395,30 +497,57 @@ export function calculateFertilizerMix(input: FertilizerMixInput): FertilizerMix
     targetTotalKg,
     suppliedTotalKg,
     limitingNutrient,
-    warnings,
+    warnings: validationMessagesToWarnings(messages),
     disclaimer: fertilizerFoundationDisclaimer,
   };
 }
 
 export function calculatePlantSpacing(input: PlantSpacingInput): PlantSpacingResult {
-  const landAreaSquareMeters = getAreaSquareMeters(input.landSizeValue, input.landSizeUnit);
-  const rowSpacingMeters = asPositiveNumber(input.rowSpacingCm) / 100;
-  const plantSpacingMeters = asPositiveNumber(input.plantSpacingCm) / 100;
-  const usableAreaPercent = clampPercent(input.usableAreaPercent, 100);
-  const seedlingBufferPercent = clampPercent(input.seedlingBufferPercent);
+  const area = normalizeArea(input.landSizeValue, input.landSizeUnit, 'ขนาดพื้นที่');
+  const rowSpacing = normalizePositiveNumber(input.rowSpacingCm, 'ระยะห่างระหว่างแถว', {
+    id: 'spacing-row-cm',
+    minWarning: calculatorValidationLimits.tinySpacingCm,
+    minWarningMessage: 'ระยะห่างระหว่างแถวน้อยมาก ควรตรวจหน่วยเซนติเมตรอีกครั้ง',
+    maxWarning: calculatorValidationLimits.hugeSpacingCm,
+    maxWarningMessage: 'ระยะห่างระหว่างแถวสูงผิดปกติ ควรตรวจหน่วยเซนติเมตรอีกครั้ง',
+  });
+  const plantSpacing = normalizePositiveNumber(input.plantSpacingCm, 'ระยะห่างระหว่างต้น', {
+    id: 'spacing-plant-cm',
+    minWarning: calculatorValidationLimits.tinySpacingCm,
+    minWarningMessage: 'ระยะห่างระหว่างต้นน้อยมาก ควรตรวจหน่วยเซนติเมตรอีกครั้ง',
+    maxWarning: calculatorValidationLimits.hugeSpacingCm,
+    maxWarningMessage: 'ระยะห่างระหว่างต้นสูงผิดปกติ ควรตรวจหน่วยเซนติเมตรอีกครั้ง',
+  });
+  const usableArea = normalizePercent(input.usableAreaPercent, 'พื้นที่ใช้ปลูกจริง', { id: 'spacing-usable-area' });
+  const seedlingBuffer = normalizePercent(input.seedlingBufferPercent, 'เผื่อต้นกล้าเพิ่ม', { id: 'spacing-seedling-buffer' });
+  const messages = [...area.messages, ...rowSpacing.messages, ...plantSpacing.messages, ...usableArea.messages, ...seedlingBuffer.messages];
+  const landAreaSquareMeters = area.squareMeters;
+  const rowSpacingMeters = rowSpacing.value / 100;
+  const plantSpacingMeters = plantSpacing.value / 100;
+  const usableAreaPercent = usableArea.value;
+  const seedlingBufferPercent = seedlingBuffer.value;
   const usableAreaSquareMeters = landAreaSquareMeters * (usableAreaPercent / 100);
   const areaPerPlant = rowSpacingMeters * plantSpacingMeters;
   const estimatedPlantCount = areaPerPlant > 0 ? Math.floor(usableAreaSquareMeters / areaPerPlant) : 0;
   const estimatedSeedlingCount = Math.ceil(estimatedPlantCount * (1 + seedlingBufferPercent / 100));
-  const warnings: string[] = [];
 
-  if (!landAreaSquareMeters) warnings.push('กรอกขนาดพื้นที่ก่อนคำนวณ');
-  if (!rowSpacingMeters || !plantSpacingMeters) warnings.push('กรอกระยะห่างระหว่างแถวและระหว่างต้นเป็นเซนติเมตร');
-  if (usableAreaPercent < 70) warnings.push('พื้นที่ใช้ปลูกต่ำกว่า 70% ควรตรวจว่าหักทางเดิน/คันนาไว้มากเกินไปหรือไม่');
-  if (estimatedPlantCount > 100000) warnings.push('จำนวนต้นสูงมาก ควรตรวจหน่วยระยะปลูกและพื้นที่');
+  if (usableAreaPercent < 70) {
+    messages.push({
+      id: 'spacing-usable-area:low',
+      severity: 'warning',
+      message: 'พื้นที่ใช้ปลูกต่ำกว่า 70% ควรตรวจว่าหักทางเดิน/คันนาไว้มากเกินไปหรือไม่',
+    });
+  }
+  if (estimatedPlantCount > calculatorValidationLimits.highPlantCount) {
+    messages.push({
+      id: 'spacing-plant-count:high',
+      severity: 'warning',
+      message: 'จำนวนต้นสูงมาก ควรตรวจหน่วยระยะปลูกและพื้นที่',
+    });
+  }
 
   return {
-    isValid: landAreaSquareMeters > 0 && rowSpacingMeters > 0 && plantSpacingMeters > 0,
+    isValid: landAreaSquareMeters > 0 && rowSpacingMeters > 0 && plantSpacingMeters > 0 && !hasValidationErrors(messages),
     landAreaSquareMeters,
     areaLabels: createAreaLabels(landAreaSquareMeters),
     rowSpacingMeters,
@@ -426,30 +555,48 @@ export function calculatePlantSpacing(input: PlantSpacingInput): PlantSpacingRes
     estimatedPlantCount,
     estimatedSeedlingCount,
     plantsPerRai: landAreaSquareMeters > 0 ? estimatedPlantCount / convertThaiArea(landAreaSquareMeters, 'square_meter', 'rai') : 0,
-    warnings,
+    warnings: validationMessagesToWarnings(messages),
     disclaimer: agricultureSafetyDisclaimer,
   };
 }
 
 export function calculateYieldEstimate(input: YieldEstimateInput): YieldEstimateResult {
-  const areaSquareMeters = getAreaSquareMeters(input.landSizeValue, input.landSizeUnit);
-  const areaRai = convertThaiArea(areaSquareMeters, 'square_meter', 'rai');
-  const sampleCount = Math.floor(asPositiveNumber(input.sampleCount));
-  const averageWeightKg = asPositiveNumber(input.averageWeightKg);
-  const estimatedTotalUnits = Math.floor(asPositiveNumber(input.estimatedTotalUnits));
+  const area = normalizeArea(input.landSizeValue, input.landSizeUnit, 'พื้นที่');
+  const sample = normalizePositiveNumber(input.sampleCount, 'จำนวนตัวอย่าง', { id: 'yield-sample-count' });
+  const averageWeight = normalizePositiveNumber(input.averageWeightKg, 'น้ำหนักเฉลี่ยต่อหน่วย', {
+    id: 'yield-average-weight',
+  });
+  const totalUnits = normalizePositiveNumber(input.estimatedTotalUnits, 'จำนวนรวมที่คาดไว้', {
+    id: 'yield-total-units',
+  });
+  const messages = [...area.messages, ...sample.messages, ...averageWeight.messages, ...totalUnits.messages];
+  const areaSquareMeters = area.squareMeters;
+  const areaRai = area.rai;
+  const sampleCount = Math.floor(sample.value);
+  const averageWeightKg = averageWeight.value;
+  const estimatedTotalUnits = Math.floor(totalUnits.value);
   const sampleTotalKg = sampleCount * averageWeightKg;
   const estimatedTotalKg = estimatedTotalUnits * averageWeightKg;
   const estimatedTotalTon = estimatedTotalKg / 1000;
-  const warnings: string[] = [];
 
-  if (!areaSquareMeters) warnings.push('กรอกพื้นที่ก่อนคำนวณผลผลิตต่อไร่');
-  if (!sampleCount) warnings.push('กรอกจำนวนตัวอย่างที่ชั่ง');
-  if (!averageWeightKg) warnings.push('กรอกน้ำหนักเฉลี่ยต่อหน่วยเป็นกิโลกรัม');
-  if (!estimatedTotalUnits) warnings.push('กรอกจำนวนหน่วยผลผลิตที่คาดว่าจะเก็บเกี่ยวทั้งหมด');
-  if (sampleCount > 0 && sampleCount < 5) warnings.push('จำนวนตัวอย่างน้อย ควรเพิ่มตัวอย่างเพื่อให้ประมาณการแม่นขึ้น');
+  if (sampleCount > 0 && sampleCount < 5) {
+    messages.push({
+      id: 'yield-sample-count:low',
+      severity: 'warning',
+      message: 'จำนวนตัวอย่างน้อย ควรเพิ่มตัวอย่างเพื่อให้ประมาณการแม่นขึ้น',
+    });
+  }
+
+  if (estimatedTotalKg > calculatorValidationLimits.highYieldKg) {
+    messages.push({
+      id: 'yield-total:high',
+      severity: 'warning',
+      message: 'ผลผลิตรวมสูงมาก ควรตรวจจำนวนรวมและน้ำหนักเฉลี่ยอีกครั้ง',
+    });
+  }
 
   return {
-    isValid: areaSquareMeters > 0 && sampleCount > 0 && averageWeightKg > 0 && estimatedTotalUnits > 0,
+    isValid: areaSquareMeters > 0 && sampleCount > 0 && averageWeightKg > 0 && estimatedTotalUnits > 0 && !hasValidationErrors(messages),
     areaRai,
     areaLabels: createAreaLabels(areaSquareMeters),
     sampleTotalKg,
@@ -457,34 +604,84 @@ export function calculateYieldEstimate(input: YieldEstimateInput): YieldEstimate
     estimatedTotalTon,
     yieldPerRaiKg: areaRai > 0 ? estimatedTotalKg / areaRai : 0,
     yieldPerRaiTon: areaRai > 0 ? estimatedTotalTon / areaRai : 0,
-    warnings,
+    warnings: validationMessagesToWarnings(messages),
     disclaimer: agricultureSafetyDisclaimer,
   };
 }
 
 export function calculateCostEstimate(input: CostEstimateInput): CostEstimateResult {
-  const areaSquareMeters = getAreaSquareMeters(input.landSizeValue, input.landSizeUnit);
-  const areaRai = convertThaiArea(areaSquareMeters, 'square_meter', 'rai');
+  const area = normalizeArea(input.landSizeValue, input.landSizeUnit, 'พื้นที่');
+  const fertilizerCost = normalizeNonNegativeNumber(input.fertilizerCost, 'ค่าปุ๋ย/ยา', {
+    id: 'cost-fertilizer',
+    maxWarning: calculatorValidationLimits.highTotalCost,
+  });
+  const laborCost = normalizeNonNegativeNumber(input.laborCost, 'ค่าแรง', {
+    id: 'cost-labor',
+    maxWarning: calculatorValidationLimits.highTotalCost,
+  });
+  const waterCost = normalizeNonNegativeNumber(input.waterCost, 'ค่าน้ำ', {
+    id: 'cost-water',
+    maxWarning: calculatorValidationLimits.highTotalCost,
+  });
+  const machineryCost = normalizeNonNegativeNumber(input.machineryCost, 'ค่าเครื่องจักร', {
+    id: 'cost-machinery',
+    maxWarning: calculatorValidationLimits.highTotalCost,
+  });
+  const otherCost = normalizeNonNegativeNumber(input.otherCost, 'ค่าอื่น ๆ', {
+    id: 'cost-other',
+    maxWarning: calculatorValidationLimits.highTotalCost,
+  });
+  const expectedYield = normalizeNonNegativeNumber(input.expectedYieldKg ?? 0, 'ผลผลิตที่คาดไว้', {
+    id: 'cost-expected-yield',
+  });
+  const messages = [
+    ...area.messages,
+    ...fertilizerCost.messages,
+    ...laborCost.messages,
+    ...waterCost.messages,
+    ...machineryCost.messages,
+    ...otherCost.messages,
+    ...expectedYield.messages,
+  ];
+  const areaSquareMeters = area.squareMeters;
+  const areaRai = area.rai;
   const costItems: CostEstimateResult['costItems'] = [
-    { id: 'fertilizerCost', label: costItemLabels.fertilizerCost, amount: Math.max(0, input.fertilizerCost) },
-    { id: 'laborCost', label: costItemLabels.laborCost, amount: Math.max(0, input.laborCost) },
-    { id: 'waterCost', label: costItemLabels.waterCost, amount: Math.max(0, input.waterCost) },
-    { id: 'machineryCost', label: costItemLabels.machineryCost, amount: Math.max(0, input.machineryCost) },
-    { id: 'otherCost', label: costItemLabels.otherCost, amount: Math.max(0, input.otherCost) },
+    { id: 'fertilizerCost', label: costItemLabels.fertilizerCost, amount: fertilizerCost.value },
+    { id: 'laborCost', label: costItemLabels.laborCost, amount: laborCost.value },
+    { id: 'waterCost', label: costItemLabels.waterCost, amount: waterCost.value },
+    { id: 'machineryCost', label: costItemLabels.machineryCost, amount: machineryCost.value },
+    { id: 'otherCost', label: costItemLabels.otherCost, amount: otherCost.value },
   ];
   const totalCost = costItems.reduce((total, item) => total + item.amount, 0);
-  const expectedYieldKg = asPositiveNumber(input.expectedYieldKg);
+  const expectedYieldKg = expectedYield.value;
   const costPerKg = expectedYieldKg > 0 ? totalCost / expectedYieldKg : undefined;
-  const warnings: string[] = [];
 
-  if (!areaSquareMeters) warnings.push('กรอกพื้นที่ก่อนคำนวณต้นทุนต่อไร่');
-  if (!totalCost) warnings.push('กรอกค่าใช้จ่ายอย่างน้อยหนึ่งรายการ');
-  if (totalCost > 0 && areaRai > 0 && totalCost / areaRai > 100000) {
-    warnings.push('ต้นทุนต่อไร่สูงมาก ควรตรวจตัวเลขและหน่วยเงินอีกครั้ง');
+  if (!totalCost) {
+    messages.push({
+      id: 'cost-total:zero',
+      severity: 'error',
+      message: 'กรอกค่าใช้จ่ายอย่างน้อยหนึ่งรายการ',
+    });
+  }
+
+  if (totalCost > calculatorValidationLimits.highTotalCost) {
+    messages.push({
+      id: 'cost-total:high',
+      severity: 'warning',
+      message: 'ต้นทุนรวมสูงมาก ควรตรวจตัวเลขค่าใช้จ่ายอีกครั้ง',
+    });
+  }
+
+  if (totalCost > 0 && areaRai > 0 && totalCost / areaRai > calculatorValidationLimits.highCostPerRai) {
+    messages.push({
+      id: 'cost-per-rai:high',
+      severity: 'warning',
+      message: 'ต้นทุนต่อไร่สูงมาก ควรตรวจตัวเลขและหน่วยเงินอีกครั้ง',
+    });
   }
 
   return {
-    isValid: areaSquareMeters > 0 && totalCost > 0,
+    isValid: areaSquareMeters > 0 && totalCost > 0 && !hasValidationErrors(messages),
     areaRai,
     areaLabels: createAreaLabels(areaSquareMeters),
     totalCost,
@@ -497,7 +694,7 @@ export function calculateCostEstimate(input: CostEstimateInput): CostEstimateRes
       ? `จุดคุ้มทุนเบื้องต้นประมาณ ${formatAgriCurrency(costPerKg)} ต่อกิโลกรัม`
       : 'จุดคุ้มทุนจะคำนวณละเอียดเมื่อเพิ่มราคาขายและผลผลิตจริงในอนาคต',
     costItems,
-    warnings,
+    warnings: validationMessagesToWarnings(messages),
     disclaimer: agricultureSafetyDisclaimer,
   };
 }
@@ -523,6 +720,111 @@ export function calculateAgriCalculator<C extends CalculatorCategory>(
   if (category === 'plant_spacing') return calculatePlantSpacing(input as PlantSpacingInput) as AgriCalculatorResultByCategory[C];
   if (category === 'yield_estimate') return calculateYieldEstimate(input as YieldEstimateInput) as AgriCalculatorResultByCategory[C];
   return calculateCostEstimate(input as CostEstimateInput) as AgriCalculatorResultByCategory[C];
+}
+
+function createSummaryLines(baseLines: string[], warnings: string[]) {
+  return [
+    'สรุปผลคำนวณเบื้องต้น',
+    ...baseLines,
+    warnings.length > 0 ? `ข้อควรตรวจซ้ำ: ${warnings.join(' · ')}` : 'ยังไม่พบคำเตือนจากสูตรคำนวณ',
+    'ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง',
+    'ผลลัพธ์นี้ไม่รับประกันผลในแปลงจริง และบันทึก/แชร์จากเครื่องนี้เท่านั้น',
+  ].join('\n');
+}
+
+function formatAreaInput(value: number, unit: ThaiAreaUnit) {
+  return `${formatAgriNumber(value, 2)} ${thaiAreaUnitLabels[unit]?.shortLabel ?? unit}`;
+}
+
+export function createCalculatorShareSummary<C extends CalculatorCategory>(
+  category: C,
+  input: AgriCalculatorInputByCategory[C],
+  result: AgriCalculatorResultByCategory[C],
+) {
+  const card = calculatorCards.find((item) => item.id === category);
+  const title = card?.label ?? 'เครื่องคำนวณเกษตร';
+
+  if (category === 'spray_mix') {
+    const sprayInput = input as SprayMixInput;
+    const sprayResult = result as SprayMixResult;
+
+    return createSummaryLines(
+      [
+        title,
+        `ถังน้ำ: ${formatAgriNumber(sprayResult.tankLiters, 0)} ลิตร`,
+        `อัตราฉลากที่กรอก: ${formatAgriNumber(sprayInput.dosageAmount, 2)} ${mixAmountUnitLabels[sprayInput.dosageUnit]} / น้ำ ${formatAgriNumber(sprayInput.dosageWaterLiters, 0)} ลิตร`,
+        `ต้องใช้ยา/สาร: ${sprayResult.requiredAmountLabel}`,
+        `ความเข้มข้น: ${sprayResult.concentrationLabel}`,
+      ],
+      sprayResult.warnings,
+    );
+  }
+
+  if (category === 'plant_spacing') {
+    const spacingInput = input as PlantSpacingInput;
+    const spacingResult = result as PlantSpacingResult;
+
+    return createSummaryLines(
+      [
+        title,
+        `พื้นที่: ${formatAreaInput(spacingInput.landSizeValue, spacingInput.landSizeUnit)}`,
+        `ระยะปลูก: ${formatAgriNumber(spacingInput.rowSpacingCm, 0)} x ${formatAgriNumber(spacingInput.plantSpacingCm, 0)} ซม.`,
+        `จำนวนต้นประมาณ: ${formatAgriNumber(spacingResult.estimatedPlantCount, 0)} ต้น`,
+        `ต้นกล้าที่ควรเตรียม: ${formatAgriNumber(spacingResult.estimatedSeedlingCount, 0)} ต้น`,
+        `พื้นที่คิดเป็น: ${spacingResult.areaLabels.rai} · ${spacingResult.areaLabels.squareMeters}`,
+      ],
+      spacingResult.warnings,
+    );
+  }
+
+  if (category === 'fertilizer_mix') {
+    const fertilizerInput = input as FertilizerMixInput;
+    const fertilizerResult = result as FertilizerMixResult;
+
+    return createSummaryLines(
+      [
+        title,
+        `พื้นที่: ${formatAreaInput(fertilizerInput.areaValue, fertilizerInput.areaUnit)}`,
+        `สูตรปุ๋ยที่กรอก: ${formatAgriNumber(fertilizerInput.fertilizerNPercent, 0)}-${formatAgriNumber(fertilizerInput.fertilizerPPercent, 0)}-${formatAgriNumber(fertilizerInput.fertilizerKPercent, 0)}`,
+        `ปริมาณปุ๋ยประมาณ: ${fertilizerResult.estimatedFertilizerLabel}`,
+        `เทียบกระสอบ 50 กก.: ${fertilizerResult.estimatedBags50KgLabel}`,
+        'หมายเหตุ: เป็นการคำนวณเบื้องต้น ยังไม่ใช่คำแนะนำปุ๋ยจริง',
+      ],
+      fertilizerResult.warnings,
+    );
+  }
+
+  if (category === 'yield_estimate') {
+    const yieldInput = input as YieldEstimateInput;
+    const yieldResult = result as YieldEstimateResult;
+
+    return createSummaryLines(
+      [
+        title,
+        `พื้นที่: ${formatAreaInput(yieldInput.landSizeValue, yieldInput.landSizeUnit)}`,
+        `ตัวอย่าง: ${formatAgriNumber(yieldInput.sampleCount, 0)} หน่วย · เฉลี่ย ${formatAgriNumber(yieldInput.averageWeightKg, 2)} กก.`,
+        `ผลผลิตรวมประมาณ: ${formatAgriNumber(yieldResult.estimatedTotalKg, 2)} กก.`,
+        `เทียบเป็นตัน: ${formatAgriNumber(yieldResult.estimatedTotalTon, 3)} ตัน`,
+        `ผลผลิตต่อไร่: ${formatAgriNumber(yieldResult.yieldPerRaiKg, 2)} กก./ไร่`,
+      ],
+      yieldResult.warnings,
+    );
+  }
+
+  const costInput = input as CostEstimateInput;
+  const costResult = result as CostEstimateResult;
+
+  return createSummaryLines(
+    [
+      title,
+      `พื้นที่: ${formatAreaInput(costInput.landSizeValue, costInput.landSizeUnit)}`,
+      `ต้นทุนรวม: ${costResult.totalCostLabel}`,
+      `ต้นทุนต่อไร่: ${costResult.costPerRaiLabel}`,
+      `จุดคุ้มทุนเบื้องต้น: ${costResult.costPerKgLabel ?? 'รอข้อมูลผลผลิต'}`,
+      'หมายเหตุ: break-even ยังเป็น placeholder และยังไม่รวมราคาขายจริง',
+    ],
+    costResult.warnings,
+  );
 }
 
 function createRecordId(category: CalculatorCategory) {

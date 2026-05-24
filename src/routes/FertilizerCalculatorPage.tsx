@@ -20,6 +20,8 @@ import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
   CalculatorHero,
+  CalculatorResetButton,
+  CalculatorShareActions,
   CalculatorSubmitButton,
   NumberField,
   RecentCalculations,
@@ -71,6 +73,11 @@ export function FertilizerCalculatorPage() {
     }));
   };
 
+  const resetInput = () => {
+    setProfileId(fertilizerProfiles[0].id);
+    setInput(defaultFertilizerMixInput);
+  };
+
   return (
     <div>
       <PageHeader title="คำนวณปุ๋ย" subtitle="ตัวช่วยคิด NPK เบื้องต้น" showBack />
@@ -87,7 +94,7 @@ export function FertilizerCalculatorPage() {
           className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            calculators.calculateAndSave('fertilizer_mix', input);
+            if (result.isValid) calculators.calculateAndSave('fertilizer_mix', input);
           }}
         >
           <Card className="p-4">
@@ -130,17 +137,18 @@ export function FertilizerCalculatorPage() {
                 value={input.baseNutrient}
               />
               <CalculatorSubmitButton>คำนวณและบันทึกในเครื่อง</CalculatorSubmitButton>
+              <CalculatorResetButton onReset={resetInput} />
             </div>
           </Card>
         </form>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
             <Badge tone="gold">เบื้องต้น</Badge>
           </div>
           <div className="mt-3 grid gap-3">
-            <ResultMetric label="ปริมาณปุ๋ยประมาณ" value={result.estimatedFertilizerLabel} />
+            <ResultMetric featured label="ปริมาณปุ๋ยประมาณ" value={result.estimatedFertilizerLabel} />
             <ResultMetric label="เทียบกระสอบ 50 กก." tone="gold" value={result.estimatedBags50KgLabel} />
             <ResultMetric
               label="ฐานคำนวณ"
@@ -164,7 +172,9 @@ export function FertilizerCalculatorPage() {
           </div>
         </Card>
 
-        <WarningList warnings={result.warnings} />
+        <WarningList isValid={result.isValid} warnings={result.warnings} />
+
+        <CalculatorShareActions category="fertilizer_mix" input={input} result={result} />
 
         <NoticeBox tone="warning" title="ขอบเขตของหน้านี้">
           ยังไม่มีคำแนะนำปุ๋ยตามชนิดพืช ดิน อายุพืช หรือฤดูกาล และยังไม่เชื่อม AI หรือผู้สนับสนุนสินค้าใด ๆ

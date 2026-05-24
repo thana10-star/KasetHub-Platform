@@ -1,6 +1,6 @@
 # Spray Mixing Calculator Notes
 
-M49 adds `/app/calculators/spray-mix` as a local-only calculator for mixing amounts from label ratios.
+M49 adds `/app/calculators/spray-mix` as a local-only calculator for mixing amounts from label ratios. M50 adds validation hardening, deterministic QA fixtures, and local share-summary support.
 
 ## What It Does
 
@@ -45,6 +45,18 @@ The M49 foundation warns when calculated concentration per liter is high:
 
 These thresholds are guardrails for double-checking input. They are not regulatory or agronomic limits.
 
+M50 also prevents invalid saves when the tank size, label amount, label water volume, or unit is empty, zero, negative, non-number, or missing from corrupted local state. Very large tank sizes trigger review warnings.
+
+## QA Fixture Examples
+
+Deterministic checks include:
+
+- 20 cc per 20 L label rate, 20 L tank = 20 cc
+- 20 cc per 20 L label rate, 10 L tank = 10 cc
+- 20 cc per 20 L label rate, 200 L tank = 200 cc
+
+These appear on `/app/calculators/qa` with expected vs actual output.
+
 ## Required Safety Copy
 
 The route must keep these messages visible:
@@ -55,6 +67,18 @@ The route must keep these messages visible:
 - Follow the real product label and legal restrictions.
 - Wear protective equipment and mix in a ventilated area.
 - Local history is stored only on this device.
+
+## Share Summary
+
+Valid spray results can be copied or shared as local text only. The summary includes:
+
+- `สรุปผลคำนวณเบื้องต้น`
+- required chemical amount
+- concentration per liter
+- warnings when present
+- `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง`
+
+No PDF, file export, backend save, Supabase write, sponsor routing, or AI recommendation is added.
 
 ## What It Does Not Do
 

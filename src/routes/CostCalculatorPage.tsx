@@ -9,6 +9,8 @@ import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
   CalculatorHero,
+  CalculatorResetButton,
+  CalculatorShareActions,
   CalculatorSubmitButton,
   NumberField,
   RecentCalculations,
@@ -37,6 +39,8 @@ export function CostCalculatorPage() {
     }));
   };
 
+  const resetInput = () => setInput(defaultCostEstimateInput);
+
   return (
     <div>
       <PageHeader title="คำนวณต้นทุน" subtitle="รวมค่าใช้จ่ายและต้นทุนต่อไร่" showBack />
@@ -53,7 +57,7 @@ export function CostCalculatorPage() {
           className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            calculators.calculateAndSave('cost_estimate', input);
+            if (result.isValid) calculators.calculateAndSave('cost_estimate', input);
           }}
         >
           <Card className="p-4">
@@ -81,14 +85,15 @@ export function CostCalculatorPage() {
                 value={input.expectedYieldKg ?? 0}
               />
               <CalculatorSubmitButton>คำนวณและบันทึกในเครื่อง</CalculatorSubmitButton>
+              <CalculatorResetButton onReset={resetInput} />
             </div>
           </Card>
         </form>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
           <div className="mt-3 grid gap-3">
-            <ResultMetric label="ต้นทุนรวม" value={result.totalCostLabel} />
+            <ResultMetric featured label="ต้นทุนรวม" value={result.totalCostLabel} />
             <ResultMetric label="ต้นทุนต่อไร่" tone="gold" value={result.costPerRaiLabel} />
             <ResultMetric label="จุดคุ้มทุนเบื้องต้น" tone="sky" value={result.costPerKgLabel ?? 'รอข้อมูลผลผลิต'} />
           </div>
@@ -110,7 +115,9 @@ export function CostCalculatorPage() {
           </p>
         </Card>
 
-        <WarningList warnings={result.warnings} />
+        <WarningList isValid={result.isValid} warnings={result.warnings} />
+
+        <CalculatorShareActions category="cost_estimate" input={input} result={result} />
 
         <NoticeBox tone="warning" title="ขอบเขตจุดคุ้มทุน">
           หน้านี้ยังเป็น placeholder สำหรับ break-even เท่านั้น ยังไม่รวมราคาขายจริง ความชื้น เกรดสินค้า หักน้ำหนัก หรือค่าใช้จ่ายหลังเก็บเกี่ยว

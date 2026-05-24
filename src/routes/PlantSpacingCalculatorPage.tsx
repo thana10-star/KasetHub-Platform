@@ -9,6 +9,8 @@ import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
   CalculatorHero,
+  CalculatorResetButton,
+  CalculatorShareActions,
   CalculatorSubmitButton,
   NumberField,
   RecentCalculations,
@@ -37,6 +39,8 @@ export function PlantSpacingCalculatorPage() {
     }));
   };
 
+  const resetInput = () => setInput(defaultPlantSpacingInput);
+
   return (
     <div>
       <PageHeader title="คำนวณระยะปลูก" subtitle="ประมาณจำนวนต้นและต้นกล้า" showBack />
@@ -53,7 +57,7 @@ export function PlantSpacingCalculatorPage() {
           className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            calculators.calculateAndSave('plant_spacing', input);
+            if (result.isValid) calculators.calculateAndSave('plant_spacing', input);
           }}
         >
           <Card className="p-4">
@@ -98,14 +102,15 @@ export function PlantSpacingCalculatorPage() {
                 value={input.seedlingBufferPercent}
               />
               <CalculatorSubmitButton>คำนวณและบันทึกในเครื่อง</CalculatorSubmitButton>
+              <CalculatorResetButton onReset={resetInput} />
             </div>
           </Card>
         </form>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
           <div className="mt-3 grid gap-3">
-            <ResultMetric label="จำนวนต้นประมาณ" value={`${formatAgriNumber(result.estimatedPlantCount, 0)} ต้น`} />
+            <ResultMetric featured label="จำนวนต้นประมาณ" value={`${formatAgriNumber(result.estimatedPlantCount, 0)} ต้น`} />
             <ResultMetric label="ต้นกล้าที่ควรเตรียม" tone="gold" value={`${formatAgriNumber(result.estimatedSeedlingCount, 0)} ต้น`} />
             <ResultMetric label="จำนวนต้นต่อไร่" tone="sky" value={`${formatAgriNumber(result.plantsPerRai, 0)} ต้น/ไร่`} />
           </div>
@@ -121,7 +126,9 @@ export function PlantSpacingCalculatorPage() {
           </div>
         </Card>
 
-        <WarningList warnings={result.warnings} />
+        <WarningList isValid={result.isValid} warnings={result.warnings} />
+
+        <CalculatorShareActions category="plant_spacing" input={input} result={result} />
 
         <NoticeBox tone="info" title="สูตรที่ใช้">
           พื้นที่ต่อต้น = ระยะแถว x ระยะต้น จากนั้นหารพื้นที่ใช้ปลูกจริง ผลลัพธ์เป็นเลขประมาณสำหรับช่วยวางแผนเท่านั้น

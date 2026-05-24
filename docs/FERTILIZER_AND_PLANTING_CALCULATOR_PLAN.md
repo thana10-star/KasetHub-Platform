@@ -1,6 +1,6 @@
 # Fertilizer And Planting Calculator Plan
 
-M49 adds simple foundations for fertilizer, planting density, yield estimate, and cost estimate. These are calculator utilities, not agronomy recommendation engines.
+M49 adds simple foundations for fertilizer, planting density, yield estimate, and cost estimate. M50 adds validation hardening, QA fixtures, and local share summaries. These are calculator utilities, not agronomy recommendation engines.
 
 ## Fertilizer Helper
 
@@ -26,6 +26,8 @@ When `auto` is selected, the helper uses the nutrient that produces the highest 
 Required warning:
 
 - `เป็นการคำนวณเบื้องต้น`
+
+M50 validation prevents divide-by-zero when a target nutrient or fertilizer percentage is missing, warns on very high fertilizer amounts, and blocks invalid saves until inputs are corrected.
 
 Boundary:
 
@@ -63,6 +65,8 @@ Thai unit rules:
 - `1 งาน = 400 ตารางเมตร`
 - `1 ตารางวา = 4 ตารางเมตร`
 
+M50 validation checks zero, negative, non-number, very small/large spacing, very small/large area, and unusually high plant counts.
+
 ## Yield Estimate
 
 Route: `/app/calculators/yield-estimate`
@@ -80,6 +84,8 @@ Outputs:
 - estimated total kg
 - estimated total ton
 - yield per rai
+
+M50 validation guards zero/negative sample inputs, very high yield estimates, and divide-by-zero for yield per rai.
 
 Boundary:
 
@@ -107,6 +113,14 @@ Outputs:
 - cost per rai
 - optional cost per kg
 - break-even placeholder
+
+M50 validation guards missing area, negative cost fields, all-zero costs, very high total cost, and very high cost per rai.
+
+## M50 QA And Share Summary
+
+`/app/calculators/qa` shows deterministic test cases with expected vs actual results for spray mix, plant spacing, fertilizer helper, yield estimate, and cost estimate.
+
+Valid calculator pages can copy/share a local text summary. Every summary is labeled `สรุปผลคำนวณเบื้องต้น` and repeats `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง`. The share foundation does not create files, write backend data, call Supabase, call AI, or send calculator history to sponsors.
 
 Boundary:
 
