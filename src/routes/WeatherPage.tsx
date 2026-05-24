@@ -1,9 +1,12 @@
 import {
   CalendarDays,
+  Clock3,
   CloudRain,
   CloudSun,
   Droplets,
   MapPin,
+  RefreshCw,
+  Settings2,
   ShieldAlert,
   Sprout,
   ThermometerSun,
@@ -18,8 +21,11 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { useWeather } from '@/hooks/useWeather';
+import { computeWeatherStaleAgeLabel, getWeatherCacheFreshnessQa } from '@/services/weather/weather-cache-qa';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
+import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
+import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -49,15 +55,30 @@ export function WeatherPage() {
     clearSelectedCache,
     forecast,
     isLoading,
+    lastSuccessfulRefresh,
     locationPrivacyStatus,
     locations,
+    localPreferenceStatus,
+    manualRefresh,
+    manualRefreshMessage,
     modeStatus,
+    refreshPolicy,
     selectLocation,
     selectedLocationId,
   } = useWeather();
   const today = forecast.today;
   const current = forecast.current;
   const isOpenMeteo = forecast.source.sourceType === 'open_meteo';
+  const sourceReadiness = buildWeatherSourceReadiness({
+    modeStatus,
+    cacheStatus,
+    isOpenMeteo,
+    isFallback: forecast.isFallback,
+    fetchedAtLabel: forecast.fetchedAtLabel ?? forecast.updatedAtLabel,
+  });
+  const cacheFreshnessQa = getWeatherCacheFreshnessQa(cacheStatus.freshness);
+  const staleAgeLabel = computeWeatherStaleAgeLabel(cacheStatus);
+  const offlineState = sourceReadiness.offlineState;
 
   return (
     <div>
@@ -89,17 +110,39 @@ export function WeatherPage() {
             <Badge tone="neutral">no GPS</Badge>
             <Badge tone="neutral">no location storage</Badge>
             <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>
-              cache {cacheStatus.freshness}
+              {cacheFreshnessQa.label}
+            </Badge>
+            <Badge tone={offlineState.status === 'live' ? 'green' : offlineState.status === 'stale_cache' ? 'gold' : 'neutral'}>
+              {offlineState.badgeLabel}
             </Badge>
             {isLoading ? <Badge tone="sky">loading</Badge> : null}
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            {modeStatus.statusLabel} · source: {forecast.source.label} · fetched: {forecast.fetchedAtLabel ?? forecast.updatedAtLabel}
+            {modeStatus.statusLabel} · source: {forecast.source.label} · fetched: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}
           </p>
+          <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+            <p>{sourceReadiness.attributionLabel}</p>
+            <p>{offlineState.message}</p>
+            <p>fallback: {getWeatherFallbackLabel(sourceReadiness.fallbackReason)}</p>
+            <p>ข้อมูลอาจล่าช้าหรือคลาดเคลื่อนได้</p>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link className="inline-flex min-h-11 items-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
               Weather QA
             </Link>
+            <Link className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+              <Settings2 aria-hidden="true" className="h-4 w-4" />
+              ตั้งค่า
+            </Link>
+            <button
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white disabled:bg-slate-200 disabled:text-slate-500"
+              disabled={refreshPolicy.status === 'disabled' || isLoading}
+              onClick={manualRefresh}
+              type="button"
+            >
+              <RefreshCw aria-hidden="true" className="h-4 w-4" />
+              รีเฟรช
+            </button>
             <button
               className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10"
               onClick={clearSelectedCache}
@@ -108,17 +151,26 @@ export function WeatherPage() {
               ล้าง cache พื้นที่นี้
             </button>
           </div>
+          <p className="mt-3 flex items-center gap-2 text-xs font-bold leading-5 text-slate-500">
+            <Clock3 aria-hidden="true" className="h-4 w-4" />
+            {manualRefreshMessage || refreshPolicy.message}
+            {refreshPolicy.remainingCooldownMs > 0 ? ` · ${formatWeatherRefreshCooldown(refreshPolicy.remainingCooldownMs)}` : ''}
+            {lastSuccessfulRefresh ? ` · ล่าสุด ${new Date(lastSuccessfulRefresh).toLocaleString('th-TH')}` : ''}
+          </p>
+          <p className="mt-2 text-xs font-bold leading-5 text-slate-500">
+            ตั้งค่าพื้นที่: {localPreferenceStatus.selectedLabel} · localStorage เท่านั้น · ไม่มี background refresh
+          </p>
         </Card>
 
         {forecast.isStale || cacheStatus.isStale ? (
           <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูล cache เก่า">
-            ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจแหล่งข้อมูลอื่นและสภาพจริงก่อนตัดสินใจ
+            ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติมและดูสภาพจริงก่อนตัดสินใจ
           </NoticeBox>
         ) : null}
 
         {forecast.isFallback ? (
           <NoticeBox tone="warning" icon={ShieldAlert} title="ใช้ข้อมูลสำรองในเครื่อง">
-            {forecast.fallbackReason ?? 'Weather API ยังไม่เปิดหรือเรียกไม่ได้'} · local/mock fallback ยังพร้อมใช้งานเสมอ
+            {forecast.fallbackReason ?? 'Weather API ยังไม่เปิดหรือเรียกไม่ได้'} · API unavailable หรือถูกปิดด้วย flag จึงใช้ local/mock fallback ที่พร้อมใช้งานเสมอ
           </NoticeBox>
         ) : (
           <NoticeBox tone="info" title="ข้อมูลอ้างอิงจาก API ภายนอก">

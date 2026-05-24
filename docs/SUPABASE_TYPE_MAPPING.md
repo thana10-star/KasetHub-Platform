@@ -609,3 +609,11 @@ Future persistence may map:
 - reviewed general risk note templates -> `weather_risk_notes`
 
 M76 keeps all cache state local-only and performs no Supabase writes.
+## Future Weather Type Mapping From M77
+
+Planning only. No generated Supabase types were added.
+
+- `weather_user_preferences` maps to local `WeatherLocalPreference` only after consent/RLS review.
+- `weather_refresh_events` maps to future refresh audit records.
+- `weather_cache_health` maps to coarse cache freshness summaries.
+- `weather_source_audit` maps to source attribution and fallback status events.

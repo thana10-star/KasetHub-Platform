@@ -76,6 +76,7 @@ import { SupabaseReadonlyProbePage } from '@/routes/SupabaseReadonlyProbePage';
 import { SupabaseSetupGuidePage } from '@/routes/SupabaseSetupGuidePage';
 import { SupabaseSqlChecklistPage } from '@/routes/SupabaseSqlChecklistPage';
 import { WeatherPage } from '@/routes/WeatherPage';
+import { WeatherPreferencesPage } from '@/routes/WeatherPreferencesPage';
 import { WeatherQAPage } from '@/routes/WeatherQAPage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
 import { YoutubePage } from '@/routes/YoutubePage';
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="next-phase" element={<NextPhasePage />} />
         <Route path="weather" element={<WeatherPage />} />
         <Route path="weather/qa" element={<WeatherQAPage />} />
+        <Route path="weather/preferences" element={<WeatherPreferencesPage />} />
         <Route path="calculators" element={<CalculatorsPage />} />
         <Route path="calculators/safety" element={<CalculatorSafetyPage />} />
         <Route path="calculators/qa" element={<CalculatorQAPage />} />

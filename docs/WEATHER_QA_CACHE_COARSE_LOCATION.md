@@ -42,3 +42,8 @@ Each fixture states whether fetch is expected, whether fallback is expected, and
 `/app/weather` now shows cache freshness, clear-cache action, coarse location selector, and general weather risk notes.
 
 Risk notes are intentionally broad and must not become exact pesticide, chemical, fertilizer, or production advice.
+## M77 QA Additions
+
+`/app/weather/qa` now includes a source readiness matrix, refresh policy preview, stale/offline examples, local-only preference proof, no-sync proof, and privacy boundary notes.
+
+The QA route still proves there is no GPS, no map pin, no precise farm coordinate, no Supabase write, and no cloud sync.

@@ -1293,3 +1293,11 @@ M76 does not run migrations or write weather data. Future weather persistence sh
 `weather_fetch_events` should log provider status, fallback reason, stale-cache use, and timeout status without storing exact farm coordinates.
 
 `weather_risk_notes` should store reviewed general note templates and must not contain hidden chemical, fertilizer, sponsor, or guaranteed-outcome advice.
+## Future Weather Tables From M77
+
+Planning only. No migrations were run.
+
+- `weather_user_preferences`: future coarse weather preference records after explicit consent and RLS owner review.
+- `weather_refresh_events`: future backend-owned refresh/audit events if weather refresh becomes server-mediated.
+- `weather_cache_health`: future cache health summaries, not raw precise user locations.
+- `weather_source_audit`: future source attribution and fallback event audit.

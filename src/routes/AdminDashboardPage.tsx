@@ -73,6 +73,7 @@ import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft
 import { weatherAlertMocks } from '@/services/weather/weather-fixtures';
 import { weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
 import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
+import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
 import { useCropWatch } from '@/hooks/useCropWatch';
@@ -266,6 +267,7 @@ export function AdminDashboardPage() {
   const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
   const weatherMode = useMemo(() => getWeatherModeStatus(), []);
+  const weatherPreference = useMemo(() => getWeatherLocalPreferenceStatus(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -331,6 +333,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherCoarseLocations.length} />
               <SummaryCard icon={CloudSun} label="M75 weather API" value={weatherMode.mode} />
+              <SummaryCard icon={CloudSun} label="M77 weather pref" value={weatherPreference.hasPreference ? weatherPreference.selectedLabel : 'local-only'} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
@@ -669,13 +672,16 @@ export function AdminDashboardPage() {
                     <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'info'}>{weatherMode.mode}</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {weatherCoarseLocations.length} พื้นที่แบบหยาบ · {weatherAlertMocks.length} mock alerts · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
+                    {weatherCoarseLocations.length} พื้นที่แบบหยาบ · {weatherAlertMocks.length} mock alerts · preference {weatherPreference.selectedLabel} · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather">
                     เปิดหน้าสภาพอากาศเกษตร
                   </Link>
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
                     M76 weather QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+                    M77 weather preferences
                   </Link>
                 </div>
               </div>

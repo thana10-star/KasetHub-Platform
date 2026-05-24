@@ -332,6 +332,7 @@ export function MyFarmPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
                   <Badge tone="neutral">M75 weather</Badge>
+                  <Badge tone="neutral">M77 local preference</Badge>
                   <Badge tone="sky">{hub.weather.forecast.updatedAtLabel}</Badge>
                 </div>
                 <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{hub.weather.forecast.location.label}</h3>
@@ -341,6 +342,9 @@ export function MyFarmPage() {
                 </p>
                 <Link className="mt-2 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather">
                   เปิดหน้าสภาพอากาศ
+                </Link>
+                <Link className="ml-4 mt-2 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+                  ตั้งค่าพื้นที่
                 </Link>
               </div>
             </div>

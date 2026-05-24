@@ -60,3 +60,11 @@ M76 adds local-only cache support:
 - selected-location cache can be cleared locally
 
 No Supabase cache table or backend cache job is added in M76.
+## M77 Fallback UX Notes
+
+Weather cache and preference state remain local-only. The app now shows stale age, fallback reason, source label, and a clear message when using the latest local data:
+
+- `ใช้ข้อมูลล่าสุดที่มีในเครื่อง`
+- `ตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติม`
+
+If Open-Meteo fails and stale cache exists, the stale cache can be shown with a warning. If no cache exists, bundled local fixture data remains available.

@@ -89,3 +89,8 @@ M76 keeps Open-Meteo flag-gated but adds:
 - `/app/weather/qa` for cache, failure, and privacy QA
 
 The API still never uses browser geolocation or farm-level coordinates.
+## M77 UX / Source Readiness Update
+
+M77 keeps Open-Meteo flag-gated and adds clearer source attribution, manual refresh policy, local-only coarse-location preference, stale cache messaging, and offline fallback copy.
+
+Manual refresh remains disabled unless Open-Meteo is explicitly ready. No background refresh job was added.

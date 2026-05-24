@@ -31,6 +31,7 @@ import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-publ
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
+import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
 import type {
   NextPhaseOption,
   NextPhaseOptionId,
@@ -155,6 +156,7 @@ export function NextPhasePage() {
   const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
   const weatherMode = useMemo(() => getWeatherModeStatus(), []);
+  const weatherPreference = useMemo(() => getWeatherLocalPreferenceStatus(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -303,13 +305,16 @@ export function NextPhasePage() {
                 <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'warning'}>{weatherMode.mode}</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-sky-900">
-                Open-Meteo is no-key and flag-gated. Default remains local fixture, no GPS, no personal location storage, and no Supabase write.
+                Open-Meteo is no-key and flag-gated. M77 preference is {weatherPreference.selectedLabel} in localStorage only; no GPS, no personal location storage, and no Supabase write.
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather">
                 เปิด M75 weather
               </Link>
               <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/qa">
                 เปิด M76 QA
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/preferences">
+                เปิด M77 preferences
               </Link>
             </div>
           </div>

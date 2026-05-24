@@ -915,3 +915,8 @@ The weather route now lets users choose among province/city-center fixtures for 
 M76 cache is local-only and keyed by coarse location id. Fresh cache can avoid fetch, stale cache is labeled, and stale cache can be used when Open-Meteo fails. If there is no usable cache, the app falls back to local fixture data.
 
 M76 still does not request GPS/geolocation, store precise personal location, write Supabase data, write backend data, enable cloud sync, call AI, add payments/ads, or make network calls by default.
+## M77 Weather UX + Data-source Readiness
+
+M77 polishes the Open-Meteo weather integration with source attribution, manual refresh policy, stale/offline messaging, a local-only coarse-location preference route, cache QA, and no-sync privacy proof.
+
+No GPS, precise location storage, Supabase writes, backend writes, cloud sync, or default network calls were added.

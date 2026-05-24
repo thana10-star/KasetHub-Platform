@@ -6,10 +6,13 @@ import { Card } from '@/components/ui/Card';
 import { LargeActionButton } from '@/components/ui/LargeActionButton';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { buildWeatherCacheQaSummary } from '@/services/weather/weather-cache-qa';
 import { getWeatherCacheStatus } from '@/services/weather/weather-cache-service';
 import { defaultWeatherCoarseLocation, weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
 import { getWeatherQaSummary } from '@/services/weather/weather-qa-fixtures';
+import { buildWeatherRefreshPolicy } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
+import { buildWeatherSourceReadiness, getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
 
 const statusTone = {
   pass: 'success',
@@ -20,6 +23,15 @@ const statusTone = {
 export function WeatherQAPage() {
   const summary = getWeatherQaSummary();
   const cacheStatus = getWeatherCacheStatus(defaultWeatherCoarseLocation.id);
+  const cacheQa = buildWeatherCacheQaSummary(defaultWeatherCoarseLocation.id);
+  const preferenceStatus = getWeatherLocalPreferenceStatus();
+  const refreshPolicy = buildWeatherRefreshPolicy({ modeStatus: summary.modeStatus });
+  const sourceReadiness = buildWeatherSourceReadiness({
+    modeStatus: summary.modeStatus,
+    cacheStatus,
+    isOpenMeteo: summary.modeStatus.canFetchOpenMeteo,
+    isFallback: !summary.modeStatus.canFetchOpenMeteo,
+  });
 
   return (
     <div>
@@ -61,6 +73,54 @@ export function WeatherQAPage() {
 
         <NoticeBox tone="info" icon={ShieldCheck} title="Location privacy proof">
           {summary.privacyStatus.summary}
+        </NoticeBox>
+
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">M77 source readiness matrix</h2>
+          {sourceReadiness.readinessMatrix.map((item) => (
+            <Card className="p-4" key={item.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-kaset-ink">{item.label}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">{item.detail}</p>
+                </div>
+                <StatusPill tone={item.tone}>{item.ready ? 'ready' : 'blocked'}</StatusPill>
+              </div>
+            </Card>
+          ))}
+        </section>
+
+        <Card className="p-4">
+          <h2 className="font-extrabold text-kaset-ink">Refresh policy preview</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {refreshPolicy.message} · cooldown {Math.round(refreshPolicy.cooldownMs / 1000)} วินาที · no background refresh {String(refreshPolicy.noAutoBackgroundRefresh)}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge tone={refreshPolicy.canRefresh ? 'green' : 'gold'}>{refreshPolicy.status}</Badge>
+            <Badge tone="neutral">manual only</Badge>
+            <Badge tone="neutral">local fixture disables refresh</Badge>
+          </div>
+        </Card>
+
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">Stale/offline examples</h2>
+          {cacheQa.examples.map((example) => (
+            <Card className="p-4" key={example.id}>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone={example.freshness === 'fresh' ? 'green' : example.freshness === 'stale' ? 'gold' : 'neutral'}>
+                  {example.freshness}
+                </Badge>
+                <Badge tone="neutral">local-only</Badge>
+              </div>
+              <h3 className="mt-2 font-extrabold text-kaset-ink">{example.title}</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{example.fallbackReason}</p>
+              <p className="mt-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">{example.userMessage}</p>
+            </Card>
+          ))}
+        </section>
+
+        <NoticeBox tone="success" icon={Database} title="Cache/preference local-only proof">
+          selected: {preferenceStatus.selectedLabel} · storage: {preferenceStatus.storageKey} · no Supabase write {String(preferenceStatus.noSupabaseWrite)} · no cloud sync {String(preferenceStatus.noCloudSync)}
         </NoticeBox>
 
         <section className="grid gap-3">
@@ -120,6 +180,9 @@ export function WeatherQAPage() {
 
         <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather">
           กลับไปหน้าสภาพอากาศ
+        </Link>
+        <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+          เปิด M77 weather preferences
         </Link>
 
         <LargeActionButton

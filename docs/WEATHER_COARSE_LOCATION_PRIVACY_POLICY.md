@@ -38,3 +38,8 @@ Each fixture has `precision = province_or_city_center` and a Thai privacy note e
 ## Future Preference Storage
 
 Future weather preferences should store only coarse location ids unless a later reviewed milestone adds explicit consent, deletion, RLS, and privacy review for more specific location data.
+## M77 Local Preference Boundary
+
+The selected weather location is stored only as coarse location id and label in localStorage. The app does not store approximate lat/lon in the preference record and does not sync weather preference to Supabase.
+
+Weather preferences must remain local-only until a later explicit consent and RLS-reviewed sync milestone.
