@@ -1235,3 +1235,30 @@ RLS expectations:
 - unpublished drafts are blocked from anon/public
 
 Seed planning covers starter offline article import, article categories, review fixtures, release gate fixtures, and fallback article fixtures. No seed inserts occur in M73.
+
+## M74 CMS SQL Draft Artifacts
+
+M74 checks in planning-only SQL draft files under `supabase/drafts/cms/`, not `supabase/migrations`.
+
+Draft artifacts:
+
+- `0002_cms_articles_schema_draft.sql`
+- `0002_cms_articles_rls_draft.sql`
+- `0002_cms_articles_seed_draft.sql`
+- `0002_cms_articles_rollback_draft.sql`
+- `README.md`
+
+The schema draft covers:
+
+- `article_versions`
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_image_assets`
+- `article_release_gates`
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_cms_overrides`
+
+Every draft includes `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED` warnings. M74 does not execute SQL, run migrations, write Supabase data, or enable frontend CMS publishing.

@@ -43,6 +43,20 @@ export function OfflineArticleCmsMigrationReviewPage() {
           การตรวจนี้อ่านจาก fixture ในแอปเท่านั้น บทความ offline fallback ยังต้องอยู่เสมอ และ human release gate ยังจำเป็นก่อน publish
         </NoticeBox>
 
+        <Link to="/app/articles/cms-sql-drafts">
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-amber-950">M74 CMS SQL drafts</h2>
+                <p className="mt-1 text-sm leading-6 text-amber-900">
+                  ดู schema/RLS/seed/rollback SQL drafts ที่อยู่ใน supabase/drafts/cms และยังไม่ run SQL จริง
+                </p>
+              </div>
+              <StatusPill tone="warning">not executed</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <Database aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
@@ -171,6 +185,9 @@ export function OfflineArticleCmsMigrationReviewPage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/release-audit">
             กลับไป release audit
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/cms-sql-drafts">
+            เปิด M74 CMS SQL drafts
           </Link>
         </div>
       </div>

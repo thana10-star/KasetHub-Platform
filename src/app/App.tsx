@@ -54,6 +54,7 @@ import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailP
 import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
 import { OfflineArticleCmsMigrationReviewPage } from '@/routes/OfflineArticleCmsMigrationReviewPage';
 import { OfflineArticleCmsPersistencePlanPage } from '@/routes/OfflineArticleCmsPersistencePlanPage';
+import { OfflineArticleCmsSqlDraftsPage } from '@/routes/OfflineArticleCmsSqlDraftsPage';
 import { OfflineArticleEditorialEvidencePage } from '@/routes/OfflineArticleEditorialEvidencePage';
 import { OfflineArticleEditorialReviewPage } from '@/routes/OfflineArticleEditorialReviewPage';
 import { OfflineArticleFullContentReadinessPage } from '@/routes/OfflineArticleFullContentReadinessPage';
@@ -142,6 +143,7 @@ export default function App() {
         <Route path="articles/release-audit" element={<OfflineArticleReleaseAuditPage />} />
         <Route path="articles/cms-persistence-plan" element={<OfflineArticleCmsPersistencePlanPage />} />
         <Route path="articles/cms-migration-review" element={<OfflineArticleCmsMigrationReviewPage />} />
+        <Route path="articles/cms-sql-drafts" element={<OfflineArticleCmsSqlDraftsPage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

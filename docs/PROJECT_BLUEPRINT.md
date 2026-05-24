@@ -883,3 +883,13 @@ M73 adds `/app/articles/cms-migration-review`, a local-only dry-run review pack 
 The new service layer defines table review planning, RLS expectation planning, rollback planning, seed fixture planning, and publish safety gates for article CMS persistence. Public writes, frontend CMS writes, automation publish, and incomplete content publish remain blocked.
 
 M73 still does not run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.
+
+## M74 CMS SQL Draft Artifacts Planning
+
+M74 adds `/app/articles/cms-sql-drafts`, a local-only route for checked-in planning SQL draft artifacts.
+
+The new draft files live under `supabase/drafts/cms/`, not `supabase/migrations`, and cover future article CMS schema, RLS policy planning, seed fixture planning, and rollback planning. Each file is marked `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED`.
+
+The app registers these files with `executionStatus = not_executed`, `reviewStatus = needs_review`, and `migrationBlocked = true`. Frontend CMS writes and final article publish remain blocked.
+
+M74 still does not run SQL, run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.

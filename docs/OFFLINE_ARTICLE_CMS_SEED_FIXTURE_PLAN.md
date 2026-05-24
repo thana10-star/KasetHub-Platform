@@ -21,3 +21,16 @@ Seed rules:
 
 M73 keeps every fixture as local planning data.
 
+## M74 Seed Draft Artifact
+
+M74 adds `supabase/drafts/cms/0002_cms_articles_seed_draft.sql` as a planning-only seed draft.
+
+The seed draft lists placeholder ideas for:
+
+- offline article categories
+- pilot article mappings
+- reviewer role fixtures
+- release gate fixtures
+- fallback article fixtures
+
+It does not insert real rows, final published articles, official source claims, sponsor content, or external images.

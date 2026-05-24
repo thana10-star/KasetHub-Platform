@@ -35,3 +35,17 @@ Release/admin scope:
 
 No real RLS execution occurs in M73.
 
+## M74 RLS Draft Artifact
+
+M74 adds `supabase/drafts/cms/0002_cms_articles_rls_draft.sql` as a planning-only RLS draft. The file contains reviewed policy intentions as commented draft SQL, not an executable migration.
+
+The draft keeps these boundaries:
+
+- public read only for released/published article versions
+- unpublished drafts blocked from anon/public reads
+- editors draft only
+- reviewers scoped to their own review tables
+- release manager blocked without audit requirements
+- automation blocked from final publish
+- admin blocked from silent human release gate bypass
+- service role reserved for backend-only use

@@ -35,3 +35,10 @@ Future tables under review:
 
 M73 is a review pack only. SQL must not run from the frontend.
 
+## M74 SQL Draft Artifacts
+
+M74 adds draft SQL files under `supabase/drafts/cms/` for schema, RLS, seed, and rollback review. They are planning artifacts only and are deliberately not placed in `supabase/migrations`.
+
+The drafts are registered in the app with `executionStatus = not_executed`, `reviewStatus = needs_review`, and `migrationBlocked = true`.
+
+M74 still performs no migration execution, no Supabase writes, no backend CMS writes, and no production article publishing.

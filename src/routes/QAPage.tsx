@@ -117,6 +117,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M71 offline article release audit', route: '/app/articles/release-audit' },
   { label: 'M72 offline article CMS persistence plan', route: '/app/articles/cms-persistence-plan' },
   { label: 'M73 offline article CMS migration review', route: '/app/articles/cms-migration-review' },
+  { label: 'M74 offline article CMS SQL drafts', route: '/app/articles/cms-sql-drafts' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -318,6 +319,14 @@ export function QAPage() {
             description="ดู table DDL review plan, RLS expectations, rollback plan และ seed fixtures โดยยังไม่ run migration"
             to="/app/articles/cms-migration-review"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M74 CMS SQL drafts"
+            description="ดู schema/RLS/seed/rollback draft artifacts ที่ยังไม่ run SQL และไม่ได้อยู่ใน migrations"
+            to="/app/articles/cms-sql-drafts"
+            variant="white"
           />
         </Card>
 

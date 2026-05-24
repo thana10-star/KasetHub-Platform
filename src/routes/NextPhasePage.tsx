@@ -24,6 +24,7 @@ import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-ga
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
 import { getCmsMigrationReviewSummary } from '@/services/content/offline-agri-cms-migration-review';
+import { getArticleCmsSqlDraftSummary } from '@/services/content/offline-agri-cms-sql-draft';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
@@ -150,6 +151,7 @@ export function NextPhasePage() {
   const ownershipGate = useMemo(() => buildOwnershipRlsGateStatus(), []);
   const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
   const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
+  const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -262,6 +264,26 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-migration-review">
                 เปิด M73 CMS migration review
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-900">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M74 CMS SQL draft artifacts</h2>
+                <StatusPill tone="warning">{articleCmsSqlDrafts.sqlDraftCount} SQL drafts</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                Draft SQL อยู่ใน supabase/drafts/cms ไม่ใช่ migrations และยังไม่ run SQL จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-sql-drafts">
+                เปิด M74 CMS SQL drafts
               </Link>
             </div>
           </div>

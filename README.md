@@ -720,6 +720,14 @@ M73 adds `/app/articles/cms-migration-review` for local-only CMS migration dry-r
 
 It plans table DDL review, RLS expectations, rollback steps, seed fixtures, and publish safety gates for the future article CMS migration. Frontend CMS writes, public writes, automation final publish, and incomplete content publish remain blocked. No migrations, Supabase writes, CMS writes, image uploads, or production article publishing are enabled.
 
+## M74 CMS SQL Draft Artifacts
+
+M74 adds `/app/articles/cms-sql-drafts` plus planning-only SQL artifacts under `supabase/drafts/cms/`.
+
+The draft files cover future article CMS schema, RLS policy planning, seed fixture planning, and rollback planning. They are marked `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED`, are not in `supabase/migrations`, and are not executed by the app.
+
+Frontend CMS writes and final article publish remain blocked. No SQL execution, migrations, Supabase writes, backend CMS writes, image uploads, AI article generation, sponsor injection, or production publishing are enabled.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

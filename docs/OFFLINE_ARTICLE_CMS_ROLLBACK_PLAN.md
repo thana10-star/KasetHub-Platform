@@ -23,3 +23,10 @@ Rollback blockers:
 
 M73 does not execute rollback or migration scripts.
 
+## M74 Rollback Draft Artifact
+
+M74 adds `supabase/drafts/cms/0002_cms_articles_rollback_draft.sql` as a planning-only rollback draft.
+
+The rollback draft records dependency-order drops for future CMS tables and warns that no destructive rollback should run without backup, operator review, and offline fallback preservation.
+
+The draft is not executed and is not in `supabase/migrations`.

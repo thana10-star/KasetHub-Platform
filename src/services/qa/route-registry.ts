@@ -4,7 +4,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
   {
     id: 'offline_article_qa_m66',
     label: 'Offline Article QA',
-    description: 'M66-M73 offline article editorial QA, image planning, version fixtures, CMS override safety contract, full-content readiness, evidence/release gates, CMS persistence planning, and migration dry-run review',
+    description: 'M66-M74 offline article editorial QA, image planning, version fixtures, CMS override safety contract, full-content readiness, evidence/release gates, CMS persistence planning, migration dry-run review, and SQL draft artifacts',
     routes: [
       { route: '/app/articles/offline-qa', label: 'Offline Article QA', milestone: 'M66', notes: 'editorial checklist, disclaimer coverage, image metadata warnings, version fixtures, and CMS override safety rules', manualCheckPath: '/app/articles/offline-qa' },
       { route: '/app/articles/full-content-readiness', label: 'Offline Article Full Content Readiness', milestone: 'M67', notes: 'pilot full-content templates, source placeholders, publish blockers, image needs, and expert escalation notes; no official full articles yet', manualCheckPath: '/app/articles/full-content-readiness' },
@@ -14,6 +14,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/articles/release-audit', label: 'Offline Article Release Audit', milestone: 'M71', notes: 'release audit event fixtures, blocked release attempts, diff preview, reviewer history, and automation bypass policy', manualCheckPath: '/app/articles/release-audit' },
       { route: '/app/articles/cms-persistence-plan', label: 'Offline Article CMS Persistence Plan', milestone: 'M72', notes: 'backend-owned CMS persistence contract planning, editor roles, release audit write contract, fallback policy, and migration checklist', manualCheckPath: '/app/articles/cms-persistence-plan' },
       { route: '/app/articles/cms-migration-review', label: 'Offline Article CMS Migration Review', milestone: 'M73', notes: 'migration dry-run checklist, table review, RLS expectations, rollback plan, seed fixture plan, and frontend write block proof', manualCheckPath: '/app/articles/cms-migration-review' },
+      { route: '/app/articles/cms-sql-drafts', label: 'Offline Article CMS SQL Drafts', milestone: 'M74', notes: 'planning-only schema/RLS/seed/rollback SQL drafts outside migrations, not executed and not wired to runtime', manualCheckPath: '/app/articles/cms-sql-drafts' },
     ],
   },
   {
@@ -74,6 +75,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/articles/release-audit', label: 'Offline Article Release Audit', milestone: 'M71', notes: 'blocked release attempts, reviewer change history, diff preview, and CMS/automation bypass blocks before any final publish', manualCheckPath: '/app/articles/release-audit' },
       { route: '/app/articles/cms-persistence-plan', label: 'Offline Article CMS Persistence Plan', milestone: 'M72', notes: 'future CMS tables, role rules, write/read contracts, release audit write plan, offline fallback policy, and migration rollback checklist', manualCheckPath: '/app/articles/cms-persistence-plan' },
       { route: '/app/articles/cms-migration-review', label: 'Offline Article CMS Migration Review', milestone: 'M73', notes: 'table DDL review planning, RLS dry-run rules, rollback planning, seed fixture planning, and no frontend CMS writes', manualCheckPath: '/app/articles/cms-migration-review' },
+      { route: '/app/articles/cms-sql-drafts', label: 'Offline Article CMS SQL Drafts', milestone: 'M74', notes: 'checked-in planning-only SQL draft artifacts for schema, RLS, seed, and rollback; still not executed or deployed', manualCheckPath: '/app/articles/cms-sql-drafts' },
       { route: '/app/articles/offline/:slug', label: 'Offline Agriculture Article Detail', milestone: 'M65', notes: 'รายละเอียดบทความออฟไลน์ outline/starter content, planned image fallback, related calculator, save/share, and safety disclaimers', manualCheckPath: '/app/articles/offline/soil-types-before-planting' },
       { route: '/app/articles/:articleId', label: 'Article detail', milestone: 'M20', notes: 'หน้ารายละเอียดบทความตัวอย่าง', manualCheckPath: '/app/articles/article-001' },
       { route: '/app/content-admin-preview', label: 'Content admin preview', milestone: 'M20/M22.5', notes: 'หลังบ้านคอนเทนต์ mock ไม่มี publish จริง', manualCheckPath: '/app/content-admin-preview' },

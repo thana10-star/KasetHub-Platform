@@ -550,3 +550,24 @@ Future persistence may map:
 - publish safety gate -> release gate and audit preconditions
 
 M73 keeps `noMigrationRun=true`, `noSupabaseWrite=true`, and `frontendCanWriteCmsRows=false`.
+
+## M74 CMS SQL Draft Artifact Mapping Notes
+
+M74 adds frontend-only SQL draft registry models:
+
+- `ArticleCmsSqlDraftExecutionStatus`
+- `ArticleCmsSqlDraftReviewStatus`
+- `ArticleCmsSqlDraftKind`
+- `ArticleCmsSqlDraftArtifact`
+- `ArticleCmsSqlDraftRegistry`
+
+The registry maps checked-in files under `supabase/drafts/cms/` to planning metadata:
+
+- execution status: `not_executed`
+- review status: `needs_review`
+- migration blocked: `true`
+- in migrations folder: `false`
+- frontend CMS write allowed: `false`
+- final publish allowed: `false`
+
+M74 performs no Supabase writes, migrations, CMS writes, CMS fetches, or production publishing.
