@@ -99,6 +99,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/auth/linking', label: 'Account linking', milestone: 'M19', notes: 'กติกาเชื่อม Phone + LINE แบบ local', manualCheckPath: '/app/auth/linking' },
       { route: '/app/auth/phone', label: 'Phone auth mock', milestone: 'M17/M28', notes: 'OTP mock ไม่มี SMS จริง', manualCheckPath: '/app/auth/phone' },
       { route: '/app/auth/phone-staging', label: 'Phone OTP staging plan', milestone: 'M28', notes: 'checklist staging ยังไม่เปิด auth จริง', manualCheckPath: '/app/auth/phone-staging' },
+      { route: '/app/auth/phone-staging-test', label: 'Phone Auth staging test review', milestone: 'M61', notes: 'review ก่อนทดสอบ Supabase Phone Auth staging จริง: redirect, SMS, test numbers, ownership, rollback และ no-real-OTP notice', manualCheckPath: '/app/auth/phone-staging-test' },
       { route: '/app/auth/line', label: 'LINE auth mock', milestone: 'M19', notes: 'ไม่มี LINE Login SDK/redirect จริง', manualCheckPath: '/app/auth/line' },
       { route: '/app/auth/google', label: 'Google auth mock', milestone: 'M07', notes: 'ไม่มี OAuth จริง', manualCheckPath: '/app/auth/google' },
       { route: '/app/auth/sync-preview', label: 'Sync preview', milestone: 'M07/M16/M29', notes: 'dry-run payload local-only', manualCheckPath: '/app/auth/sync-preview' },

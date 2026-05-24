@@ -12,6 +12,7 @@ import {
   requestPhoneOtp,
   verifyPhoneOtp,
 } from '@/services/auth/phone-auth-adapter';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { validateThaiPhoneNumber } from '@/services/auth/phone-auth-local-mock';
 import type { PhoneAuthActionResult } from '@/services/auth/phone-auth.types';
 
@@ -22,6 +23,7 @@ export function AuthPhonePage() {
   const [message, setMessage] = useState<PhoneAuthActionResult | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const phoneStatus = getPhoneAuthAdapterStatus();
+  const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const validation = useMemo(() => validateThaiPhoneNumber(phoneNumber), [phoneNumber]);
   const session = phoneStatus.session;
 
@@ -86,6 +88,13 @@ export function AuthPhonePage() {
           ตอนนี้ยังเป็น local mock เท่านั้น การส่ง OTP จริงด้วย Supabase Auth ต้องตั้งค่า staging, SMS provider, redirect URL, rate limit และ session ownership ก่อน
           <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
             เปิด Phone OTP staging checklist
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" icon={ShieldCheck} title="M61 staging test review">
+          {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · ยังไม่ส่ง OTP จริง และ Guest Memory sync ต้องรอ owner จาก Supabase session จริงก่อน
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
+            เปิด Phone Auth staging test plan
           </Link>
         </NoticeBox>
 

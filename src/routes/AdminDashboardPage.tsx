@@ -33,6 +33,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { adminModuleLabels, adminRoleLabels } from '@/services/admin/admin-fixtures';
 import { buildAdminDashboardData } from '@/services/admin/admin-dashboard-service';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import type {
@@ -218,6 +219,7 @@ export function AdminDashboardPage() {
   const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
   const supabaseSqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
+  const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const mvpReadiness = useMemo(() => runMvpReadinessAudit(), []);
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
@@ -694,6 +696,31 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
                     เปิด Phone OTP staging checklist
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging-test">
+                    เปิด M61 staging test plan
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+                  <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-amber-950">M61 Phone Auth staging test review</h2>
+                    <StatusPill tone={phoneAuthM61.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                      {phoneAuthM61.levelLabel}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-amber-950">
+                    blockers {phoneAuthM61.blockerItems.length} · no real OTP/SMS · no cloud sync · ownership required before Guest Memory sync
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/auth/phone-staging-test">
+                    เปิด Phone Auth staging test plan
                   </Link>
                 </div>
               </div>

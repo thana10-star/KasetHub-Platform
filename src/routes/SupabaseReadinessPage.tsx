@@ -19,6 +19,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import {
@@ -100,6 +101,7 @@ export function SupabaseReadinessPage() {
   const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
   const sqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
+  const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
 
   return (
@@ -384,9 +386,16 @@ export function SupabaseReadinessPage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
                 เปิด Phone OTP staging checklist
               </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging-test">
+                เปิด M61 staging test plan
+              </Link>
             </div>
           </div>
         </Card>
+
+        <NoticeBox tone="warning" icon={Phone} title="M61 first real Phone Auth staging test">
+          {phoneAuthM61.levelLabel} · blockers {phoneAuthM61.blockerItems.length} · no real OTP/SMS from the app · cloud sync stays off until ownership is proven.
+        </NoticeBox>
 
         <Card className="p-4">
           <div className="flex gap-3">

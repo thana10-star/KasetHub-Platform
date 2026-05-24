@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
@@ -142,6 +143,7 @@ export function NextPhasePage() {
   const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
   const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
+  const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -304,6 +306,28 @@ export function NextPhasePage() {
               </Link>
               <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-endpoint-plan">
                 เปิด AI endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <Phone aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M61 Phone Auth staging test plan</h2>
+                <StatusPill tone={phoneAuthM61.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                  {phoneAuthM61.levelLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-950">
+                กลับสู่ production-readiness roadmap: เตรียม real Supabase Phone Auth staging test โดยยังไม่ส่ง OTP จริงและยังไม่เปิด cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/auth/phone-staging-test">
+                เปิด Phone Auth staging test plan
               </Link>
             </div>
           </div>

@@ -50,3 +50,16 @@ If redirect returns to the wrong environment:
 - "กลับไปที่สถานะบัญชี"
 - "ยังไม่สำรองข้อมูลจนกว่าจะยืนยันบัญชีสำเร็จ"
 - "หากใช้เครื่องร่วมกับผู้อื่น โปรดออกจากระบบหลังใช้งาน"
+
+## M61 Redirect Review
+
+`/app/auth/phone-staging-test` reports redirect readiness from `VITE_SUPABASE_AUTH_REDIRECT_URL`.
+
+M61 blocks the first staging OTP test when the redirect URL is empty or invalid. This is safe for default local/mock mode, but not enough for a real OTP round.
+
+Before enabling real staging OTP, confirm:
+
+- local dev redirect works
+- staging/preview redirect works
+- production redirect is parked but not used
+- redirect URL contains no secrets, tokens, phone numbers, or service-role keys

@@ -1,5 +1,5 @@
 import { ClipboardList, KeyRound, Link2, Lock, MessageCircle, Phone, RotateCcw, ShieldCheck, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +9,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
 import { clearLineMockSessionFromAdapter, getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { clearPhoneMockSession, getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { getAccountStatus } from '@/services/account/account-status-service';
 
@@ -16,6 +17,7 @@ export function AuthStatusPage() {
   const { state } = useGuestMemory();
   const [refreshKey, setRefreshKey] = useState(0);
   const phoneStatus = getPhoneAuthAdapterStatus();
+  const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const lineStatus = getLineAuthAdapterStatus();
   const accountStatus = getAccountStatus(state);
   const phoneSession = phoneStatus.session;
@@ -111,9 +113,16 @@ export function AuthStatusPage() {
               <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/auth/phone-staging">
                 เปิด checklist ก่อนทดสอบ OTP จริง
               </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
+                เปิด M61 staging test plan
+              </Link>
             </div>
           </div>
         </Card>
+
+        <NoticeBox tone="warning" icon={ShieldCheck} title="M61 Phone Auth staging status">
+          {m61Review.levelLabel} · blockers {m61Review.blockerItems.length} · current phone mode {m61Review.flags.phoneAuthMode} · ยังไม่ส่ง OTP จริง และ cloud sync ยังต้องรอ ownership จาก Supabase session จริง
+        </NoticeBox>
 
         <Card className="p-4">
           <div className="flex gap-3">

@@ -11,6 +11,7 @@ import {
   ImageUp,
   ListChecks,
   MessageCircle,
+  Phone,
   ShieldCheck,
   Sparkles,
   UserRoundCheck,
@@ -73,6 +74,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Supabase SQL checklist', route: '/app/supabase-sql-checklist' },
   { label: 'Env safety', route: '/app/env-safety' },
   { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },
+  { label: 'Phone Auth staging test review', route: '/app/auth/phone-staging-test' },
   { label: 'Guest Sync Edge plan', route: '/app/guest-sync-edge' },
   { label: 'My Farm Hub', route: '/app/my-farm' },
   { label: 'My Farm settings', route: '/app/my-farm/settings' },
@@ -207,6 +209,14 @@ export function QAPage() {
             description="ดู endpoint URL gate, validation fixtures, secret checklist, audit/rate-limit preview และ no-fetch proof"
             to="/app/calculators/ai-edge-dry-run"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Phone}
+            label="เปิด Phone Auth staging test"
+            description="ดู M61 checklist ก่อนทดสอบ Supabase Phone OTP staging จริง โดยยังไม่ส่ง OTP จากแอป"
+            to="/app/auth/phone-staging-test"
+            variant="white"
           />
         </Card>
 

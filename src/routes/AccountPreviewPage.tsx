@@ -23,6 +23,7 @@ import { getGuestSyncAdapterStatus } from '@/services/backend/guest-sync-adapter
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { createGuestToCloudSyncPlan } from '@/services/backend/guest-to-cloud-sync-planner';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 
 const backupOptions = [
@@ -50,6 +51,7 @@ export function AccountPreviewPage() {
   const supabaseStatus = accountStatus.supabase;
   const guestSyncStatus = getGuestSyncAdapterStatus();
   const guestSyncEdge = runGuestSyncStagingReadiness();
+  const m61Review = runPhoneAuthStagingReview();
 
   return (
     <div>
@@ -95,10 +97,17 @@ export function AccountPreviewPage() {
             <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
               เปิด Phone OTP staging checklist
             </Link>
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging-test">
+              เปิด M61 Phone Auth staging test
+            </Link>
             <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/guest-sync-edge">
               เปิด Guest Sync Edge plan
             </Link>
           </div>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" title="M61 Phone Auth staging status">
+          {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · ข้อมูล Guest Memory จะยังไม่ขึ้น cloud จนกว่า Phone Auth staging และ ownership/RLS จะผ่านจริง
         </NoticeBox>
 
         {accountStatus.phoneMockSession ? (

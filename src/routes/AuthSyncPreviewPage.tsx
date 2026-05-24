@@ -17,6 +17,7 @@ import {
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
 import { getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import type {
   GuestSyncAuthProviderCandidate,
   GuestSyncConsentOptions,
@@ -174,6 +175,7 @@ export function AuthSyncPreviewPage() {
 
   const syncStatus = getGuestSyncAdapterStatus();
   const phoneAuthStatus = getPhoneAuthAdapterStatus();
+  const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const lineAuthStatus = getLineAuthAdapterStatus();
   const linkingPlan = createAccountLinkingPlan({
     phoneSession: phoneAuthStatus.session,
@@ -241,6 +243,13 @@ export function AuthSyncPreviewPage() {
           <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
             เปิด Phone OTP staging checklist
           </Link>
+          <Link className="ml-4 mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
+            เปิด M61 staging test plan
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" title="M61 ownership boundary">
+          {m61Review.levelLabel} · cloud sync stays blocked until a real Supabase Phone Auth session proves `auth.uid()` ownership and the user consents to Guest Memory sync.
         </NoticeBox>
 
         {phoneAuthStatus.session ? (

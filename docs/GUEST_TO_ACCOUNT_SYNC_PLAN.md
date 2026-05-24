@@ -181,3 +181,17 @@ Before enabling it:
 - Keep local Guest Memory preserved after success, partial success, or rejection until a later synced-marker policy is implemented.
 
 M29 adds the contract and test plan only. It does not deploy or call the endpoint.
+
+## M61 Phone Auth Staging Gate
+
+M61 adds `/app/auth/phone-staging-test` to prepare the first real Supabase Phone Auth staging test.
+
+Guest Memory sync remains blocked until:
+
+- Supabase Phone Auth creates a real staging session.
+- `auth.uid()` is proven as the owner for RLS checks.
+- the user gives explicit consent.
+- rollback steps are ready.
+- cloud sync remains off outside a controlled staging sync milestone.
+
+A phone mock session is still not enough for real cloud sync.

@@ -143,3 +143,17 @@ M29 keeps the M16 dry run unchanged and adds the future Edge Function contract f
 - No Edge Function is deployed or called in M29.
 
 Real sync must still wait for staging auth, SQL/RLS verification, idempotent merge tests, audit logging, and rollback checks.
+
+## M61 Phone Auth Staging Test Dependency
+
+M61 does not change the M16 dry-run sync. It adds a stricter Phone Auth staging review before any real OTP test.
+
+The dry run should continue to show:
+
+- local data is preserved
+- no backend write occurs
+- no Supabase write occurs
+- phone mock ownership is only a placeholder
+- real sync must wait for real Supabase session ownership
+
+`/app/auth/phone-staging-test` is the new review surface for redirect URLs, SMS provider setup, test phone numbers, ownership, and rollback.

@@ -189,3 +189,22 @@ Phone auth staging must prove:
 - Guest Sync consent is explicit.
 - Cloud sync remains off until the Edge Function idempotency, merge, audit, and rollback tests pass.
 - service-role remains server-side only.
+
+## M61 First Staging Test Review
+
+M61 adds `/app/auth/phone-staging-test` and `src/services/auth/phone-auth-staging-review.ts`.
+
+The review checks:
+
+- M42 staging project and SQL/RLS success.
+- M44 public read/RLS review success.
+- auth and phone flags are still off by default.
+- redirect URL readiness.
+- SMS provider readiness.
+- private test phone number plan.
+- OTP cost and rate-limit warnings.
+- ownership requirements before Guest Memory sync.
+- rollback readiness.
+- production blockers.
+
+M61 still does not enable real phone auth, send SMS, write Supabase data, deploy Edge Functions, or enable cloud sync.

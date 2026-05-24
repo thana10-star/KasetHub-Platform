@@ -58,6 +58,7 @@ export type AppRoute =
   | '/app/auth/linking'
   | '/app/auth/phone'
   | '/app/auth/phone-staging'
+  | '/app/auth/phone-staging-test'
   | '/app/auth/line'
   | '/app/auth/google'
   | '/app/auth/sync-preview'

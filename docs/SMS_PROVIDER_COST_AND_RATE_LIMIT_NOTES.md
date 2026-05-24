@@ -51,3 +51,16 @@ Minimum staging rules:
 - No staging delivery test.
 - No user support path for missing SMS.
 - No account recovery/deletion policy.
+
+## M61 SMS Review
+
+M61 treats SMS provider setup as a blocker for real OTP because no provider is configured in the app and no SMS should be sent automatically.
+
+Before a future staging OTP test:
+
+- provider secret must be stored only in Supabase/Auth settings
+- spending limit must be active
+- resend cooldown must be active
+- max attempts and lockout must be active
+- test phone numbers must stay outside git
+- the team must record SMS cost after the test

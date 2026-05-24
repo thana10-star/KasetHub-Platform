@@ -15,6 +15,7 @@ import { AuthLinkingPage } from '@/routes/AuthLinkingPage';
 import { AuthPage } from '@/routes/AuthPage';
 import { AuthPhonePage } from '@/routes/AuthPhonePage';
 import { AuthPhoneStagingPage } from '@/routes/AuthPhoneStagingPage';
+import { AuthPhoneStagingTestPage } from '@/routes/AuthPhoneStagingTestPage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
 import { CalculatorAIArchitecturePage } from '@/routes/CalculatorAIArchitecturePage';
@@ -133,6 +134,7 @@ export default function App() {
         <Route path="auth/linking" element={<AuthLinkingPage />} />
         <Route path="auth/phone" element={<AuthPhonePage />} />
         <Route path="auth/phone-staging" element={<AuthPhoneStagingPage />} />
+        <Route path="auth/phone-staging-test" element={<AuthPhoneStagingTestPage />} />
         <Route path="auth/line" element={<AuthLinePage />} />
         <Route path="auth/google" element={<AuthGooglePage />} />
         <Route path="auth/sync-preview" element={<AuthSyncPreviewPage />} />
