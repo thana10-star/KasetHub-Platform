@@ -2,6 +2,8 @@
 
 M50 hardens the M49 agriculture calculator foundation with deterministic fixtures, validation helpers, safer warning states, and an in-app QA route.
 
+M51 builds on this by adding crop profile fixtures and a static unit-test readiness plan without adding a test runner yet.
+
 ## Scope
 
 - No backend writes.
@@ -18,6 +20,7 @@ M50 hardens the M49 agriculture calculator foundation with deterministic fixture
 - `src/services/agri-calculators/agri-calculator-validation.ts`
 - `src/routes/CalculatorQAPage.tsx`
 - `/app/calculators/qa`
+- `src/services/agri-calculators/agri-calculator-unit-test-plan.ts`
 
 ## Deterministic Test Cases
 
@@ -75,4 +78,6 @@ Results are not guarantees and are not replacements for product labels, soil tes
 
 ## Future Work
 
-M50 is still arithmetic QA, not agronomy intelligence. Future milestones can add a formal unit test runner, edge-case fixtures by crop, export/share polish, and eventually AI explanations only after deterministic outputs remain separate from advice.
+M50-M51 are still arithmetic QA and planning, not agronomy intelligence. Future milestones can add a formal unit test runner, edge-case fixtures by crop, export/share polish, and eventually AI explanations only after deterministic outputs remain separate from advice.
+
+The M51 unit-test plan covers spray mix math, Thai land unit conversion, plant spacing, fertilizer NPK helper, yield estimate, cost estimate, and crop profile example loading.

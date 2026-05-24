@@ -1,4 +1,4 @@
-import { Calculator, ChevronRight, Copy, History, RotateCcw, Share2, ShieldCheck, Star } from 'lucide-react';
+import { Calculator, ChevronRight, Copy, History, RotateCcw, Share2, ShieldCheck, Sprout, Star } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
@@ -9,12 +9,18 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { calculatorCards } from '@/services/agri-calculators/agri-calculator-fixtures';
 import { createCalculatorShareSummary } from '@/services/agri-calculators/agri-calculator-service';
+import { calculatorPlanningOnlyDisclaimer } from '@/services/agri-calculators/crop-calculator-boundaries';
+import {
+  cropCalculatorProfileOptions,
+  getCropCalculatorProfile,
+} from '@/services/agri-calculators/crop-calculator-profiles';
 import type {
   AgriCalculatorInputByCategory,
   AgriCalculatorResultByCategory,
   CalculatorCategory,
   CalculatorHistoryRecord,
 } from '@/services/agri-calculators/agri-calculator.types';
+import type { CropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profile.types';
 import { shareContent } from '@/services/share/share-service';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
 
@@ -146,6 +152,56 @@ export function CalculatorHero({
             {children}
           </div>
         </div>
+      </div>
+    </Card>
+  );
+}
+
+export function CropProfilePicker({
+  actionLabel = 'ใช้ตัวอย่างของพืชนี้',
+  children,
+  onChange,
+  onUseExample,
+  selectedCropKey,
+}: {
+  actionLabel?: string;
+  children?: ReactNode;
+  onChange: (cropKey: CropCalculatorKey) => void;
+  onUseExample: () => void;
+  selectedCropKey: CropCalculatorKey;
+}) {
+  const profile = getCropCalculatorProfile(selectedCropKey);
+
+  return (
+    <Card className="p-4">
+      <div className="flex gap-3">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+          <Sprout aria-hidden="true" className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-extrabold text-kaset-ink">ตัวอย่างตามพืช</h2>
+            <Badge tone="gold">planning only</Badge>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{calculatorPlanningOnlyDisclaimer}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-4">
+        <SelectField<CropCalculatorKey>
+          label="เลือกพืช"
+          onChange={onChange}
+          options={cropCalculatorProfileOptions}
+          value={selectedCropKey}
+        />
+        <div className="rounded-lg bg-kaset-mist p-3">
+          <p className="font-extrabold text-kaset-ink">{profile.thaiDisplayName}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{profile.fertilizerPlanningNote}</p>
+        </div>
+        {children}
+        <Button className="min-h-[52px] w-full" onClick={onUseExample} variant="soft">
+          <Sprout aria-hidden="true" className="h-5 w-5" />
+          {actionLabel}
+        </Button>
       </div>
     </Card>
   );

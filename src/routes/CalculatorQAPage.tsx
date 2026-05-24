@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, FlaskConical, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FlaskConical, ShieldCheck, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -8,6 +8,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { calculatorCards, calculatorLocalOnlyDisclaimer } from '@/services/agri-calculators/agri-calculator-fixtures';
 import type { AgriCalculatorTestRun, AgriCalculatorTestStatus } from '@/services/agri-calculators/agri-calculator-test-fixtures';
 import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-calculator-test-fixtures';
+import { summarizeAgriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
 
@@ -82,6 +83,7 @@ function TestCaseCard({ run }: { run: AgriCalculatorTestRun }) {
 
 export function CalculatorQAPage() {
   const suite = runAgriCalculatorTestSuite();
+  const unitTestPlan = summarizeAgriCalculatorUnitTestPlan();
 
   return (
     <div>
@@ -130,6 +132,11 @@ export function CalculatorQAPage() {
           ผลทดสอบนี้ช่วยจับความคลาดเคลื่อนของสูตรพื้นฐานเท่านั้น ไม่ใช่การรับรองทางเกษตร และไม่แทนฉลากยา/ปุ๋ย นักวิชาการเกษตร หรือข้อมูลรังวัดจริง
         </NoticeBox>
 
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/safety">
+          <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+          เปิดขอบเขตความปลอดภัย
+        </Link>
+
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-extrabold text-kaset-ink">รายการทดสอบ</h2>
@@ -145,6 +152,20 @@ export function CalculatorQAPage() {
         <NoticeBox tone="info" title="หมายเหตุ local-only">
           {calculatorLocalOnlyDisclaimer} หน้านี้อ่าน fixtures และคำนวณในเครื่องเท่านั้น ไม่มีการบันทึกขึ้น Supabase
         </NoticeBox>
+
+        <Card className="p-4">
+          <h2 className="font-extrabold text-kaset-ink">Unit-test readiness plan</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            มีแผน unit test {unitTestPlan.totalCount} รายการ · high priority {unitTestPlan.highPriorityCount} · ยังไม่เพิ่ม test runner ใน M51
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {unitTestPlan.groups.map((group) => (
+              <Badge key={group} tone="neutral">
+                {group}
+              </Badge>
+            ))}
+          </div>
+        </Card>
 
         <Card className="p-4">
           <h2 className="font-extrabold text-kaset-ink">Known limitations</h2>

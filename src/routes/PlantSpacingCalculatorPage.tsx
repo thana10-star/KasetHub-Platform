@@ -5,6 +5,8 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { defaultPlantSpacingInput, thaiAreaUnitLabels } from '@/services/agri-calculators/agri-calculator-fixtures';
 import { calculatePlantSpacing, formatAgriNumber } from '@/services/agri-calculators/agri-calculator-service';
 import type { PlantSpacingInput, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
+import { getCropCalculatorProfile } from '@/services/agri-calculators/crop-calculator-profiles';
+import type { CropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profile.types';
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
@@ -12,6 +14,7 @@ import {
   CalculatorResetButton,
   CalculatorShareActions,
   CalculatorSubmitButton,
+  CropProfilePicker,
   NumberField,
   RecentCalculations,
   ResultMetric,
@@ -30,7 +33,9 @@ const areaUnitOptions: Array<{ value: ThaiAreaUnit; label: string }> = [
 export function PlantSpacingCalculatorPage() {
   const calculators = useAgriCalculators();
   const [input, setInput] = useState<PlantSpacingInput>(() => calculators.getLastInput('plant_spacing') ?? defaultPlantSpacingInput);
+  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('rice');
   const result = useMemo(() => calculatePlantSpacing(input), [input]);
+  const selectedCropProfile = getCropCalculatorProfile(selectedCropKey);
 
   const updateInput = (patch: Partial<PlantSpacingInput>) => {
     setInput((current) => ({
@@ -40,6 +45,20 @@ export function PlantSpacingCalculatorPage() {
   };
 
   const resetInput = () => setInput(defaultPlantSpacingInput);
+
+  const applyCropExample = () => {
+    const spacingExample = selectedCropProfile.commonSpacingExamples[0];
+    const areaExample = selectedCropProfile.commonUnitExamples[0];
+
+    updateInput({
+      landSizeValue: areaExample.areaValue,
+      landSizeUnit: areaExample.areaUnit,
+      rowSpacingCm: spacingExample.rowSpacingCm,
+      plantSpacingCm: spacingExample.plantSpacingCm,
+      usableAreaPercent: spacingExample.usableAreaPercent,
+      seedlingBufferPercent: spacingExample.seedlingBufferPercent,
+    });
+  };
 
   return (
     <div>
@@ -52,6 +71,19 @@ export function PlantSpacingCalculatorPage() {
         />
 
         <SafetyNotice>ตัวเลขเป็นการประมาณจากพื้นที่และระยะปลูกจริง ต้องเผื่อคันนา ทางเดิน ระบบน้ำ และความงอกของเมล็ดด้วย</SafetyNotice>
+
+        <CropProfilePicker selectedCropKey={selectedCropKey} onChange={setSelectedCropKey} onUseExample={applyCropExample}>
+          <div className="grid gap-2">
+            {selectedCropProfile.commonSpacingExamples.map((example) => (
+              <div className="rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10" key={example.id}>
+                <p className="text-sm font-extrabold text-kaset-ink">{example.label}</p>
+                <p className="mt-1 text-xs font-bold leading-5 text-slate-500">
+                  {formatAgriNumber(example.rowSpacingCm, 0)} x {formatAgriNumber(example.plantSpacingCm, 0)} ซม. · {example.note}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CropProfilePicker>
 
         <form
           className="grid gap-4"

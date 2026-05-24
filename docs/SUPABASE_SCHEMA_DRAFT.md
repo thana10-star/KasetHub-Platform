@@ -586,6 +586,54 @@ RLS notes: Users can CRUD their own cost records. Public read is disabled by def
 
 Admin/moderation notes: Cost records are sensitive financial planning data. They must not be used for credit, ads, affiliate targeting, or pricing offers without explicit consent and policy review.
 
+## `crop_calculator_profiles` Future
+
+Purpose: Admin-reviewed crop example profiles for calculator form defaults such as spacing examples, area examples, yield input examples, and cost category labels.
+
+Key columns: `id uuid`, `crop_key`, `thai_display_name`, `profile_status`, `fertilizer_planning_status`, `spacing_examples jsonb`, `unit_examples jsonb`, `yield_examples jsonb`, `cost_categories text[]`, `safety_notes text[]`, `source_label`, `review_status`, `rule_version_id nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `crop_key`, `profile_status`, `fertilizer_planning_status`, `review_status`.
+
+RLS notes: Public can read only approved planning profiles. Admin/editor/expert roles manage drafts through backend-controlled policies.
+
+Admin/moderation notes: Profiles must not contain exact fertilizer doses or pesticide/product recommendations until reviewed rule versions exist. Sponsored profiles must be clearly labeled and separated from base examples.
+
+## `calculator_safety_notes` Future
+
+Purpose: Versioned safety copy for calculator boundaries, fertilizer/chemical warnings, AI explanation boundaries, and sponsor/affiliate separation.
+
+Key columns: `id uuid`, `note_key`, `title`, `body`, `locale`, `risk_area`, `status`, `effective_from`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `note_key + locale + effective_from`, `risk_area`, `status`.
+
+RLS notes: Public can read active notes. Admin/editor/expert roles manage drafts and retired notes.
+
+Admin/moderation notes: Safety copy should be versioned so exported summaries and AI explanations can cite the boundary text active at the time.
+
+## `calculator_result_reviews` Future
+
+Purpose: Expert or admin review records for user-submitted calculator results, risky fertilizer/chemical questions, disputed output, or future AI explanation quality checks.
+
+Key columns: `id uuid`, `calculator_history_id nullable`, `user_id nullable`, `calculator_category`, `risk_area`, `review_status`, `reviewer_id nullable`, `review_summary`, `recommended_action`, `created_at`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `calculator_history_id`, `user_id`, `calculator_category`, `risk_area`, `review_status`, `created_at desc`.
+
+RLS notes: Users may read safe summaries of their own review requests. Moderator/admin/expert reads and writes must be role-gated and audited.
+
+Admin/moderation notes: Use for high-risk fertilizer, chemical, and AI explanation escalation. Review records must not expose private calculator payloads broadly.
+
+## `crop_rule_versions` Future
+
+Purpose: Version registry for future crop-specific recommendation rules after expert review, source citation, and safety policy approval.
+
+Key columns: `id uuid`, `crop_key`, `rule_area`, `version_label`, `status`, `source_refs jsonb`, `approved_by nullable`, `approved_at nullable`, `effective_from nullable`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `crop_key`, `rule_area`, `status`, `effective_from`, unique `crop_key + rule_area + version_label`.
+
+RLS notes: Public can read only approved, active rule metadata. Rule authoring and approval are backend/admin/expert only.
+
+Admin/moderation notes: Future AI recommendations must cite rule versions and must not mix sponsor influence into deterministic calculator output or expert-reviewed rule logic.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

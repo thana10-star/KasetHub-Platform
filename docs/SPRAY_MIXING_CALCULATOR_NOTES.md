@@ -1,6 +1,6 @@
 # Spray Mixing Calculator Notes
 
-M49 adds `/app/calculators/spray-mix` as a local-only calculator for mixing amounts from label ratios. M50 adds validation hardening, deterministic QA fixtures, and local share-summary support.
+M49 adds `/app/calculators/spray-mix` as a local-only calculator for mixing amounts from label ratios. M50 adds validation hardening, deterministic QA fixtures, and local share-summary support. M51 keeps spray mixing outside crop profile examples because chemical use must remain label-first.
 
 ## What It Does
 
@@ -84,6 +84,7 @@ No PDF, file export, backend save, Supabase write, sponsor routing, or AI recomm
 
 - No product recommendation.
 - No pest/disease diagnosis.
+- No crop-specific chemical recommendation.
 - No pesticide legality check.
 - No weather/wind drift check.
 - No worker safety certification.
@@ -97,3 +98,5 @@ No PDF, file export, backend save, Supabase write, sponsor routing, or AI recomm
 Future AI can help read label text only after image/text safety review exists. Even then, the app should show extracted label data as user-confirmed inputs before calculating.
 
 Future sponsor or affiliate features must not replace the label-first calculation. Paid product placement must be labeled and separated from the calculator result.
+
+M51 adds `/app/calculators/safety` to explain why chemical and fertilizer recommendations must stay separate from deterministic math, AI explanations, and sponsored product placement.

@@ -1,6 +1,6 @@
 # Agriculture Calculator Foundation
 
-M49 adds the first real agriculture calculator foundation for KasetHub. M50 hardens that foundation with validation helpers, deterministic QA fixtures, safer warning states, and local share summaries while staying fully local-only.
+M49 adds the first real agriculture calculator foundation for KasetHub. M50 hardens that foundation with validation helpers, deterministic QA fixtures, safer warning states, and local share summaries. M51 adds crop-specific planning profiles and safety boundaries while staying fully local-only.
 
 ## Current Scope
 
@@ -17,6 +17,7 @@ M49 adds the first real agriculture calculator foundation for KasetHub. M50 hard
 ## Routes
 
 - `/app/calculators`
+- `/app/calculators/safety`
 - `/app/calculators/qa`
 - `/app/calculators/spray-mix`
 - `/app/calculators/fertilizer`
@@ -35,6 +36,10 @@ Files:
 - `src/services/agri-calculators/agri-calculator-service.ts`
 - `src/services/agri-calculators/agri-calculator-validation.ts`
 - `src/services/agri-calculators/agri-calculator-test-fixtures.ts`
+- `src/services/agri-calculators/crop-calculator-profile.types.ts`
+- `src/services/agri-calculators/crop-calculator-profiles.ts`
+- `src/services/agri-calculators/crop-calculator-boundaries.ts`
+- `src/services/agri-calculators/agri-calculator-unit-test-plan.ts`
 - `src/hooks/useAgriCalculators.ts`
 
 Core types:
@@ -75,6 +80,14 @@ Every calculator must keep clear copy that:
 `/app/calculators/qa` runs deterministic expected-vs-actual checks for spray mix, plant spacing, fertilizer helper, yield estimate, and cost estimate. It shows pass/warn/fail status and known limitations.
 
 Validation now handles empty/zero/negative/non-number values, corrupted or missing units, extremely high values, unsafe concentration warnings, area too small/large warnings, and divide-by-zero prevention. Invalid results should not be saved into local history.
+
+## M51 Crop-specific Planning
+
+M51 adds crop profile fixtures for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. These profiles provide spacing examples, area examples, yield input examples, cost category labels, and safety notes.
+
+Every profile keeps `fertilizerPlanningStatus = planning_only`. Crop examples are only starter values for form filling and must show: `ตัวอย่างนี้เป็นค่าเริ่มต้นเพื่อช่วยกรอก ไม่ใช่คำแนะนำทางวิชาการสุดท้าย`.
+
+M51 also adds `/app/calculators/safety` so users can see what calculators can and cannot do, why labels/soil tests/experts still matter, and why sponsor or AI recommendations must stay separate from deterministic results.
 
 ## Local Storage
 

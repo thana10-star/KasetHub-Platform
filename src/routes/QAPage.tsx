@@ -73,6 +73,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Notification settings', route: '/app/notification-settings' },
   { label: 'สภาพอากาศเกษตร', route: '/app/weather' },
   { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
+  { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
   { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
@@ -229,6 +230,14 @@ export function QAPage() {
             description="ดู test case deterministic, pass/warn/fail และขอบเขตความปลอดภัย"
             to="/app/calculators/qa"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิดความปลอดภัยเครื่องคำนวณ"
+            description="ดูขอบเขตปุ๋ย สารเคมี AI และ sponsor ก่อนใช้ตัวเลขจริง"
+            to="/app/calculators/safety"
+            variant="white"
           />
         </Card>
 

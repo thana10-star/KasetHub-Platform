@@ -9,6 +9,7 @@ import {
   thaiAreaUnitLabels,
 } from '@/services/agri-calculators/agri-calculator-fixtures';
 import { calculateFertilizerMix, formatAgriNumber } from '@/services/agri-calculators/agri-calculator-service';
+import { getCropCalculatorProfile } from '@/services/agri-calculators/crop-calculator-profiles';
 import type {
   FertilizerBaseNutrient,
   FertilizerMixInput,
@@ -16,6 +17,7 @@ import type {
   NutrientKey,
   ThaiAreaUnit,
 } from '@/services/agri-calculators/agri-calculator.types';
+import type { CropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profile.types';
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
@@ -23,6 +25,7 @@ import {
   CalculatorResetButton,
   CalculatorShareActions,
   CalculatorSubmitButton,
+  CropProfilePicker,
   NumberField,
   RecentCalculations,
   ResultMetric,
@@ -63,8 +66,10 @@ export function FertilizerCalculatorPage() {
   const calculators = useAgriCalculators();
   const [input, setInput] = useState<FertilizerMixInput>(() => calculators.getLastInput('fertilizer_mix') ?? defaultFertilizerMixInput);
   const [profileId, setProfileId] = useState(fertilizerProfiles[0].id);
+  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('rice');
   const result = useMemo(() => calculateFertilizerMix(input), [input]);
   const selectedProfile = fertilizerProfiles.find((profile) => profile.id === profileId) ?? fertilizerProfiles[0];
+  const selectedCropProfile = getCropCalculatorProfile(selectedCropKey);
 
   const updateInput = (patch: Partial<FertilizerMixInput>) => {
     setInput((current) => ({
@@ -78,6 +83,16 @@ export function FertilizerCalculatorPage() {
     setInput(defaultFertilizerMixInput);
   };
 
+  const applyCropExample = () => {
+    const areaExample = selectedCropProfile.commonUnitExamples[0];
+
+    updateInput({
+      areaValue: areaExample.areaValue,
+      areaUnit: areaExample.areaUnit,
+      baseNutrient: 'auto',
+    });
+  };
+
   return (
     <div>
       <PageHeader title="คำนวณปุ๋ย" subtitle="ตัวช่วยคิด NPK เบื้องต้น" showBack />
@@ -89,6 +104,22 @@ export function FertilizerCalculatorPage() {
         />
 
         <SafetyNotice>เป็นการคำนวณเบื้องต้น ยังไม่ใช่คำแนะนำการใส่ปุ๋ยจริง ควรตรวจดิน พืช ฤดู และคำแนะนำจากเจ้าหน้าที่ก่อนใช้</SafetyNotice>
+
+        <CropProfilePicker selectedCropKey={selectedCropKey} onChange={setSelectedCropKey} onUseExample={applyCropExample}>
+          <div className="grid gap-2">
+            <div className="rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10">
+              <p className="text-sm font-extrabold text-kaset-ink">สถานะคำแนะนำปุ๋ย: planning_only</p>
+              <p className="mt-1 text-xs font-bold leading-5 text-slate-500">
+                ใช้ตัวอย่างพื้นที่ของ {selectedCropProfile.thaiDisplayName} เท่านั้น ไม่เปลี่ยนเป้าหมาย NPK และไม่แนะนำอัตราปุ๋ยเฉพาะพืช
+              </p>
+            </div>
+            {selectedCropProfile.safetyDisclaimerNotes.map((note) => (
+              <p className="rounded-lg bg-amber-50 p-3 text-xs font-bold leading-5 text-amber-950" key={note}>
+                {note}
+              </p>
+            ))}
+          </div>
+        </CropProfilePicker>
 
         <form
           className="grid gap-4"

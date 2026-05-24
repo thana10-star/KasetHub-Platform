@@ -1,6 +1,6 @@
 # Fertilizer And Planting Calculator Plan
 
-M49 adds simple foundations for fertilizer, planting density, yield estimate, and cost estimate. M50 adds validation hardening, QA fixtures, and local share summaries. These are calculator utilities, not agronomy recommendation engines.
+M49 adds simple foundations for fertilizer, planting density, yield estimate, and cost estimate. M50 adds validation hardening, QA fixtures, and local share summaries. M51 adds crop-specific planning examples and safety boundaries. These are calculator utilities, not agronomy recommendation engines.
 
 ## Fertilizer Helper
 
@@ -28,6 +28,8 @@ Required warning:
 - `เป็นการคำนวณเบื้องต้น`
 
 M50 validation prevents divide-by-zero when a target nutrient or fertilizer percentage is missing, warns on very high fertilizer amounts, and blocks invalid saves until inputs are corrected.
+
+M51 crop examples may fill area context only on the fertilizer page. They do not fill crop-specific NPK targets, fertilizer doses, or product names.
 
 Boundary:
 
@@ -67,6 +69,8 @@ Thai unit rules:
 
 M50 validation checks zero, negative, non-number, very small/large spacing, very small/large area, and unusually high plant counts.
 
+M51 adds crop profile spacing examples for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. These are labeled as starter form values, not final agronomy recommendations.
+
 ## Yield Estimate
 
 Route: `/app/calculators/yield-estimate`
@@ -86,6 +90,8 @@ Outputs:
 - yield per rai
 
 M50 validation guards zero/negative sample inputs, very high yield estimates, and divide-by-zero for yield per rai.
+
+M51 yield profile examples help fill sample count, average weight, and total units for calculator practice. They are not yield forecasts.
 
 Boundary:
 
@@ -115,6 +121,8 @@ Outputs:
 - break-even placeholder
 
 M50 validation guards missing area, negative cost fields, all-zero costs, very high total cost, and very high cost per rai.
+
+M51 cost profile examples list common cost categories by crop and fill area context. Users must enter their own real costs.
 
 ## M50 QA And Share Summary
 

@@ -5,6 +5,8 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { defaultYieldEstimateInput, thaiAreaUnitLabels } from '@/services/agri-calculators/agri-calculator-fixtures';
 import { calculateYieldEstimate, formatAgriNumber } from '@/services/agri-calculators/agri-calculator-service';
 import type { ThaiAreaUnit, YieldEstimateInput } from '@/services/agri-calculators/agri-calculator.types';
+import { getCropCalculatorProfile } from '@/services/agri-calculators/crop-calculator-profiles';
+import type { CropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profile.types';
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import {
   CalculatorBackLink,
@@ -12,6 +14,7 @@ import {
   CalculatorResetButton,
   CalculatorShareActions,
   CalculatorSubmitButton,
+  CropProfilePicker,
   NumberField,
   RecentCalculations,
   ResultMetric,
@@ -30,7 +33,9 @@ const areaUnitOptions: Array<{ value: ThaiAreaUnit; label: string }> = [
 export function YieldEstimateCalculatorPage() {
   const calculators = useAgriCalculators();
   const [input, setInput] = useState<YieldEstimateInput>(() => calculators.getLastInput('yield_estimate') ?? defaultYieldEstimateInput);
+  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('rice');
   const result = useMemo(() => calculateYieldEstimate(input), [input]);
+  const selectedCropProfile = getCropCalculatorProfile(selectedCropKey);
 
   const updateInput = (patch: Partial<YieldEstimateInput>) => {
     setInput((current) => ({
@@ -40,6 +45,18 @@ export function YieldEstimateCalculatorPage() {
   };
 
   const resetInput = () => setInput(defaultYieldEstimateInput);
+
+  const applyCropExample = () => {
+    const yieldExample = selectedCropProfile.yieldEstimateInputExamples[0];
+
+    updateInput({
+      landSizeValue: yieldExample.landSizeValue,
+      landSizeUnit: yieldExample.landSizeUnit,
+      sampleCount: yieldExample.sampleCount,
+      averageWeightKg: yieldExample.averageWeightKg,
+      estimatedTotalUnits: yieldExample.estimatedTotalUnits,
+    });
+  };
 
   return (
     <div>
@@ -52,6 +69,19 @@ export function YieldEstimateCalculatorPage() {
         />
 
         <SafetyNotice>ผลผลิตจริงขึ้นกับพันธุ์พืช สภาพอากาศ โรค แมลง น้ำ และการจัดการแปลง ตัวเลขนี้ใช้ช่วยวางแผนเท่านั้น</SafetyNotice>
+
+        <CropProfilePicker selectedCropKey={selectedCropKey} onChange={setSelectedCropKey} onUseExample={applyCropExample}>
+          <div className="grid gap-2">
+            {selectedCropProfile.yieldEstimateInputExamples.map((example) => (
+              <div className="rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10" key={example.id}>
+                <p className="text-sm font-extrabold text-kaset-ink">{example.label}</p>
+                <p className="mt-1 text-xs font-bold leading-5 text-slate-500">
+                  {formatAgriNumber(example.sampleCount, 0)} ตัวอย่าง · เฉลี่ย {formatAgriNumber(example.averageWeightKg, 2)} กก. · {example.note}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CropProfilePicker>
 
         <form
           className="grid gap-4"

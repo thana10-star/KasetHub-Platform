@@ -19,6 +19,7 @@ export type AppRoute =
   | '/app/next-phase'
   | '/app/weather'
   | '/app/calculators'
+  | '/app/calculators/safety'
   | '/app/calculators/qa'
   | '/app/calculators/spray-mix'
   | '/app/calculators/plant-spacing'

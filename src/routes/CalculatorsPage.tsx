@@ -6,10 +6,11 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { calculatorCards, calculatorLocalOnlyDisclaimer } from '@/services/agri-calculators/agri-calculator-fixtures';
+import { cropCalculatorProfiles } from '@/services/agri-calculators/crop-calculator-profiles';
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import { RecentCalculations } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
-import { FlaskConical, Star } from 'lucide-react';
+import { FlaskConical, ShieldCheck, Sprout, Star } from 'lucide-react';
 
 export function CalculatorsPage() {
   const calculators = useAgriCalculators();
@@ -48,6 +49,26 @@ export function CalculatorsPage() {
           {calculatorLocalOnlyDisclaimer} ผลลัพธ์เป็นการคำนวณเบื้องต้นและไม่รับประกันผลในแปลงจริง
         </NoticeBox>
 
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ShieldCheck aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">ความปลอดภัยเครื่องคำนวณ</h2>
+                <StatusPill tone="warning">อ่านก่อนใช้จริง</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ดูขอบเขตปุ๋ย สารเคมี AI และผู้สนับสนุน ก่อนนำตัวเลขไปใช้ในแปลงจริง
+              </p>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/safety">
+                เปิดขอบเขตความปลอดภัย
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <Card className="border-sky-200 bg-sky-50 p-4">
           <div className="flex gap-3">
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
@@ -65,6 +86,30 @@ export function CalculatorsPage() {
             </div>
           </div>
         </Card>
+
+        <section className="grid gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold text-kaset-ink">ตัวอย่างพืช M51</h2>
+            <StatusPill tone="info">{cropCalculatorProfiles.length} crops</StatusPill>
+          </div>
+          <Card className="p-4">
+            <div className="flex gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <Sprout aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-extrabold text-kaset-ink">ตัวอย่างช่วยกรอก ไม่ใช่คำแนะนำสุดท้าย</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {cropCalculatorProfiles.map((profile) => (
+                    <Badge key={profile.cropKey} tone="neutral">
+                      {profile.thaiDisplayName}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </section>
 
         {favoriteCards.length > 0 ? (
           <section className="grid gap-3">
