@@ -61,7 +61,7 @@ export const quickActions: QuickAction[] = [
   },
   {
     label: 'สภาพอากาศเกษตร',
-    description: 'ฝน แดด ลม ตัวอย่าง',
+    description: 'Open-Meteo เมื่อเปิด flag',
     href: '/app/weather',
     icon: CloudSun,
     accent: 'sky',

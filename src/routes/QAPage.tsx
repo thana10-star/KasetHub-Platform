@@ -84,7 +84,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'My Farm settings', route: '/app/my-farm/settings' },
   { label: 'Notification Center', route: '/app/notifications' },
   { label: 'Notification settings', route: '/app/notification-settings' },
-  { label: 'สภาพอากาศเกษตร', route: '/app/weather' },
+  { label: 'M75 real weather API / local fallback', route: '/app/weather' },
   { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
   { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },

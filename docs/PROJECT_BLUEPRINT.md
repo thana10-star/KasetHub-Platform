@@ -893,3 +893,15 @@ The new draft files live under `supabase/drafts/cms/`, not `supabase/migrations`
 The app registers these files with `executionStatus = not_executed`, `reviewStatus = needs_review`, and `migrationBlocked = true`. Frontend CMS writes and final article publish remain blocked.
 
 M74 still does not run SQL, run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.
+
+## M75 Real Weather API Integration
+
+M75 adds `/app/weather` as a flag-gated Open-Meteo weather integration with an offline-safe fallback.
+
+The weather adapter supports `local_fixture`, `open_meteo_disabled`, `open_meteo_ready`, and `production_disabled`. Defaults keep `VITE_WEATHER_MODE=local_fixture` and `VITE_ENABLE_REAL_WEATHER_API=false`, so the app performs no network call unless local staging flags explicitly enable Open-Meteo.
+
+When enabled, the adapter requests the Open-Meteo public forecast endpoint with configured default coordinates only. It maps current temperature, humidity, precipitation, wind speed, weather code, and a 5-7 day forecast into Thai farmer-friendly weather cards.
+
+M75 updates Home, My Farm, Profile, Admin Dashboard, Next Phase, QA, and route registry entry points with weather status. The UI states that Open-Meteo is external forecast data, uses no GPS/geolocation, stores no personal precise location, and falls back to local fixture data on errors.
+
+M75 still does not write Supabase data, write backend data, enable cloud sync, request GPS, store personal location, call AI, add payments/ads, or make weather API calls by default.

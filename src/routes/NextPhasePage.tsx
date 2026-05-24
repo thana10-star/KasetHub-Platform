@@ -3,6 +3,7 @@ import {
   Bot,
   CheckCircle2,
   CloudUpload,
+  CloudSun,
   Database,
   GitBranch,
   ImageUp,
@@ -29,6 +30,7 @@ import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-pl
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
+import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
 import type {
   NextPhaseOption,
   NextPhaseOptionId,
@@ -152,6 +154,7 @@ export function NextPhasePage() {
   const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
   const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
+  const weatherMode = useMemo(() => getWeatherModeStatus(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -284,6 +287,26 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-sql-drafts">
                 เปิด M74 CMS SQL drafts
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <CloudSun aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M75 real weather API</h2>
+                <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'warning'}>{weatherMode.mode}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                Open-Meteo is no-key and flag-gated. Default remains local fixture, no GPS, no personal location storage, and no Supabase write.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather">
+                เปิด M75 weather
               </Link>
             </div>
           </div>

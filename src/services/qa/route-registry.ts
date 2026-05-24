@@ -27,7 +27,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
       { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34', notes: 'ศูนย์รวมข้อมูลฟาร์ม local จาก Guest Memory, crop watch, weather, และ farm area', manualCheckPath: '/app/my-farm' },
       { route: '/app/my-farm/settings', label: 'My Farm settings', milestone: 'M34', notes: 'สถานะข้อมูล local และแผน cloud sync ในอนาคต', manualCheckPath: '/app/my-farm/settings' },
-      { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32', notes: 'สภาพอากาศเกษตร mock/local ไม่มี weather API หรือ geolocation จริง', manualCheckPath: '/app/weather' },
+      { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32/M75', notes: 'Open-Meteo public weather API is flag-gated; default local fixture remains, with no GPS/geolocation, no personal location storage, and no Supabase writes', manualCheckPath: '/app/weather' },
       { route: '/app/farm-area', label: 'Farm area planner', milestone: 'M33', notes: 'คำนวณพื้นที่แปลงและแปลงหน่วยที่ดินไทยแบบ local-only', manualCheckPath: '/app/farm-area' },
       { route: '/app/farm-area-guide', label: 'Farm area guide', milestone: 'M33', notes: 'คู่มือวัดพื้นที่ด้วยสายวัด สูตรพื้นที่ และคำเตือนเรื่องรังวัด', manualCheckPath: '/app/farm-area-guide' },
       { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery', manualCheckPath: '/app/notifications' },

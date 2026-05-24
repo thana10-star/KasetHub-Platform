@@ -30,6 +30,11 @@ export type PublicRuntimeEnv = {
   lineAuthMode: string;
   enableLineAuth: boolean;
   enableLineAuthLocalMock: boolean;
+  weatherMode: string;
+  enableRealWeatherApi: boolean;
+  weatherDefaultLat: number;
+  weatherDefaultLon: number;
+  weatherDefaultLabel: string;
 };
 
 function readStringEnv(key: keyof ImportMetaEnv): string {
@@ -49,6 +54,11 @@ function readBooleanEnv(key: keyof ImportMetaEnv, fallback = false): boolean {
   }
 
   return fallback;
+}
+
+function readNumberEnv(key: keyof ImportMetaEnv, fallback: number): number {
+  const value = Number(readStringEnv(key));
+  return Number.isFinite(value) ? value : fallback;
 }
 
 export const publicEnv: PublicRuntimeEnv = Object.freeze({
@@ -83,6 +93,11 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   lineAuthMode: readStringEnv('VITE_LINE_AUTH_MODE') || 'local_mock',
   enableLineAuth: readBooleanEnv('VITE_ENABLE_LINE_AUTH', false),
   enableLineAuthLocalMock: readBooleanEnv('VITE_ENABLE_LINE_AUTH_LOCAL_MOCK', true),
+  weatherMode: readStringEnv('VITE_WEATHER_MODE') || 'local_fixture',
+  enableRealWeatherApi: readBooleanEnv('VITE_ENABLE_REAL_WEATHER_API', false),
+  weatherDefaultLat: readNumberEnv('VITE_WEATHER_DEFAULT_LAT', 13.7563),
+  weatherDefaultLon: readNumberEnv('VITE_WEATHER_DEFAULT_LON', 100.5018),
+  weatherDefaultLabel: readStringEnv('VITE_WEATHER_DEFAULT_LABEL') || 'กรุงเทพฯ',
 });
 
 export function hasSupabaseEnv(env: Pick<PublicRuntimeEnv, 'supabaseUrl' | 'supabaseAnonKey'> = publicEnv) {

@@ -71,6 +71,7 @@ import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-set
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft-validator';
 import { weatherAlertMocks, weatherLocations } from '@/services/weather/weather-fixtures';
+import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
 import { useCropWatch } from '@/hooks/useCropWatch';
@@ -263,6 +264,7 @@ export function AdminDashboardPage() {
   const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
   const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
+  const weatherMode = useMemo(() => getWeatherModeStatus(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -327,6 +329,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
+              <SummaryCard icon={CloudSun} label="M75 weather API" value={weatherMode.mode} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
@@ -662,10 +665,10 @@ export function AdminDashboardPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-extrabold text-kaset-ink">Agriculture weather preview</h2>
-                    <StatusPill tone="info">demo/local</StatusPill>
+                    <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'info'}>{weatherMode.mode}</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {weatherLocations.length} พื้นที่ตัวอย่าง · {weatherAlertMocks.length} mock alerts · ไม่มี weather API, geolocation, backend หรือ push จริง
+                    {weatherLocations.length} พื้นที่ตัวอย่าง · {weatherAlertMocks.length} mock alerts · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather">
                     เปิดหน้าสภาพอากาศเกษตร

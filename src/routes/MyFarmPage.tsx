@@ -331,7 +331,7 @@ export function MyFarmPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="neutral">mock weather</Badge>
+                  <Badge tone="neutral">M75 weather</Badge>
                   <Badge tone="sky">{hub.weather.forecast.updatedAtLabel}</Badge>
                 </div>
                 <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{hub.weather.forecast.location.label}</h3>

@@ -54,7 +54,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'ตั้งค่า My Farm', icon: Settings, href: '/app/my-farm/settings' },
   { label: 'ตั้งค่าการแจ้งเตือน', icon: Bell, href: '/app/notification-settings' },
   { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
-  { label: 'สภาพอากาศเกษตรตัวอย่าง', icon: CloudSun, href: '/app/weather' },
+  { label: 'M75 สภาพอากาศ Open-Meteo / local fallback', icon: CloudSun, href: '/app/weather' },
   { label: 'เครื่องคำนวณเกษตร', icon: Calculator, href: '/app/calculators' },
   { label: 'ผลคำนวณที่บันทึกไว้', icon: History, href: '/app/calculators/saved-results' },
   { label: 'ความปลอดภัยเครื่องคำนวณ', icon: ShieldCheck, href: '/app/calculators/safety' },

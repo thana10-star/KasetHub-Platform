@@ -1262,3 +1262,19 @@ The schema draft covers:
 - `article_cms_overrides`
 
 Every draft includes `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED` warnings. M74 does not execute SQL, run migrations, write Supabase data, or enable frontend CMS publishing.
+
+## M75 Weather API Future Tables
+
+M75 does not run migrations or write weather data. Future weather persistence may require:
+
+- `weather_cache`
+- `weather_api_events`
+- `farm_weather_preferences`
+
+`weather_cache` should store source label, coarse location label or reviewed preference id, forecast payload snapshot, fetched timestamp, expiry timestamp, stale status, and provider status.
+
+`weather_api_events` should store provider name, mode, status, fallback reason, timeout status, and no sensitive user location values.
+
+`farm_weather_preferences` should store user-selected coarse location preferences only after explicit consent and ownership/RLS review.
+
+No future weather table should store GPS or precise personal location by default. M75 keeps local fixture fallback available and performs no Supabase writes.

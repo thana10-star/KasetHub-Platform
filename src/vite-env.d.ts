@@ -29,6 +29,11 @@ interface ImportMetaEnv {
   readonly VITE_LINE_AUTH_MODE?: string;
   readonly VITE_ENABLE_LINE_AUTH?: string;
   readonly VITE_ENABLE_LINE_AUTH_LOCAL_MOCK?: string;
+  readonly VITE_WEATHER_MODE?: string;
+  readonly VITE_ENABLE_REAL_WEATHER_API?: string;
+  readonly VITE_WEATHER_DEFAULT_LAT?: string;
+  readonly VITE_WEATHER_DEFAULT_LON?: string;
+  readonly VITE_WEATHER_DEFAULT_LABEL?: string;
 }
 
 interface ImportMeta {

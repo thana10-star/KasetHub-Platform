@@ -571,3 +571,21 @@ The registry maps checked-in files under `supabase/drafts/cms/` to planning meta
 - final publish allowed: `false`
 
 M74 performs no Supabase writes, migrations, CMS writes, CMS fetches, or production publishing.
+
+## M75 Weather API Mapping Notes
+
+M75 adds frontend weather adapter models:
+
+- `WeatherMode`
+- `WeatherModeStatus`
+- `WeatherCurrentConditions`
+- `WeatherLocationForecast`
+- `WeatherAdapterResult`
+
+Future persistence may map:
+
+- forecast snapshots -> `weather_cache`
+- provider status/fallback events -> `weather_api_events`
+- reviewed coarse user preferences -> `farm_weather_preferences`
+
+M75 performs no Supabase writes, backend writes, cloud sync, GPS request, or personal precise location storage. The default mode remains `local_fixture`.
