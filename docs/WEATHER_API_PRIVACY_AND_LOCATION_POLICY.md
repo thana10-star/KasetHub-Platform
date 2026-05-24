@@ -41,3 +41,17 @@ Weather screens should state:
 ## Future Work
 
 Before user-selected farm weather preferences are added, KasetHub should define consent, coarse-location storage, cache expiry, deletion, and RLS rules. Precise location storage should remain opt-in and reviewed separately.
+
+## M76 Coarse Location Rule
+
+M76 adds only predefined coarse locations. Each location uses a province/city-center approximation with `precision = province_or_city_center`.
+
+The app still blocks:
+
+- GPS
+- browser geolocation
+- exact farm coordinates
+- map pins
+- precise personal location storage
+
+Future persistence should store coarse location ids only unless a later milestone reviews consent, deletion, RLS, and privacy impact.

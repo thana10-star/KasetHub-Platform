@@ -70,7 +70,8 @@ import { runSupabaseReadinessAudit } from '@/services/supabase/supabase-readines
 import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
 import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft-validator';
-import { weatherAlertMocks, weatherLocations } from '@/services/weather/weather-fixtures';
+import { weatherAlertMocks } from '@/services/weather/weather-fixtures';
+import { weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
 import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
@@ -328,7 +329,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={ShieldCheck} label="M70 release gate" value={`${articleEvidencePacket.finalPublishAllowedCount} final`} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
-              <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
+              <SummaryCard icon={CloudSun} label="weather locations" value={weatherCoarseLocations.length} />
               <SummaryCard icon={CloudSun} label="M75 weather API" value={weatherMode.mode} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
@@ -668,10 +669,13 @@ export function AdminDashboardPage() {
                     <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'info'}>{weatherMode.mode}</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {weatherLocations.length} พื้นที่ตัวอย่าง · {weatherAlertMocks.length} mock alerts · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
+                    {weatherCoarseLocations.length} พื้นที่แบบหยาบ · {weatherAlertMocks.length} mock alerts · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather">
                     เปิดหน้าสภาพอากาศเกษตร
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
+                    M76 weather QA
                   </Link>
                 </div>
               </div>

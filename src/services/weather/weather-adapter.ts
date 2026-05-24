@@ -3,9 +3,21 @@ import {
   futureWeatherSources,
   weatherAlertMocks,
   weatherForecastsWithAlerts,
-  weatherLocations,
   weatherSources,
 } from '@/services/weather/weather-fixtures';
+import {
+  getWeatherCacheStatus,
+  readWeatherCacheEntry,
+  writeWeatherCacheEntry,
+} from '@/services/weather/weather-cache-service';
+import type { WeatherCacheStorageLike } from '@/services/weather/weather-cache.types';
+import {
+  defaultWeatherCoarseLocation,
+  getWeatherCoarseLocation,
+  getWeatherLocationOptions,
+  toWeatherLocation,
+  weatherLocationPrivacyStatus,
+} from '@/services/weather/weather-location-fixtures';
 import {
   fetchOpenMeteoForecast,
   type OpenMeteoFetch,
@@ -37,9 +49,15 @@ type LoadWeatherOptions = {
   env?: WeatherAdapterEnv;
   fetcher?: OpenMeteoFetch;
   timeoutMs?: number;
+  cacheStorage?: WeatherCacheStorageLike | null;
+  nowMs?: number;
+  staleAfterMs?: number;
+  forceRefresh?: boolean;
 };
 
-const defaultLocationId = weatherLocations.find((location) => location.isDefault)?.id ?? weatherLocations[0]?.id;
+type WeatherCacheOptions = Pick<LoadWeatherOptions, 'cacheStorage' | 'nowMs' | 'staleAfterMs'>;
+
+const defaultLocationId = defaultWeatherCoarseLocation.id;
 
 const openMeteoSource: WeatherSource = {
   id: 'open-meteo-source',
@@ -109,7 +127,7 @@ export function getWeatherModeStatus(overrides?: WeatherAdapterEnv): WeatherMode
 }
 
 export function getWeatherLocations() {
-  return weatherLocations;
+  return getWeatherLocationOptions();
 }
 
 export function getWeatherSources() {
@@ -127,6 +145,7 @@ export function getWeatherAlerts() {
 function enrichLocalForecast(
   forecast: WeatherLocationForecast,
   status: WeatherModeStatus,
+  location = forecast.location,
   overrides?: Partial<WeatherLocationForecast>,
 ): WeatherLocationForecast {
   const today = forecast.today;
@@ -134,6 +153,7 @@ function enrichLocalForecast(
 
   return {
     ...forecast,
+    location,
     mode: status.mode,
     apiStatus: status.canFetchOpenMeteo ? 'ready' : 'local_fixture',
     fetchedAt,
@@ -154,29 +174,48 @@ function enrichLocalForecast(
   };
 }
 
-export function getWeatherForecast(locationId = defaultLocationId): WeatherLocationForecast {
-  const status = getWeatherModeStatus();
-  const forecast =
-    weatherForecastsWithAlerts.find((item) => item.location.id === locationId) ??
-    weatherForecastsWithAlerts[0];
+function getFixtureForecastForCoarseLocation(locationId = defaultLocationId) {
+  const coarseLocation = getWeatherCoarseLocation(locationId);
 
-  return enrichLocalForecast(forecast, status);
+  return (
+    weatherForecastsWithAlerts.find((item) => item.location.label === coarseLocation.label) ??
+    weatherForecastsWithAlerts.find((item) => item.location.region === coarseLocation.region) ??
+    weatherForecastsWithAlerts.find((item) => item.location.label === defaultWeatherCoarseLocation.label) ??
+    weatherForecastsWithAlerts[0]
+  );
 }
 
-function getLocalWeatherAdapterResult(locationId = defaultLocationId, status = getWeatherModeStatus()): WeatherAdapterResult {
-  const forecast =
-    weatherForecastsWithAlerts.find((item) => item.location.id === locationId) ??
-    weatherForecastsWithAlerts[0];
-  const enrichedForecast = enrichLocalForecast(forecast, status);
+export function getWeatherForecast(locationId = defaultLocationId): WeatherLocationForecast {
+  const status = getWeatherModeStatus();
+  const coarseLocation = getWeatherCoarseLocation(locationId);
+  const forecast = getFixtureForecastForCoarseLocation(coarseLocation.id);
+
+  return enrichLocalForecast(forecast, status, toWeatherLocation(coarseLocation));
+}
+
+function getLocalWeatherAdapterResult(
+  locationId = defaultLocationId,
+  status = getWeatherModeStatus(),
+  cacheOptions: WeatherCacheOptions = {},
+): WeatherAdapterResult {
+  const coarseLocation = getWeatherCoarseLocation(locationId);
+  const forecast = getFixtureForecastForCoarseLocation(coarseLocation.id);
+  const enrichedForecast = enrichLocalForecast(forecast, status, toWeatherLocation(coarseLocation));
 
   return {
     locations: getWeatherLocations(),
-    selectedLocationId: enrichedForecast.location.id,
+    selectedLocationId: coarseLocation.id,
     forecast: enrichedForecast,
     sources: getWeatherSources(),
     futureSources: getFutureWeatherSources(),
     alerts: getWeatherAlerts(),
     modeStatus: status,
+    cacheStatus: getWeatherCacheStatus(coarseLocation.id, {
+      nowMs: cacheOptions.nowMs,
+      staleAfterMs: cacheOptions.staleAfterMs,
+      storage: cacheOptions.cacheStorage,
+    }),
+    locationPrivacyStatus: weatherLocationPrivacyStatus,
   };
 }
 
@@ -291,19 +330,13 @@ function buildRecommendationsFromForecast(today: WeatherForecastDay): CropWorkRe
 function buildOpenMeteoForecast(
   response: OpenMeteoForecastResponse,
   status: WeatherModeStatus,
-  env: ReturnType<typeof resolveWeatherEnv>,
+  coarseLocation = defaultWeatherCoarseLocation,
 ): WeatherLocationForecast {
   const daily = buildDailyForecastFromOpenMeteo(response);
   const today = daily[0] ?? getLocalWeatherAdapterResult(undefined, status).forecast.today;
   const currentMapped = mapOpenMeteoWeatherCodeToThai(response.current?.weather_code);
   const fetchedAt = new Date().toISOString();
-  const location: WeatherLocation = {
-    id: 'configured-open-meteo-location',
-    label: env.weatherDefaultLabel || 'พื้นที่ที่ตั้งค่าไว้',
-    province: env.weatherDefaultLabel || 'พื้นที่ที่ตั้งค่าไว้',
-    region: 'ตำแหน่งตั้งค่า',
-    isDefault: true,
-  };
+  const location: WeatherLocation = toWeatherLocation(coarseLocation);
   const current: WeatherCurrentConditions = {
     temperatureC: Number(response.current?.temperature_2m ?? today.maxTempC),
     humidityPercent: response.current?.relative_humidity_2m,
@@ -329,7 +362,7 @@ function buildOpenMeteoForecast(
     isStale: false,
     isFallback: false,
     externalNotice: 'ข้อมูลอ้างอิงจาก API ภายนอก',
-    privacyNotice: 'ใช้พิกัดเริ่มต้นจาก env เท่านั้น ไม่มีการขอ GPS และไม่มีการเก็บตำแหน่งส่วนตัว',
+    privacyNotice: 'ใช้ตำแหน่งจังหวัด/เมืองกลางโดยประมาณเท่านั้น ไม่มีการขอ GPS และไม่มีการเก็บตำแหน่งส่วนตัว',
     current,
     today: {
       ...today,
@@ -351,11 +384,21 @@ function localFallbackWithReason(
   locationId: string | undefined,
   status: WeatherModeStatus,
   reason: string,
+  cacheOptions: WeatherCacheOptions = {},
 ): WeatherAdapterResult {
-  const result = getLocalWeatherAdapterResult(locationId, { ...status, fallbackActive: true });
+  const coarseLocation = getWeatherCoarseLocation(locationId);
+  const result = getLocalWeatherAdapterResult(coarseLocation.id, { ...status, fallbackActive: true }, cacheOptions);
 
   return {
     ...result,
+    selectedLocationId: coarseLocation.id,
+    cacheStatus: getWeatherCacheStatus(coarseLocation.id, {
+      nowMs: cacheOptions.nowMs,
+      staleAfterMs: cacheOptions.staleAfterMs,
+      storage: cacheOptions.cacheStorage,
+      failureReason: reason,
+      fallbackReason: 'ใช้ local fixture เพราะไม่มี cache ที่ใช้ได้',
+    }),
     forecast: {
       ...result.forecast,
       apiStatus: 'fallback' as WeatherApiStatus,
@@ -372,37 +415,106 @@ export async function loadWeatherAdapterResult(
 ): Promise<WeatherAdapterResult> {
   const env = resolveWeatherEnv(options.env);
   const status = getWeatherModeStatus(env);
+  const coarseLocation = getWeatherCoarseLocation(locationId);
+  const cacheOptions = {
+    nowMs: options.nowMs,
+    staleAfterMs: options.staleAfterMs,
+    storage: options.cacheStorage,
+  };
 
   if (!status.canFetchOpenMeteo) {
-    return getLocalWeatherAdapterResult(locationId, status);
+    return getLocalWeatherAdapterResult(coarseLocation.id, status, options);
+  }
+
+  const cachedEntry = readWeatherCacheEntry(coarseLocation.id, cacheOptions);
+  const cacheStatus = getWeatherCacheStatus(coarseLocation.id, cacheOptions);
+
+  if (cachedEntry && cacheStatus.isFresh && !options.forceRefresh) {
+    return {
+      locations: getWeatherLocations(),
+      selectedLocationId: coarseLocation.id,
+      forecast: {
+        ...cachedEntry.forecast,
+        apiStatus: 'ready',
+        isFallback: false,
+        isStale: false,
+        fallbackReason: undefined,
+        updatedAtLabel: 'จาก cache ล่าสุด',
+      },
+      sources: getWeatherSources(),
+      futureSources: getFutureWeatherSources(),
+      alerts: getWeatherAlerts(),
+      modeStatus: status,
+      cacheStatus,
+      locationPrivacyStatus: weatherLocationPrivacyStatus,
+    };
   }
 
   try {
     const response = await fetchOpenMeteoForecast(
       {
-        latitude: env.weatherDefaultLat,
-        longitude: env.weatherDefaultLon,
+        latitude: coarseLocation.approximateLat,
+        longitude: coarseLocation.approximateLon,
         forecastDays: 7,
       },
       options.fetcher,
       options.timeoutMs,
     );
-    const forecast = buildOpenMeteoForecast(response, status, env);
+    const forecast = buildOpenMeteoForecast(response, status, coarseLocation);
+
+    writeWeatherCacheEntry(
+      {
+        locationId: coarseLocation.id,
+        forecast,
+        sourceMode: status.mode,
+        sourceLabel: forecast.source.label,
+      },
+      cacheOptions,
+    );
 
     return {
-      locations: [forecast.location],
-      selectedLocationId: forecast.location.id,
+      locations: getWeatherLocations(),
+      selectedLocationId: coarseLocation.id,
       forecast,
       sources: getWeatherSources(),
       futureSources: getFutureWeatherSources(),
       alerts: getWeatherAlerts(),
       modeStatus: status,
+      cacheStatus: getWeatherCacheStatus(coarseLocation.id, cacheOptions),
+      locationPrivacyStatus: weatherLocationPrivacyStatus,
     };
   } catch (error) {
-    return localFallbackWithReason(
-      locationId,
-      status,
-      error instanceof Error ? error.message : 'open_meteo_fetch_failed',
-    );
+    const reason = error instanceof Error ? error.message : 'open_meteo_fetch_failed';
+    const staleEntry = readWeatherCacheEntry(coarseLocation.id, cacheOptions);
+
+    if (staleEntry) {
+      return {
+        locations: getWeatherLocations(),
+        selectedLocationId: coarseLocation.id,
+        forecast: {
+          ...staleEntry.forecast,
+          apiStatus: 'fallback',
+          isFallback: true,
+          isStale: true,
+          fallbackReason: reason,
+          updatedAtLabel: 'ใช้ cache เก่า',
+        },
+        sources: getWeatherSources(),
+        futureSources: getFutureWeatherSources(),
+        alerts: getWeatherAlerts(),
+        modeStatus: {
+          ...status,
+          fallbackActive: true,
+        },
+        cacheStatus: getWeatherCacheStatus(coarseLocation.id, {
+          ...cacheOptions,
+          failureReason: reason,
+          fallbackReason: 'ใช้ stale cache เพราะ Open-Meteo เรียกไม่ได้',
+        }),
+        locationPrivacyStatus: weatherLocationPrivacyStatus,
+      };
+    }
+
+    return localFallbackWithReason(coarseLocation.id, status, reason, options);
   }
 }

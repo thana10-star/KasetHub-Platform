@@ -48,3 +48,15 @@ The UI should support a stale state before future cache persistence. Stale weath
 ## Offline First
 
 The local fixture remains the baseline so the app is still useful with no network, no key, and no weather provider availability.
+
+## M76 Local Cache Behavior
+
+M76 adds local-only cache support:
+
+- fresh cache avoids fetch
+- stale cache displays a stale warning
+- API failure can use stale cache
+- no cache plus API failure falls back to local fixture
+- selected-location cache can be cleared locally
+
+No Supabase cache table or backend cache job is added in M76.

@@ -18,6 +18,7 @@ export type AppRoute =
   | '/app/mvp-snapshot'
   | '/app/next-phase'
   | '/app/weather'
+  | '/app/weather/qa'
   | '/app/calculators'
   | '/app/calculators/safety'
   | '/app/calculators/qa'

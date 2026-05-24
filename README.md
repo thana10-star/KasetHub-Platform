@@ -24,6 +24,14 @@ M35-M44 continue the safe staging path with local notifications, real backend ph
 - Updates `/app/weather` with current weather, precipitation, wind, humidity, 5-7 day forecast, source/fetched time, API mode, and fallback state.
 - Adds docs: `docs/REAL_WEATHER_API_OPEN_METEO.md`, `docs/WEATHER_API_PRIVACY_AND_LOCATION_POLICY.md`, and `docs/WEATHER_API_FALLBACK_AND_CACHE_PLAN.md`.
 
+## M76 Weather QA Cache And Coarse Location
+
+- Adds local-only weather cache services and stale/fresh status.
+- Adds predefined province/city-center coarse locations for weather lookup.
+- Adds `/app/weather/qa` with mode, cache, fallback, location privacy, and failure fixture checks.
+- Updates `/app/weather` with coarse location selector, cache status, clear cache action, stale warning, and farmer risk notes.
+- Keeps no GPS, no browser geolocation, no exact farm coordinates, no Supabase writes, and no required network calls by default.
+
 ## M61 Phone Auth Staging Test Plan
 
 - Adds `src/services/auth/phone-auth-staging-review.ts` and typed review output for the first Supabase Phone Auth staging test.

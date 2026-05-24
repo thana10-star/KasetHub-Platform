@@ -589,3 +589,23 @@ Future persistence may map:
 - reviewed coarse user preferences -> `farm_weather_preferences`
 
 M75 performs no Supabase writes, backend writes, cloud sync, GPS request, or personal precise location storage. The default mode remains `local_fixture`.
+
+## M76 Weather Cache / Coarse Location Mapping Notes
+
+M76 adds frontend-only weather QA and cache models:
+
+- `WeatherCacheEntry`
+- `WeatherCacheStatus`
+- `WeatherCoarseLocation`
+- `WeatherLocationPrivacyStatus`
+- `WeatherQaFixture`
+- `WeatherRiskNote`
+
+Future persistence may map:
+
+- local weather cache status -> `weather_cache`
+- coarse location selection -> `weather_location_preferences`
+- fetch/fallback/stale events -> `weather_fetch_events`
+- reviewed general risk note templates -> `weather_risk_notes`
+
+M76 keeps all cache state local-only and performs no Supabase writes.

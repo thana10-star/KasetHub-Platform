@@ -1278,3 +1278,18 @@ M75 does not run migrations or write weather data. Future weather persistence ma
 `farm_weather_preferences` should store user-selected coarse location preferences only after explicit consent and ownership/RLS review.
 
 No future weather table should store GPS or precise personal location by default. M75 keeps local fixture fallback available and performs no Supabase writes.
+
+## M76 Weather Cache / Location Future Notes
+
+M76 does not run migrations or write weather data. Future weather persistence should review:
+
+- `weather_cache`
+- `weather_location_preferences`
+- `weather_fetch_events`
+- `weather_risk_notes`
+
+`weather_location_preferences` should store coarse location ids only unless a later privacy review allows more detail.
+
+`weather_fetch_events` should log provider status, fallback reason, stale-cache use, and timeout status without storing exact farm coordinates.
+
+`weather_risk_notes` should store reviewed general note templates and must not contain hidden chemical, fertilizer, sponsor, or guaranteed-outcome advice.

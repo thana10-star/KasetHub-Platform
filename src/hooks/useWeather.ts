@@ -3,6 +3,7 @@ import {
   getWeatherAdapterResult,
   loadWeatherAdapterResult,
 } from '@/services/weather/weather-adapter';
+import { clearWeatherCache } from '@/services/weather/weather-cache-service';
 import type { WeatherAdapterResult } from '@/services/weather/weather.types';
 
 export function useWeather(initialLocationId?: string) {
@@ -10,6 +11,7 @@ export function useWeather(initialLocationId?: string) {
   const [selectedLocationId, setSelectedLocationId] = useState(initialResult.selectedLocationId);
   const [weather, setWeather] = useState<WeatherAdapterResult>(initialResult);
   const [isLoading, setIsLoading] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -30,12 +32,16 @@ export function useWeather(initialLocationId?: string) {
     return () => {
       cancelled = true;
     };
-  }, [selectedLocationId]);
+  }, [reloadKey, selectedLocationId]);
 
   return {
     ...weather,
     isLoading,
     selectedLocationId,
     selectLocation: setSelectedLocationId,
+    clearSelectedCache: () => {
+      clearWeatherCache(selectedLocationId);
+      setReloadKey((value) => value + 1);
+    },
   };
 }

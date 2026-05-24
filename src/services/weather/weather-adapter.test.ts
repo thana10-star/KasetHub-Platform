@@ -9,6 +9,13 @@ import {
   loadWeatherAdapterResult,
   mapOpenMeteoWeatherCodeToThai,
 } from '@/services/weather/weather-adapter';
+import {
+  clearWeatherCache,
+  createMemoryWeatherCacheStorage,
+  getWeatherCacheStatus,
+} from '@/services/weather/weather-cache-service';
+import { weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
+import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 
 const readyEnv = {
   weatherMode: 'open_meteo_ready',
@@ -79,6 +86,22 @@ describe('M75 real weather Open-Meteo adapter', () => {
     expect(result.modeStatus.statusLabel).toContain('ปิด');
   });
 
+  test('open_meteo_ready still requires API flag before fetch', async () => {
+    let calls = 0;
+    const fetcher: OpenMeteoFetch = async () => {
+      calls += 1;
+      return { ok: true, status: 200, json: async () => openMeteoFixture };
+    };
+
+    const result = await loadWeatherAdapterResult(undefined, {
+      env: { ...readyEnv, enableRealWeatherApi: false },
+      fetcher,
+    });
+
+    expect(calls).toBe(0);
+    expect(result.forecast.source.sourceType).toBe('demo');
+  });
+
   test('open_meteo_ready builds correct endpoint with configured lat/lon', async () => {
     const url = buildOpenMeteoForecastUrl({ latitude: 13.7563, longitude: 100.5018 });
     expect(url).toContain('latitude=13.7563');
@@ -110,6 +133,97 @@ describe('M75 real weather Open-Meteo adapter', () => {
     expect(result.forecast.isFallback).toBe(true);
     expect(result.forecast.source.sourceType).toBe('demo');
     expect(result.forecast.fallbackReason).toContain('network_down');
+  });
+
+  test('cache hit avoids fetch', async () => {
+    const storage = createMemoryWeatherCacheStorage();
+    let calls = 0;
+    const fetcher: OpenMeteoFetch = async () => {
+      calls += 1;
+      return { ok: true, status: 200, json: async () => openMeteoFixture };
+    };
+
+    await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher,
+      cacheStorage: storage,
+      nowMs: Date.parse('2026-05-24T09:00:00Z'),
+    });
+    const cached = await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher,
+      cacheStorage: storage,
+      nowMs: Date.parse('2026-05-24T09:10:00Z'),
+    });
+
+    expect(calls).toBe(1);
+    expect(cached.cacheStatus.isFresh).toBe(true);
+    expect(cached.forecast.source.label).toBe('Open-Meteo');
+  });
+
+  test('stale cache shows stale status', async () => {
+    const storage = createMemoryWeatherCacheStorage();
+    const baseTime = Date.parse('2026-05-24T09:00:00Z');
+
+    await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher: async () => ({ ok: true, status: 200, json: async () => openMeteoFixture }),
+      cacheStorage: storage,
+      nowMs: baseTime,
+      staleAfterMs: 30 * 60 * 1000,
+    });
+
+    const status = getWeatherCacheStatus('bangkok', {
+      storage,
+      nowMs: baseTime + 31 * 60 * 1000,
+      staleAfterMs: 30 * 60 * 1000,
+    });
+
+    expect(status.isStale).toBe(true);
+    expect(status.freshness).toBe('stale');
+  });
+
+  test('API failure falls back to stale cache when available', async () => {
+    const storage = createMemoryWeatherCacheStorage();
+    const baseTime = Date.parse('2026-05-24T09:00:00Z');
+
+    await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher: async () => ({ ok: true, status: 200, json: async () => openMeteoFixture }),
+      cacheStorage: storage,
+      nowMs: baseTime,
+      staleAfterMs: 30 * 60 * 1000,
+    });
+
+    const result = await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher: async () => {
+        throw new Error('api_down');
+      },
+      cacheStorage: storage,
+      nowMs: baseTime + 31 * 60 * 1000,
+      staleAfterMs: 30 * 60 * 1000,
+    });
+
+    expect(result.forecast.isStale).toBe(true);
+    expect(result.forecast.isFallback).toBe(true);
+    expect(result.cacheStatus.isStale).toBe(true);
+    expect(result.forecast.source.label).toBe('Open-Meteo');
+  });
+
+  test('cache can be cleared', async () => {
+    const storage = createMemoryWeatherCacheStorage();
+
+    await loadWeatherAdapterResult('bangkok', {
+      env: readyEnv,
+      fetcher: async () => ({ ok: true, status: 200, json: async () => openMeteoFixture }),
+      cacheStorage: storage,
+      nowMs: Date.parse('2026-05-24T09:00:00Z'),
+    });
+
+    expect(getWeatherCacheStatus('bangkok', { storage }).hasEntry).toBe(true);
+    clearWeatherCache('bangkok', storage);
+    expect(getWeatherCacheStatus('bangkok', { storage }).hasEntry).toBe(false);
   });
 
   test('weather code maps to Thai label', () => {
@@ -160,5 +274,17 @@ describe('M75 real weather Open-Meteo adapter', () => {
     expect(serialized).not.toContain('13.7563');
     expect(serialized).not.toContain('100.5018');
     expect(result.forecast.location.label).toBe('กรุงเทพฯ');
+  });
+
+  test('coarse location fixtures do not store precise farm coordinates', () => {
+    expect(weatherCoarseLocations).toHaveLength(9);
+    expect(weatherCoarseLocations.every((location) => location.precision === 'province_or_city_center')).toBe(true);
+    expect(weatherCoarseLocations.every((location) => location.privacyNote.includes('ไม่ใช่ตำแหน่งแปลง'))).toBe(true);
+  });
+
+  test('risk notes are general and disclaimer-bound', () => {
+    expect(farmerWeatherRiskNotes).toHaveLength(4);
+    expect(farmerWeatherRiskNotes.map((note) => note.title)).toContain('ก่อนพ่นยาให้ดูฝนและลม');
+    expect(farmerWeatherRiskNotes.every((note) => note.boundary.includes('ไม่'))).toBe(true);
   });
 });

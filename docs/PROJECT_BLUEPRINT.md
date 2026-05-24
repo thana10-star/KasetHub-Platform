@@ -905,3 +905,13 @@ When enabled, the adapter requests the Open-Meteo public forecast endpoint with 
 M75 updates Home, My Farm, Profile, Admin Dashboard, Next Phase, QA, and route registry entry points with weather status. The UI states that Open-Meteo is external forecast data, uses no GPS/geolocation, stores no personal precise location, and falls back to local fixture data on errors.
 
 M75 still does not write Supabase data, write backend data, enable cloud sync, request GPS, store personal location, call AI, add payments/ads, or make weather API calls by default.
+
+## M76 Weather QA Cache And Coarse Location
+
+M76 adds `/app/weather/qa`, local-only weather cache readiness, predefined coarse location fixtures, stale-cache UI, failure fixtures, and farmer-friendly risk note boundaries.
+
+The weather route now lets users choose among province/city-center fixtures for กรุงเทพฯ, นครราชสีมา, ขอนแก่น, เชียงใหม่, นครสวรรค์, สุพรรณบุรี, อุบลราชธานี, สุราษฎร์ธานี, and สงขลา. These are approximate forecast lookup locations, not farm coordinates.
+
+M76 cache is local-only and keyed by coarse location id. Fresh cache can avoid fetch, stale cache is labeled, and stale cache can be used when Open-Meteo fails. If there is no usable cache, the app falls back to local fixture data.
+
+M76 still does not request GPS/geolocation, store precise personal location, write Supabase data, write backend data, enable cloud sync, call AI, add payments/ads, or make network calls by default.

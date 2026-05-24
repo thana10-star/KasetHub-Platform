@@ -308,6 +308,9 @@ export function NextPhasePage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather">
                 เปิด M75 weather
               </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/qa">
+                เปิด M76 QA
+              </Link>
             </div>
           </div>
         </Card>

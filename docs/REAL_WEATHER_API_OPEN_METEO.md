@@ -77,3 +77,15 @@ The route must keep these reminders visible:
 ## M75 Boundaries
 
 M75 does not add GPS, personal location storage, Supabase writes, backend writes, cloud sync, AI calls, payment, ads, or weather cache persistence.
+
+## M76 Cache And Coarse Location Update
+
+M76 keeps Open-Meteo flag-gated but adds:
+
+- predefined province/city-center coarse locations
+- local-only cache by coarse location id
+- stale warning after the configured cache window
+- stale cache fallback when Open-Meteo fails
+- `/app/weather/qa` for cache, failure, and privacy QA
+
+The API still never uses browser geolocation or farm-level coordinates.

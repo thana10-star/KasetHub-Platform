@@ -1,3 +1,6 @@
+import type { WeatherCacheStatus } from '@/services/weather/weather-cache.types';
+import type { WeatherLocationPrivacyStatus } from '@/services/weather/weather-location.types';
+
 export type AgricultureWeatherRisk =
   | 'heavy_rain'
   | 'drought'
@@ -135,4 +138,6 @@ export type WeatherAdapterResult = {
   futureSources: WeatherSource[];
   alerts: WeatherAlertMock[];
   modeStatus: WeatherModeStatus;
+  cacheStatus: WeatherCacheStatus;
+  locationPrivacyStatus: WeatherLocationPrivacyStatus;
 };

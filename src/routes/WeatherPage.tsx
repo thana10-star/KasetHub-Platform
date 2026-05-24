@@ -9,6 +9,7 @@ import {
   ThermometerSun,
   Wind,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
@@ -18,6 +19,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { useWeather } from '@/hooks/useWeather';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
+import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -43,8 +45,11 @@ function RiskBadges({ risks }: { risks: WeatherForecastDay['risks'] }) {
 export function WeatherPage() {
   const {
     alerts,
+    cacheStatus,
+    clearSelectedCache,
     forecast,
     isLoading,
+    locationPrivacyStatus,
     locations,
     modeStatus,
     selectLocation,
@@ -83,12 +88,33 @@ export function WeatherPage() {
             <StatusPill tone={modeStatus.canFetchOpenMeteo ? 'success' : 'warning'}>{modeStatus.mode}</StatusPill>
             <Badge tone="neutral">no GPS</Badge>
             <Badge tone="neutral">no location storage</Badge>
+            <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>
+              cache {cacheStatus.freshness}
+            </Badge>
             {isLoading ? <Badge tone="sky">loading</Badge> : null}
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             {modeStatus.statusLabel} · source: {forecast.source.label} · fetched: {forecast.fetchedAtLabel ?? forecast.updatedAtLabel}
           </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link className="inline-flex min-h-11 items-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
+              Weather QA
+            </Link>
+            <button
+              className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10"
+              onClick={clearSelectedCache}
+              type="button"
+            >
+              ล้าง cache พื้นที่นี้
+            </button>
+          </div>
         </Card>
+
+        {forecast.isStale || cacheStatus.isStale ? (
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูล cache เก่า">
+            ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจแหล่งข้อมูลอื่นและสภาพจริงก่อนตัดสินใจ
+          </NoticeBox>
+        ) : null}
 
         {forecast.isFallback ? (
           <NoticeBox tone="warning" icon={ShieldAlert} title="ใช้ข้อมูลสำรองในเครื่อง">
@@ -104,11 +130,11 @@ export function WeatherPage() {
           ก่อนพ่นยาให้ดูฝนและลม ข้อมูลอากาศเป็นการพยากรณ์ อาจคลาดเคลื่อนได้ ควรตรวจสภาพจริงที่แปลงก่อนตัดสินใจ
         </NoticeBox>
 
-        {!isOpenMeteo && locations.length > 1 ? (
+        {locations.length > 1 ? (
           <section className="grid gap-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-extrabold text-kaset-ink">พื้นที่ตัวอย่าง</h2>
-              <StatusPill tone="info">{forecast.source.shortLabel}</StatusPill>
+              <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่แบบหยาบ</h2>
+              <StatusPill tone="info">province/city center</StatusPill>
             </div>
             <div className="-mx-5 overflow-x-auto px-5">
               <div className="flex min-w-max gap-2">
@@ -130,6 +156,9 @@ export function WeatherPage() {
                 ))}
               </div>
             </div>
+            <p className="text-xs font-bold leading-5 text-slate-500">
+              {locationPrivacyStatus.summary}
+            </p>
           </section>
         ) : null}
 
@@ -183,7 +212,7 @@ export function WeatherPage() {
           <Card className="p-4">
             <MapPin aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
             <p className="mt-3 text-lg font-extrabold leading-7 text-kaset-ink">{forecast.location.label}</p>
-            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">พิกัดเริ่มต้นจาก env เท่านั้น</p>
+            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">จังหวัด/เมืองกลางโดยประมาณ ไม่ใช่หมุดแปลง</p>
           </Card>
         </section>
 
@@ -197,6 +226,17 @@ export function WeatherPage() {
             <RiskBadges risks={today.risks} />
           </div>
         </Card>
+
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">ข้อควรระวังทั่วไป</h2>
+          {farmerWeatherRiskNotes.map((note) => (
+            <Card className="p-4" key={note.id}>
+              <h3 className="font-extrabold text-kaset-ink">{note.title}</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{note.detail}</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-amber-800">{note.boundary}</p>
+            </Card>
+          ))}
+        </section>
 
         <section className="grid gap-3">
           <h2 className="text-lg font-extrabold text-kaset-ink">พยากรณ์ 5-7 วัน</h2>

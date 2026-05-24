@@ -239,7 +239,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       detail: `${input.weatherForecast.today.conditionLabel} · ฝน ${input.weatherForecast.today.rainChancePercent}%`,
       valueLabel: input.weatherForecast.location.label,
       route: '/app/weather',
-      badgeLabel: 'mock weather',
+      badgeLabel: input.weatherForecast.source.sourceType === 'open_meteo' ? 'Open-Meteo' : 'local weather',
       tone: 'neutral',
     },
     {
