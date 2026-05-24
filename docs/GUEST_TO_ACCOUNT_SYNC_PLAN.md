@@ -208,3 +208,19 @@ Guest Memory upload still requires a later milestone that verifies:
 - rollback is rehearsed
 
 Phone mock sessions and M62 staging session previews must not upload Guest Memory.
+
+## M63 Ownership/RLS Sync Gate
+
+M63 adds `/app/ownership-rls-gate` and keeps Guest Memory upload blocked while checking:
+
+- real Supabase Auth session evidence
+- mock session rejection
+- expected `auth.uid()` owner mapping
+- local Guest Memory data presence
+- explicit consent before upload
+- idempotency key requirement
+- audit log requirement
+- owner-scoped RLS expectations
+- backend-only service-role handling
+
+Even if every review input is marked ready, M63 returns `syncAllowed: false`. Upload waits for a future owner-scoped RLS dry-run and backend-owned sync implementation.

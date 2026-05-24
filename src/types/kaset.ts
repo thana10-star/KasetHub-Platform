@@ -51,6 +51,7 @@ export type AppRoute =
   | '/app/notification-settings'
   | '/app/profile'
   | '/app/account-preview'
+  | '/app/ownership-rls-gate'
   | '/app/guest-sync-edge'
   | '/app/guest-sync-status'
   | '/app/auth'

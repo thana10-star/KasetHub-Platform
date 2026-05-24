@@ -157,3 +157,11 @@ The dry run should continue to show:
 - real sync must wait for real Supabase session ownership
 
 `/app/auth/phone-staging-test` is the new review surface for redirect URLs, SMS provider setup, test phone numbers, ownership, and rollback.
+
+## M63 Ownership/RLS Gate Review
+
+M63 adds `/app/ownership-rls-gate` as the next review surface after the controlled Phone Auth staging boundary.
+
+The M16 dry run still remains local only. M63 adds proof that sync cannot proceed without real Supabase Auth ownership, consent, idempotency, audit logging, and owner-scoped RLS expectations.
+
+No Guest Memory upload, cloud sync, Supabase app table write, or Edge Function call is added.

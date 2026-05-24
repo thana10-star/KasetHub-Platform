@@ -364,3 +364,17 @@ M29 adds Edge Function contract types only:
 - `GuestSyncStagingReadiness` -> frontend planning output only, not a database table
 
 Future persistence should map sync attempts into `guest_sync_events` or a backend-owned audit table with `user_id`, `guest_id`, `idempotency_key`, request hash, consent snapshot, status, counts, error code, and timestamps. The frontend must not persist service-role credentials, trusted owner claims, or admin-only audit decisions.
+
+## M63 Ownership/RLS Gate Mapping Notes
+
+M63 adds frontend-only review models:
+
+- `OwnershipGateStatus`
+- `OwnershipGateCheck`
+- `OwnershipGateBlocker`
+- `OwnershipGateConsentRequirement`
+- `OwnershipGateIdempotencyRequirement`
+- `OwnershipGateAuditRequirement`
+- `OwnershipGateRlsExpectation`
+
+Future persistence may map to `guest_sync_consent_records`, `guest_sync_idempotency_keys`, `guest_sync_audit_logs`, and `guest_sync_rls_dry_run_results`. M63 keeps these as plans only and does not write Supabase data.

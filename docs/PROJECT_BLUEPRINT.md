@@ -789,3 +789,15 @@ M61 updates Phone Auth, Auth Status, Sync Preview, Account Preview, Supabase Rea
 M61 tests prove the default review is blocked until explicitly configured, auth flags stay off by default, cloud sync remains blocked until ownership exists, frontend service-role keys are rejected, and rollback steps exist.
 
 M61 still does not enable production Phone Auth, send real OTP/SMS by default, commit `.env.local`, add real keys, add service-role keys, enable cloud sync, write Supabase data, deploy Edge Functions, or change production behavior.
+
+## M62 Controlled Phone Auth Staging Boundary
+
+M62 adds a gated Phone Auth staging adapter that can request or verify Supabase Phone OTP only when local staging flags, valid anon config, and cloud-sync-off checks are explicitly enabled outside git. Default behavior remains local mock.
+
+M62 can represent a masked real Supabase phone staging session, but Guest Memory upload and app table writes remain blocked.
+
+## M63 Ownership/RLS Sync Gate Review
+
+M63 adds `/app/ownership-rls-gate` and `ownership-rls-gate.ts` to review the relationship between a real Supabase Auth session, expected `auth.uid()` owner id, local Guest Memory data, consent capture, idempotency, audit logging, RLS owner policies, and service-role backend-only rules.
+
+The gate intentionally keeps `syncAllowed=false` in every state. It is a review milestone only: no Guest Memory upload, no cloud sync, no Supabase app table writes, no Edge Function deployment, no production auth enablement, and no automatic SQL execution.

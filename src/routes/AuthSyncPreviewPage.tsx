@@ -10,6 +10,7 @@ import {
   getGuestSyncAdapterStatus,
   runGuestMemorySyncDryRun,
 } from '@/services/backend/guest-sync-adapter';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import {
   createGuestSyncIdempotencyKeyPreview,
   runGuestSyncStagingReadiness,
@@ -182,6 +183,11 @@ export function AuthSyncPreviewPage() {
     phoneMockSession: phoneStagingStatus.localMockSession,
     supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
   });
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
+  });
   const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const lineAuthStatus = getLineAuthAdapterStatus();
   const linkingPlan = createAccountLinkingPlan({
@@ -262,6 +268,14 @@ export function AuthSyncPreviewPage() {
         <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 session ownership review">
           real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
           {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation} Next: {ownershipStatus.nextRequiredMilestone}.
+        </NoticeBox>
+
+        <NoticeBox tone="danger" title="M63 ownership/RLS gate">
+          {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · next safe step:{' '}
+          {ownershipGate.nextSafeStep}
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
         </NoticeBox>
 
         {phoneAuthStatus.session ? (

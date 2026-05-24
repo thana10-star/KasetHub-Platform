@@ -35,6 +35,7 @@ import { buildAdminDashboardData } from '@/services/admin/admin-dashboard-servic
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import type {
   AdminHealthStatus,
@@ -221,6 +222,24 @@ export function AdminDashboardPage() {
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
+  const ownershipGate = useMemo(
+    () =>
+      buildOwnershipRlsGateStatus({
+        guestMemoryRecordCount:
+          guestMemory.counts.savedItems +
+          guestMemory.counts.likedPosts +
+          guestMemory.counts.followedTopics +
+          guestMemory.counts.farmRecords +
+          guestMemory.counts.recentAIQuestions,
+      }),
+    [
+      guestMemory.counts.farmRecords,
+      guestMemory.counts.followedTopics,
+      guestMemory.counts.likedPosts,
+      guestMemory.counts.recentAIQuestions,
+      guestMemory.counts.savedItems,
+    ],
+  );
   const mvpReadiness = useMemo(() => runMvpReadinessAudit(), []);
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
   const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
@@ -294,6 +313,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={ClipboardList} label="M42 review" value={executionReview.statusLabel} />
               <SummaryCard icon={Database} label="M43 probe" value={readonlyProbe.statusLabel} />
               <SummaryCard icon={ShieldCheck} label="M44 RLS review" value={m44Review.statusLabel} />
+              <SummaryCard icon={LockKeyhole} label="M63 owner gate" value={ownershipGate.blockers.length > 0 ? 'blocked' : 'review'} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
@@ -726,6 +746,26 @@ export function AdminDashboardPage() {
               </div>
             </Card>
 
+            <Card className="border-rose-200 bg-rose-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-rose-800">
+                  <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-rose-950">M63 ownership/RLS sync gate</h2>
+                    <StatusPill tone="danger">{ownershipGate.statusCode}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-rose-950">
+                    blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · no Guest Memory upload · no Supabase app table writes
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-rose-950" to="/app/ownership-rls-gate">
+                    เปิด Ownership/RLS gate review
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
             <Card className="p-4">
               <div className="flex gap-3">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
@@ -1010,6 +1050,23 @@ export function AdminDashboardPage() {
                 <Badge tone="neutral">{guestMemory.counts.followedTopics} follows</Badge>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Guest Memory ยังเป็น active local storage และยังไม่มี cloud/admin sync จริง</p>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-rose-100 text-rose-800">
+                  <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold text-kaset-ink">M63 ownership/RLS gate</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/ownership-rls-gate">
+                    เปิด Ownership/RLS gate review
+                  </Link>
+                </div>
+              </div>
             </Card>
 
             <Card className="p-4">

@@ -49,6 +49,7 @@ import { MyFarmSettingsPage } from '@/routes/MyFarmSettingsPage';
 import { NextPhasePage } from '@/routes/NextPhasePage';
 import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
+import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
 import { PriceDetailPage } from '@/routes/PriceDetailPage';
 import { PricesPage } from '@/routes/PricesPage';
@@ -127,6 +128,7 @@ export default function App() {
         <Route path="notification-settings" element={<NotificationSettingsPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="account-preview" element={<AccountPreviewPage />} />
+        <Route path="ownership-rls-gate" element={<OwnershipRlsGatePage />} />
         <Route path="guest-sync-edge" element={<GuestSyncEdgePage />} />
         <Route path="guest-sync-status" element={<GuestSyncStatusPage />} />
         <Route path="auth" element={<AuthPage />} />

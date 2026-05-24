@@ -14,11 +14,12 @@ import {
   getPhoneAuthStagingAdapterStatus,
 } from '@/services/auth/phone-auth-staging-adapter';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { getAccountStatus } from '@/services/account/account-status-service';
 
 export function AuthStatusPage() {
-  const { state } = useGuestMemory();
+  const { state, counts } = useGuestMemory();
   const [refreshKey, setRefreshKey] = useState(0);
   const phoneStatus = getPhoneAuthAdapterStatus();
   const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
@@ -26,6 +27,11 @@ export function AuthStatusPage() {
   const ownershipStatus = getAuthOwnershipStatus({
     phoneMockSession: phoneStagingStatus.localMockSession,
     supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
   });
   const lineStatus = getLineAuthAdapterStatus();
   const accountStatus = getAccountStatus(state);
@@ -83,6 +89,13 @@ export function AuthStatusPage() {
         <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} icon={Lock} title="M62 ownership proof status">
           {ownershipStatus.label} · sync allowed {String(ownershipStatus.syncAllowed)} · user{' '}
           {ownershipStatus.userIdMasked ?? 'ยังไม่มี'} · {ownershipStatus.explanation}
+        </NoticeBox>
+
+        <NoticeBox tone="danger" icon={ShieldCheck} title="M63 ownership/RLS sync gate">
+          {ownershipGate.statusLabel} · syncAllowed {String(ownershipGate.syncAllowed)} · blockers {ownershipGate.blockers.length} · sync ยังต้องรอ owner/RLS, consent, idempotency และ audit
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
         </NoticeBox>
 
         <Card className="p-4">

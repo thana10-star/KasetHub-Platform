@@ -75,6 +75,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Env safety', route: '/app/env-safety' },
   { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },
   { label: 'Phone Auth staging test review', route: '/app/auth/phone-staging-test' },
+  { label: 'Ownership/RLS sync gate review', route: '/app/ownership-rls-gate' },
   { label: 'Guest Sync Edge plan', route: '/app/guest-sync-edge' },
   { label: 'My Farm Hub', route: '/app/my-farm' },
   { label: 'My Farm settings', route: '/app/my-farm/settings' },
@@ -217,6 +218,14 @@ export function QAPage() {
             description="ดู M61 checklist ก่อนทดสอบ Supabase Phone OTP staging จริง โดยยังไม่ส่ง OTP จากแอป"
             to="/app/auth/phone-staging-test"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด Ownership/RLS sync gate"
+            description="ดู M63 owner, consent, idempotency, audit และ RLS gate ก่อนอัปโหลด Guest Memory จริง"
+            to="/app/ownership-rls-gate"
+            variant="soft"
           />
         </Card>
 

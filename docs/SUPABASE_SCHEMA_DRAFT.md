@@ -1060,3 +1060,14 @@ Before staging:
 - Keep auth, phone OTP, LINE Login, and cloud sync disabled for the first staging pass.
 - Verify public read tables, user-owned tables, backend-only tables, admin review tables, crop price review tables, and community moderation tables separately.
 - Keep service-role keys out of frontend ENV and reserve them for future Edge Functions/backend jobs.
+
+## M63 Ownership/RLS Sync Gate Future Tables
+
+M63 does not run migrations. Future owner-scoped sync may require:
+
+- `guest_sync_consent_records`
+- `guest_sync_idempotency_keys`
+- `guest_sync_audit_logs`
+- `guest_sync_rls_dry_run_results`
+
+These tables must be owner-scoped where user-visible and backend-owned where operational. RLS must prove authenticated users can read own rows only, cannot read other users rows, anon cannot read user-owned rows, and inserts require `owner_id = auth.uid()`.

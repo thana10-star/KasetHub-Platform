@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
@@ -144,6 +145,7 @@ export function NextPhasePage() {
   const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
   const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
+  const ownershipGate = useMemo(() => buildOwnershipRlsGateStatus(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -328,6 +330,26 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/auth/phone-staging-test">
                 เปิด Phone Auth staging test plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-rose-200 bg-rose-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-rose-800">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-rose-950">M63 ownership/RLS sync gate</h2>
+                <StatusPill tone="danger">{ownershipGate.statusCode}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-rose-950">
+                Guest Memory upload stays blocked until real auth.uid() ownership, consent, idempotency, audit, and owner-scoped RLS checks pass.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-rose-950" to="/app/ownership-rls-gate">
+                เปิด Ownership/RLS gate review
               </Link>
             </div>
           </div>

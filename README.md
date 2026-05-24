@@ -647,6 +647,12 @@ M41 adds the first full walkthrough for manually creating the real staging proje
 
 The local setup progress tracks project creation, env setup, schema SQL, RLS SQL, table verification, and staging safety verification in `localStorage` only. M41 still does not commit `.env.local`, expose service-role keys, run SQL automatically, enable auth, enable cloud sync, enable uploads, enable AI proxy, or write backend data.
 
+## M63 Ownership/RLS Sync Gate
+
+M63 adds `/app/ownership-rls-gate`, a review gate before any Guest Memory upload. It checks real Supabase Auth session evidence, rejects mock-only ownership, lists consent/idempotency/audit requirements, documents owner-scoped RLS expectations, and keeps `syncAllowed=false`.
+
+M63 still does not upload Guest Memory, enable cloud sync, write Supabase app tables, deploy Edge Functions, add service-role keys to frontend, enable production auth, or execute SQL automatically.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

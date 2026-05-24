@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { getGuestSyncAdapterStatus } from '@/services/backend/guest-sync-adapter';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { createGuestToCloudSyncPlan } from '@/services/backend/guest-to-cloud-sync-planner';
 import { getAccountStatus } from '@/services/account/account-status-service';
@@ -58,6 +59,11 @@ export function AccountPreviewPage() {
   const ownershipStatus = getAuthOwnershipStatus({
     phoneMockSession: phoneStagingStatus.localMockSession,
     supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
   });
 
   return (
@@ -120,6 +126,13 @@ export function AccountPreviewPage() {
         <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 Phone Auth ownership status">
           {ownershipStatus.label} · real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
           {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation}
+        </NoticeBox>
+
+        <NoticeBox tone="danger" title="M63 ownership/RLS gate">
+          {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · Guest Memory upload ยังถูกบล็อกจนกว่า owner, consent, idempotency, audit และ RLS จะผ่านครบ
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
         </NoticeBox>
 
         {accountStatus.phoneMockSession ? (

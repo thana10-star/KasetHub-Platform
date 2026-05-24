@@ -225,3 +225,11 @@ VITE_ENABLE_CLOUD_SYNC=false
 The adapter may request and verify Supabase Phone OTP only when all staging gates pass. It blocks if cloud sync is enabled, Supabase config is invalid, a service-role-like key is detected, or production mode is requested.
 
 M62 stores only a local masked session preview after successful verification. It does not write profiles, app tables, Guest Memory, or cloud sync records.
+
+## M63 Ownership/RLS Gate
+
+M63 treats a real Supabase Phone Auth staging session as evidence only. It is not enough to upload Guest Memory.
+
+Before sync, KasetHub must also verify `auth.uid()` owner mapping, collect user consent, require idempotency, prepare audit logging, and prove owner-scoped RLS behavior. The new route is `/app/ownership-rls-gate`.
+
+Phone mock sessions still never count as ownership.
