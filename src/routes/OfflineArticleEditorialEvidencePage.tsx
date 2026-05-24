@@ -47,6 +47,20 @@ export function OfflineArticleEditorialEvidencePage() {
           หน้านี้เป็นหลักฐาน local-only ไม่มี Supabase write ไม่มี CMS write ไม่มี AI generation และไม่มี production publish
         </NoticeBox>
 
+        <Link to="/app/articles/release-audit">
+          <Card className="border-rose-200 bg-rose-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-rose-950">M71 release audit</h2>
+                <p className="mt-1 text-sm leading-6 text-rose-900">
+                  ดู timeline, blocked attempts, diff preview และ automation bypass ที่ยังไม่สามารถ publish จริงได้
+                </p>
+              </div>
+              <StatusPill tone="warning">audit ready</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
@@ -176,6 +190,9 @@ export function OfflineArticleEditorialEvidencePage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/full-content-readiness">
             เปิด full-content readiness
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/release-audit">
+            เปิด M71 release audit
           </Link>
         </div>
       </div>

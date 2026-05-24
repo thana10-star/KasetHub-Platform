@@ -51,3 +51,9 @@ M67 prepares five pilot full-content templates while keeping bundled offline fal
 Offline article evidence packets should map to future CMS-side review records without forcing online content to replace offline fallback.
 
 Future CMS can store evidence and release review rows, but the app must keep a separate human release gate. Completed metadata is not enough to publish a final article automatically.
+
+## M71 Release Audit Readiness
+
+M71 adds local release audit fixtures for blocked publish attempts, reviewer change history, source/disclaimer/image change previews, release diff previews, and automation bypass attempts.
+
+Future CMS may propose article changes, but it must not publish by itself. CMS override or automation remains blocked until a human release approval, release reviewer, timestamp, note, and audit trail exist.

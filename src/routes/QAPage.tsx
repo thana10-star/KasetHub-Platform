@@ -113,6 +113,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M68 pilot article draft review', route: '/app/articles/pilot-draft-review' },
   { label: 'M69 pilot article editorial review', route: '/app/articles/editorial-review' },
   { label: 'M70 editorial evidence and human release gate', route: '/app/articles/editorial-evidence' },
+  { label: 'M71 offline article release audit', route: '/app/articles/release-audit' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -290,6 +291,14 @@ export function QAPage() {
             description="ดู evidence packet, completion simulation และ human release gate ที่ยัง block final publish"
             to="/app/articles/editorial-evidence"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={History}
+            label="เปิด M71 release audit"
+            description="ดู blocked release attempts, reviewer history, diff preview และ automation bypass policy"
+            to="/app/articles/release-audit"
+            variant="soft"
           />
         </Card>
 

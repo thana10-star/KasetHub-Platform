@@ -4,13 +4,14 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
   {
     id: 'offline_article_qa_m66',
     label: 'Offline Article QA',
-    description: 'M66-M67 offline article editorial QA, image planning, version fixtures, CMS override safety contract, and full-content drafting readiness',
+    description: 'M66-M71 offline article editorial QA, image planning, version fixtures, CMS override safety contract, full-content readiness, evidence gate, and release audit readiness',
     routes: [
       { route: '/app/articles/offline-qa', label: 'Offline Article QA', milestone: 'M66', notes: 'editorial checklist, disclaimer coverage, image metadata warnings, version fixtures, and CMS override safety rules', manualCheckPath: '/app/articles/offline-qa' },
       { route: '/app/articles/full-content-readiness', label: 'Offline Article Full Content Readiness', milestone: 'M67', notes: 'pilot full-content templates, source placeholders, publish blockers, image needs, and expert escalation notes; no official full articles yet', manualCheckPath: '/app/articles/full-content-readiness' },
       { route: '/app/articles/pilot-draft-review', label: 'Offline Pilot Article Draft Review', milestone: 'M68', notes: 'local-only reviewed draft candidate for soil-types-before-planting with source placeholders, image needs, safety checklist, and blocked publish gate', manualCheckPath: '/app/articles/pilot-draft-review' },
       { route: '/app/articles/editorial-review', label: 'Offline Article Editorial Review', milestone: 'M69', notes: 'reviewer sign-off fixtures, source metadata placeholders, image review checklist, second pilot draft, and final publish blockers', manualCheckPath: '/app/articles/editorial-review' },
       { route: '/app/articles/editorial-evidence', label: 'Offline Article Editorial Evidence', milestone: 'M70', notes: 'local evidence packet, simulated completion, and human release gate proving final publish remains blocked', manualCheckPath: '/app/articles/editorial-evidence' },
+      { route: '/app/articles/release-audit', label: 'Offline Article Release Audit', milestone: 'M71', notes: 'release audit event fixtures, blocked release attempts, diff preview, reviewer history, and automation bypass policy', manualCheckPath: '/app/articles/release-audit' },
     ],
   },
   {
@@ -68,6 +69,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/articles/pilot-draft-review', label: 'Offline Pilot Article Draft Review', milestone: 'M68', notes: 'first local-only richer Thai draft workflow for ดิน 6 ชนิด รู้จักก่อนปลูก; still blocked from final publish', manualCheckPath: '/app/articles/pilot-draft-review' },
       { route: '/app/articles/editorial-review', label: 'Offline Article Editorial Review', milestone: 'M69', notes: 'pending reviewer signoffs, source metadata shape, image asset checklist validation, and second low-risk pilot draft plan', manualCheckPath: '/app/articles/editorial-review' },
       { route: '/app/articles/editorial-evidence', label: 'Offline Article Editorial Evidence', milestone: 'M70', notes: 'evidence packet, human approval requirement, release reviewer/timestamp/note placeholders, and no final publish', manualCheckPath: '/app/articles/editorial-evidence' },
+      { route: '/app/articles/release-audit', label: 'Offline Article Release Audit', milestone: 'M71', notes: 'blocked release attempts, reviewer change history, diff preview, and CMS/automation bypass blocks before any final publish', manualCheckPath: '/app/articles/release-audit' },
       { route: '/app/articles/offline/:slug', label: 'Offline Agriculture Article Detail', milestone: 'M65', notes: 'รายละเอียดบทความออฟไลน์ outline/starter content, planned image fallback, related calculator, save/share, and safety disclaimers', manualCheckPath: '/app/articles/offline/soil-types-before-planting' },
       { route: '/app/articles/:articleId', label: 'Article detail', milestone: 'M20', notes: 'หน้ารายละเอียดบทความตัวอย่าง', manualCheckPath: '/app/articles/article-001' },
       { route: '/app/content-admin-preview', label: 'Content admin preview', milestone: 'M20/M22.5', notes: 'หลังบ้านคอนเทนต์ mock ไม่มี publish จริง', manualCheckPath: '/app/content-admin-preview' },

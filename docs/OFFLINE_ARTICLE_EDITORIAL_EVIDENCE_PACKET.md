@@ -27,3 +27,9 @@ The packet can simulate completed source, reviewer, and image metadata, but it s
 - No AI article generation.
 - No real image generation.
 - No sponsor or affiliate injection.
+
+## M71 Release Audit Link
+
+M71 adds a release audit readiness layer on top of the evidence packet.
+
+The audit layer records local fixture examples for blocked publish attempts, reviewer changes, disclaimer changes, image review changes, and automation bypass attempts. The evidence packet remains required, but the audit layer proves that evidence completion still does not equal final publication.

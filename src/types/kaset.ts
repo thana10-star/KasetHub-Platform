@@ -52,6 +52,7 @@ export type AppRoute =
   | '/app/articles/pilot-draft-review'
   | '/app/articles/editorial-review'
   | '/app/articles/editorial-evidence'
+  | '/app/articles/release-audit'
   | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/notification-settings'

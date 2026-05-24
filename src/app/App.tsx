@@ -56,6 +56,7 @@ import { OfflineArticleEditorialEvidencePage } from '@/routes/OfflineArticleEdit
 import { OfflineArticleEditorialReviewPage } from '@/routes/OfflineArticleEditorialReviewPage';
 import { OfflineArticleFullContentReadinessPage } from '@/routes/OfflineArticleFullContentReadinessPage';
 import { OfflineArticleQAPage } from '@/routes/OfflineArticleQAPage';
+import { OfflineArticleReleaseAuditPage } from '@/routes/OfflineArticleReleaseAuditPage';
 import { OfflinePilotArticleDraftReviewPage } from '@/routes/OfflinePilotArticleDraftReviewPage';
 import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
@@ -136,6 +137,7 @@ export default function App() {
         <Route path="articles/pilot-draft-review" element={<OfflinePilotArticleDraftReviewPage />} />
         <Route path="articles/editorial-review" element={<OfflineArticleEditorialReviewPage />} />
         <Route path="articles/editorial-evidence" element={<OfflineArticleEditorialEvidencePage />} />
+        <Route path="articles/release-audit" element={<OfflineArticleReleaseAuditPage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

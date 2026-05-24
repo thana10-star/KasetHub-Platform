@@ -483,3 +483,25 @@ Future persistence may map:
 - release attempts and decisions -> `article_release_audit_logs`
 
 M70 keeps `finalPublishAllowed=false` and performs no Supabase writes, CMS writes, or production publishing.
+
+## M71 Offline Article Release Audit Mapping Notes
+
+M71 adds frontend-only release audit models:
+
+- `ArticleReleaseAuditEvent`
+- `ArticleReleaseAttempt`
+- `ArticleReleaseBlockedReason`
+- `ArticleReviewerChangeHistory`
+- `ArticleReleaseDiffPreview`
+- `ArticleReleaseAuditStatus`
+- `ArticleAutomationBypassAttempt`
+
+Future persistence may map:
+
+- audit timeline -> `article_release_audit_events`
+- blocked release attempts -> `article_release_attempts`
+- reviewer state changes -> `article_reviewer_history`
+- release diff previews -> `article_release_diff_previews`
+- automation or CMS bypass attempts -> `article_automation_bypass_events`
+
+M71 keeps every model local-only, keeps `finalPublishAllowed=false`, and performs no Supabase writes, CMS writes, or production publishing.

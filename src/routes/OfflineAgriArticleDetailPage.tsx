@@ -26,6 +26,7 @@ import {
   getArticleReviewerRoleLabel,
 } from '@/services/content/offline-agri-editorial-review';
 import { buildArticleEvidencePacket } from '@/services/content/offline-agri-editorial-evidence';
+import { buildArticleReleaseAuditReadiness } from '@/services/content/offline-agri-release-audit';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -63,6 +64,7 @@ export function OfflineAgriArticleDetailPage() {
   const pilotDraftGate = getPilotArticleDraftPublishGate(article.slug);
   const editorialState = getArticleEditorialApprovalStateBySlug(article.slug);
   const evidencePacket = editorialState ? buildArticleEvidencePacket(article.slug) : undefined;
+  const releaseAudit = evidencePacket ? buildArticleReleaseAuditReadiness(article.slug) : undefined;
   const displayTitle = pilotDraft?.titleTh ?? article.titleTh;
   const displaySummary = pilotDraft?.summaryTh ?? article.shortSummaryTh;
 
@@ -247,6 +249,29 @@ export function OfflineAgriArticleDetailPage() {
                 </div>
                 <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-rose-900 px-4 text-sm font-extrabold text-white" to="/app/articles/editorial-evidence">
                   เปิด M70 editorial evidence
+                </Link>
+              </Card>
+            ) : null}
+
+            {releaseAudit ? (
+              <Card className="border-rose-200 bg-white p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusPill tone="warning">M71 release audit</StatusPill>
+                  <Badge tone="rose">final publish: no</Badge>
+                  <Badge tone="neutral">{releaseAudit.attempts.length} blocked attempts</Badge>
+                </div>
+                <h2 className="mt-3 font-extrabold text-rose-950">Release audit summary</h2>
+                <p className="mt-2 text-sm leading-6 text-rose-900">
+                  การพยายาม publish ล่าสุดยังถูกบล็อก เพราะต้องมี human release approval และ automation/CMS ไม่สามารถข้าม gate นี้ได้
+                </p>
+                <div className="mt-3 grid gap-2 text-xs font-bold leading-5 text-rose-900">
+                  <p>last attempted status: {releaseAudit.attempts[0]?.status ?? 'blocked'}</p>
+                  <p>reviewer change history: {releaseAudit.reviewerHistory.length}</p>
+                  <p>automation bypass blocked: {releaseAudit.automationBypassAttempts.length}</p>
+                  <p>diff preview: {releaseAudit.diffPreview.id}</p>
+                </div>
+                <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-rose-900 px-4 text-sm font-extrabold text-white" to="/app/articles/release-audit">
+                  เปิด M71 release audit
                 </Link>
               </Card>
             ) : null}

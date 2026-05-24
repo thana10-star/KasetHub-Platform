@@ -50,6 +50,7 @@ import { runFullArticlePublishReadiness } from '@/services/content/offline-agri-
 import { runPilotArticleDraftWorkflowReview } from '@/services/content/offline-agri-pilot-article-drafts';
 import { getArticleEditorialReviewSummary } from '@/services/content/offline-agri-editorial-review';
 import { getArticleEvidencePacketSummary } from '@/services/content/offline-agri-editorial-evidence';
+import { getArticleReleaseAuditSummary } from '@/services/content/offline-agri-release-audit';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -255,6 +256,7 @@ export function AdminDashboardPage() {
   const pilotArticleDraft = useMemo(() => runPilotArticleDraftWorkflowReview(), []);
   const articleEditorialReview = useMemo(() => getArticleEditorialReviewSummary(), []);
   const articleEvidencePacket = useMemo(() => getArticleEvidencePacketSummary(), []);
+  const articleReleaseAudit = useMemo(() => getArticleReleaseAuditSummary(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -333,6 +335,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={ShieldCheck} label="M44 RLS review" value={m44Review.statusLabel} />
               <SummaryCard icon={LockKeyhole} label="M63 owner gate" value={ownershipGate.blockers.length > 0 ? 'blocked' : 'review'} />
               <SummaryCard icon={CloudUpload} label="M64 dry-run payload" value="blocked" />
+              <SummaryCard icon={Gavel} label="M71 release audit" value={`${articleReleaseAudit.blockedAttemptCount} blocked`} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
@@ -388,6 +391,9 @@ export function AdminDashboardPage() {
                   </Link>
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-evidence">
                     เปิด M70 evidence gate
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/release-audit">
+                    เปิด M71 release audit
                   </Link>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
                     เปิดคลังความรู้เกษตรออฟไลน์

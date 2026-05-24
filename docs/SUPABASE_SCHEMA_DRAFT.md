@@ -1162,3 +1162,23 @@ M70 does not run migrations. Future article release workflows may require:
 `article_release_audit_logs` should record all release attempts, blocked states, reviewer changes, and final publish decisions.
 
 No table should allow metadata completion alone to publish an article.
+
+## M71 Offline Article Release Audit Future Tables
+
+M71 does not run migrations. Future release audit readiness may require:
+
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_release_diff_previews`
+- `article_automation_bypass_events`
+
+`article_release_audit_events` should store the timeline of attempted publish, blocked publish, reviewer/source/disclaimer/image changes, release gate changes, and automation bypass attempts.
+
+`article_release_attempts` should store attempted actor, attempted route, status, blocked reasons, release gate id, and final publish decision.
+
+`article_reviewer_history` should store reviewer role changes, before/after state, reviewer placeholder or user id, and audit notes.
+
+`article_release_diff_previews` should store reviewed before/after summaries and disclaimer/source/reviewer/image change previews.
+
+`article_automation_bypass_events` should record blocked CMS or automation attempts. No automation event should grant final publish.

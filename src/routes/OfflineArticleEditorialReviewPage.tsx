@@ -56,6 +56,20 @@ export function OfflineArticleEditorialReviewPage() {
           </Card>
         </Link>
 
+        <Link to="/app/articles/release-audit">
+          <Card className="border-rose-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-rose-950">M71 release audit</h2>
+                <p className="mt-1 text-sm leading-6 text-rose-900">
+                  ตรวจ blocked release attempts, reviewer history, diff preview และ automation bypass policy
+                </p>
+              </div>
+              <StatusPill tone="warning">blocked</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

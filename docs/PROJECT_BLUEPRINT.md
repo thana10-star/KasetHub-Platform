@@ -859,3 +859,11 @@ M70 adds `/app/articles/editorial-evidence`, a local-only evidence packet and hu
 The new service layer builds source evidence, reviewer evidence, image evidence, safety confirmation, freshness placeholders, escalation notes, and release blockers. It also includes a safe completion simulation proving that even completed metadata and review evidence cannot publish automatically without explicit human release approval, reviewer, timestamp, and note placeholders.
 
 M70 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, inject sponsors, or add official finance/loan/government facts.
+
+## M71 Offline Article Release Audit Readiness
+
+M71 adds `/app/articles/release-audit`, a local-only release audit readiness route for offline agriculture articles.
+
+The new service layer records blocked publish attempt fixtures, reviewer change history placeholders, release diff previews, disclaimer/source/image change tracking, and automation bypass attempts. CMS override and automation remain unable to publish without the human release gate.
+
+M71 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, load external images, inject sponsors, or add production article publishing.

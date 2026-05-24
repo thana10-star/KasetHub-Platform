@@ -702,6 +702,12 @@ M70 adds `/app/articles/editorial-evidence` for local-only evidence packet revie
 
 It proves that even simulated-complete source, reviewer, and image metadata cannot publish an article automatically. A separate human release approval, reviewer, timestamp, and note remain required. No final article publish is enabled.
 
+## M71 Offline Article Release Audit Readiness
+
+M71 adds `/app/articles/release-audit` for local-only release audit review.
+
+It shows blocked release attempts, reviewer change history, release diff previews, disclaimer/source/image change tracking, and automation bypass blocks. CMS override or automation alone still cannot publish an article. No final article publish, Supabase write, CMS write, AI generation, external image loading, or sponsor injection is enabled.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.
