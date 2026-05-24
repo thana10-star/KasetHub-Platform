@@ -35,3 +35,6 @@ Article content must not recommend exact product use, hidden sponsor products, o
 
 Future CMS articles should include editorial review status, source notes, last reviewed date, and safety tags. Offline fallback content remains intentionally conservative.
 
+## M66 Non-removable Safety Rule
+
+M66 treats required disclaimers as non-removable by CMS override. A future CMS item that removes the general safety note, finance warning, or fertilizer/chemical label warning must be blocked and the bundled offline fallback must remain visible.

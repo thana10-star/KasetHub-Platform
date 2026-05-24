@@ -33,3 +33,15 @@ These paths are planning metadata only until optimized assets are intentionally 
 
 Future image generation or editorial production should follow the category theme, avoid misleading disease or damage visuals, and keep the image educational. Prompt notes must not imply a product recommendation, sponsor placement, or official diagnosis.
 
+## M66 Image QA
+
+M66 adds image checklist validation for planned offline article assets:
+
+- cover metadata exists
+- path is local, not external
+- Thai alt text exists
+- future prompt note exists
+- aspect ratio is supported
+- offline size warning exists
+
+Current warnings are expected because assets remain planned placeholders.

@@ -47,6 +47,7 @@ export type AppRoute =
   | '/app/crop-watch'
   | '/app/articles'
   | '/app/articles/offline'
+  | '/app/articles/offline-qa'
   | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/notification-settings'

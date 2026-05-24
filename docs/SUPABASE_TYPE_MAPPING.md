@@ -416,3 +416,27 @@ Future CMS mapping:
 - `futureCmsKey` -> stable CMS override key
 
 M65 keeps all articles bundled in the frontend and offline available. No CMS rows, Supabase writes, image uploads, or external image URLs are added.
+
+## M66 Offline Article QA / CMS Contract Mapping Notes
+
+M66 adds frontend-only QA and override models:
+
+- `ArticleQaStatus`
+- `ArticleEditorialChecklist`
+- `ArticleSafetyChecklist`
+- `ArticleImageChecklist`
+- `ArticleCmsOverrideRule`
+- `ArticleVersionInfo`
+- `ArticleContentReadinessScore`
+- `OfflineAgriCmsOverridePayload`
+- `OfflineAgriCmsOverrideDecision`
+
+Future persistence may map:
+
+- `ArticleVersionInfo` -> `article_versions`
+- editorial checklist results -> `article_editorial_reviews`
+- CMS override attempts -> `article_cms_overrides`
+- image checklist metadata -> `article_image_assets`
+- required disclaimer rules -> `article_safety_requirements`
+
+M66 keeps every mapping as planning only and performs no Supabase writes or CMS fetches.

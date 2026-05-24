@@ -819,3 +819,11 @@ The new content services define offline article taxonomy, metadata, starter outl
 M65 updates Articles, Profile, My Farm, Admin Dashboard, QA, route registry, schema docs, and content docs with the offline library entry point and safety boundaries.
 
 M65 still does not write Supabase data, create backend CMS records, generate articles with AI, import YouTube content, inject sponsors/affiliates, use external image URLs, or require network calls.
+
+## M66 Offline Article Content QA And CMS Contract
+
+M66 adds `/app/articles/offline-qa`, article QA services, article version fixtures, and CMS override validation for the offline agriculture library.
+
+The new QA layer proves future CMS content cannot remove required disclaimers, cannot use external image URLs for offline mode, and must preserve offline fallback when an override is invalid. It also documents image QA and version readiness before full articles are written.
+
+M66 still does not write Supabase data, create CMS rows, generate article text with AI, generate real images, load external images, or add sponsor/affiliate content.

@@ -52,6 +52,7 @@ import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
 import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailPage';
 import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
+import { OfflineArticleQAPage } from '@/routes/OfflineArticleQAPage';
 import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
 import { PriceDetailPage } from '@/routes/PriceDetailPage';
@@ -126,6 +127,7 @@ export default function App() {
         <Route path="crop-watch" element={<CropWatchPage />} />
         <Route path="articles" element={<ArticlesPage />} />
         <Route path="articles/offline" element={<OfflineAgriArticlesPage />} />
+        <Route path="articles/offline-qa" element={<OfflineArticleQAPage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

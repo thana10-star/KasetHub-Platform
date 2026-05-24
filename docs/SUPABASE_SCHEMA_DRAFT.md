@@ -1099,3 +1099,25 @@ Recommended columns for image assets: `article_id`, `asset_role`, `storage_path`
 RLS notes: Public users may read published, reviewed articles only. Draft/review content must be editor/admin-only. Sponsor or affiliate metadata must not be injected into educational article results without explicit labeling and review.
 
 CMS notes: Seasonal, loan, rate, government scheme, disease alert, and market-timing articles should be CMS-managed, not hardcoded forever. Bundled offline articles remain fallback content when CMS is unavailable.
+
+## M66 Offline Article QA / CMS Contract Future Tables
+
+M66 does not run migrations. Future CMS readiness may add these exact planning tables:
+
+- `article_versions`
+- `article_editorial_reviews`
+- `article_cms_overrides`
+- `article_image_assets`
+- `article_safety_requirements`
+
+`article_versions` should store version id, `future_cms_key`, content status, editorial owner, last reviewed date, and fallback priority.
+
+`article_editorial_reviews` should track reviewer, checklist status, notes, and review timestamps.
+
+`article_cms_overrides` should track online CMS body/title/summary override attempts, accepted/blocked status, freshness date, and fallback decision.
+
+`article_image_assets` should track local/offline asset path, storage path, size, aspect ratio, alt text, and offline suitability.
+
+`article_safety_requirements` should define required disclaimers by category and risk tag. CMS overrides must not remove these requirements.
+
+No table should allow hidden sponsor injection into educational article content. Public reads must expose only reviewed/published rows.

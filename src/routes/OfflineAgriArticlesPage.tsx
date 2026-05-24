@@ -1,5 +1,6 @@
 import { BookOpenCheck, FileText, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArticleCard } from '@/components/kaset/ArticleCard';
 import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -74,6 +75,18 @@ export function OfflineAgriArticlesPage() {
         <NoticeBox tone="warning" icon={ShieldCheck} title="ข้อมูลนี้เป็นความรู้เบื้องต้น">
           ควรตรวจสอบกับหน่วยงานเกษตร/ผู้เชี่ยวชาญในพื้นที่ โดยเฉพาะหัวข้อปุ๋ย สารเคมี สินเชื่อ หรือโครงการรัฐ
         </NoticeBox>
+
+        <Link to="/app/articles/offline-qa">
+          <Card className="border-sky-200 bg-sky-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-sky-950">QA คลังบทความออฟไลน์</h2>
+                <p className="mt-1 text-sm leading-6 text-sky-900">ตรวจคำเตือน เวอร์ชัน รูปภาพ และกติกา CMS override ก่อนเพิ่มบทความเต็ม</p>
+              </div>
+              <StatusPill tone="info">M66</StatusPill>
+            </div>
+          </Card>
+        </Link>
 
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">

@@ -45,6 +45,7 @@ import type {
   AdminTask,
 } from '@/services/admin/admin.types';
 import { getOfflineAgriArticleReadinessSummary } from '@/services/content/offline-agri-article-service';
+import { runOfflineAgriArticleQa } from '@/services/content/offline-agri-article-qa';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -245,6 +246,7 @@ export function AdminDashboardPage() {
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
   const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
   const offlineArticleLibrary = useMemo(() => getOfflineAgriArticleReadinessSummary(), []);
+  const offlineArticleQa = useMemo(() => runOfflineAgriArticleQa(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -301,6 +303,7 @@ export function AdminDashboardPage() {
             <section className="grid grid-cols-2 gap-3">
               <SummaryCard icon={FileText} label="content items" value={dashboard.summary.contentItems} />
               <SummaryCard icon={BookOpenCheck} label="offline articles" value={offlineArticleLibrary.total} />
+              <SummaryCard icon={ShieldCheck} label="M66 article QA" value={`${offlineArticleQa.averageScore}%`} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
@@ -356,6 +359,9 @@ export function AdminDashboardPage() {
                   <p className="mt-1 text-sm leading-6 text-slate-700">
                     Bundled evergreen article outlines with planned image assets, Thai safety notes, and future Supabase CMS compatibility. No CMS writes or network calls.
                   </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
+                    เปิด M66 offline article QA
+                  </Link>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
                     เปิดคลังความรู้เกษตรออฟไลน์
                   </Link>
@@ -935,6 +941,12 @@ export function AdminDashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-extrabold text-kaset-ink">Offline Agriculture Library</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    QA {offlineArticleQa.averageScore}% · warnings {offlineArticleQa.warnCount} · failures {offlineArticleQa.failCount}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
+                    เปิด M66 offline article QA
+                  </Link>
                   <p className="mt-1 text-sm leading-6 text-slate-700">
                     {offlineArticleLibrary.total} bundled article outlines · {offlineArticleLibrary.starterContent} starter content · future CMS override ready
                   </p>

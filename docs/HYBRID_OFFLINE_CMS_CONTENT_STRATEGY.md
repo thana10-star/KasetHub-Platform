@@ -36,3 +36,8 @@ These article types should come from CMS rather than static bundled fixtures:
 
 M65 does not add Supabase writes, CMS writes, external image loading, AI article generation, YouTube import, or sponsor injection.
 
+## M66 CMS Override Contract
+
+M66 adds local CMS override validation. Future CMS content may extend body content and update title/summary only when the CMS version is newer. CMS content must not remove required safety disclaimers, must not use external images in offline mode, and must provide freshness dates for seasonal, finance, government, loan, or rate-sensitive content.
+
+Invalid CMS overrides fall back to the bundled offline article.

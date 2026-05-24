@@ -668,6 +668,14 @@ The library bundles Thai starter outlines for soil, water, fertilizer, rice, sug
 
 M65 does not add CMS writes, Supabase writes, AI article generation, YouTube import, sponsor/affiliate injection, external image URLs, or network calls.
 
+## M66 Offline Article Content QA And CMS Contract
+
+M66 adds `/app/articles/offline-qa` plus local QA and CMS override services for the offline agriculture article library.
+
+The QA layer checks article metadata, disclaimers, image plans, version fixtures, and CMS compatibility. CMS overrides are blocked if they remove required disclaimers, use external image URLs in offline mode, miss required freshness dates for finance/government/seasonal content, or fail the future CMS key/version checks.
+
+M66 remains local-only: no Supabase writes, CMS writes, AI article generation, real image generation, external image loading, sponsor injection, or network calls.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

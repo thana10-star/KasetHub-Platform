@@ -13,6 +13,7 @@ import {
   findOfflineAgriArticleBySlug,
   offlineAgriArticleToArticle,
 } from '@/services/content/offline-agri-article-service';
+import { getOfflineAgriArticleQaBySlug } from '@/services/content/offline-agri-article-qa';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -43,6 +44,7 @@ export function OfflineAgriArticleDetailPage() {
   const category = getOfflineAgriArticleCategoryMeta(article.category);
   const articleSummary = offlineAgriArticleToArticle(article);
   const saved = isSaved(article.id);
+  const articleQa = getOfflineAgriArticleQaBySlug(article.slug);
 
   return (
     <div>
@@ -58,6 +60,14 @@ export function OfflineAgriArticleDetailPage() {
             <StatusPill tone={article.bodyReadiness === 'starter_content' ? 'success' : 'warning'}>
               {article.bodyReadiness}
             </StatusPill>
+            {articleQa ? (
+              <>
+                <StatusPill tone={articleQa.status === 'fail' ? 'danger' : articleQa.status === 'warn' ? 'warning' : 'success'}>
+                  QA {articleQa.status}
+                </StatusPill>
+                <StatusPill tone="info">{articleQa.versionInfo.contentStatus}</StatusPill>
+              </>
+            ) : null}
           </div>
           <h1 className="text-2xl font-extrabold leading-8 text-kaset-ink">{article.titleTh}</h1>
           <p className="text-base leading-7 text-slate-700">{article.shortSummaryTh}</p>
@@ -94,6 +104,23 @@ export function OfflineAgriArticleDetailPage() {
         <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลนี้เป็นความรู้เบื้องต้น">
           ควรตรวจสอบกับหน่วยงานเกษตร/ผู้เชี่ยวชาญในพื้นที่
         </NoticeBox>
+
+        {articleQa ? (
+          <Card className="border-sky-200 bg-sky-50 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone="info">version</StatusPill>
+              <Badge tone="sky">{articleQa.versionInfo.contentStatus}</Badge>
+              <Badge tone="neutral">{articleQa.percentage}% QA</Badge>
+            </div>
+            <p className="mt-3 break-all text-xs font-bold leading-5 text-sky-950">{articleQa.versionInfo.versionId}</p>
+            <p className="mt-2 text-sm leading-6 text-sky-900">
+              บทความนี้ยังเป็น offline fallback ที่ต้องคงอยู่ แม้ CMS ในอนาคตจะเพิ่มเนื้อหาเต็มแล้วก็ตาม
+            </p>
+            <p className="mt-2 text-sm leading-6 text-sky-900">
+              Content readiness: {articleQa.needsFullContent ? 'ยังต้องทำฉบับเต็ม/รีวิวเพิ่ม' : 'พร้อมสำหรับเผยแพร่เต็มในอนาคต'}
+            </p>
+          </Card>
+        ) : null}
 
         <Card className="p-4">
           <h2 className="font-extrabold text-kaset-ink">แผนภาพประกอบ</h2>

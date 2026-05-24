@@ -2,6 +2,14 @@ import type { MvpRouteGroup } from '@/services/qa/mvp-readiness.types';
 
 export const mvpRouteGroups: MvpRouteGroup[] = [
   {
+    id: 'offline_article_qa_m66',
+    label: 'Offline Article QA',
+    description: 'M66 offline article editorial QA, image planning, version fixtures, and CMS override safety contract',
+    routes: [
+      { route: '/app/articles/offline-qa', label: 'Offline Article QA', milestone: 'M66', notes: 'editorial checklist, disclaimer coverage, image metadata warnings, version fixtures, and CMS override safety rules', manualCheckPath: '/app/articles/offline-qa' },
+    ],
+  },
+  {
     id: 'core_app',
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',

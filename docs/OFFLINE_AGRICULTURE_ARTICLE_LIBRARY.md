@@ -53,3 +53,8 @@ Every detail page must show:
 
 Finance content must also warn that loan or government scheme conditions can change. Fertilizer or chemical-adjacent content must remind users to read the real label before use.
 
+## M66 QA Readiness
+
+M66 adds `/app/articles/offline-qa` and local QA services for the offline library. The QA layer checks metadata, outline sections, disclaimers, image plans, version fixtures, and CMS override safety before any full article expansion.
+
+The library still stays offline-first and local-only.

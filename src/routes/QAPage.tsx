@@ -107,6 +107,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ราคาพืชผล', route: '/app/prices' },
   { label: 'บทความ', route: '/app/articles' },
   { label: 'คลังความรู้เกษตรออฟไลน์', route: '/app/articles/offline' },
+  { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -244,6 +245,14 @@ export function QAPage() {
             description="ตรวจ M65 offline article library, image placeholders, safety notes และ CMS fallback plan"
             to="/app/articles/offline"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด QA คลังบทความออฟไลน์"
+            description="ตรวจ M66 editorial checklist, version fixtures, image warnings และกติกา CMS override"
+            to="/app/articles/offline-qa"
+            variant="white"
           />
         </Card>
 
