@@ -52,6 +52,7 @@ import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
 import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailPage';
 import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
+import { OfflineArticleFullContentReadinessPage } from '@/routes/OfflineArticleFullContentReadinessPage';
 import { OfflineArticleQAPage } from '@/routes/OfflineArticleQAPage';
 import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
@@ -128,6 +129,7 @@ export default function App() {
         <Route path="articles" element={<ArticlesPage />} />
         <Route path="articles/offline" element={<OfflineAgriArticlesPage />} />
         <Route path="articles/offline-qa" element={<OfflineArticleQAPage />} />
+        <Route path="articles/full-content-readiness" element={<OfflineArticleFullContentReadinessPage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

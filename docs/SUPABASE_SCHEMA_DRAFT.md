@@ -1121,3 +1121,25 @@ M66 does not run migrations. Future CMS readiness may add these exact planning t
 `article_safety_requirements` should define required disclaimers by category and risk tag. CMS overrides must not remove these requirements.
 
 No table should allow hidden sponsor injection into educational article content. Public reads must expose only reviewed/published rows.
+
+## M67 Offline Article Full Body Future Tables
+
+M67 does not run migrations. Future full-content publishing may require:
+
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_publish_gates`
+- `article_image_requirements`
+
+`article_full_body_versions` should store reviewed body sections, template version, source article slug, CMS key, content status, and publish status.
+
+`article_source_reviews` should store source type, source label, reviewer, review timestamp, and freshness date where needed.
+
+`article_expert_reviews` should store agronomist, finance reviewer, local expert, or editorial review outcomes.
+
+`article_publish_gates` should record blockers and pass/fail state for required safety, source, review, image, and freshness checks.
+
+`article_image_requirements` should track required image role, local/offline asset path, storage path, aspect ratio, byte limit, alt text, and review status.
+
+No future table should allow CMS content to remove required disclaimers or hide sponsor/affiliate content inside education articles.

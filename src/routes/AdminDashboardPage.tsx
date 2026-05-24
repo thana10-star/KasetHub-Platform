@@ -46,6 +46,7 @@ import type {
 } from '@/services/admin/admin.types';
 import { getOfflineAgriArticleReadinessSummary } from '@/services/content/offline-agri-article-service';
 import { runOfflineAgriArticleQa } from '@/services/content/offline-agri-article-qa';
+import { runFullArticlePublishReadiness } from '@/services/content/offline-agri-full-article-readiness';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -247,6 +248,7 @@ export function AdminDashboardPage() {
   const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
   const offlineArticleLibrary = useMemo(() => getOfflineAgriArticleReadinessSummary(), []);
   const offlineArticleQa = useMemo(() => runOfflineAgriArticleQa(), []);
+  const fullArticleReadiness = useMemo(() => runFullArticlePublishReadiness(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -304,6 +306,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={FileText} label="content items" value={dashboard.summary.contentItems} />
               <SummaryCard icon={BookOpenCheck} label="offline articles" value={offlineArticleLibrary.total} />
               <SummaryCard icon={ShieldCheck} label="M66 article QA" value={`${offlineArticleQa.averageScore}%`} />
+              <SummaryCard icon={FileText} label="M67 full drafts" value={`${fullArticleReadiness.blockedCount}/${fullArticleReadiness.pilotCount}`} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
@@ -361,6 +364,9 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
                     เปิด M66 offline article QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/full-content-readiness">
+                    เปิด M67 full-content readiness
                   </Link>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
                     เปิดคลังความรู้เกษตรออฟไลน์
@@ -946,6 +952,9 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
                     เปิด M66 offline article QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/full-content-readiness">
+                    เปิด M67 full-content readiness
                   </Link>
                   <p className="mt-1 text-sm leading-6 text-slate-700">
                     {offlineArticleLibrary.total} bundled article outlines · {offlineArticleLibrary.starterContent} starter content · future CMS override ready

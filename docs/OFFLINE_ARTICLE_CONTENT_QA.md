@@ -26,3 +26,6 @@ The QA service checks:
 
 M66 does not add full official articles, Supabase writes, CMS writes, AI article generation, image generation, external image loading, or sponsor content.
 
+## M67 Full-content Readiness
+
+M67 adds `/app/articles/full-content-readiness` for pilot full-article templates. QA now distinguishes between safe offline outlines and future full article drafts. A pilot full article remains blocked until sources, reviewer metadata, safety notes, image metadata, freshness dates when needed, and expert escalation notes are complete.

@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Eye,
+  FileText,
   GitBranch,
   Hand,
   History,
@@ -108,6 +109,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'บทความ', route: '/app/articles' },
   { label: 'คลังความรู้เกษตรออฟไลน์', route: '/app/articles/offline' },
   { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },
+  { label: 'M67 เตรียมบทความเต็มออฟไลน์', route: '/app/articles/full-content-readiness' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -253,6 +255,14 @@ export function QAPage() {
             description="ตรวจ M66 editorial checklist, version fixtures, image warnings และกติกา CMS override"
             to="/app/articles/offline-qa"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={FileText}
+            label="เปิด M67 full-content readiness"
+            description="ดู pilot templates, source placeholders, publish gate และ expert escalation ก่อนเพิ่มบทความเต็ม"
+            to="/app/articles/full-content-readiness"
+            variant="soft"
           />
         </Card>
 

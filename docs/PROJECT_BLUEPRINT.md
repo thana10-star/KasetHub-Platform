@@ -827,3 +827,11 @@ M66 adds `/app/articles/offline-qa`, article QA services, article version fixtur
 The new QA layer proves future CMS content cannot remove required disclaimers, cannot use external image URLs for offline mode, and must preserve offline fallback when an override is invalid. It also documents image QA and version readiness before full articles are written.
 
 M66 still does not write Supabase data, create CMS rows, generate article text with AI, generate real images, load external images, or add sponsor/affiliate content.
+
+## M67 Offline Article Full-content Drafting Readiness
+
+M67 adds `/app/articles/full-content-readiness` and full-article draft template services for five pilot topics: soil types before planting, NPK label basics, rice cost/profit per rai, cassava plant spacing per rai, and farm break-even price.
+
+The publish gate blocks all pilots until source placeholders, reviewer metadata, last reviewed dates, image metadata, freshness dates when needed, required disclaimers, and expert escalation notes are complete. Offline fallback articles remain available.
+
+M67 still does not publish full official articles, write Supabase/CMS data, generate article text with AI, generate images, load external images, inject sponsors, or hardcode official finance/loan/government facts.

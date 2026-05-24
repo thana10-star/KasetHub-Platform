@@ -101,3 +101,11 @@ M66 adds `offline-agri-article-qa.ts` and `offline-agri-cms-override.ts` to hard
 The QA layer checks metadata, outline sections, required disclaimers, image metadata, version fixtures, and body/source readiness. The CMS override contract blocks disclaimer removal, external offline images, stale title/summary updates, and missing freshness dates for finance/government/seasonal content.
 
 `/app/articles/offline-qa` surfaces the current QA score and warnings without calling a backend or CMS.
+
+## M67 Offline Article Full-content Readiness
+
+M67 adds pilot full-content draft templates for five article topics and a readiness route at `/app/articles/full-content-readiness`.
+
+The new service layer prepares source placeholders, review requirements, image requirements, expert escalation notes, and publish blockers. All templates remain `draft_template`; none are official full articles.
+
+M67 still does not write CMS records, generate article text with AI, generate real images, load external images, add sponsor content, or hardcode official finance/loan/government facts.

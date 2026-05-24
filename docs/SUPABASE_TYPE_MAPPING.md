@@ -440,3 +440,25 @@ Future persistence may map:
 - required disclaimer rules -> `article_safety_requirements`
 
 M66 keeps every mapping as planning only and performs no Supabase writes or CMS fetches.
+
+## M67 Offline Article Full Content Mapping Notes
+
+M67 adds frontend-only full-content readiness models:
+
+- `FullArticleBodyTemplate`
+- `FullArticleSectionTemplate`
+- `FullArticleReviewRequirement`
+- `FullArticleSourcePlaceholder`
+- `FullArticleExpertEscalationNote`
+- `FullArticlePublishReadinessGate`
+- `FullArticleDraftStatus`
+
+Future persistence may map:
+
+- `FullArticleBodyTemplate` -> `article_full_body_versions`
+- source placeholders -> `article_source_reviews`
+- review requirements and escalation notes -> `article_expert_reviews`
+- publish gate output -> `article_publish_gates`
+- image requirements -> `article_image_requirements`
+
+M67 keeps all mappings as local planning only and performs no Supabase writes, CMS writes, or content fetches.

@@ -46,6 +46,20 @@ export function OfflineArticleQAPage() {
           หน้านี้อ่านจาก fixture ในแอปเท่านั้น ยังไม่เชื่อม Supabase CMS ไม่โหลดรูปภายนอก และไม่เขียนข้อมูลขึ้น backend
         </NoticeBox>
 
+        <Link to="/app/articles/full-content-readiness">
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-amber-950">M67 full-content readiness</h2>
+                <p className="mt-1 text-sm leading-6 text-amber-900">
+                  ตรวจ pilot templates, source placeholders, publish gate, image needs และ expert escalation ก่อนเขียนบทความเต็มจริง
+                </p>
+              </div>
+              <StatusPill tone="warning">draft only</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <BookOpenCheck aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
@@ -161,4 +175,3 @@ export function OfflineArticleQAPage() {
     </div>
   );
 }
-

@@ -14,6 +14,8 @@ import {
   offlineAgriArticleToArticle,
 } from '@/services/content/offline-agri-article-service';
 import { getOfflineAgriArticleQaBySlug } from '@/services/content/offline-agri-article-qa';
+import { getFullArticleReadinessForArticleSlug } from '@/services/content/offline-agri-full-article-readiness';
+import { findOfflineAgriFullArticleTemplateForArticleSlug } from '@/services/content/offline-agri-full-article-template';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -45,6 +47,8 @@ export function OfflineAgriArticleDetailPage() {
   const articleSummary = offlineAgriArticleToArticle(article);
   const saved = isSaved(article.id);
   const articleQa = getOfflineAgriArticleQaBySlug(article.slug);
+  const fullArticleGate = getFullArticleReadinessForArticleSlug(article.slug);
+  const fullArticleTemplate = findOfflineAgriFullArticleTemplateForArticleSlug(article.slug);
 
   return (
     <div>
@@ -119,6 +123,31 @@ export function OfflineAgriArticleDetailPage() {
             <p className="mt-2 text-sm leading-6 text-sky-900">
               Content readiness: {articleQa.needsFullContent ? 'ยังต้องทำฉบับเต็ม/รีวิวเพิ่ม' : 'พร้อมสำหรับเผยแพร่เต็มในอนาคต'}
             </p>
+          </Card>
+        ) : null}
+
+        {fullArticleGate && fullArticleTemplate ? (
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone="warning">M67 draft_template</StatusPill>
+              <Badge tone="neutral">{fullArticleTemplate.pilotSlug}</Badge>
+              <Badge tone="rose">{fullArticleGate.blockers.length} blockers</Badge>
+            </div>
+            <h2 className="mt-3 font-extrabold text-amber-950">Full-content draft readiness</h2>
+            <p className="mt-2 text-sm leading-6 text-amber-900">
+              หัวข้อนี้มีแม่แบบบทความเต็มแล้ว แต่ยังไม่ใช่บทความทางการเต็มรูปแบบ ต้องเติมแหล่งอ้างอิง reviewer วันที่รีวิว ภาพที่ตรวจแล้ว และ expert escalation ก่อนเผยแพร่
+            </p>
+            <div className="mt-3 grid gap-2 text-xs font-bold leading-5 text-amber-900">
+              <p>source placeholders: {fullArticleGate.filledSourceCount}/{fullArticleGate.sourcePlaceholderCount}</p>
+              <p>last reviewed date: {fullArticleTemplate.lastReviewedDatePlaceholder}</p>
+              <p>image needs: {fullArticleGate.imageRequirementCount} planned assets</p>
+              {fullArticleTemplate.expertEscalationNotes.length > 0 ? (
+                <p>expert escalation: {fullArticleTemplate.expertEscalationNotes.map((note) => note.riskType).join(', ')}</p>
+              ) : null}
+            </div>
+            <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/articles/full-content-readiness">
+              เปิด publish gate M67
+            </Link>
           </Card>
         ) : null}
 

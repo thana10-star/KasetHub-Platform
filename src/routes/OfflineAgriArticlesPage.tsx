@@ -88,6 +88,20 @@ export function OfflineAgriArticlesPage() {
           </Card>
         </Link>
 
+        <Link to="/app/articles/full-content-readiness">
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-amber-950">M67 เตรียมบทความเต็ม</h2>
+                <p className="mt-1 text-sm leading-6 text-amber-900">
+                  ดู pilot templates, source placeholders, publish blockers และ expert escalation ก่อนเขียนฉบับเต็มจริง
+                </p>
+              </div>
+              <StatusPill tone="warning">not official</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

@@ -38,3 +38,9 @@ Future CMS articles should include editorial review status, source notes, last r
 ## M66 Non-removable Safety Rule
 
 M66 treats required disclaimers as non-removable by CMS override. A future CMS item that removes the general safety note, finance warning, or fertilizer/chemical label warning must be blocked and the bundled offline fallback must remain visible.
+
+## M67 Publish Gate Safety
+
+Full article drafts cannot be marked ready unless source placeholders are filled, reviewers are assigned, a last reviewed date exists, required disclaimers remain present, image metadata is valid, finance freshness dates exist where applicable, and expert escalation notes are present for risky topics.
+
+M67 does not add official full content and does not invent finance, fertilizer, crop, loan, or government facts.

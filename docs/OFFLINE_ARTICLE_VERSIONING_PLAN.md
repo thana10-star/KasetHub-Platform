@@ -27,3 +27,6 @@ M65 articles currently remain `outline_only` or `starter_content`. M66 does not 
 
 CMS versions can extend body content, but bundled offline fallback must remain available and required disclaimers must remain visible.
 
+## M67 Full Body Version Planning
+
+M67 adds draft template IDs for future full article body versions. The current status is `draft_template`; no article moves to `ready_for_full_publish`. Future CMS versions should map full body content to source reviews, expert reviews, image requirements, and publish gate records.

@@ -676,6 +676,14 @@ The QA layer checks article metadata, disclaimers, image plans, version fixtures
 
 M66 remains local-only: no Supabase writes, CMS writes, AI article generation, real image generation, external image loading, sponsor injection, or network calls.
 
+## M67 Offline Article Full-content Readiness
+
+M67 adds `/app/articles/full-content-readiness` as a local review route for future full offline agriculture articles.
+
+It adds pilot full-content templates, source placeholders, review metadata placeholders, image requirements, expert escalation notes, and a publish gate that keeps all pilot articles blocked from `ready_for_full_publish`.
+
+M67 does not add official full article bodies, Supabase writes, CMS writes, AI article generation, real image generation, external images, sponsor/affiliate injection, or hardcoded official finance/loan/government facts.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.
