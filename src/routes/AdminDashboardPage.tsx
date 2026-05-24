@@ -77,6 +77,7 @@ import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-sour
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
 import { useCropWatch } from '@/hooks/useCropWatch';
@@ -274,6 +275,7 @@ export function AdminDashboardPage() {
   const weatherRiskRules = useMemo(() => getWeatherAgriRiskRuleSummary(), []);
   const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
   const weatherRiskAudit = useMemo(() => getWeatherRiskReleaseAuditSummary(), []);
+  const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -343,6 +345,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={CloudSun} label="M78 risk rules" value={`${weatherRiskRules.rules.length} rules`} />
               <SummaryCard icon={ShieldCheck} label="M79 risk review" value={`${weatherRiskReview.pendingSignoffCount} pending`} />
               <SummaryCard icon={ClipboardList} label="M80 risk audit" value={`${weatherRiskAudit.auditEventCount} events`} />
+              <SummaryCard icon={BrainCircuit} label="M81 AI text" value={aiTextStatus.mode} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
@@ -1190,6 +1193,25 @@ export function AdminDashboardPage() {
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/ai-proxy-status">
               เปิด AI proxy status
             </Link>
+            <Card className="border-indigo-200 bg-indigo-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+                  <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-indigo-950">M81 Real AI text proxy</h2>
+                    <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>{aiTextStatus.mode}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-indigo-900">
+                    staging-only · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · no frontend provider key
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
+                    เปิด M81 AI text status
+                  </Link>
+                </div>
+              </div>
+            </Card>
           </>
         ) : null}
 

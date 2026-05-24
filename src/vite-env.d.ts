@@ -10,6 +10,10 @@ interface ImportMetaEnv {
   readonly VITE_AI_PROXY_MODE?: string;
   readonly VITE_ENABLE_AI_BACKEND_PROXY?: string;
   readonly VITE_ENABLE_LOCAL_AI_PROXY_HANDLER?: string;
+  readonly VITE_ENABLE_REAL_AI_TEXT?: string;
+  readonly VITE_AI_TEXT_MODE?: string;
+  readonly VITE_AI_TEXT_PROXY_MODE?: string;
+  readonly VITE_ENABLE_AI_TEXT_NETWORK?: string;
   readonly VITE_CALCULATOR_AI_MODE?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_BACKEND?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_NETWORK?: string;

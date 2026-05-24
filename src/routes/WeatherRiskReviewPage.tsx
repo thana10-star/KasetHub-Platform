@@ -10,6 +10,7 @@ import { weatherAgriRiskCategoryLabels } from '@/services/weather/weather-agri-r
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { weatherRiskReviewerRoleLabels } from '@/services/weather/weather-risk-review-fixtures';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 
 const reviewTone = {
   pending: 'warning',
@@ -20,6 +21,7 @@ const reviewTone = {
 export function WeatherRiskReviewPage() {
   const summary = getWeatherRiskExpertReviewSummary();
   const releaseAudit = getWeatherRiskReleaseAuditSummary();
+  const aiTextStatus = getAITextProxyStatus();
 
   return (
     <div>
@@ -47,6 +49,10 @@ export function WeatherRiskReviewPage() {
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่คำแนะนำเชิงสั่งการ">
           M79 ยังไม่อนุญาตให้กฎอากาศสั่งให้พ่นยา ให้น้ำ ใส่ปุ๋ย เลื่อนเก็บเกี่ยว หรือใช้สินค้าใด ๆ แบบเฉพาะเจาะจง · M80 release blocked {String(releaseAudit.releaseBlocked)} · automation blocked {String(releaseAudit.automationBypassBlocked)}
+        </NoticeBox>
+
+        <NoticeBox tone="info" title="M81 AI text proxy remains blocked from prescriptions">
+          mode {aiTextStatus.mode} · proxy-only · no product/sponsor · no exact prescription. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

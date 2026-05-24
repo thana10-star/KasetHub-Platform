@@ -125,3 +125,6 @@ Frontend adapter
 ```
 
 M59 still stops before prompt building and provider calls. The route `/app/calculators/ai-edge-contract` shows the typed request, response, server-only key boundary, audit/rate-limit hooks, timeout plan, and failure modes.
+## M81 Real AI Text Proxy Boundary
+
+M81 adds a separate `src/services/ai-text` controlled staging proxy plan for text explanations. Calculator explanations are allowed only from locked deterministic output snapshots and must not recompute formulas, mutate values, inject sponsors/products, or produce exact fertilizer/chemical prescriptions. The default remains local fixture with no network.

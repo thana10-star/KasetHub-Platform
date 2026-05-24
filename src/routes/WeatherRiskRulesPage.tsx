@@ -16,6 +16,7 @@ import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agr
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 
 export function WeatherRiskRulesPage() {
   const summary = getWeatherAgriRiskRuleSummary();
@@ -23,6 +24,7 @@ export function WeatherRiskRulesPage() {
   const boundary = getWeatherAgriRiskBoundarySummary();
   const expertReview = getWeatherRiskExpertReviewSummary();
   const releaseAudit = getWeatherRiskReleaseAuditSummary();
+  const aiTextStatus = getAITextProxyStatus();
 
   return (
     <div>
@@ -52,6 +54,10 @@ export function WeatherRiskRulesPage() {
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่กฎ agronomy ที่ตรวจทานแล้ว">
           เกณฑ์ทั้งหมดติดป้าย `เบื้องต้น` และ `planning-only` ต้องมีผู้เชี่ยวชาญตรวจทานก่อนใช้เป็นคำแนะนำจริง · M79 versions {expertReview.versionCount} · M80 audit events {releaseAudit.auditEventCount} · release blocked {String(releaseAudit.releaseBlocked)}
+        </NoticeBox>
+
+        <NoticeBox tone="info" title="M81 AI text proxy readiness">
+          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · weather explanations stay proxy-only and non-prescriptive. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">

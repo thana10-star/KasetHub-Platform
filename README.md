@@ -798,3 +798,10 @@ All videos, posts, crop prices, crop watches, price alerts, weather forecasts, w
 Weather remains offline-safe by default. M77 adds source attribution, manual refresh with cooldown, local-only coarse-location preference storage, stale cache messaging, `/app/weather/preferences`, and expanded `/app/weather/qa`.
 
 Open-Meteo is still disabled unless explicit local flags enable it. No GPS, precise personal location storage, Supabase writes, or cloud sync were added.
+## M81 Real AI Text Proxy Controlled Staging
+
+- Adds `/app/ai-text-status` for a staging-only text proxy boundary.
+- Keeps default behavior local fixture/no network.
+- Blocks prescriptions, sponsor/product injection, diagnosis, guarantees, and unrestricted chat.
+- Keeps provider keys and service-role keys out of frontend config.
+- Adds audit and rate-limit previews without Supabase writes.

@@ -34,6 +34,7 @@ import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -90,6 +91,7 @@ export function WeatherPage() {
   const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
   const expertReviewSummary = getWeatherRiskExpertReviewSummary();
   const releaseAuditSummary = getWeatherRiskReleaseAuditSummary();
+  const aiTextStatus = getAITextProxyStatus();
 
   return (
     <div>
@@ -206,6 +208,19 @@ export function WeatherPage() {
           <NoticeBox tone="info" title="คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ">
             การ์ดนี้เป็น preview จากกฎ planning-only ยังไม่ใช่ agronomy engine ที่ผู้เชี่ยวชาญตรวจทาน และไม่แนะนำสินค้า อัตราสารเคมี หรือผลลัพธ์รับประกัน · rule versions {expertReviewSummary.versionCount} · audit events {releaseAuditSummary.auditEventCount} · prescriptiveAllowed false
           </NoticeBox>
+          <Card className="border-indigo-200 bg-indigo-50 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>M81 {aiTextStatus.mode}</StatusPill>
+              <Badge tone="green">proxy only</Badge>
+              <Badge tone="green">fixture fallback</Badge>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-indigo-900">
+              Weather caution explanation can use the AI text proxy only in controlled staging. It cannot become diagnosis, product advice, prescription, or guaranteed outcome.
+            </p>
+            <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-status">
+              เปิด M81 AI text status
+            </Link>
+          </Card>
           <div className="grid gap-3 md:grid-cols-2">
             {agriRiskAssessment.cards.slice(0, 6).map((card) => (
               <Card className="p-4" key={card.id}>

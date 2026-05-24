@@ -20,6 +20,7 @@ import {
   getCalculatorAIAdapterStatus,
 } from '@/services/agri-calculators/calculator-ai-adapter';
 import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
 type PreviewScenario = 'spray_mix' | 'fertilizer_mix';
@@ -44,6 +45,7 @@ export function CalculatorAIExplanationPreviewPage() {
   );
   const adapterStatus = useMemo(() => getCalculatorAIAdapterStatus(), []);
   const adapterResponse = useMemo(() => explainCalculatorResult(adapterRequest), [adapterRequest]);
+  const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
   const policySummary = summarizeCalculatorAIExplanationPolicy();
 
   return (
@@ -73,6 +75,27 @@ export function CalculatorAIExplanationPreviewPage() {
         <NoticeBox tone="warning" title="ยังไม่เรียก AI จริง">
           แผนนี้เป็น local preview สำหรับกำหนดขอบเขตเท่านั้น ผลคำนวณ deterministic ต้องคงเดิม และ AI ห้ามแนะนำสินค้าเคมี ปุ๋ยนอกสูตร sponsor หรือรับประกันผลผลิต/กำไร
         </NoticeBox>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M81 real AI text staging readiness</h2>
+                <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>{aiTextStatus.mode}</StatusPill>
+                <Badge tone="green">immutable output</Badge>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-indigo-900">
+                calculator explanation is allowed only through a backend-owned proxy boundary. Default still falls back to fixture, no provider key is exposed, and locked calculator values remain unchanged.
+              </p>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-status">
+                เปิด M81 AI text status
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="border-indigo-200 bg-indigo-50 p-4">
           <div className="flex gap-3">

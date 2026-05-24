@@ -12,6 +12,7 @@ import {
 } from '@/services/agri-calculators/calculator-ai-adapter';
 import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
 import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
 const stagingChecklist = [
@@ -34,6 +35,7 @@ export function CalculatorAIAdapterStatusPage() {
   });
   const sampleResponse = explainCalculatorResult(sampleRequest);
   const qaSuite = runCalculatorAIAdapterQASuite();
+  const aiTextStatus = getAITextProxyStatus();
 
   return (
     <div>
@@ -61,6 +63,10 @@ export function CalculatorAIAdapterStatusPage() {
 
         <NoticeBox tone="warning" title="ยังไม่เรียก AI จริง">
           M57 เป็น contract และ local fixture เท่านั้น ไม่มี fetch ไม่มี endpoint ไม่มี provider key ไม่มี Supabase write และไม่ส่งข้อมูลออกจากเครื่องโดยค่าเริ่มต้น
+        </NoticeBox>
+
+        <NoticeBox tone="info" title="M81 real AI text proxy">
+          calculator explanation can later use the controlled AI text proxy only through backend-owned staging. mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">

@@ -651,3 +651,13 @@ Planning only. No generated Supabase types were added.
 - `WeatherRiskHumanApprovalGate` may map to `weather_risk_release_reviews`.
 
 M80 keeps automation/CMS bypass blocked and keeps `finalPrescriptiveAllowed: false`.
+## M81 AI Text Proxy Future Mapping
+
+- `AITextRequest` -> future `ai_text_requests` backend-owned request envelope.
+- `AITextResponse` -> future backend response log metadata after safety filtering.
+- `AITextAuditPreview` -> future `ai_text_audit_logs`.
+- `AITextRateLimitPreview` -> future `ai_text_rate_limits`.
+- `AITextSafetyBoundary` / `AITextBlockedAction` -> future `ai_text_blocked_actions`.
+- release gate requirements -> future `ai_text_release_gates`.
+
+M81 is frontend planning/staging UI only. No Supabase writes, migrations, provider calls, or direct frontend CMS/AI publish paths are added.

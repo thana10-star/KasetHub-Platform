@@ -11,6 +11,10 @@ export type PublicRuntimeEnv = {
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
   enableLocalAIProxyHandler: boolean;
+  enableRealAIText: boolean;
+  aiTextMode: string;
+  aiTextProxyMode: string;
+  enableAITextNetwork: boolean;
   calculatorAIMode: string;
   enableCalculatorAIBackend: boolean;
   enableCalculatorAINetwork: boolean;
@@ -74,6 +78,10 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),
   enableLocalAIProxyHandler: readBooleanEnv('VITE_ENABLE_LOCAL_AI_PROXY_HANDLER', false),
+  enableRealAIText: readBooleanEnv('VITE_ENABLE_REAL_AI_TEXT', false),
+  aiTextMode: readStringEnv('VITE_AI_TEXT_MODE') || 'local_fixture',
+  aiTextProxyMode: readStringEnv('VITE_AI_TEXT_PROXY_MODE') || 'staging_proxy',
+  enableAITextNetwork: readBooleanEnv('VITE_ENABLE_AI_TEXT_NETWORK', false),
   calculatorAIMode: readStringEnv('VITE_CALCULATOR_AI_MODE') || 'local_fixture',
   enableCalculatorAIBackend: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_BACKEND', false),
   enableCalculatorAINetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_NETWORK', false),

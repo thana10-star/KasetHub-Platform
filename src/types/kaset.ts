@@ -13,6 +13,7 @@ export type AppRoute =
   | '/app/youtube'
   | '/app/ai'
   | '/app/ai-proxy-status'
+  | '/app/ai-text-status'
   | '/app/ai-credits'
   | '/app/qa'
   | '/app/mvp-snapshot'

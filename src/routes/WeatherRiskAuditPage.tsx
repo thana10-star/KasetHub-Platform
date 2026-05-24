@@ -9,6 +9,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { getWeatherRiskDiffPreviewSummary } from '@/services/weather/weather-risk-diff-preview';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getWeatherRiskReviewerHistorySummary } from '@/services/weather/weather-risk-review-history';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 
 const auditTone = {
   planning_only: 'info',
@@ -21,6 +22,7 @@ export function WeatherRiskAuditPage() {
   const audit = getWeatherRiskReleaseAuditSummary();
   const history = getWeatherRiskReviewerHistorySummary();
   const diff = getWeatherRiskDiffPreviewSummary();
+  const aiTextStatus = getAITextProxyStatus();
 
   return (
     <div>
@@ -47,6 +49,10 @@ export function WeatherRiskAuditPage() {
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่ระบบคำแนะนำจริง">
           ทุกข้อมูลในหน้านี้เป็น local-only fixture ไม่มี Supabase write ไม่มี backend write ไม่มี GPS และยังไม่อนุญาตให้ rule ใดเป็น prescriptive
+        </NoticeBox>
+
+        <NoticeBox tone="info" title="M81 AI text proxy governance">
+          AI text mode {aiTextStatus.mode} · automation cannot bypass the weather risk human gate · proxy remains fixture/disabled by default. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

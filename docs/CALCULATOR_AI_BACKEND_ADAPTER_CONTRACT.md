@@ -117,3 +117,6 @@ The contract proves that lock-hash mismatch and policy mismatch are blocked befo
 M60 adds a local dry-run readiness plan after the adapter and Edge contract. The adapter still controls calculator AI mode, while the dry-run plan checks the future Edge URL and Edge-specific dry-run/network flags.
 
 Even when `VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN=true` and `VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK=true`, M60 does not call fetch. A later milestone must explicitly add a staging-only client and tests.
+## M81 AI Text Proxy Compatibility
+
+The calculator AI adapter remains disabled/local by default. M81 can preview a future real text proxy status, but calculator explanation text is still bounded by locked snapshots, audit/rate-limit previews, blocked actions, and the backend-only provider-key rule. No frontend provider key or service-role key is allowed.

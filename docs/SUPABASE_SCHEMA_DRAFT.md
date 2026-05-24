@@ -1335,3 +1335,42 @@ Planning only. No migrations were run.
 - `weather_risk_release_reviews`: future human release approvals, timestamps, notes, and rollback references.
 
 M80 keeps all governance data local-only and keeps final prescriptive release blocked.
+## `ai_text_requests` Future
+
+Purpose: Backend-owned request envelope records for future controlled AI text proxy calls.
+
+Key columns: `id uuid`, `user_id nullable`, `request_type`, `source_route`, `locked_output_hash nullable`, `mode`, `created_at`, `metadata jsonb`.
+
+RLS notes: Frontend must not write directly. Backend/Edge Function-owned insert only after auth, audit, and rate-limit review.
+
+## `ai_text_audit_logs` Future
+
+Purpose: Safety, policy, and provider-attempt audit events for future AI text proxy calls.
+
+Key columns: `id uuid`, `request_id`, `event_type`, `policy_version`, `blocked_actions text[]`, `created_at`, `metadata jsonb`.
+
+RLS notes: Backend-owned writes only. Public reads disabled.
+
+## `ai_text_rate_limits` Future
+
+Purpose: Track backend-enforced per-user/device AI text request limits.
+
+Key columns: `id uuid`, `scope`, `scope_hash`, `window_start`, `request_count`, `cooldown_until`, `created_at`, `updated_at`.
+
+RLS notes: Backend-owned writes only.
+
+## `ai_text_release_gates` Future
+
+Purpose: Store review/release status for AI text proxy rollout scope.
+
+Key columns: `id uuid`, `release_scope`, `status`, `reviewer_id`, `approved_at nullable`, `notes`, `metadata jsonb`.
+
+RLS notes: Admin/reviewer scoped; no silent automation publish.
+
+## `ai_text_blocked_actions` Future
+
+Purpose: Version blocked action policy for AI text requests.
+
+Key columns: `id uuid`, `policy_version`, `action_id`, `label`, `reason`, `active`, `created_at`.
+
+RLS notes: Public read may be allowed for active policy metadata only after review; writes backend/admin only.

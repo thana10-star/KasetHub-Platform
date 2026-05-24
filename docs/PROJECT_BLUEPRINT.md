@@ -944,3 +944,6 @@ M80 adds `/app/weather/risk-audit`, a local-only release audit and governance QA
 The service layer adds reviewed-source simulations, reviewer history fixtures, release audit events, diff previews, stale review warnings, and human approval gate blockers.
 
 M80 proves automation and CMS cannot turn a weather risk rule prescriptive. It still adds no AI calls, no production agronomy engine, no exact prescriptions, no product/sponsor recommendations, no GPS/geolocation, no Supabase writes, no backend writes, no cloud sync, and no automated push notifications.
+## M81 Real AI Text Proxy Controlled Staging
+
+M81 adds `src/services/ai-text` for a controlled staging-only text proxy boundary. It supports calculator explanation, weather caution explanation, and general educational explanation requests while blocking exact chemical/fertilizer prescription, sponsor/product insertion, autonomous diagnosis, guaranteed outcomes, and legal/financial certainty. `/app/ai-text-status` shows mode, network flags, audit preview, rate-limit preview, immutable calculator-output proof, and fallback status. Defaults remain `VITE_AI_TEXT_MODE=local_fixture`, `VITE_ENABLE_REAL_AI_TEXT=false`, and `VITE_ENABLE_AI_TEXT_NETWORK=false`.

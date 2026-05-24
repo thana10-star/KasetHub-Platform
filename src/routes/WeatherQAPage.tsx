@@ -25,6 +25,7 @@ import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-ri
 import { getWeatherRiskDiffPreviewSummary } from '@/services/weather/weather-risk-diff-preview';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getWeatherRiskReviewerHistorySummary } from '@/services/weather/weather-risk-review-history';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 
 const statusTone = {
   pass: 'success',
@@ -45,6 +46,7 @@ export function WeatherQAPage() {
   const riskReleaseAudit = getWeatherRiskReleaseAuditSummary();
   const riskReviewerHistory = getWeatherRiskReviewerHistorySummary();
   const riskDiffPreview = getWeatherRiskDiffPreviewSummary();
+  const aiTextStatus = getAITextProxyStatus();
   const sourceReadiness = buildWeatherSourceReadiness({
     modeStatus: summary.modeStatus,
     cacheStatus,
@@ -92,6 +94,10 @@ export function WeatherQAPage() {
 
         <NoticeBox tone="info" icon={ShieldCheck} title="Location privacy proof">
           {summary.privacyStatus.summary}
+        </NoticeBox>
+
+        <NoticeBox tone="info" title="M81 AI text status">
+          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · no provider key in frontend · blocked actions {aiTextStatus.blockedActions.length}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link>
         </NoticeBox>
 
         <section className="grid gap-3">
