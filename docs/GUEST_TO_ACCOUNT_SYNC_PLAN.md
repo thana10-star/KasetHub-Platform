@@ -195,3 +195,16 @@ Guest Memory sync remains blocked until:
 - cloud sync remains off outside a controlled staging sync milestone.
 
 A phone mock session is still not enough for real cloud sync.
+## M62 Phone Auth Ownership Gate
+
+M62 can represent a real Supabase Phone Auth staging session, but `syncAllowed` remains `false`.
+
+Guest Memory upload still requires a later milestone that verifies:
+
+- `auth.uid()` belongs to the user
+- RLS owner checks pass
+- consent is explicit
+- idempotency and audit logging exist
+- rollback is rehearsed
+
+Phone mock sessions and M62 staging session previews must not upload Guest Memory.

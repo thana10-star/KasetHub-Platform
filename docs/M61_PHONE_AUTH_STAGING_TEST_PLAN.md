@@ -38,3 +38,9 @@ M61 prepares the first real Supabase Phone Auth staging test without enabling re
 ## Boundaries
 
 M61 does not add a real auth adapter, send SMS, write Supabase data, enable cloud sync, deploy Edge Functions, or change production behavior.
+
+## M62 Follow-up
+
+M62 adds a controlled staging adapter for the next step. Real OTP remains off by default and only runs when local staging flags are explicitly set to `VITE_PHONE_AUTH_MODE=supabase_staging_ready`, `VITE_ENABLE_PHONE_AUTH=true`, `VITE_ENABLE_AUTH=true`, valid Supabase anon config is present, and `VITE_ENABLE_CLOUD_SYNC=false`.
+
+M62 still does not sync Guest Memory or write app tables.

@@ -63,3 +63,15 @@ Before enabling real staging OTP, confirm:
 - staging/preview redirect works
 - production redirect is parked but not used
 - redirect URL contains no secrets, tokens, phone numbers, or service-role keys
+## M62 Redirect Verification
+
+M62 surfaces the current `VITE_SUPABASE_AUTH_REDIRECT_URL` on `/app/auth/phone`, `/app/auth/phone-staging-test`, and `/app/auth/status`.
+
+Before controlled OTP testing:
+
+- confirm the local redirect URL is allowlisted in Supabase Auth settings
+- confirm any staging preview URL is allowlisted
+- do not place tokens, secrets, service-role keys, or test phone numbers in redirect URLs
+- keep production redirects parked until a later production review
+
+The redirect preview is a readiness signal only; it does not unlock Guest Memory sync.

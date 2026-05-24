@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
 import {
   phoneAuthStagingReviewAreaLabels,
   phoneAuthStagingReviewStatusLabels,
@@ -117,6 +118,7 @@ function TextListSection({ icon: Icon, items, title }: { icon: LucideIcon; items
 
 export function AuthPhoneStagingTestPage() {
   const review = useMemo(() => runPhoneAuthStagingReview(), []);
+  const stagingStatus = useMemo(() => getPhoneAuthStagingAdapterStatus(), []);
 
   return (
     <div>
@@ -146,6 +148,35 @@ export function AuthPhoneStagingTestPage() {
         <NoticeBox tone="warning" title="ยังไม่ส่ง OTP จริง">
           canSendRealOtp {String(review.canSendRealOtp)} · noRealSms {String(review.noRealSms)} · noSupabaseWrite {String(review.noSupabaseWrite)} · noCloudSync {String(review.noCloudSync)}
         </NoticeBox>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M62 controlled staging boundary</h2>
+                <StatusPill tone={stagingStatus.canAttemptSupabaseOtp ? 'warning' : 'info'}>{stagingStatus.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-amber-900">
+                mode {stagingStatus.mode} · redirect {stagingStatus.redirectUrlPreview} · OTP request readiness:{' '}
+                {stagingStatus.canAttemptSupabaseOtp ? 'ready for local staging flags' : 'blocked / local mock'} · ทดสอบเฉพาะเบอร์ภายในเท่านั้น
+              </p>
+              <p className="mt-2 text-xs font-bold leading-5 text-amber-900">
+                network {stagingStatus.networkCallsEnabled ? 'enabled for staging OTP only' : 'off'} · cloud sync{' '}
+                {stagingStatus.cloudSyncEnabled ? 'on (blocked)' : 'off'} · app table writes {String(!stagingStatus.noAppTableWrites)}
+              </p>
+              {stagingStatus.disabledReasons.length > 0 ? (
+                <ul className="mt-3 grid gap-1 text-xs font-bold leading-5 text-amber-900">
+                  {stagingStatus.disabledReasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </div>
+        </Card>
 
         <section className="grid grid-cols-3 gap-2">
           <Card className="p-3 text-center">

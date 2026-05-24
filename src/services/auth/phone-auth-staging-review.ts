@@ -211,7 +211,10 @@ export function runPhoneAuthStagingReview(
   const authFlagsDefaultOff =
     env.phoneAuthMode === 'local_mock' && !env.enableAuth && !env.enablePhoneAuth && !env.enableCloudSync;
   const stagingFlagsExplicit =
-    env.enableSupabase && env.enableAuth && env.enablePhoneAuth && env.phoneAuthMode === 'supabase_ready_mock';
+    env.enableSupabase &&
+    env.enableAuth &&
+    env.enablePhoneAuth &&
+    (env.phoneAuthMode === 'supabase_ready_mock' || env.phoneAuthMode === 'supabase_staging_ready');
 
   const items: PhoneAuthStagingReviewItem[] = [
     item({

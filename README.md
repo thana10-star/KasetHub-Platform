@@ -24,6 +24,14 @@ M35-M44 continue the safe staging path with local notifications, real backend ph
 - Vitest proves the default status is blocked, auth flags are off by default, cloud sync remains blocked until ownership exists, frontend service-role keys are rejected, and rollback steps exist.
 - Keeps M61 planning-only: no real OTP, no real SMS by default, no cloud sync, no Supabase writes, no service-role key, no Edge Function deployment, and no production auth behavior.
 
+## M62 Controlled Phone Auth Staging Test
+
+- Adds a controlled staging adapter in `src/services/auth/phone-auth-staging-adapter.ts`.
+- Adds ownership status in `src/services/auth/auth-ownership-status.ts`.
+- Allows Supabase Phone OTP only when local staging flags are explicit: `VITE_PHONE_AUTH_MODE=supabase_staging_ready`, `VITE_ENABLE_SUPABASE=true`, `VITE_ENABLE_AUTH=true`, `VITE_ENABLE_PHONE_AUTH=true`, valid staging anon config, and `VITE_ENABLE_CLOUD_SYNC=false`.
+- Updates `/app/auth/phone`, `/app/auth/phone-staging-test`, `/app/auth/status`, `/app/auth/sync-preview`, and `/app/account-preview` with staging status, redirect preview, SMS cost warnings, rollback reminders, and ownership status.
+- Keeps Guest Memory sync blocked: no profile/app table writes and no cloud upload in M62.
+
 ## M53 Calculator Export/Share Polish
 
 - Structured calculator result summaries in `src/services/agri-calculators/calculator-result-summary-service.ts`

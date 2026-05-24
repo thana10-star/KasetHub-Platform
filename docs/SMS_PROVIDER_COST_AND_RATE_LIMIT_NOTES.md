@@ -64,3 +64,15 @@ Before a future staging OTP test:
 - max attempts and lockout must be active
 - test phone numbers must stay outside git
 - the team must record SMS cost after the test
+## M62 Controlled OTP Cost Guardrails
+
+M62 may call Supabase Phone OTP only in local staging mode. Before any real OTP:
+
+- set SMS spending limit
+- set resend cooldown
+- set max request attempts
+- set max verification attempts
+- test only approved internal phone numbers
+- stop and roll back if duplicate SMS or unexpected cost appears
+
+The app displays `ทดสอบเฉพาะเบอร์ภายในเท่านั้น` near the OTP request path.

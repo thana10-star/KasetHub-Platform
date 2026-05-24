@@ -15,8 +15,10 @@ import {
   runGuestSyncStagingReadiness,
 } from '@/services/backend/guest-sync-staging-readiness';
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
+import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
 import { getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import type {
   GuestSyncAuthProviderCandidate,
@@ -175,6 +177,11 @@ export function AuthSyncPreviewPage() {
 
   const syncStatus = getGuestSyncAdapterStatus();
   const phoneAuthStatus = getPhoneAuthAdapterStatus();
+  const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
+  const ownershipStatus = getAuthOwnershipStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
   const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const lineAuthStatus = getLineAuthAdapterStatus();
   const linkingPlan = createAccountLinkingPlan({
@@ -250,6 +257,11 @@ export function AuthSyncPreviewPage() {
 
         <NoticeBox tone="warning" title="M61 ownership boundary">
           {m61Review.levelLabel} · cloud sync stays blocked until a real Supabase Phone Auth session proves `auth.uid()` ownership and the user consents to Guest Memory sync.
+        </NoticeBox>
+
+        <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 session ownership review">
+          real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
+          {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation} Next: {ownershipStatus.nextRequiredMilestone}.
         </NoticeBox>
 
         {phoneAuthStatus.session ? (

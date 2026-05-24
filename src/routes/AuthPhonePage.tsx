@@ -7,47 +7,50 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import {
-  clearPhoneMockSession,
-  getPhoneAuthAdapterStatus,
-  requestPhoneOtp,
-  verifyPhoneOtp,
-} from '@/services/auth/phone-auth-adapter';
+  clearPhoneAuthStagingSessions,
+  getPhoneAuthStagingAdapterStatus,
+  requestPhoneAuthStagingOtp,
+  verifyPhoneAuthStagingOtp,
+} from '@/services/auth/phone-auth-staging-adapter';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { validateThaiPhoneNumber } from '@/services/auth/phone-auth-local-mock';
-import type { PhoneAuthActionResult } from '@/services/auth/phone-auth.types';
+import type { PhoneAuthStagingActionResult } from '@/services/auth/phone-auth-staging-adapter.types';
 
 export function AuthPhonePage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
-  const [message, setMessage] = useState<PhoneAuthActionResult | null>(null);
+  const [message, setMessage] = useState<PhoneAuthStagingActionResult | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const phoneStatus = getPhoneAuthAdapterStatus();
+  const phoneStatus = getPhoneAuthStagingAdapterStatus();
   const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const validation = useMemo(() => validateThaiPhoneNumber(phoneNumber), [phoneNumber]);
-  const session = phoneStatus.session;
+  const localSession = phoneStatus.localMockSession;
+  const supabaseSession = phoneStatus.supabaseSessionPreview;
 
   function refresh() {
     setRefreshKey((current) => current + 1);
   }
 
-  function handleRequestOtp() {
-    const result = requestPhoneOtp(phoneNumber);
+  async function handleRequestOtp() {
+    const result = await requestPhoneAuthStagingOtp(phoneNumber);
     setMessage(result);
     setOtpRequested(result.success);
+    refresh();
   }
 
-  function handleVerifyOtp() {
-    const result = verifyPhoneOtp(phoneNumber, otp);
+  async function handleVerifyOtp() {
+    const result = await verifyPhoneAuthStagingOtp(phoneNumber, otp);
     setMessage(result);
     refresh();
   }
 
   function handleClearSession() {
-    clearPhoneMockSession();
+    clearPhoneAuthStagingSessions();
     setMessage({
+      status: 'success',
       success: true,
-      message: 'ล้าง session จำลองแล้ว ยังใช้งานแบบ Guest ได้ตามเดิม',
+      message: 'ล้าง session staging/local preview แล้ว ยังใช้งานแบบ Guest ได้ตามเดิม',
     });
     setOtp('');
     setOtpRequested(false);
@@ -58,7 +61,7 @@ export function AuthPhonePage() {
 
   return (
     <div>
-      <PageHeader title="สมัครด้วยเบอร์โทร" subtitle="Phone OTP mock เท่านั้น ยังไม่ส่ง SMS จริง" showBack />
+      <PageHeader title="สมัครด้วยเบอร์โทร" subtitle="M62 controlled Phone Auth staging boundary" showBack />
       <div className="grid gap-5 px-5 pb-6">
         <Card className="overflow-hidden bg-kaset-deep text-white">
           <div className="relative p-5">
@@ -68,46 +71,71 @@ export function AuthPhonePage() {
                 <Phone aria-hidden="true" className="h-7 w-7" />
               </span>
               <div className="min-w-0">
-                <StatusPill className="bg-white/15 text-white ring-white/20" tone="success">
-                  แนะนำ
+                <StatusPill className="bg-white/15 text-white ring-white/20" tone={phoneStatus.canAttemptSupabaseOtp ? 'warning' : 'success'}>
+                  {phoneStatus.canAttemptSupabaseOtp ? 'staging OTP' : 'local mock'}
                 </StatusPill>
-                <h2 className="mt-3 text-xl font-extrabold leading-7">เบอร์โทรเหมาะสำหรับผู้ใช้ทั่วไป</h2>
+                <h2 className="mt-3 text-xl font-extrabold leading-7">ทดสอบ Phone Auth แบบปลอดภัยก่อนเปิดจริง</h2>
                 <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  ไม่ต้องใช้อีเมล ตอนนี้เป็นตัวอย่าง OTP เท่านั้น เพื่อพิสูจน์ว่าอนาคตต้องยืนยันเจ้าของบัญชีก่อนซิงก์ข้อมูล
+                  ค่าเริ่มต้นยังเป็น local mock ถ้าเปิด staging flags ครบจึงจะส่ง OTP ผ่าน Supabase Auth ได้ เฉพาะเบอร์ทดสอบภายในเท่านั้น
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        <NoticeBox tone="warning" title="รหัสทดสอบคือ 123456">
-          ยังไม่ส่ง OTP จริง ไม่มี SMS ไม่มี Supabase Auth และไม่มี network request ในเวอร์ชันนี้
+        <NoticeBox tone={phoneStatus.canAttemptSupabaseOtp ? 'warning' : 'info'} title="ทดสอบเฉพาะเบอร์ภายในเท่านั้น">
+          {phoneStatus.canAttemptSupabaseOtp
+            ? 'โหมด staging พร้อมส่ง OTP จริงผ่าน Supabase Auth เฉพาะเมื่อเปิด local flags ครบแล้ว อย่าเก็บ OTP ใน log และอย่าเปิด cloud sync'
+            : 'ค่าเริ่มต้นยังเป็น local mock ใช้รหัส 123456 ไม่มี SMS จริง ไม่มี cloud sync และไม่มี app table write'}
         </NoticeBox>
 
         <NoticeBox tone="info" icon={ClipboardList} title="Real Phone OTP ต้องผ่าน staging checklist ก่อน">
-          ตอนนี้ยังเป็น local mock เท่านั้น การส่ง OTP จริงด้วย Supabase Auth ต้องตั้งค่า staging, SMS provider, redirect URL, rate limit และ session ownership ก่อน
-          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
-            เปิด Phone OTP staging checklist
-          </Link>
+          ตรวจ Supabase staging project, redirect URL, SMS provider, rate limit, test number, rollback และ ownership ก่อนส่ง OTP จริง
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link className="inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
+              เปิด Phone OTP staging checklist
+            </Link>
+            <Link className="inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
+              เปิด Phone Auth staging test plan
+            </Link>
+          </div>
         </NoticeBox>
 
         <NoticeBox tone="warning" icon={ShieldCheck} title="M61 staging test review">
-          {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · ยังไม่ส่ง OTP จริง และ Guest Memory sync ต้องรอ owner จาก Supabase session จริงก่อน
-          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
-            เปิด Phone Auth staging test plan
-          </Link>
+          {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · Guest Memory sync ต้องรอ owner จาก Supabase session จริงก่อน
+        </NoticeBox>
+
+        <NoticeBox tone={phoneStatus.canAttemptSupabaseOtp ? 'warning' : 'info'} icon={ShieldCheck} title="M62 staging mode status">
+          {phoneStatus.statusLabel} · redirect: {phoneStatus.redirectUrlPreview} · OTP readiness:{' '}
+          {phoneStatus.canAttemptSupabaseOtp ? 'พร้อมเฉพาะ staging flags' : 'ยังไม่เปิด real OTP'} · no cloud sync:{' '}
+          {String(phoneStatus.noCloudSync)}
         </NoticeBox>
 
         <Card className="p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">สถานะ Phone Auth</h2>
-            <StatusPill tone={phoneStatus.canUseLocalMock ? 'success' : 'warning'}>{phoneStatus.modeLabel}</StatusPill>
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <Phone aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">Staging adapter status</h2>
+                <StatusPill tone={phoneStatus.canRequestOtp ? 'success' : 'warning'}>{phoneStatus.modeLabel}</StatusPill>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{phoneStatus.statusLabel}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                phone flag: {phoneStatus.phoneAuthEnabled ? 'เปิด' : 'ปิด'} · network:{' '}
+                {phoneStatus.networkCallsEnabled ? 'เปิดเฉพาะ staging' : 'ปิด'} · cloud sync:{' '}
+                {phoneStatus.cloudSyncEnabled ? 'เปิด (block)' : 'ปิด'}
+              </p>
+              {phoneStatus.disabledReasons.length > 0 ? (
+                <ul className="mt-3 grid gap-1 rounded-lg bg-amber-50 p-3 text-xs font-bold leading-5 text-amber-900">
+                  {phoneStatus.disabledReasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{phoneStatus.readinessLabel}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            phone auth flag: {phoneStatus.phoneAuthEnabled ? 'เปิด' : 'ปิด'} · local mock:{' '}
-            {phoneStatus.localMockEnabled ? 'เปิด' : 'ปิด'} · network: ปิด
-          </p>
         </Card>
 
         <Card className="p-4">
@@ -132,19 +160,19 @@ export function AuthPhonePage() {
           )}
           <Button className="mt-4 w-full" onClick={handleRequestOtp}>
             <MessageSquareText aria-hidden="true" className="h-4 w-4" />
-            ส่งรหัส OTP จำลอง
+            {phoneStatus.canAttemptSupabaseOtp ? 'ส่ง OTP staging จริง' : 'ส่งรหัส OTP จำลอง'}
           </Button>
           {otpRequested ? (
             <Button className="mt-3 w-full" onClick={handleRequestOtp} variant="secondary">
               <RotateCcw aria-hidden="true" className="h-4 w-4" />
-              ส่งรหัสจำลองอีกครั้ง
+              {phoneStatus.canAttemptSupabaseOtp ? 'ส่ง OTP staging อีกครั้ง' : 'ส่งรหัสจำลองอีกครั้ง'}
             </Button>
           ) : null}
         </Card>
 
         <Card className="p-4">
           <label className="text-sm font-extrabold text-kaset-ink" htmlFor="otp-code">
-            รหัส OTP จำลอง
+            รหัส OTP
           </label>
           <input
             className="mt-2 h-14 w-full rounded-lg border border-kaset-deep/10 bg-white px-4 text-center text-xl font-extrabold tracking-[0.35em] text-kaset-ink outline-none transition placeholder:tracking-normal placeholder:text-slate-400 focus:border-kaset-leaf focus:ring-2 focus:ring-kaset-leaf/20"
@@ -156,20 +184,51 @@ export function AuthPhonePage() {
             type="text"
             value={otp}
           />
-          <p className="mt-2 text-sm leading-6 text-slate-500">ใช้รหัส 123456 สำหรับทดสอบเท่านั้น</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {phoneStatus.canAttemptSupabaseOtp ? 'ใส่ OTP จาก SMS staging เฉพาะเบอร์ทดสอบภายใน' : 'ใช้รหัส 123456 สำหรับ local mock'}
+          </p>
           <Button className="mt-4 w-full" onClick={handleVerifyOtp}>
             <ShieldCheck aria-hidden="true" className="h-4 w-4" />
-            ยืนยันเบอร์โทรจำลอง
+            {phoneStatus.canAttemptSupabaseOtp ? 'ยืนยัน OTP staging' : 'ยืนยันเบอร์โทรจำลอง'}
           </Button>
         </Card>
 
         {message ? (
-          <NoticeBox tone={message.success ? 'success' : 'danger'} title={message.success ? 'สำเร็จ' : 'ยังดำเนินการไม่ได้'}>
+          <NoticeBox tone={message.success ? 'success' : message.status === 'disabled' ? 'warning' : 'danger'} title={message.success ? 'สำเร็จ' : 'ยังดำเนินการไม่ได้'}>
             {message.message}
           </NoticeBox>
         ) : null}
 
-        {session ? (
+        {supabaseSession ? (
+          <Card className="p-4">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <CheckCircle2 aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-extrabold text-kaset-ink">พบ Supabase Phone Auth staging session</h2>
+                  <StatusPill tone="success">staging session</StatusPill>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {supabaseSession.phoneNumberMasked} · user {supabaseSession.userIdMasked}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  access token present: {String(supabaseSession.accessTokenPresent)} · refresh token present:{' '}
+                  {String(supabaseSession.refreshTokenPresent)}
+                </p>
+                <NoticeBox tone="warning" title="ยังไม่ sync Guest Memory">
+                  M62 พิสูจน์ session ได้เท่านั้น ยังไม่เขียน profile/app tables และยังไม่ upload ข้อมูล local
+                </NoticeBox>
+                <Button className="mt-4 w-full" onClick={handleClearSession} variant="secondary">
+                  ล้าง staging session preview
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : null}
+
+        {localSession ? (
           <Card className="p-4">
             <div className="flex gap-3">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
@@ -181,9 +240,9 @@ export function AuthPhonePage() {
                   <StatusPill tone="success">phone mock</StatusPill>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {session.phoneNumberMasked} · หมดอายุ {new Date(session.expiresAt).toLocaleString('th-TH')}
+                  {localSession.phoneNumberMasked} · หมดอายุ {new Date(localSession.expiresAt).toLocaleString('th-TH')}
                 </p>
-                <p className="mt-1 break-all text-xs leading-5 text-slate-500">{session.mockUserId}</p>
+                <p className="mt-1 break-all text-xs leading-5 text-slate-500">{localSession.mockUserId}</p>
                 <div className="mt-4 grid gap-2">
                   <Link to="/app/auth/sync-preview">
                     <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
@@ -203,7 +262,7 @@ export function AuthPhonePage() {
           <div className="flex gap-3">
             <Lock aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-amber-800" />
             <p className="text-sm leading-6 text-amber-900">
-              Session นี้ใช้ทดสอบ ownership gate เท่านั้น ยังไม่ใช่บัญชีจริง ไม่ได้ผูก Supabase และไม่สามารถซิงก์ cloud จริง
+              Phone Auth staging ใช้พิสูจน์ session เท่านั้น ยังไม่เปิด cloud sync ไม่เขียนตาราง app และ service-role key ต้องไม่อยู่ใน frontend
             </p>
           </div>
         </Card>

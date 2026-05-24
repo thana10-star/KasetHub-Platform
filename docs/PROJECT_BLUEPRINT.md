@@ -86,6 +86,15 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - Tests prove the default status is blocked, auth flags stay off by default, cloud sync remains blocked until ownership exists, frontend service-role keys are rejected, and rollback steps exist.
 - Keeps M61 planning-only: no production auth enablement, no real OTP/SMS by default, no Supabase write, no cloud sync, no service-role key, no `.env.local` commit, and no Edge Function deployment.
 
+## M62 Controlled Phone Auth Staging Test
+
+- Adds `phone-auth-staging-adapter.types.ts` and `phone-auth-staging-adapter.ts`.
+- Adds `auth-ownership-status.types.ts` and `auth-ownership-status.ts`.
+- Allows Supabase Phone OTP only in local staging mode with `VITE_PHONE_AUTH_MODE=supabase_staging_ready`, `VITE_ENABLE_SUPABASE=true`, `VITE_ENABLE_AUTH=true`, `VITE_ENABLE_PHONE_AUTH=true`, valid staging anon config, and `VITE_ENABLE_CLOUD_SYNC=false`.
+- Blocks staging OTP when cloud sync is enabled, Supabase config is invalid, production mode is requested, or a service-role-like key appears in frontend env.
+- Updates Phone Auth, staging test, Auth Status, Sync Preview, and Account Preview with staging status, redirect preview, SMS cost warnings, rollback reminders, and ownership status.
+- Keeps Guest Memory sync blocked and does not write profile/app tables.
+
 ## M01 Foundation
 
 - React + TypeScript + Vite web app

@@ -9,6 +9,10 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
 import { clearLineMockSessionFromAdapter, getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { clearPhoneMockSession, getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
+import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
+import {
+  getPhoneAuthStagingAdapterStatus,
+} from '@/services/auth/phone-auth-staging-adapter';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { getAccountStatus } from '@/services/account/account-status-service';
@@ -17,7 +21,12 @@ export function AuthStatusPage() {
   const { state } = useGuestMemory();
   const [refreshKey, setRefreshKey] = useState(0);
   const phoneStatus = getPhoneAuthAdapterStatus();
+  const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
   const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
+  const ownershipStatus = getAuthOwnershipStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
   const lineStatus = getLineAuthAdapterStatus();
   const accountStatus = getAccountStatus(state);
   const phoneSession = phoneStatus.session;
@@ -64,6 +73,17 @@ export function AuthStatusPage() {
             </div>
           </div>
         </Card>
+
+        <NoticeBox tone={phoneStagingStatus.canAttemptSupabaseOtp ? 'warning' : 'info'} icon={ShieldCheck} title="M62 controlled Phone Auth staging boundary">
+          {phoneStagingStatus.statusLabel} · redirect {phoneStagingStatus.redirectUrlPreview} · network{' '}
+          {phoneStagingStatus.networkCallsEnabled ? 'เปิดเฉพาะ staging OTP' : 'ปิด'} · cloud sync{' '}
+          {phoneStagingStatus.cloudSyncEnabled ? 'เปิด (blocked)' : 'ปิด'} · ทดสอบเฉพาะเบอร์ภายในเท่านั้น
+        </NoticeBox>
+
+        <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} icon={Lock} title="M62 ownership proof status">
+          {ownershipStatus.label} · sync allowed {String(ownershipStatus.syncAllowed)} · user{' '}
+          {ownershipStatus.userIdMasked ?? 'ยังไม่มี'} · {ownershipStatus.explanation}
+        </NoticeBox>
 
         <Card className="p-4">
           <div className="flex gap-3">

@@ -23,6 +23,8 @@ import { getGuestSyncAdapterStatus } from '@/services/backend/guest-sync-adapter
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { createGuestToCloudSyncPlan } from '@/services/backend/guest-to-cloud-sync-planner';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 
@@ -52,6 +54,11 @@ export function AccountPreviewPage() {
   const guestSyncStatus = getGuestSyncAdapterStatus();
   const guestSyncEdge = runGuestSyncStagingReadiness();
   const m61Review = runPhoneAuthStagingReview();
+  const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
+  const ownershipStatus = getAuthOwnershipStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
 
   return (
     <div>
@@ -108,6 +115,11 @@ export function AccountPreviewPage() {
 
         <NoticeBox tone="warning" title="M61 Phone Auth staging status">
           {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · ข้อมูล Guest Memory จะยังไม่ขึ้น cloud จนกว่า Phone Auth staging และ ownership/RLS จะผ่านจริง
+        </NoticeBox>
+
+        <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 Phone Auth ownership status">
+          {ownershipStatus.label} · real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
+          {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation}
         </NoticeBox>
 
         {accountStatus.phoneMockSession ? (
