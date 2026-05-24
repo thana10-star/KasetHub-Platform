@@ -116,6 +116,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M70 editorial evidence and human release gate', route: '/app/articles/editorial-evidence' },
   { label: 'M71 offline article release audit', route: '/app/articles/release-audit' },
   { label: 'M72 offline article CMS persistence plan', route: '/app/articles/cms-persistence-plan' },
+  { label: 'M73 offline article CMS migration review', route: '/app/articles/cms-migration-review' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -309,6 +310,14 @@ export function QAPage() {
             description="ดู future tables, role rules, release audit write contract, fallback policy และ migration checklist"
             to="/app/articles/cms-persistence-plan"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M73 CMS migration review"
+            description="ดู table DDL review plan, RLS expectations, rollback plan และ seed fixtures โดยยังไม่ run migration"
+            to="/app/articles/cms-migration-review"
+            variant="soft"
           />
         </Card>
 

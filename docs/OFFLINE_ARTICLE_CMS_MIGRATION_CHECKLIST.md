@@ -17,3 +17,6 @@ Rollback must exist before any migration is run.
 
 The frontend must never contain service-role keys, provider keys, or direct publish-write paths.
 
+## M73 Dry-run Additions
+
+M73 adds table-level review fixtures, RLS expectation fixtures, seed fixture plans, and a publish safety gate. All remain blocked until a future reviewed staging migration milestone.

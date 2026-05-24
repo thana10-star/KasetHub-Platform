@@ -21,3 +21,8 @@ Fallback behavior:
 
 M72 only plans this policy. It does not fetch CMS content or write database records.
 
+## M73 Seed And Rollback Boundary
+
+Seed fixture plans must prove that invalid CMS content falls back to bundled offline articles. Rollback must not remove bundled offline fallback content.
+
+M73 does not insert seed rows and does not run rollback or migration scripts.

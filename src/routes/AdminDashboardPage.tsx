@@ -52,6 +52,7 @@ import { getArticleEditorialReviewSummary } from '@/services/content/offline-agr
 import { getArticleEvidencePacketSummary } from '@/services/content/offline-agri-editorial-evidence';
 import { getArticleReleaseAuditSummary } from '@/services/content/offline-agri-release-audit';
 import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
+import { getCmsMigrationReviewSummary } from '@/services/content/offline-agri-cms-migration-review';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -259,6 +260,7 @@ export function AdminDashboardPage() {
   const articleEvidencePacket = useMemo(() => getArticleEvidencePacketSummary(), []);
   const articleReleaseAudit = useMemo(() => getArticleReleaseAuditSummary(), []);
   const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
+  const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -339,6 +341,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={CloudUpload} label="M64 dry-run payload" value="blocked" />
               <SummaryCard icon={Gavel} label="M71 release audit" value={`${articleReleaseAudit.blockedAttemptCount} blocked`} />
               <SummaryCard icon={Database} label="M72 CMS contract" value={`${articleCmsPersistence.tableCount} tables`} />
+              <SummaryCard icon={ClipboardList} label="M73 CMS migration" value={`${articleCmsMigration.tableCount} planned`} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
@@ -400,6 +403,9 @@ export function AdminDashboardPage() {
                   </Link>
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/cms-persistence-plan">
                     เปิด M72 CMS persistence
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/cms-migration-review">
+                    เปิด M73 CMS migration review
                   </Link>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
                     เปิดคลังความรู้เกษตรออฟไลน์

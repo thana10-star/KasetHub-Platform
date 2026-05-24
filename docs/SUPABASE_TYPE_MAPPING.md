@@ -528,3 +528,25 @@ Future persistence may map:
 - fallback policy -> bundled offline fallback behavior when CMS override is invalid
 
 M72 performs no Supabase writes, CMS writes, migrations, CMS fetches, or production publishing.
+
+## M73 CMS Migration Dry-run Mapping Notes
+
+M73 adds frontend-only migration review models:
+
+- `CmsMigrationReviewStatus`
+- `CmsMigrationTableReview`
+- `CmsMigrationRlsReview`
+- `CmsMigrationRollbackPlan`
+- `CmsMigrationSeedFixturePlan`
+- `CmsMigrationPublishSafetyGate`
+- `CmsMigrationBlocker`
+
+Future persistence may map:
+
+- table reviews -> migration review checklist entries
+- RLS reviews -> policy review checklist entries
+- rollback plan -> rollback script review
+- seed fixture plan -> staging seed plan
+- publish safety gate -> release gate and audit preconditions
+
+M73 keeps `noMigrationRun=true`, `noSupabaseWrite=true`, and `frontendCanWriteCmsRows=false`.

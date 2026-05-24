@@ -33,3 +33,8 @@ Contract rules:
 - offline bundled content remains fallback when CMS content is invalid or unavailable
 - human release gate remains required before publish
 
+## M73 Migration Review Pack
+
+M73 adds a dry-run migration review pack for this contract.
+
+The pack reviews future table DDL expectations, RLS expectations, rollback planning, seed fixture planning, and publish safety gates. It still does not run migrations, write Supabase rows, or create a backend CMS endpoint.

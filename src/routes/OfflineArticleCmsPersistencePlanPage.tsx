@@ -43,6 +43,20 @@ export function OfflineArticleCmsPersistencePlanPage() {
           บทความ offline bundled ต้องยังอ่านได้เสมอเมื่อ CMS ยังไม่พร้อม ล้มเหลว หรือไม่ผ่าน safety/release policy
         </NoticeBox>
 
+        <Link to="/app/articles/cms-migration-review">
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-amber-950">M73 CMS migration review</h2>
+                <p className="mt-1 text-sm leading-6 text-amber-900">
+                  ตรวจ table DDL plan, RLS expectation, rollback plan และ seed fixture plan โดยยังไม่ run migration จริง
+                </p>
+              </div>
+              <StatusPill tone="warning">dry run</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <UserRoundCheck aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
@@ -179,6 +193,9 @@ export function OfflineArticleCmsPersistencePlanPage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/offline-qa">
             กลับไป offline article QA
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/cms-migration-review">
+            เปิด M73 CMS migration review
           </Link>
         </div>
       </div>

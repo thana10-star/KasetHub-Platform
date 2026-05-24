@@ -875,3 +875,11 @@ M72 adds `/app/articles/cms-persistence-plan`, a local-only planning route for f
 The new service layer defines CMS roles, write/read contracts, release audit write requirements, future table planning, offline fallback policy, and migration rollback checklist. Viewer cannot edit, automation cannot publish, admin cannot silently bypass human release, and release manager remains blocked without evidence and audit requirements.
 
 M72 still does not run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.
+
+## M73 CMS Migration Dry-run Checklist And SQL Review Pack
+
+M73 adds `/app/articles/cms-migration-review`, a local-only dry-run review pack for the future CMS article migration.
+
+The new service layer defines table review planning, RLS expectation planning, rollback planning, seed fixture planning, and publish safety gates for article CMS persistence. Public writes, frontend CMS writes, automation publish, and incomplete content publish remain blocked.
+
+M73 still does not run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.

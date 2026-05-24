@@ -714,6 +714,12 @@ M72 adds `/app/articles/cms-persistence-plan` for local-only future CMS persiste
 
 It defines future article CMS tables, editor/reviewer/release roles, read/write contracts, release audit write requirements, offline fallback policy, and migration rollback checklist. Viewer cannot edit, automation cannot publish, admin cannot silently bypass the human release gate, and no database writes or migrations are run.
 
+## M73 CMS Migration Dry-run Review Pack
+
+M73 adds `/app/articles/cms-migration-review` for local-only CMS migration dry-run review.
+
+It plans table DDL review, RLS expectations, rollback steps, seed fixtures, and publish safety gates for the future article CMS migration. Frontend CMS writes, public writes, automation final publish, and incomplete content publish remain blocked. No migrations, Supabase writes, CMS writes, image uploads, or production article publishing are enabled.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

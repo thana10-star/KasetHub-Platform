@@ -23,6 +23,7 @@ import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-re
 import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
+import { getCmsMigrationReviewSummary } from '@/services/content/offline-agri-cms-migration-review';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
@@ -148,6 +149,7 @@ export function NextPhasePage() {
   const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const ownershipGate = useMemo(() => buildOwnershipRlsGateStatus(), []);
   const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
+  const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -240,6 +242,26 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
                 เปิด M41 setup guide
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-900">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M73 CMS migration dry-run</h2>
+                <StatusPill tone="warning">{articleCmsMigration.tableCount} table plans</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ตรวจ table DDL plan, RLS expectation, rollback plan และ seed fixture plan โดยยังไม่ run migration หรือเขียน Supabase
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-migration-review">
+                เปิด M73 CMS migration review
               </Link>
             </div>
           </div>

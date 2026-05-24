@@ -1210,3 +1210,28 @@ RLS and role planning:
 - automation cannot final publish
 
 Migration planning must include rollback before any staging migration is run.
+
+## M73 CMS Migration Dry-run Review Pack
+
+M73 does not run migrations. It adds a dry-run review pack for the M72 table list.
+
+Each future table must have:
+
+- owner
+- write source
+- read scope
+- RLS expectation
+- rollback note
+- seed strategy
+- audit requirement
+
+RLS expectations:
+
+- viewer/public cannot write
+- editors cannot bypass release gates
+- release managers cannot bypass audit requirements
+- automation/service accounts cannot final publish directly
+- public reads only approved published content
+- unpublished drafts are blocked from anon/public
+
+Seed planning covers starter offline article import, article categories, review fixtures, release gate fixtures, and fallback article fixtures. No seed inserts occur in M73.

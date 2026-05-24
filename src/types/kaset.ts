@@ -54,6 +54,7 @@ export type AppRoute =
   | '/app/articles/editorial-evidence'
   | '/app/articles/release-audit'
   | '/app/articles/cms-persistence-plan'
+  | '/app/articles/cms-migration-review'
   | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/notification-settings'

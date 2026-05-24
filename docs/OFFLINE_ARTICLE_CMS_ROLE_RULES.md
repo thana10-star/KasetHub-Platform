@@ -20,3 +20,8 @@ Automation rule:
 
 Final release still requires explicit human approval, release reviewer, release timestamp, release note, and audit event records.
 
+## M73 RLS Review Link
+
+M73 turns these role rules into RLS review expectations.
+
+Viewer/public writes remain forbidden, editors cannot bypass release gates, release managers cannot bypass audit requirements, and automation/service accounts cannot final publish directly.
