@@ -26,3 +26,9 @@ The soil pilot is intentionally low risk and evergreen, but it still needs human
 - M68 publish gate intentionally blocked
 
 This document does not add official facts or final reviewed guidance.
+
+## M69 Editorial QA Polish
+
+M69 keeps the soil pilot as a reviewed draft candidate and adds pending sign-offs for content editor, agriculture expert, safety reviewer, and image reviewer.
+
+Source metadata, image review, and final publish blockers are now represented as structured fixtures. They are still incomplete and cannot unlock final publishing.

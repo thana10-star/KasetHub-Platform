@@ -1,7 +1,11 @@
 import type { AppRoute } from '@/types/kaset';
 import type { OfflineAgriArticleImageAspectRatio } from '@/services/content/offline-agri-article.types';
 
-export type PilotArticleDraftStatus = 'reviewed_draft_candidate' | 'final_review_pending' | 'ready_for_publish_future';
+export type PilotArticleDraftStatus =
+  | 'draft_template'
+  | 'reviewed_draft_candidate'
+  | 'final_review_pending'
+  | 'ready_for_publish_future';
 
 export type PilotArticleDraftSectionKind =
   | 'intro'
@@ -63,6 +67,7 @@ export type PilotArticleDraftReviewMetadata = {
 export type OfflineAgriPilotArticleDraft = {
   id: string;
   slug: string;
+  offlineFallbackArticleSlug?: string;
   titleTh: string;
   reasonTh: string;
   status: PilotArticleDraftStatus;

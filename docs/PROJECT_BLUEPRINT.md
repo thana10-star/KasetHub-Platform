@@ -843,3 +843,11 @@ M68 adds `/app/articles/pilot-draft-review` and the first richer local-only pilo
 The pilot title is `ดิน 6 ชนิด รู้จักก่อนปลูก`. It includes draft-only Thai body sections, a simple soil comparison table, observation steps, broad use examples, improvement ideas, mistakes to avoid, expert escalation notes, related app links, source placeholders, image requirements, and publish blockers.
 
 The article detail route `/app/articles/offline/soil-types-before-planting` can show the richer draft, but the publish gate remains blocked. M68 still does not publish official full content, write Supabase/CMS data, generate articles with AI, generate images, load external images, inject sponsors, or hardcode official finance/loan/government facts.
+
+## M69 Pilot Article Editorial QA Polish
+
+M69 adds `/app/articles/editorial-review`, an offline-only editorial QA route for pilot article sign-off.
+
+The new service layer defines reviewer roles, pending sign-off fixtures, final source metadata shape, image asset review fixtures, approval state, and final publish blockers. It keeps `soil-types-before-planting` blocked and adds a second low-risk `draft_template` pilot, `soil-ph-reading-yourself`, mapped back to the soil article fallback.
+
+M69 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, load external images, inject sponsors, or add official finance/loan/government facts.

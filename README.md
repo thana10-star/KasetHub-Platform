@@ -690,6 +690,12 @@ M68 adds `/app/articles/pilot-draft-review` and richer local-only draft content 
 
 The draft includes review/source placeholders, image needs, safety disclaimers, and publish blockers. It is still not a final official article, and no Supabase/CMS writes, AI article generation, external images, or sponsor/affiliate injection are added.
 
+## M69 Pilot Article Editorial QA
+
+M69 adds `/app/articles/editorial-review` for local-only editorial sign-off QA.
+
+It defines pending reviewer sign-offs, source metadata placeholders, image review fixtures, final publish blockers, and a second low-risk `draft_template` pilot for `soil-ph-reading-yourself`. No article is marked final publish.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

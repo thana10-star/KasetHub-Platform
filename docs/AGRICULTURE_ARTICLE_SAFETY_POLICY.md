@@ -52,3 +52,9 @@ M68 adds richer draft content only for the low-risk evergreen soil topic `soil-t
 The draft keeps the general safety disclaimer, avoids exact fertilizer or chemical prescriptions, uses broad examples only, and tells readers to confirm local conditions with an agriculture office or expert when results affect real planting decisions.
 
 The pilot remains blocked from final publishing until review metadata, source placeholders, image needs, and publish-gate blockers are resolved.
+
+## M69 Editorial Safety Review
+
+M69 adds pending reviewer sign-offs and source/image review fixtures. Safety review remains required and incomplete.
+
+The editorial workflow must not remove baseline disclaimers, convert broad education into exact fertilizer/chemical advice, add official finance or government claims, or mix sponsor content into article guidance.

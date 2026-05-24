@@ -224,6 +224,91 @@ export const offlineAgriPilotArticleDrafts: OfflineAgriPilotArticleDraft[] = [
       ],
     },
   },
+  {
+    id: 'pilot-draft-soil-ph-reading-yourself-m69',
+    slug: 'soil-ph-reading-yourself',
+    offlineFallbackArticleSlug: 'soil-types-before-planting',
+    titleTh: 'อ่านค่า pH ดิน ด้วยตัวเอง',
+    reasonTh: 'หัวข้อความรู้พื้นฐานความเสี่ยงต่ำสำหรับเตรียมร่างในอนาคต โดยยังไม่ให้คำแนะนำปรับดินหรือใส่วัสดุเฉพาะ',
+    status: 'draft_template',
+    summaryTh:
+      'ร่างแม่แบบนี้เตรียมโครงสำหรับอธิบายการอ่านค่า pH ดินแบบพื้นฐานในอนาคต แต่ยังไม่ใช่บทความเต็มและยังไม่สรุปวิธีปรับดินจากค่า pH',
+    relatedRoutes: ['/app/articles/offline', '/app/articles/full-content-readiness'],
+    isFinalOfficialArticle: false,
+    fullPublishAllowed: false,
+    noNetworkRequired: true,
+    comparisonRows: [],
+    sections: [
+      {
+        id: 'soil-ph-intro-template',
+        kind: 'intro',
+        headingTh: 'ทำไมค่า pH ดินจึงควรรู้ก่อนปรับปรุงแปลง',
+        bodyTh: [
+          'ส่วนนี้ยังเป็นแม่แบบร่าง ต้องรอแหล่งอ้างอิงและผู้เชี่ยวชาญตรวจทานก่อนเขียนเป็นบทความเต็ม',
+        ],
+      },
+      {
+        id: 'soil-ph-ask-expert-template',
+        kind: 'ask_expert',
+        headingTh: 'เมื่อไรควรถามผู้เชี่ยวชาญ',
+        bodyTh: [
+          'ถ้าผล pH ทำให้ต้องตัดสินใจลงทุนหรือปรับดินจริง ต้องใช้ผลตรวจและคำแนะนำในพื้นที่ ไม่ใช่อ่านจากบทความอย่างเดียว',
+        ],
+      },
+      {
+        id: 'soil-ph-summary-template',
+        kind: 'summary',
+        headingTh: 'สรุปสถานะร่าง',
+        bodyTh: [
+          'M69 เพิ่มเฉพาะ draft template สำหรับ QA workflow ยังไม่ใช่บทความทางการและยังไม่เผยแพร่เป็นเนื้อหาเต็ม',
+        ],
+      },
+    ],
+    review: {
+      editorialStatus: 'draft_template',
+      reviewerPlaceholder: 'KasetHub editorial reviewer pending',
+      lastReviewedPlaceholder: 'pending_future_review_date',
+      sourcePlaceholders: [
+        {
+          id: 'soil-ph-source-test-method',
+          labelTh: 'แหล่งอ้างอิงวิธีอ่านค่า pH ดิน',
+          status: 'placeholder_only',
+          required: true,
+          noteTh: 'ต้องเติมแหล่งอ้างอิงที่ตรวจทานแล้วก่อนเขียนบทความเต็ม',
+        },
+        {
+          id: 'soil-ph-source-local-office',
+          labelTh: 'รีวิวจากหน่วยงานเกษตรหรือผู้เชี่ยวชาญในพื้นที่',
+          status: 'placeholder_only',
+          required: true,
+          noteTh: 'ต้องยืนยันว่าภาษาไม่กลายเป็นคำแนะนำปรับดินเฉพาะแปลง',
+        },
+      ],
+      imageRequirements: [
+        {
+          id: 'soil-ph-cover-image',
+          labelTh: 'ภาพปกชุดทดสอบ pH ดินแบบไม่ระบุยี่ห้อ',
+          plannedPath: 'public/assets/articles/soil/soil-ph-reading-yourself-cover.webp',
+          aspectRatio: '16:9',
+          altTextTh: 'ภาพตัวอย่างการอ่านค่า pH ดินแบบพื้นฐาน',
+          status: 'planned_only',
+          required: true,
+        },
+      ],
+      safetyDisclaimersTh: soilSafetyDisclaimers,
+      publishBlockers: [
+        'second_pilot_is_draft_template_only',
+        'source_placeholders_not_filled',
+        'final_human_review_missing',
+        'image_assets_not_reviewed',
+      ],
+      reviewChecklistTh: [
+        'ยังไม่เขียนคำแนะนำปรับดินจากค่า pH',
+        'ต้องมีแหล่งอ้างอิงและผู้เชี่ยวชาญตรวจทานก่อนเป็นบทความเต็ม',
+        'ต้องไม่มีสินค้า ยี่ห้อ หรือ sponsor แทรกในเนื้อหา',
+      ],
+    },
+  },
 ];
 
 export function getOfflineAgriPilotArticleDrafts() {

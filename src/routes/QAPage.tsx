@@ -111,6 +111,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },
   { label: 'M67 เตรียมบทความเต็มออฟไลน์', route: '/app/articles/full-content-readiness' },
   { label: 'M68 pilot article draft review', route: '/app/articles/pilot-draft-review' },
+  { label: 'M69 pilot article editorial review', route: '/app/articles/editorial-review' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -272,6 +273,14 @@ export function QAPage() {
             description="ดูร่างบทความ ดิน 6 ชนิด รู้จักก่อนปลูก พร้อม checklist และ publish blockers"
             to="/app/articles/pilot-draft-review"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={UserRoundCheck}
+            label="เปิด M69 pilot editorial review"
+            description="ตรวจ reviewer sign-off, source metadata, image review และ second pilot draft โดยยังไม่ publish final"
+            to="/app/articles/editorial-review"
+            variant="soft"
           />
         </Card>
 

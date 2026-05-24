@@ -34,3 +34,17 @@ It must remain blocked while:
 - the M68 publish blocker is active
 
 The pilot can be useful for local reading and editorial review, but it must not be labeled as official final content.
+
+## M69 Editorial Gate
+
+M69 adds pending reviewer sign-offs, final source metadata placeholders, and image review fixtures.
+
+The final gate remains blocked unless:
+
+- every required reviewer sign-off is complete
+- source metadata is reviewed and no longer placeholder-only
+- image assets pass offline path, alt text, aspect ratio, and size checks
+- required safety disclaimers remain present
+- final human review is represented
+
+No M69 article is marked final official publish.

@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, BookOpenCheck, Calculator, Check, Clock, FileImage, FileText, ListChecks, ShieldAlert } from 'lucide-react';
+import { ArrowRight, Bookmark, BookOpenCheck, Calculator, Check, Clock, FileImage, FileText, ListChecks, ShieldAlert, UserCheck } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { ShareButton } from '@/components/kaset/ShareButton';
 import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
@@ -20,6 +20,11 @@ import {
   findOfflineAgriPilotArticleDraftBySlug,
   getPilotArticleDraftPublishGate,
 } from '@/services/content/offline-agri-pilot-article-drafts';
+import {
+  getArticleEditorialApprovalStateBySlug,
+  getArticleFinalPublishBlockerLabel,
+  getArticleReviewerRoleLabel,
+} from '@/services/content/offline-agri-editorial-review';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -55,6 +60,7 @@ export function OfflineAgriArticleDetailPage() {
   const fullArticleTemplate = findOfflineAgriFullArticleTemplateForArticleSlug(article.slug);
   const pilotDraft = findOfflineAgriPilotArticleDraftBySlug(article.slug);
   const pilotDraftGate = getPilotArticleDraftPublishGate(article.slug);
+  const editorialState = getArticleEditorialApprovalStateBySlug(article.slug);
   const displayTitle = pilotDraft?.titleTh ?? article.titleTh;
   const displaySummary = pilotDraft?.summaryTh ?? article.shortSummaryTh;
 
@@ -173,6 +179,50 @@ export function OfflineAgriArticleDetailPage() {
                 publish blocked: {pilotDraftGate.blockers.slice(0, 4).join(', ')}
               </p>
             </Card>
+
+            {editorialState ? (
+              <Card className="border-amber-200 bg-amber-50 p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusPill tone="warning">M69 editorial review</StatusPill>
+                  <Badge tone="rose">final publish: no</Badge>
+                  <Badge tone="neutral">{editorialState.signoffs.filter((signoff) => signoff.status === 'pending').length} pending</Badge>
+                </div>
+                <h2 className="mt-3 inline-flex items-center gap-2 font-extrabold text-amber-950">
+                  <UserCheck aria-hidden="true" className="h-5 w-5" />
+                  Editorial review status
+                </h2>
+                <div className="mt-3 grid gap-2">
+                  {editorialState.signoffs.map((signoff) => (
+                    <div className="rounded-lg bg-white/70 p-3 text-sm leading-6 text-amber-950" key={signoff.id}>
+                      <span className="font-extrabold">{getArticleReviewerRoleLabel(signoff.role)}</span> · {signoff.status}
+                      <p className="mt-1 text-xs leading-5 text-amber-900">{signoff.noteTh}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 grid gap-2">
+                  {editorialState.sourceMetadata.slice(0, 2).map((source) => (
+                    <p className="rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-amber-900" key={source.id}>
+                      source: {source.sourceTitle} · {source.freshnessStatus} · {source.citationPlaceholder}
+                    </p>
+                  ))}
+                  {editorialState.imageReviews.slice(0, 2).map((image) => (
+                    <p className="rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-amber-900" key={image.id}>
+                      image: {image.assetKind} · {image.status} · max {image.maxSizeKbTarget}KB
+                    </p>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {editorialState.blockers.slice(0, 4).map((blocker) => (
+                    <Badge key={blocker} tone="rose">
+                      {getArticleFinalPublishBlockerLabel(blocker)}
+                    </Badge>
+                  ))}
+                </div>
+                <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/articles/editorial-review">
+                  เปิด M69 editorial review
+                </Link>
+              </Card>
+            ) : null}
 
             {pilotDraft.sections.map((section) => (
               <Card className="p-5" key={section.id}>

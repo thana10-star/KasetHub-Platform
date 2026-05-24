@@ -31,3 +31,9 @@ M68 adds the first richer local-only pilot article draft workflow for KasetHub o
 - No exact fertilizer, chemical, or crop prescription.
 
 The draft remains blocked until source placeholders, reviewer metadata, final review date, and image review are represented.
+
+## M69 Follow-up
+
+M69 adds a separate editorial QA layer with pending reviewer sign-offs, final source metadata shape, image asset review fixtures, and a second low-risk pilot draft template for `soil-ph-reading-yourself`.
+
+The M68 soil pilot remains blocked from final publish.

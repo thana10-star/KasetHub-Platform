@@ -46,7 +46,7 @@ describe('M68 offline pilot article draft workflow', () => {
     const draft = summary.drafts[0];
 
     expect(summary.finalPublishAllowedCount).toBe(0);
-    expect(summary.blockedCount).toBe(1);
+    expect(summary.blockedCount).toBe(2);
     expect(draft.isFinalOfficialArticle).toBe(false);
     expect(draft.fullPublishAllowed).toBe(false);
   });
@@ -79,8 +79,18 @@ describe('M68 offline pilot article draft workflow', () => {
     const draftSlugs = new Set(drafts.map((draft) => draft.slug));
     const nonPilotArticles = offlineAgriArticles.filter((article) => !draftSlugs.has(article.slug));
 
-    expect(drafts).toHaveLength(1);
+    expect(drafts).toHaveLength(2);
     expect(nonPilotArticles.length).toBe(offlineAgriArticles.length - 1);
     expect(nonPilotArticles.every((article) => article.bodyReadiness === 'outline_only' || article.bodyReadiness === 'starter_content')).toBe(true);
+  });
+
+  test('M69 second low risk pilot draft template exists without final publish', () => {
+    const draft = findOfflineAgriPilotArticleDraftBySlug('soil-ph-reading-yourself');
+
+    expect(draft).toBeTruthy();
+    expect(draft?.status).toBe('draft_template');
+    expect(draft?.offlineFallbackArticleSlug).toBe('soil-types-before-planting');
+    expect(draft?.fullPublishAllowed).toBe(false);
+    expect(draft?.review.publishBlockers).toContain('second_pilot_is_draft_template_only');
   });
 });

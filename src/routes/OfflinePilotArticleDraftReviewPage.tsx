@@ -51,6 +51,16 @@ export function OfflinePilotArticleDraftReviewPage() {
           Publish gate ยังปิดอยู่จนกว่าจะมีแหล่งอ้างอิงจริง reviewer วันที่รีวิว และภาพที่ผ่านการตรวจทาน
         </NoticeBox>
 
+        <Link to="/app/articles/editorial-review">
+          <Card className="border-amber-200 bg-amber-50 p-4">
+            <StatusPill tone="warning">M69 editorial QA</StatusPill>
+            <h2 className="mt-3 font-extrabold text-amber-950">เปิด reviewer sign-off workflow</h2>
+            <p className="mt-1 text-sm leading-6 text-amber-900">
+              ดู source metadata, image checklist, second low-risk pilot draft และ final publish blockers ที่ยังปิดอยู่
+            </p>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
