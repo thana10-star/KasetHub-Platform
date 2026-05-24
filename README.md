@@ -660,6 +660,14 @@ M64 adds `/app/guest-sync-dry-run`, a local-only payload preview before any Gues
 
 The route and service preview consent, idempotency, audit events, conflicts, owner scope, blockers, and privacy filters. It excludes raw photos, base64 image blobs, OTP/session tokens, service-role keys, provider keys, and private env-like values. `uploadAllowed` remains false, and there are still no Supabase app-table writes or cloud sync.
 
+## M65 Offline Agriculture Article Library
+
+M65 adds an offline-first agriculture article library at `/app/articles/offline` with detail routes such as `/app/articles/offline/soil-types-before-planting`.
+
+The library bundles Thai starter outlines for soil, water, fertilizer, rice, sugarcane, cassava, and farm finance. It includes planned local image paths, Thai alt text, safety notes, related calculator/app routes, and future CMS keys for Supabase compatibility.
+
+M65 does not add CMS writes, Supabase writes, AI article generation, YouTube import, sponsor/affiliate injection, external image URLs, or network calls.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

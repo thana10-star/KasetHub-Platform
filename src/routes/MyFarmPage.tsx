@@ -159,6 +159,13 @@ export function MyFarmPage() {
                 variant={action.tone}
               />
             ))}
+            <LargeActionButton
+              description="อ่านหัวข้อดิน น้ำ ปุ๋ย พืชหลัก และบัญชีฟาร์มจากบทความที่ฝังอยู่ในแอป"
+              icon={FileText}
+              label="คลังความรู้เกษตรออฟไลน์"
+              to="/app/articles/offline"
+              variant="white"
+            />
           </div>
         </section>
 

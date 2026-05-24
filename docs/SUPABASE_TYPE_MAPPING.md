@@ -393,3 +393,26 @@ M64 adds frontend-only types:
 - `GuestSyncDryRunBlocker`
 
 The future backend mapping should treat these as preview models only. Safe groups may map to saved items, farm records, recent AI questions, crop watches, calculator saved results, followed topics, and likes after real ownership, consent, idempotency, audit, and owner-scoped RLS pass. M64 keeps `uploadAllowed=false` and performs no writes.
+
+## M65 Offline Agriculture Article Mapping Notes
+
+M65 adds frontend-only offline article models:
+
+- `OfflineAgriArticleCategory`
+- `OfflineAgriArticle`
+- `OfflineAgriArticleDifficulty`
+- `OfflineAgriArticleReadiness`
+- `OfflineAgriArticleSection`
+- `OfflineAgriArticleImageAsset`
+- `OfflineAgriArticleSafetyNote`
+- `OfflineAgriArticleCmsCompatibility`
+
+Future CMS mapping:
+
+- `OfflineAgriArticle` -> `agri_articles` plus versioned body tables
+- `OfflineAgriArticleSection` -> article body sections or rich content blocks
+- `OfflineAgriArticleImageAsset` -> `agri_article_image_assets`
+- `OfflineAgriArticleSafetyNote` -> `agri_article_safety_notes`
+- `futureCmsKey` -> stable CMS override key
+
+M65 keeps all articles bundled in the frontend and offline available. No CMS rows, Supabase writes, image uploads, or external image URLs are added.

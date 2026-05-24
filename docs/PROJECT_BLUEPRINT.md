@@ -809,3 +809,13 @@ M64 adds `/app/guest-sync-dry-run`, `guest-sync-dry-run-payload.types.ts`, and `
 The dry-run payload groups saved items, farm records, recent AI questions, crop watches, calculator saved result summaries, followed topics, and likes. It previews consent, idempotency, audit events, conflicts, owner scope, blockers, and privacy filters while keeping `uploadAllowed=false`, `noSupabaseWrite=true`, and `noCloudSync=true`.
 
 M64 updates Ownership/RLS Gate, Sync Preview, Guest Sync Status, Account Preview, Admin Dashboard, Next Phase, QA, and schema/docs with links and boundaries. It still does not upload Guest Memory, write Supabase app tables, enable cloud sync, deploy Edge Functions, place service-role keys in the frontend, run SQL, or enable production auth.
+
+## M65 Offline Agriculture Article Library
+
+M65 adds `/app/articles/offline` and `/app/articles/offline/:slug` as a hybrid offline-first agriculture article foundation.
+
+The new content services define offline article taxonomy, metadata, starter outlines, planned image asset references, safety notes, and CMS compatibility keys. The starter library covers soil, water, fertilizer, rice, sugarcane, cassava, and farm finance with two topics per category.
+
+M65 updates Articles, Profile, My Farm, Admin Dashboard, QA, route registry, schema docs, and content docs with the offline library entry point and safety boundaries.
+
+M65 still does not write Supabase data, create backend CMS records, generate articles with AI, import YouTube content, inject sponsors/affiliates, use external image URLs, or require network calls.

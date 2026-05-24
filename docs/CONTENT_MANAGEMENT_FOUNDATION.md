@@ -78,3 +78,18 @@ A real content system should add:
 - safety review gates for disease, fertilizer, pesticide, pricing, and AI-assisted claims
 - public read APIs that expose only published content
 - RLS or backend authorization aligned with the M18 schema draft
+
+## M65 Offline Agriculture Article Library
+
+M65 adds a separate offline-first agriculture article foundation:
+
+- `src/services/content/offline-agri-article.types.ts`
+- `src/services/content/offline-agri-article-taxonomy.ts`
+- `src/services/content/offline-agri-article-fixtures.ts`
+- `src/services/content/offline-agri-article-service.ts`
+- `/app/articles/offline`
+- `/app/articles/offline/:slug`
+
+The M65 library bundles evergreen Thai agriculture article outlines and starter snippets for offline reading. It covers soil, water, fertilizer, rice, sugarcane, cassava, and farm finance. It does not replace the M20 article fixtures; it prepares a more CMS-compatible schema for future Supabase content.
+
+M65 still does not add Supabase writes, backend CMS writes, AI article generation, YouTube import, sponsor/affiliate injection, external image URLs, or network calls.

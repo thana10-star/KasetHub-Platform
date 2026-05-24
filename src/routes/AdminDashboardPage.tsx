@@ -44,6 +44,7 @@ import type {
   AdminRiskItem,
   AdminTask,
 } from '@/services/admin/admin.types';
+import { getOfflineAgriArticleReadinessSummary } from '@/services/content/offline-agri-article-service';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -243,6 +244,7 @@ export function AdminDashboardPage() {
   const mvpReadiness = useMemo(() => runMvpReadinessAudit(), []);
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
   const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
+  const offlineArticleLibrary = useMemo(() => getOfflineAgriArticleReadinessSummary(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -298,6 +300,7 @@ export function AdminDashboardPage() {
           <>
             <section className="grid grid-cols-2 gap-3">
               <SummaryCard icon={FileText} label="content items" value={dashboard.summary.contentItems} />
+              <SummaryCard icon={BookOpenCheck} label="offline articles" value={offlineArticleLibrary.total} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
@@ -335,6 +338,26 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/next-phase">
                     เปิดแผน next phase
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <BookOpenCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M65 Offline Agriculture Library</h2>
+                    <StatusPill tone="success">{offlineArticleLibrary.total} offline topics</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    Bundled evergreen article outlines with planned image assets, Thai safety notes, and future Supabase CMS compatibility. No CMS writes or network calls.
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
+                    เปิดคลังความรู้เกษตรออฟไลน์
                   </Link>
                 </div>
               </div>
@@ -904,6 +927,23 @@ export function AdminDashboardPage() {
                 <p className="text-[11px] font-bold text-slate-500">published</p>
               </Card>
             </section>
+
+            <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <BookOpenCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold text-kaset-ink">Offline Agriculture Library</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {offlineArticleLibrary.total} bundled article outlines · {offlineArticleLibrary.starterContent} starter content · future CMS override ready
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
+                    เปิดคลังความรู้เกษตรออฟไลน์
+                  </Link>
+                </div>
+              </div>
+            </Card>
 
             <ModuleCard module={dashboard.modules.find((module) => module.id === 'youtube_import') ?? dashboard.modules[0]} />
 

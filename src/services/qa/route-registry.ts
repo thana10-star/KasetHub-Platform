@@ -51,6 +51,8 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/youtube', label: 'YouTube hub', milestone: 'M03/M22.5', notes: 'ใช้ fixture และ owner channel URL config', manualCheckPath: '/app/youtube' },
       { route: '/app/youtube/:videoId', label: 'YouTube video detail', milestone: 'M03', notes: 'หน้ารายละเอียดวิดีโอ mock', manualCheckPath: '/app/youtube/sample-video-id' },
       { route: '/app/articles', label: 'Articles', milestone: 'M01/M20', notes: 'บทความตัวอย่างและ save action', manualCheckPath: '/app/articles' },
+      { route: '/app/articles/offline', label: 'Offline Agriculture Article Library', milestone: 'M65', notes: 'คลังบทความเกษตรออฟไลน์แบบ bundled fixtures พร้อม taxonomy, image plan, safety notes, and CMS compatibility', manualCheckPath: '/app/articles/offline' },
+      { route: '/app/articles/offline/:slug', label: 'Offline Agriculture Article Detail', milestone: 'M65', notes: 'รายละเอียดบทความออฟไลน์ outline/starter content, planned image fallback, related calculator, save/share, and safety disclaimers', manualCheckPath: '/app/articles/offline/soil-types-before-planting' },
       { route: '/app/articles/:articleId', label: 'Article detail', milestone: 'M20', notes: 'หน้ารายละเอียดบทความตัวอย่าง', manualCheckPath: '/app/articles/article-001' },
       { route: '/app/content-admin-preview', label: 'Content admin preview', milestone: 'M20/M22.5', notes: 'หลังบ้านคอนเทนต์ mock ไม่มี publish จริง', manualCheckPath: '/app/content-admin-preview' },
     ],

@@ -46,6 +46,7 @@ export type AppRoute =
   | '/app/prices'
   | '/app/crop-watch'
   | '/app/articles'
+  | '/app/articles/offline'
   | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/notification-settings'

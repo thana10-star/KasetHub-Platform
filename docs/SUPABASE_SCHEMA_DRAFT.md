@@ -1081,3 +1081,21 @@ M64 does not run migrations. Future backend-owned sync may also require:
 These tables, if added later, must be user-owned or backend-only, must avoid raw photo/base64 payload storage, and must not store OTP/session tokens or service-role/provider keys.
 
 These tables must be owner-scoped where user-visible and backend-owned where operational. RLS must prove authenticated users can read own rows only, cannot read other users rows, anon cannot read user-owned rows, and inserts require `owner_id = auth.uid()`.
+
+## M65 Offline Agriculture Article CMS Future Tables
+
+M65 does not run migrations. Future hybrid offline/CMS content may require:
+
+- `agri_articles`
+- `agri_article_versions`
+- `agri_article_image_assets`
+- `agri_article_safety_notes`
+- `agri_article_cms_overrides`
+
+Recommended columns for `agri_articles`: `id uuid`, `future_cms_key`, `slug`, `category`, `title_th`, `summary_th`, `difficulty`, `estimated_reading_minutes`, `body_readiness`, `source_status`, `offline_fallback_key`, `published_status`, `review_status`, `last_reviewed_at`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Recommended columns for image assets: `article_id`, `asset_role`, `storage_path`, `alt_text_th`, `aspect_ratio`, `byte_size`, `review_status`, `created_at`.
+
+RLS notes: Public users may read published, reviewed articles only. Draft/review content must be editor/admin-only. Sponsor or affiliate metadata must not be injected into educational article results without explicit labeling and review.
+
+CMS notes: Seasonal, loan, rate, government scheme, disease alert, and market-timing articles should be CMS-managed, not hardcoded forever. Bundled offline articles remain fallback content when CMS is unavailable.

@@ -73,6 +73,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'แผน Guest Sync Edge Function', icon: CloudUpload, href: '/app/guest-sync-edge' },
   { label: 'สำรองข้อมูลในอนาคต', icon: UserRound, href: '/app/account-preview' },
   { label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้', icon: Sprout, href: '/app/memory' },
+  { label: 'คลังความรู้เกษตรออฟไลน์', icon: BookOpenCheck, href: '/app/articles/offline' },
   { label: 'บทความที่บันทึกไว้', icon: BookOpenCheck, href: '/app/saved-articles' },
   { label: 'วิดีโอที่บันทึกไว้', icon: Bookmark, href: '/app/saved-videos' },
   { label: 'โพสต์ของฉัน', icon: FileText },

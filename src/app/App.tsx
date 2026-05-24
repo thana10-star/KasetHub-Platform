@@ -50,6 +50,8 @@ import { MyFarmSettingsPage } from '@/routes/MyFarmSettingsPage';
 import { NextPhasePage } from '@/routes/NextPhasePage';
 import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
+import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailPage';
+import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
 import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
 import { PriceDetailPage } from '@/routes/PriceDetailPage';
@@ -123,6 +125,8 @@ export default function App() {
         <Route path="prices/:priceId" element={<PriceDetailPage />} />
         <Route path="crop-watch" element={<CropWatchPage />} />
         <Route path="articles" element={<ArticlesPage />} />
+        <Route path="articles/offline" element={<OfflineAgriArticlesPage />} />
+        <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
