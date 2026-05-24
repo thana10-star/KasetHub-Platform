@@ -33,5 +33,8 @@ M63 always returns `syncAllowed: false`. Even a real staging session is only evi
 ## App Route
 
 - `/app/ownership-rls-gate`
+- `/app/guest-sync-dry-run` (M64 follow-up preview)
+
+M64 adds `/app/guest-sync-dry-run` so the app can preview the local-only Guest Memory payload after this gate review. The new payload builder still keeps upload blocked and uses the M63 owner/RLS requirements as blockers before any future real sync.
 
 The route shows ownership status, blockers, consent/idempotency/audit requirements, RLS expectations, and a clear `ยังไม่อัปโหลดข้อมูลจริง` notice.

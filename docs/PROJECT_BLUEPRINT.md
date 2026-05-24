@@ -801,3 +801,11 @@ M62 can represent a masked real Supabase phone staging session, but Guest Memory
 M63 adds `/app/ownership-rls-gate` and `ownership-rls-gate.ts` to review the relationship between a real Supabase Auth session, expected `auth.uid()` owner id, local Guest Memory data, consent capture, idempotency, audit logging, RLS owner policies, and service-role backend-only rules.
 
 The gate intentionally keeps `syncAllowed=false` in every state. It is a review milestone only: no Guest Memory upload, no cloud sync, no Supabase app table writes, no Edge Function deployment, no production auth enablement, and no automatic SQL execution.
+
+## M64 Guest Memory Sync Dry-run Payload Builder
+
+M64 adds `/app/guest-sync-dry-run`, `guest-sync-dry-run-payload.types.ts`, and `guest-sync-dry-run-payload.ts` to preview the first safe Guest Memory sync payload without upload.
+
+The dry-run payload groups saved items, farm records, recent AI questions, crop watches, calculator saved result summaries, followed topics, and likes. It previews consent, idempotency, audit events, conflicts, owner scope, blockers, and privacy filters while keeping `uploadAllowed=false`, `noSupabaseWrite=true`, and `noCloudSync=true`.
+
+M64 updates Ownership/RLS Gate, Sync Preview, Guest Sync Status, Account Preview, Admin Dashboard, Next Phase, QA, and schema/docs with links and boundaries. It still does not upload Guest Memory, write Supabase app tables, enable cloud sync, deploy Edge Functions, place service-role keys in the frontend, run SQL, or enable production auth.

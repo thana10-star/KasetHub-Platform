@@ -105,6 +105,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/auth/sync-preview', label: 'Sync preview', milestone: 'M07/M16/M29', notes: 'dry-run payload local-only', manualCheckPath: '/app/auth/sync-preview' },
       { route: '/app/account-preview', label: 'Account preview', milestone: 'M05-M29', notes: 'สถานะบัญชีและ backend readiness', manualCheckPath: '/app/account-preview' },
       { route: '/app/ownership-rls-gate', label: 'Ownership/RLS sync gate', milestone: 'M63', notes: 'review owner mapping, consent, idempotency, audit, and RLS expectations before Guest Memory upload; sync remains blocked', manualCheckPath: '/app/ownership-rls-gate' },
+      { route: '/app/guest-sync-dry-run', label: 'Guest Sync dry-run payload', milestone: 'M64', notes: 'local-only payload builder with consent preview, idempotency preview, audit preview, conflict preview, and privacy filters; upload remains blocked', manualCheckPath: '/app/guest-sync-dry-run' },
       { route: '/app/guest-sync-status', label: 'Guest sync status', milestone: 'M16/M29', notes: 'adapter status ไม่มี cloud sync จริง', manualCheckPath: '/app/guest-sync-status' },
       { route: '/app/guest-sync-edge', label: 'Guest Sync Edge plan', milestone: 'M29', notes: 'contract/readiness ไม่มี endpoint call', manualCheckPath: '/app/guest-sync-edge' },
     ],

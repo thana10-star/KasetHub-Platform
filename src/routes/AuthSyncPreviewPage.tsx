@@ -278,6 +278,13 @@ export function AuthSyncPreviewPage() {
           </Link>
         </NoticeBox>
 
+        <NoticeBox tone="warning" icon={ListChecks} title="M64 dry-run payload status">
+          สร้าง payload preview แบบ local-only ได้แล้ว แต่ sync ยังถูกบล็อกจนกว่าจะมี ownership, consent, idempotency, audit และ RLS gate ครบ
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
+          </Link>
+        </NoticeBox>
+
         {phoneAuthStatus.session ? (
           <NoticeBox tone="success" title="ยืนยันเบอร์โทรจำลองแล้ว">
             พร้อมทดสอบ dry-run sync ด้วย session จำลอง {phoneAuthStatus.session.phoneNumberMasked} แต่ยังไม่ใช่บัญชีจริงและยังไม่อัปโหลดข้อมูล

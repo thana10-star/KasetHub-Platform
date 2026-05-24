@@ -21,3 +21,16 @@ Guest Memory sync must be deliberate and retry-safe.
 ## M63 Boundary
 
 M63 displays these requirements only. It does not capture real consent, create idempotency rows, or upload data.
+
+## M64 Dry-run Preview
+
+M64 turns the consent and idempotency plan into a local preview:
+
+- data group consent toggles
+- consent timestamp preview
+- sync request id preview
+- idempotency key preview
+- duplicate handling preview
+- local-only warning
+
+The preview is not real consent evidence and does not enable upload.

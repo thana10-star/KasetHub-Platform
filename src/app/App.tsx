@@ -34,6 +34,7 @@ import { CommunityRulesPage } from '@/routes/CommunityRulesPage';
 import { ArticleDetailPage } from '@/routes/ArticleDetailPage';
 import { CostCalculatorPage } from '@/routes/CostCalculatorPage';
 import { GuestSyncEdgePage } from '@/routes/GuestSyncEdgePage';
+import { GuestSyncDryRunPage } from '@/routes/GuestSyncDryRunPage';
 import { GuestSyncStatusPage } from '@/routes/GuestSyncStatusPage';
 import { FarmAreaGuidePage } from '@/routes/FarmAreaGuidePage';
 import { FarmAreaPage } from '@/routes/FarmAreaPage';
@@ -129,6 +130,7 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="account-preview" element={<AccountPreviewPage />} />
         <Route path="ownership-rls-gate" element={<OwnershipRlsGatePage />} />
+        <Route path="guest-sync-dry-run" element={<GuestSyncDryRunPage />} />
         <Route path="guest-sync-edge" element={<GuestSyncEdgePage />} />
         <Route path="guest-sync-status" element={<GuestSyncStatusPage />} />
         <Route path="auth" element={<AuthPage />} />

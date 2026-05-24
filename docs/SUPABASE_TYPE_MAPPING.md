@@ -378,3 +378,18 @@ M63 adds frontend-only review models:
 - `OwnershipGateRlsExpectation`
 
 Future persistence may map to `guest_sync_consent_records`, `guest_sync_idempotency_keys`, `guest_sync_audit_logs`, and `guest_sync_rls_dry_run_results`. M63 keeps these as plans only and does not write Supabase data.
+
+## M64 Guest Sync Dry-run Payload Mapping Notes
+
+M64 adds frontend-only types:
+
+- `GuestSyncDryRunPayload`
+- `GuestSyncDryRunRecordGroup`
+- `GuestSyncDryRunConsentPreview`
+- `GuestSyncDryRunIdempotencyPreview`
+- `GuestSyncDryRunAuditPreview`
+- `GuestSyncDryRunConflictPreview`
+- `GuestSyncDryRunOwnerScope`
+- `GuestSyncDryRunBlocker`
+
+The future backend mapping should treat these as preview models only. Safe groups may map to saved items, farm records, recent AI questions, crop watches, calculator saved results, followed topics, and likes after real ownership, consent, idempotency, audit, and owner-scoped RLS pass. M64 keeps `uploadAllowed=false` and performs no writes.

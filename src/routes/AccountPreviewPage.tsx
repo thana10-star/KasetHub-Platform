@@ -135,6 +135,13 @@ export function AccountPreviewPage() {
           </Link>
         </NoticeBox>
 
+        <NoticeBox tone="warning" icon={CloudUpload} title="M64 dry-run payload preview">
+          ดูกลุ่มข้อมูลและ payload preview แบบ local-only ได้แล้ว แต่ยังไม่ sync cloud และยังไม่เขียน Supabase app table
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
+          </Link>
+        </NoticeBox>
+
         {accountStatus.phoneMockSession ? (
           <NoticeBox tone="success" title="มี Phone mock session">
             ยืนยันเบอร์โทรจำลองแล้ว {accountStatus.phoneMockSession.phoneNumberMasked} ใช้ได้เฉพาะการทดสอบ ownership gate ยังไม่ใช่บัญชีจริง

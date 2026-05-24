@@ -28,3 +28,7 @@ Local Guest Memory must remain intact until backend confirms success. Failure lo
 ## M63 Boundary
 
 No audit table is created and no audit row is written in M63.
+
+## M64 Audit Preview
+
+M64 adds a local `auditPreview` inside the dry-run payload. It shows a planned audit event id, event types, masked owner id, record count, and generated timestamp, while keeping `wouldWriteAuditLog: false`.

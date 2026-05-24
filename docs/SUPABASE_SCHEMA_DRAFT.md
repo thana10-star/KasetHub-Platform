@@ -1070,4 +1070,14 @@ M63 does not run migrations. Future owner-scoped sync may require:
 - `guest_sync_audit_logs`
 - `guest_sync_rls_dry_run_results`
 
+## M64 Guest Sync Dry-run Payload Future Tables
+
+M64 does not run migrations. Future backend-owned sync may also require:
+
+- `guest_sync_payload_previews`
+- `guest_sync_conflict_previews`
+- `guest_sync_privacy_filter_events`
+
+These tables, if added later, must be user-owned or backend-only, must avoid raw photo/base64 payload storage, and must not store OTP/session tokens or service-role/provider keys.
+
 These tables must be owner-scoped where user-visible and backend-owned where operational. RLS must prove authenticated users can read own rows only, cannot read other users rows, anon cannot read user-owned rows, and inserts require `owner_id = auth.uid()`.

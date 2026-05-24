@@ -233,3 +233,17 @@ M63 adds the `/app/ownership-rls-gate` review before this endpoint can be used. 
 - service-role credentials remain backend-only
 
 M63 does not deploy or call the endpoint.
+
+## M64 Dry-run Payload Contract Dependency
+
+M64 adds a local-only payload builder for the future endpoint. The future backend should accept only a server-validated version of the M64-safe groups:
+
+- saved items
+- farm records
+- recent AI questions when explicitly consented
+- crop watches
+- calculator saved summaries as safe summaries only
+- followed topics
+- likes
+
+The endpoint must reject raw images, base64 blobs, OTP/session tokens, service-role values, provider keys, and owner ids that do not match `auth.uid()`.

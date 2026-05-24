@@ -355,6 +355,26 @@ export function NextPhasePage() {
           </div>
         </Card>
 
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <CloudUpload aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M64 Guest Sync dry-run payload</h2>
+                <StatusPill tone="warning">local-only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-950">
+                Next safe step is to review payload groups, consent, idempotency, audit, conflict, and privacy filters before any real upload.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/guest-sync-dry-run">
+                เปิด Guest Sync dry-run payload
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Card className="p-4">
             <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

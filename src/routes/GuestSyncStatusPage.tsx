@@ -1,4 +1,4 @@
-import { CloudUpload, Database, KeyRound, Phone, PlayCircle, ShieldCheck, Smartphone, UsersRound } from 'lucide-react';
+import { ClipboardCheck, CloudUpload, Database, KeyRound, Phone, PlayCircle, ShieldCheck, Smartphone, UsersRound } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -156,6 +156,13 @@ export function GuestSyncStatusPage() {
           {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · ยังไม่อัปโหลดข้อมูลจริง
           <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
             เปิด Ownership/RLS gate review
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" icon={ClipboardCheck} title="M64 Guest Sync dry-run payload">
+          Payload builder ใหม่จะแสดงกลุ่มข้อมูล, consent preview, idempotency key, audit preview และ privacy filter โดยยังไม่อัปโหลดข้อมูลจริง
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
           </Link>
         </NoticeBox>
 

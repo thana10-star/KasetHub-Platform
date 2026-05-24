@@ -62,6 +62,13 @@ export function OwnershipRlsGatePage() {
           {String(gate.noSupabaseAppWrites)}
         </NoticeBox>
 
+        <NoticeBox tone="warning" icon={ClipboardCheck} title="M64 dry-run payload builder">
+          สร้าง payload preview ในเครื่องได้แล้วสำหรับ saved items, farm records, AI questions, crop watch, calculator summaries, follows และ likes แต่ uploadAllowed ยังเป็น false เสมอ
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
+          </Link>
+        </NoticeBox>
+
         <Card className="p-4">
           <div className="flex gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
@@ -176,6 +183,7 @@ export function OwnershipRlsGatePage() {
         </NoticeBox>
 
         <div className="grid gap-3">
+          <LargeActionButton icon={ClipboardCheck} label="เปิด Guest Sync dry-run payload" description="ดู consent preview, idempotency key, audit preview และ privacy filter ก่อน milestone อัปโหลดจริง" to="/app/guest-sync-dry-run" variant="soft" />
           <LargeActionButton icon={CloudUpload} label="เปิด Sync Preview" description="ดู payload dry-run local-only ยังไม่ upload จริง" to="/app/auth/sync-preview" variant="soft" />
           <LargeActionButton icon={Database} label="เปิด Guest Sync Status" description="ดู adapter/Edge Function plan แบบ no-cloud-write" to="/app/guest-sync-status" variant="white" />
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/account-preview">

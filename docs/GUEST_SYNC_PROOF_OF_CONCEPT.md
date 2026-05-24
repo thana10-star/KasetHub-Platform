@@ -165,3 +165,7 @@ M63 adds `/app/ownership-rls-gate` as the next review surface after the controll
 The M16 dry run still remains local only. M63 adds proof that sync cannot proceed without real Supabase Auth ownership, consent, idempotency, audit logging, and owner-scoped RLS expectations.
 
 No Guest Memory upload, cloud sync, Supabase app table write, or Edge Function call is added.
+
+## M64 Guest Sync Dry-run Payload
+
+M64 keeps the M16 proof-of-concept local and adds a stricter payload builder at `/app/guest-sync-dry-run`. The new route previews local data groups, consent, idempotency, audit, conflict handling, blockers, and privacy filters. It still does not upload, write Supabase app tables, call an Edge Function, or enable cloud sync.
