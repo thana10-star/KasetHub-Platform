@@ -16,7 +16,8 @@ export type AgriCalculatorUnitTestPlanItem = {
   priority: AgriCalculatorUnitTestPriority;
   plannedAssertions: string[];
   fixtureSource: string;
-  status: 'planned';
+  testFile: string;
+  status: 'planned' | 'implemented';
 };
 
 export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
@@ -26,7 +27,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Spray mix ratio scaling',
     priority: 'high',
     fixtureSource: 'agri-calculator-test-fixtures.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       '20cc/20L with 20L tank returns 20cc',
       '20cc/20L with 10L tank returns 10cc',
@@ -40,7 +42,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Thai land unit conversion',
     priority: 'high',
     fixtureSource: 'agri-calculator-service.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       '1 rai equals 1,600 square meters',
       '1 ngan equals 400 square meters',
@@ -54,7 +57,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Plant spacing density',
     priority: 'high',
     fixtureSource: 'agri-calculator-test-fixtures.ts and crop-calculator-profiles.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       '1 rai at 1m x 1m returns 1,600 plants',
       '5 rai at 1m x 0.8m returns 10,000 plants',
@@ -68,7 +72,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Fertilizer NPK helper',
     priority: 'high',
     fixtureSource: 'agri-calculator-test-fixtures.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       'N target 4kg/rai with 46-0-0 returns about 8.70kg fertilizer',
       'all-zero NPK formula returns invalid result',
@@ -82,7 +87,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Yield estimate sample total',
     priority: 'medium',
     fixtureSource: 'agri-calculator-test-fixtures.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       '1,000 units at 0.5kg returns 500kg',
       'yield per rai divides by normalized area',
@@ -96,7 +102,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Cost estimate per rai',
     priority: 'medium',
     fixtureSource: 'agri-calculator-test-fixtures.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       '4,000 baht over 2 rai returns 2,000 baht/rai',
       'all-zero cost fields return invalid result',
@@ -110,7 +117,8 @@ export const agriCalculatorUnitTestPlan: AgriCalculatorUnitTestPlanItem[] = [
     title: 'Crop profile example loading',
     priority: 'medium',
     fixtureSource: 'crop-calculator-profiles.ts',
-    status: 'planned',
+    testFile: 'agri-calculator-service.test.ts',
+    status: 'implemented',
     plannedAssertions: [
       'all required crop keys are present',
       'each crop has spacing, area, yield, cost category, and safety notes',
@@ -125,6 +133,7 @@ export function summarizeAgriCalculatorUnitTestPlan() {
     totalCount: agriCalculatorUnitTestPlan.length,
     highPriorityCount: agriCalculatorUnitTestPlan.filter((item) => item.priority === 'high').length,
     mediumPriorityCount: agriCalculatorUnitTestPlan.filter((item) => item.priority === 'medium').length,
+    implementedCount: agriCalculatorUnitTestPlan.filter((item) => item.status === 'implemented').length,
     groups: Array.from(new Set(agriCalculatorUnitTestPlan.map((item) => item.group))),
   };
 }

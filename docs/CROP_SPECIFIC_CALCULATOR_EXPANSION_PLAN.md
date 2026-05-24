@@ -1,6 +1,6 @@
 # Crop-specific Calculator Expansion Plan
 
-M51 prepares crop-specific calculator data foundations without turning KasetHub calculators into hidden agronomy recommendations.
+M51 prepares crop-specific calculator data foundations without turning KasetHub calculators into hidden agronomy recommendations. M52 adds formal service-level regression tests so these planning profiles and deterministic calculators stay stable before any crop recommendation logic is introduced.
 
 ## Scope
 
@@ -82,3 +82,9 @@ AI may later explain what inputs mean or ask clarifying questions, but it must n
 ## Future Sponsor/Affiliate Boundary
 
 Sponsor and affiliate features must remain outside base calculator output. Paid placements must be clearly labeled and must not influence formulas, crop profiles, AI recommendations, or saved calculator history.
+
+## M52 Regression Safety
+
+`src/services/agri-calculators/agri-calculator-service.test.ts` verifies crop profile loading and confirms every profile remains `planning_only`. The tests also check that invalid crop keys are rejected instead of inventing recommendations.
+
+`docs/CALCULATOR_REGRESSION_SAFETY.md` records the rule that future recommendation layers must not silently change deterministic calculator output.

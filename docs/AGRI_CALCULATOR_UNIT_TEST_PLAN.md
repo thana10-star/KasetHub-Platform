@@ -4,7 +4,11 @@ M51 adds a static unit-test readiness plan in:
 
 - `src/services/agri-calculators/agri-calculator-unit-test-plan.ts`
 
-No test runner is added in M51. The plan prepares formal tests for a later milestone.
+M52 implements the first formal service-level tests with Vitest:
+
+- `src/services/agri-calculators/agri-calculator-service.test.ts`
+
+The tests are pure calculation utility tests. They do not render React, call network services, write Supabase data, or invoke AI.
 
 ## Planned Groups
 
@@ -68,4 +72,4 @@ Crop profile loading:
 
 ## Future Runner
 
-A later milestone can add Vitest or the repo-standard test runner if selected. Tests should run against pure services first and avoid browser/network dependencies.
+M52 uses `npm run test` for Vitest. Future milestones can add more service tests before any component/browser tests. Tests should continue to avoid network dependencies and should keep deterministic formulas separate from recommendation logic.
