@@ -61,3 +61,16 @@ M52 edge fixtures cover:
 - overflow-ish cost values
 
 These tests protect against divide-by-zero, invalid localStorage state, unsafe concentrations, high-value warnings, and unexpected `Infinity` results.
+
+## Export/Share Regression Safety
+
+M54 adds tests for text export templates and share fallback helpers. These tests protect:
+
+- short LINE-friendly text generation
+- long detail text generation
+- empty summary blocking
+- unsupported native share fallback
+- clipboard copy success and missing clipboard states
+- oversized summary truncation
+
+Template and share changes must not alter deterministic calculator formulas. Future AI explanations, sponsor placements, or rewarded unlocks must read calculator output as an input, not rewrite the formula result.

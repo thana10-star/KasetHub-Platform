@@ -103,6 +103,9 @@ export function CalculatorsPage() {
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/saved-results">
                 เปิดผลคำนวณที่บันทึกไว้
               </Link>
+              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/export-preview">
+                ตัวอย่าง export
+              </Link>
             </div>
           </div>
         </Card>

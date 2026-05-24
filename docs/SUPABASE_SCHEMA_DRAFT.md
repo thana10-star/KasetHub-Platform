@@ -670,6 +670,42 @@ RLS notes: Users can read their own unlock history. Grant validation should be b
 
 Admin/moderation notes: Basic calculator results and safety copy must stay free. Unlocks must not insert hidden sponsor/product recommendations into deterministic results.
 
+## `calculator_export_events` Future
+
+Purpose: Optional consent-gated audit/analytics events for text exports, copy actions, native share fallback, and future file exports.
+
+Key columns: `id uuid`, `user_id nullable`, `saved_result_id nullable`, `calculator_category`, `export_version`, `export_channel`, `export_status`, `template_key nullable`, `created_at`, `consent_version nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `saved_result_id`, `calculator_category`, `export_channel`, `created_at desc`.
+
+RLS notes: Users may read their own export history if surfaced. Inserts should be backend-owned or explicitly consent-gated.
+
+Admin/moderation notes: Do not store raw export text by default. Export analytics must not become hidden sponsor targeting.
+
+## `calculator_share_templates` Future
+
+Purpose: Versioned templates for short LINE-friendly and long detail calculator export text after product/legal review.
+
+Key columns: `id uuid`, `template_key`, `calculator_category`, `template_version`, `locale`, `template_type`, `body_template`, `status`, `effective_from`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `template_key + template_version + locale`, `calculator_category`, `template_type`, `status`, `effective_from`.
+
+RLS notes: Public can read active approved templates. Drafts and retired versions are admin/editor only.
+
+Admin/moderation notes: Template changes must keep safety copy visible and must not add AI or sponsor recommendations to deterministic results.
+
+## `calculator_usage_stats` Future
+
+Purpose: Aggregated calculator usage metrics for product QA and capacity planning without exposing raw user inputs.
+
+Key columns: `id uuid`, `period_start`, `period_granularity`, `calculator_category`, `event_type`, `count`, `source_surface`, `created_at`, `metadata jsonb`.
+
+Indexes: `period_start`, `period_granularity`, `calculator_category`, `event_type`, `source_surface`.
+
+RLS notes: Aggregate stats are admin/product only unless a public transparency dashboard is reviewed.
+
+Admin/moderation notes: Stats should be aggregated and privacy-preserving. Do not infer chemical, cost, or yield behavior for individual users.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

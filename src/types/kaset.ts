@@ -22,6 +22,7 @@ export type AppRoute =
   | '/app/calculators/safety'
   | '/app/calculators/qa'
   | '/app/calculators/saved-results'
+  | '/app/calculators/export-preview'
   | '/app/calculators/spray-mix'
   | '/app/calculators/plant-spacing'
   | '/app/calculators/fertilizer'

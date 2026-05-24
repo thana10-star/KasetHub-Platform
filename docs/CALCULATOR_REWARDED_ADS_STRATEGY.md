@@ -1,6 +1,6 @@
 # Calculator Rewarded Ads Strategy
 
-M53 defines a planning-only monetization boundary for agriculture calculators. No real AdMob SDK, ad inventory, payment, sponsor placement, affiliate routing, backend write, Supabase write, AI call, or network call is added.
+M53 defines a planning-only monetization boundary for agriculture calculators. M54 keeps export/share polish free and text-only while the rewarded-ads strategy remains future-only. No real AdMob SDK, ad inventory, payment, sponsor placement, affiliate routing, backend write, Supabase write, AI call, or network call is added.
 
 ## Core Rule
 
@@ -16,6 +16,7 @@ Basic calculations remain free. Ads should unlock convenience or advanced modes,
 
 ## Safety Boundaries
 
+- Current M54 short and long text exports remain basic free functionality.
 - Do not hide safety copy behind ads.
 - Do not make spray, fertilizer, yield, or cost safety notes conditional on monetization.
 - Do not change deterministic formulas based on ad viewing.
@@ -25,4 +26,3 @@ Basic calculations remain free. Ads should unlock convenience or advanced modes,
 ## Future Backend Needs
 
 A real implementation would need consent, fraud/rate-limit controls, server-side unlock validation, audit logs, privacy review, and clear separation between calculator history, ad events, and sponsor attribution.
-

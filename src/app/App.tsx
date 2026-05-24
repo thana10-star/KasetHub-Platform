@@ -17,6 +17,7 @@ import { AuthPhonePage } from '@/routes/AuthPhonePage';
 import { AuthPhoneStagingPage } from '@/routes/AuthPhoneStagingPage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
+import { CalculatorExportPreviewPage } from '@/routes/CalculatorExportPreviewPage';
 import { CalculatorQAPage } from '@/routes/CalculatorQAPage';
 import { CalculatorSafetyPage } from '@/routes/CalculatorSafetyPage';
 import { CalculatorSavedResultsPage } from '@/routes/CalculatorSavedResultsPage';
@@ -88,6 +89,7 @@ export default function App() {
         <Route path="calculators/safety" element={<CalculatorSafetyPage />} />
         <Route path="calculators/qa" element={<CalculatorQAPage />} />
         <Route path="calculators/saved-results" element={<CalculatorSavedResultsPage />} />
+        <Route path="calculators/export-preview" element={<CalculatorExportPreviewPage />} />
         <Route path="calculators/spray-mix" element={<SprayMixCalculatorPage />} />
         <Route path="calculators/plant-spacing" element={<PlantSpacingCalculatorPage />} />
         <Route path="calculators/fertilizer" element={<FertilizerCalculatorPage />} />

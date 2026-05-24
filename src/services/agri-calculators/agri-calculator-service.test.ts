@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
+  calculateAgriCalculator,
   calculateCostEstimate,
   calculateFertilizerMix,
   calculatePlantSpacing,
@@ -19,8 +20,15 @@ import {
   buildCalculatorResultSummary,
   getSavedCalculatorResultSummaries,
 } from '@/services/agri-calculators/calculator-result-summary-service';
+import {
+  buildCalculatorExportTemplate,
+  clampCalculatorExportText,
+  copyCalculatorExportText,
+  prepareCalculatorShareText,
+  shareCalculatorExportText,
+} from '@/services/agri-calculators/calculator-export-template-service';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
-import type { MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
+import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
 describe('agriculture calculator deterministic fixtures', () => {
   test('M50 deterministic QA fixtures still pass without drift', () => {
@@ -457,5 +465,151 @@ describe('calculator result summary service', () => {
 
     expect(state.version).toBe(1);
     expect(state.savedResults).toEqual([]);
+  });
+});
+
+describe('calculator export template service', () => {
+  function createSummary(category: CalculatorCategory) {
+    const input = {
+      spray_mix: {
+        tankLiters: 20,
+        tankSizeOption: 20 as const,
+        dosageAmount: 20,
+        dosageUnit: 'cc' as const,
+        dosageWaterLiters: 20,
+      },
+      plant_spacing: {
+        landSizeValue: 1,
+        landSizeUnit: 'rai' as const,
+        rowSpacingCm: 100,
+        plantSpacingCm: 100,
+        seedlingBufferPercent: 0,
+        usableAreaPercent: 100,
+      },
+      fertilizer_mix: {
+        areaValue: 1,
+        areaUnit: 'rai' as const,
+        targetNitrogenKgPerRai: 4,
+        targetPhosphorusKgPerRai: 0,
+        targetPotassiumKgPerRai: 0,
+        fertilizerNPercent: 46,
+        fertilizerPPercent: 0,
+        fertilizerKPercent: 0,
+        baseNutrient: 'nitrogen' as const,
+      },
+      yield_estimate: {
+        landSizeValue: 1,
+        landSizeUnit: 'rai' as const,
+        sampleCount: 10,
+        averageWeightKg: 0.5,
+        estimatedTotalUnits: 1000,
+      },
+      cost_estimate: {
+        landSizeValue: 2,
+        landSizeUnit: 'rai' as const,
+        fertilizerCost: 2000,
+        laborCost: 1000,
+        waterCost: 500,
+        machineryCost: 500,
+        otherCost: 0,
+        expectedYieldKg: 1000,
+      },
+    }[category];
+    const result = calculateAgriCalculator(category, input);
+
+    return buildCalculatorResultSummary(category, input, result, {
+      createdAt: '2026-05-24T08:00:00.000Z',
+      id: `template-${category}`,
+    });
+  }
+
+  test('formats short and long text templates for every calculator category', () => {
+    const categories: CalculatorCategory[] = ['spray_mix', 'plant_spacing', 'fertilizer_mix', 'yield_estimate', 'cost_estimate'];
+
+    categories.forEach((category) => {
+      const template = buildCalculatorExportTemplate(createSummary(category), {
+        cropLabel: category === 'plant_spacing' ? 'ข้าว' : undefined,
+        generatedAt: '2026-05-24T08:00:00.000Z',
+      });
+
+      expect(template.shortLineText).toContain('สรุปผลคำนวณเบื้องต้น');
+      expect(template.shortLineText).toContain('ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญ');
+      expect(template.longDetailText).toContain('ข้อมูลที่กรอก');
+      expect(template.longDetailText).toContain('ผลคำนวณ');
+      expect(template.longDetailText).toContain('KasetHub เครื่องคำนวณเกษตร');
+      expect(template.longDetailText).toContain('ไม่มี PDF');
+      expect(template.resultRecap.length).toBeGreaterThan(0);
+    });
+  });
+
+  test('creates LINE-friendly templates and truncates oversized text safely', () => {
+    const summary = createSummary('spray_mix');
+    const template = buildCalculatorExportTemplate(summary, {
+      lineFriendlyMaxChars: 120,
+      longDetailMaxChars: 220,
+    });
+
+    expect(template.shortLineText.length).toBeLessThanOrEqual(120);
+    expect(template.shortLineWasTruncated).toBe(true);
+    expect(template.shortLineText).toContain('KasetHub');
+    expect(template.longDetailText.length).toBeLessThanOrEqual(220);
+    expect(template.longDetailWasTruncated).toBe(true);
+
+    const clamped = clampCalculatorExportText('ก'.repeat(500), 80);
+    expect(clamped.wasTruncated).toBe(true);
+    expect(clamped.text.length).toBeLessThanOrEqual(80);
+  });
+
+  test('protects empty summaries before copy or share', async () => {
+    expect(prepareCalculatorShareText('').status).toBe('empty');
+
+    const copyResult = await copyCalculatorExportText('', {
+      writeText: async () => undefined,
+    });
+    expect(copyResult.status).toBe('empty');
+
+    const shareResult = await shareCalculatorExportText({
+      title: 'empty',
+      text: '   ',
+      nativeShare: { share: async () => undefined },
+      clipboard: { writeText: async () => undefined },
+    });
+    expect(shareResult.status).toBe('empty');
+  });
+
+  test('copies text through clipboard and reports unsupported clipboard fallback', async () => {
+    let copiedText = '';
+    const copied = await copyCalculatorExportText('ข้อความทดสอบ', {
+      writeText: async (text) => {
+        copiedText = text;
+      },
+    });
+
+    expect(copied.status).toBe('copied');
+    expect(copied.message).toBe('คัดลอกข้อความสำเร็จ');
+    expect(copiedText).toBe('ข้อความทดสอบ');
+
+    const unsupported = await copyCalculatorExportText('ข้อความทดสอบ');
+    expect(unsupported.status).toBe('unsupported');
+    expect(unsupported.helperMessage).toBe('ลองคัดลอกข้อความแทน');
+  });
+
+  test('falls back from unsupported native share to clipboard text copy', async () => {
+    let copiedText = '';
+    const result = await shareCalculatorExportText({
+      title: 'สรุป',
+      text: 'ข้อความสำหรับแชร์',
+      nativeShare: {},
+      clipboard: {
+        writeText: async (text) => {
+          copiedText = text;
+        },
+      },
+    });
+
+    expect(result.status).toBe('copied_fallback');
+    expect(result.message).toBe('อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง');
+    expect(result.helperMessage).toBe('คัดลอกข้อความสำเร็จ');
+    expect(copiedText).toBe('ข้อความสำหรับแชร์');
   });
 });

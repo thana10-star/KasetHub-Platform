@@ -12,6 +12,12 @@ import {
   buildCalculatorResultSummary,
   saveCalculatorResultSummary,
 } from '@/services/agri-calculators/calculator-result-summary-service';
+import {
+  buildCalculatorExportTemplate,
+  copyCalculatorExportText,
+  createExportSharePayload,
+  shareCalculatorExportText,
+} from '@/services/agri-calculators/calculator-export-template-service';
 import { calculatorPlanningOnlyDisclaimer } from '@/services/agri-calculators/crop-calculator-boundaries';
 import {
   cropCalculatorProfileOptions,
@@ -279,6 +285,7 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
 }) {
   const [message, setMessage] = useState('');
   const summary = useMemo(() => buildCalculatorResultSummary(category, input, result), [category, input, result]);
+  const exportTemplate = useMemo(() => buildCalculatorExportTemplate(summary), [summary]);
 
   if (!result.isValid) {
     return (
@@ -289,27 +296,29 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
   }
 
   const copySummary = async () => {
-    try {
-      if (!navigator.clipboard?.writeText) {
-        setMessage('อุปกรณ์นี้ยังไม่รองรับการคัดลอกอัตโนมัติ');
-        return;
-      }
+    const copyResult = await copyCalculatorExportText(
+      exportTemplate.longDetailText,
+      typeof navigator !== 'undefined' ? navigator.clipboard : undefined,
+    );
 
-      await navigator.clipboard.writeText(summary.shareText);
-      setMessage('คัดลอกสรุปผลแล้ว');
-    } catch {
-      setMessage('คัดลอกไม่สำเร็จ ลองเลือกข้อความจากสรุปแทน');
-    }
+    setMessage([copyResult.message, copyResult.helperMessage].filter(Boolean).join(' · '));
   };
 
   const shareSummary = async () => {
-    const shareResult = await shareContent(summary.shareMetadata.native, 'native');
+    const webNavigator = typeof navigator !== 'undefined' ? navigator : undefined;
+    const shareResult = await shareCalculatorExportText({
+      title: exportTemplate.calculatorTitle,
+      text: exportTemplate.longDetailText,
+      url: summary.calculatorRoute,
+      nativeShare: webNavigator,
+      clipboard: webNavigator?.clipboard,
+    });
 
-    setMessage(shareResult.message);
+    setMessage([shareResult.message, shareResult.helperMessage].filter(Boolean).join(' · '));
   };
 
   const shareToLine = async () => {
-    const shareResult = await shareContent(summary.shareMetadata.line, 'line');
+    const shareResult = await shareContent(createExportSharePayload(exportTemplate, 'short_line', 'line'), 'line');
 
     setMessage(shareResult.message);
   };
@@ -331,12 +340,15 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
         ผลคำนวณเบื้องต้น · ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง
       </div>
       <div className="mt-3 grid gap-2 rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10">
-        <p className="text-sm font-extrabold text-kaset-ink">{summary.summaryTitle}</p>
-        {summary.resultRecap.slice(0, 3).map((line) => (
+        <p className="text-sm font-extrabold text-kaset-ink">{exportTemplate.calculatorTitle}</p>
+        {exportTemplate.resultRecap.slice(0, 3).map((line) => (
           <p className="text-sm leading-6 text-slate-600" key={line}>
             {line}
           </p>
         ))}
+        <p className="rounded-lg bg-kaset-mist p-2 text-xs font-bold leading-5 text-kaset-deep">
+          LINE-friendly preview พร้อมคัดลอกเป็นข้อความอ่านง่าย
+        </p>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Button className="min-h-[52px] px-3 text-sm" onClick={copySummary} variant="secondary">

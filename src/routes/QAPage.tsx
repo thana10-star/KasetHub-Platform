@@ -78,6 +78,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
   { label: 'ผลคำนวณที่บันทึกไว้', route: '/app/calculators/saved-results' },
+  { label: 'ตัวอย่าง export เครื่องคำนวณ', route: '/app/calculators/export-preview' },
   { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
