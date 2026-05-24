@@ -696,6 +696,12 @@ M69 adds `/app/articles/editorial-review` for local-only editorial sign-off QA.
 
 It defines pending reviewer sign-offs, source metadata placeholders, image review fixtures, final publish blockers, and a second low-risk `draft_template` pilot for `soil-ph-reading-yourself`. No article is marked final publish.
 
+## M70 Editorial Evidence And Human Release Gate
+
+M70 adds `/app/articles/editorial-evidence` for local-only evidence packet review.
+
+It proves that even simulated-complete source, reviewer, and image metadata cannot publish an article automatically. A separate human release approval, reviewer, timestamp, and note remain required. No final article publish is enabled.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

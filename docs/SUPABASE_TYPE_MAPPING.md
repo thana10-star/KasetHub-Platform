@@ -462,3 +462,24 @@ Future persistence may map:
 - image requirements -> `article_image_requirements`
 
 M67 keeps all mappings as local planning only and performs no Supabase writes, CMS writes, or content fetches.
+
+## M70 Editorial Evidence / Human Release Mapping Notes
+
+M70 adds frontend-only evidence and release gate models:
+
+- `ArticleEvidencePacket`
+- `ArticleEvidenceItem`
+- `ArticleSourceEvidence`
+- `ArticleImageEvidence`
+- `ArticleReviewerEvidence`
+- `ArticleReleaseGate`
+- `ArticleHumanApprovalRequirement`
+
+Future persistence may map:
+
+- evidence packets -> `article_evidence_packets`
+- human release approval -> `article_release_reviews`
+- gate blockers -> `article_release_gates`
+- release attempts and decisions -> `article_release_audit_logs`
+
+M70 keeps `finalPublishAllowed=false` and performs no Supabase writes, CMS writes, or production publishing.

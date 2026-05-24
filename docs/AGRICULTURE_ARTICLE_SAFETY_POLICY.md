@@ -58,3 +58,9 @@ The pilot remains blocked from final publishing until review metadata, source pl
 M69 adds pending reviewer sign-offs and source/image review fixtures. Safety review remains required and incomplete.
 
 The editorial workflow must not remove baseline disclaimers, convert broad education into exact fertilizer/chemical advice, add official finance or government claims, or mix sponsor content into article guidance.
+
+## M70 Release Safety
+
+M70 keeps safety review separate from release approval. Completed metadata or simulated review evidence cannot remove disclaimers or publish an article automatically.
+
+Human release approval remains required before any future final article state.

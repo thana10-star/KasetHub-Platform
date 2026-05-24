@@ -52,6 +52,7 @@ import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
 import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailPage';
 import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
+import { OfflineArticleEditorialEvidencePage } from '@/routes/OfflineArticleEditorialEvidencePage';
 import { OfflineArticleEditorialReviewPage } from '@/routes/OfflineArticleEditorialReviewPage';
 import { OfflineArticleFullContentReadinessPage } from '@/routes/OfflineArticleFullContentReadinessPage';
 import { OfflineArticleQAPage } from '@/routes/OfflineArticleQAPage';
@@ -134,6 +135,7 @@ export default function App() {
         <Route path="articles/full-content-readiness" element={<OfflineArticleFullContentReadinessPage />} />
         <Route path="articles/pilot-draft-review" element={<OfflinePilotArticleDraftReviewPage />} />
         <Route path="articles/editorial-review" element={<OfflineArticleEditorialReviewPage />} />
+        <Route path="articles/editorial-evidence" element={<OfflineArticleEditorialEvidencePage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

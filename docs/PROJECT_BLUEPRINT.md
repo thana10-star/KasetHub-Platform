@@ -851,3 +851,11 @@ M69 adds `/app/articles/editorial-review`, an offline-only editorial QA route fo
 The new service layer defines reviewer roles, pending sign-off fixtures, final source metadata shape, image asset review fixtures, approval state, and final publish blockers. It keeps `soil-types-before-planting` blocked and adds a second low-risk `draft_template` pilot, `soil-ph-reading-yourself`, mapped back to the soil article fallback.
 
 M69 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, load external images, inject sponsors, or add official finance/loan/government facts.
+
+## M70 Editorial Evidence Packet And Human Release Gate
+
+M70 adds `/app/articles/editorial-evidence`, a local-only evidence packet and human release gate for offline agriculture articles.
+
+The new service layer builds source evidence, reviewer evidence, image evidence, safety confirmation, freshness placeholders, escalation notes, and release blockers. It also includes a safe completion simulation proving that even completed metadata and review evidence cannot publish automatically without explicit human release approval, reviewer, timestamp, and note placeholders.
+
+M70 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, inject sponsors, or add official finance/loan/government facts.

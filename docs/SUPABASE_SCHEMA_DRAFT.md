@@ -1143,3 +1143,22 @@ M67 does not run migrations. Future full-content publishing may require:
 `article_image_requirements` should track required image role, local/offline asset path, storage path, aspect ratio, byte limit, alt text, and review status.
 
 No future table should allow CMS content to remove required disclaimers or hide sponsor/affiliate content inside education articles.
+
+## M70 Editorial Evidence / Human Release Future Tables
+
+M70 does not run migrations. Future article release workflows may require:
+
+- `article_evidence_packets`
+- `article_release_reviews`
+- `article_release_gates`
+- `article_release_audit_logs`
+
+`article_evidence_packets` should store source, reviewer, image, safety, freshness, and escalation evidence snapshots.
+
+`article_release_reviews` should store the explicit human approval flag, release reviewer, release timestamp, and release note.
+
+`article_release_gates` should store release blockers and prove automatic publish is forbidden.
+
+`article_release_audit_logs` should record all release attempts, blocked states, reviewer changes, and final publish decisions.
+
+No table should allow metadata completion alone to publish an article.

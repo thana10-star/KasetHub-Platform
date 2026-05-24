@@ -49,6 +49,7 @@ import { runOfflineAgriArticleQa } from '@/services/content/offline-agri-article
 import { runFullArticlePublishReadiness } from '@/services/content/offline-agri-full-article-readiness';
 import { runPilotArticleDraftWorkflowReview } from '@/services/content/offline-agri-pilot-article-drafts';
 import { getArticleEditorialReviewSummary } from '@/services/content/offline-agri-editorial-review';
+import { getArticleEvidencePacketSummary } from '@/services/content/offline-agri-editorial-evidence';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
@@ -253,6 +254,7 @@ export function AdminDashboardPage() {
   const fullArticleReadiness = useMemo(() => runFullArticlePublishReadiness(), []);
   const pilotArticleDraft = useMemo(() => runPilotArticleDraftWorkflowReview(), []);
   const articleEditorialReview = useMemo(() => getArticleEditorialReviewSummary(), []);
+  const articleEvidencePacket = useMemo(() => getArticleEvidencePacketSummary(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -313,6 +315,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={FileText} label="M67 full drafts" value={`${fullArticleReadiness.blockedCount}/${fullArticleReadiness.pilotCount}`} />
               <SummaryCard icon={BookOpenCheck} label="M68 pilot draft" value={`${pilotArticleDraft.blockedCount}/${pilotArticleDraft.pilotCount}`} />
               <SummaryCard icon={UsersRound} label="M69 editorial QA" value={`${articleEditorialReview.pendingSignoffCount} pending`} />
+              <SummaryCard icon={ShieldCheck} label="M70 release gate" value={`${articleEvidencePacket.finalPublishAllowedCount} final`} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
@@ -382,6 +385,9 @@ export function AdminDashboardPage() {
                   </Link>
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-review">
                     เปิด M69 editorial QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-evidence">
+                    เปิด M70 evidence gate
                   </Link>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
                     เปิดคลังความรู้เกษตรออฟไลน์

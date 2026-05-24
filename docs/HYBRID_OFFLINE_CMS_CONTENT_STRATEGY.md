@@ -45,3 +45,9 @@ Invalid CMS overrides fall back to the bundled offline article.
 ## M67 Full-content Draft Contract
 
 M67 prepares five pilot full-content templates while keeping bundled offline fallback articles available. CMS can later provide reviewed full bodies, but the publish gate must still preserve required disclaimers, source review metadata, expert escalation notes, and image requirements.
+
+## M70 Evidence And Release Planning
+
+Offline article evidence packets should map to future CMS-side review records without forcing online content to replace offline fallback.
+
+Future CMS can store evidence and release review rows, but the app must keep a separate human release gate. Completed metadata is not enough to publish a final article automatically.

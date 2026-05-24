@@ -112,6 +112,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M67 เตรียมบทความเต็มออฟไลน์', route: '/app/articles/full-content-readiness' },
   { label: 'M68 pilot article draft review', route: '/app/articles/pilot-draft-review' },
   { label: 'M69 pilot article editorial review', route: '/app/articles/editorial-review' },
+  { label: 'M70 editorial evidence and human release gate', route: '/app/articles/editorial-evidence' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -281,6 +282,14 @@ export function QAPage() {
             description="ตรวจ reviewer sign-off, source metadata, image review และ second pilot draft โดยยังไม่ publish final"
             to="/app/articles/editorial-review"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด M70 editorial evidence"
+            description="ดู evidence packet, completion simulation และ human release gate ที่ยัง block final publish"
+            to="/app/articles/editorial-evidence"
+            variant="white"
           />
         </Card>
 

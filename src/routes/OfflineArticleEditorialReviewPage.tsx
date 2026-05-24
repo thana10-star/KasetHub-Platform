@@ -46,6 +46,16 @@ export function OfflineArticleEditorialReviewPage() {
           หน้านี้เป็น QA fixture ในเครื่องเท่านั้น ไม่มี Supabase write ไม่มี backend CMS write ไม่มี AI generation และไม่มีภาพจาก CDN ภายนอก
         </NoticeBox>
 
+        <Link to="/app/articles/editorial-evidence">
+          <Card className="border-rose-200 bg-rose-50 p-4">
+            <StatusPill tone="warning">M70 human release gate</StatusPill>
+            <h2 className="mt-3 font-extrabold text-rose-950">เปิด evidence packet และ release gate</h2>
+            <p className="mt-1 text-sm leading-6 text-rose-900">
+              จำลองว่า metadata/review ครบแล้วก็ยัง publish ไม่ได้จนกว่าจะมี human approval แยกต่างหาก
+            </p>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

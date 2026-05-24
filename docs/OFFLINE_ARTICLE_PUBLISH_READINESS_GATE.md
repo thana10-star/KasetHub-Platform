@@ -48,3 +48,16 @@ The final gate remains blocked unless:
 - final human review is represented
 
 No M69 article is marked final official publish.
+
+## M70 Human Release Gate
+
+M70 proves that readiness metadata cannot publish an article by itself.
+
+Even if evidence is simulated complete, final publish remains blocked until a distinct human release step provides:
+
+- explicit approval flag
+- release reviewer
+- release timestamp
+- release note
+
+`finalPublishAllowed` remains `false` in M70.

@@ -25,6 +25,7 @@ import {
   getArticleFinalPublishBlockerLabel,
   getArticleReviewerRoleLabel,
 } from '@/services/content/offline-agri-editorial-review';
+import { buildArticleEvidencePacket } from '@/services/content/offline-agri-editorial-evidence';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -61,6 +62,7 @@ export function OfflineAgriArticleDetailPage() {
   const pilotDraft = findOfflineAgriPilotArticleDraftBySlug(article.slug);
   const pilotDraftGate = getPilotArticleDraftPublishGate(article.slug);
   const editorialState = getArticleEditorialApprovalStateBySlug(article.slug);
+  const evidencePacket = editorialState ? buildArticleEvidencePacket(article.slug) : undefined;
   const displayTitle = pilotDraft?.titleTh ?? article.titleTh;
   const displaySummary = pilotDraft?.summaryTh ?? article.shortSummaryTh;
 
@@ -220,6 +222,31 @@ export function OfflineAgriArticleDetailPage() {
                 </div>
                 <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/articles/editorial-review">
                   เปิด M69 editorial review
+                </Link>
+              </Card>
+            ) : null}
+
+            {evidencePacket ? (
+              <Card className="border-rose-200 bg-rose-50 p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusPill tone="warning">M70 evidence packet</StatusPill>
+                  <Badge tone="rose">human release missing</Badge>
+                  <Badge tone="neutral">{evidencePacket.missingEvidenceCount} missing</Badge>
+                </div>
+                <h2 className="mt-3 font-extrabold text-rose-950">Editorial evidence / release gate</h2>
+                <p className="mt-2 text-sm leading-6 text-rose-900">
+                  ยังไม่ได้เผยแพร่จริง และไม่สามารถ publish อัตโนมัติจาก metadata ได้ ต้องมี human release approval แยกต่างหาก
+                </p>
+                <div className="mt-3 grid gap-2 text-xs font-bold leading-5 text-rose-900">
+                  <p>source evidence: {evidencePacket.sourceEvidence.length}</p>
+                  <p>reviewer evidence: {evidencePacket.reviewerEvidence.length}</p>
+                  <p>image evidence: {evidencePacket.imageEvidence.length}</p>
+                  <p>release reviewer: {evidencePacket.releaseGate.releaseReviewerPlaceholder}</p>
+                  <p>release timestamp: {evidencePacket.releaseGate.releaseTimestampPlaceholder}</p>
+                  <p>release note: {evidencePacket.releaseGate.releaseNotePlaceholder}</p>
+                </div>
+                <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-rose-900 px-4 text-sm font-extrabold text-white" to="/app/articles/editorial-evidence">
+                  เปิด M70 editorial evidence
                 </Link>
               </Card>
             ) : null}
