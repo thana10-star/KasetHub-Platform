@@ -280,6 +280,26 @@ export function NextPhasePage() {
           </div>
         </Card>
 
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <Bot aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M56 calculator AI backend architecture</h2>
+                <StatusPill tone="warning">no real AI call</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                รีวิว snapshot lock, backend policy check, prompt builder, safety filter, audit log และ rate limit ก่อนเปิด AI explanation จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-architecture">
+                เปิด AI architecture review
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Card className="p-4">
             <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

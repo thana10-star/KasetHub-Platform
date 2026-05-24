@@ -76,3 +76,14 @@ Before any real AI call is added:
 - reject sponsor/product placement inside explanation prompts
 - test that the same calculator inputs still produce the same deterministic result
 
+## M56 Backend Architecture Review
+
+M56 adds `/app/calculators/ai-architecture` and the `calculator-ai-backend-review` service. It defines the future backend flow:
+
+```text
+Calculator -> Snapshot Lock -> Backend Policy Check -> Prompt Builder -> AI Explanation -> Safety Filter -> Final Display
+```
+
+The snapshot lock freezes result recap values before AI. The backend review plan says AI receives an explanation-only snapshot, cannot recompute formulas, cannot mutate outputs, and must echo locked result values only.
+
+M56 still does not call AI, write backend data, write Supabase data, sync to cloud, or add sponsor/affiliate behavior.

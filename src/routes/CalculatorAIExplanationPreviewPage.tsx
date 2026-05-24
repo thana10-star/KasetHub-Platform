@@ -195,9 +195,12 @@ export function CalculatorAIExplanationPreviewPage() {
           Allowed {policySummary.allowedCount} actions · blocked {calculatorAIBlockedActions.length} actions · noRealAICall true · deterministic output stays unchanged.
         </NoticeBox>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
             Calculator QA
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-architecture">
+            AI architecture
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/saved-results">
             Saved results
@@ -208,4 +211,3 @@ export function CalculatorAIExplanationPreviewPage() {
     </div>
   );
 }
-

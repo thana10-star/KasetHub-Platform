@@ -345,6 +345,10 @@ export function AdminDashboardPage() {
                     <BrainCircuit aria-hidden="true" className="h-4 w-4" />
                     เปิดแผน AI อธิบายผล
                   </Link>
+                  <Link className="ml-4 mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-architecture">
+                    <ShieldCheck aria-hidden="true" className="h-4 w-4" />
+                    เปิด AI backend architecture
+                  </Link>
                 </div>
               </div>
             </Card>

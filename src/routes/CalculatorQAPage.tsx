@@ -209,6 +209,11 @@ export function CalculatorQAPage() {
           เปิดแผน AI อธิบายผล
         </Link>
 
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-architecture">
+          <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+          เปิด architecture AI backend
+        </Link>
+
         <CalculatorRewardedAdsPlanningCard compact />
 
         <section className="grid gap-3">

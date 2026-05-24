@@ -59,3 +59,15 @@ Rewarded ads may unlock convenience features in the future, but must not unlock 
 - no recommendation engine
 - local preview only
 
+## M56 Backend Prompt Execution Plan
+
+Future prompt execution should happen only in a backend-owned route or Edge Function after:
+
+- deterministic result snapshot is locked
+- policy version is selected
+- prompt template version is selected
+- blocked actions are rejected
+- oversized and invalid payloads are rejected
+- high-risk spray/fertilizer cases are escalated or filtered
+
+The frontend must not hold provider keys and must not send mutable calculator state directly to an AI provider.

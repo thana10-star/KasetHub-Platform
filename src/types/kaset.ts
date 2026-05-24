@@ -24,6 +24,7 @@ export type AppRoute =
   | '/app/calculators/saved-results'
   | '/app/calculators/export-preview'
   | '/app/calculators/ai-explanation-preview'
+  | '/app/calculators/ai-architecture'
   | '/app/calculators/spray-mix'
   | '/app/calculators/plant-spacing'
   | '/app/calculators/fertilizer'

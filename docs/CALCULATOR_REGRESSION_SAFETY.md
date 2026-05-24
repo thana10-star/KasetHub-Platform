@@ -90,3 +90,16 @@ Regression checks now cover:
 - `noRealAICall` remains `true`
 
 Future AI integrations must call the planner/policy before constructing prompts and must keep AI text separate from deterministic result cards.
+
+## M56 Backend Architecture Regression Safety
+
+M56 extends tests from local explanation planning into backend architecture planning. Regression checks now cover:
+
+- frozen `CalculatorAIExecutionSnapshot` result values
+- blocked deterministic mutation attempts
+- banned sponsor insertion
+- invalid explanation request rejection
+- policy version selection
+- oversized payload and invalid crop profile rejection
+
+Future backend AI work must keep these checks passing before adding network calls or provider integration.

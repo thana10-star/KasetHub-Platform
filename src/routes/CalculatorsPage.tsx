@@ -104,6 +104,9 @@ export function CalculatorsPage() {
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
                 เปิดแผน AI อธิบายผล
               </Link>
+              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-architecture">
+                AI backend architecture
+              </Link>
             </div>
           </div>
         </Card>

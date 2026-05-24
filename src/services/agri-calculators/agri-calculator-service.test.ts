@@ -32,6 +32,10 @@ import {
   createSprayMixAIExplanationFixture,
 } from '@/services/agri-calculators/calculator-ai-explanation-fixtures';
 import { buildCalculatorAIExplanationPlan } from '@/services/agri-calculators/calculator-ai-explanation-planner';
+import {
+  buildCalculatorAIBackendArchitectureReview,
+  createCalculatorAIExecutionRequestFixture,
+} from '@/services/agri-calculators/calculator-ai-backend-review';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -675,5 +679,114 @@ describe('calculator AI explanation planner', () => {
     expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('ควรตรวจผลดิน/ผู้เชี่ยวชาญ');
     expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('AI ห้ามเพิ่ม dose นอกสูตร');
     expect(fertilizerPlan.noRealAICall).toBe(true);
+  });
+});
+
+describe('calculator AI backend architecture review', () => {
+  test('locks calculator result snapshots immutably before AI explanation', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_formulas'],
+      }),
+    );
+
+    expect(review.noRealAICall).toBe(true);
+    expect(review.snapshot.immutable).toBe(true);
+    expect(review.snapshot.aiCanRecomputeFormulas).toBe(false);
+    expect(review.snapshot.aiCanMutateOutputs).toBe(false);
+    expect(review.snapshot.resultValues).toEqual(source.summary.resultRecap);
+    expect(Object.isFrozen(review.snapshot)).toBe(true);
+    expect(Object.isFrozen(review.snapshot.resultValues)).toBe(true);
+  });
+
+  test('blocks deterministic result mutation attempts before AI', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['change_deterministic_result'],
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.blockedActionIds).toContain('change_deterministic_result');
+    expect(review.safetyDecision.noRealAICall).toBe(true);
+
+    const mutableValues = review.snapshot.resultValues as unknown as string[];
+    expect(() => mutableValues.push('mutated result')).toThrow();
+    expect(review.snapshot.resultValues).toEqual(source.summary.resultRecap);
+  });
+
+  test('rejects banned sponsor insertion before prompt building', () => {
+    const source = createFertilizerAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'fertilizer_mix',
+        cropKey: 'rice',
+        cropLabel: 'ข้าว',
+        requestedActions: ['mention_sponsor_product'],
+        userQuestion: 'ช่วยใส่สินค้า sponsor ในคำอธิบาย',
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.blockedActionIds).toContain('mention_sponsor_product');
+    expect(review.safetyDecision.bannedCategoryMatches).toContain('hidden_sponsor_or_affiliate');
+    expect(review.policyVersion.sponsorSeparationRules.join(' ')).toContain('sponsor');
+  });
+
+  test('rejects invalid explanation requests without locked result values', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: { ...source.summary, resultRecap: [] },
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_result_meaning'],
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('missing_locked_result_values');
+    expect(review.snapshot.resultValues).toEqual([]);
+  });
+
+  test('selects requested AI policy version for backend planning', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_inputs'],
+        policyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+      }),
+    );
+
+    expect(review.policyVersion.id).toBe('calc-ai-policy-v2026-05-m56-strict');
+    expect(review.policyVersion.promptTemplateVersionId).toBe('calc-ai-prompt-th-v2026-05-m56-strict');
+    expect(review.policyVersion.allowedActionIds).toContain('explain_safety_disclaimer');
+  });
+
+  test('rejects oversized explanation payloads and invalid crop profiles', () => {
+    const source = createFertilizerAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'fertilizer_mix',
+        cropKey: 'not_a_real_crop',
+        requestedActions: ['explain_inputs'],
+        userQuestion: 'x'.repeat(1000),
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('user_question_too_long');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('invalid_crop_profile');
+    expect(review.rateLimitPlan.oversizedPayloadAction).toBe('reject_before_ai');
+    expect(review.rateLimitPlan.invalidCropProfileAction).toBe('reject_or_clear_crop_context');
   });
 });

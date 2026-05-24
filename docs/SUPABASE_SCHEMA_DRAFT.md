@@ -706,6 +706,66 @@ RLS notes: Aggregate stats are admin/product only unless a public transparency d
 
 Admin/moderation notes: Stats should be aggregated and privacy-preserving. Do not infer chemical, cost, or yield behavior for individual users.
 
+## `calculator_ai_audit_logs` Future
+
+Purpose: Backend-owned audit records for future calculator AI explanation requests, policy decisions, snapshot lock hashes, and safety outcomes.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `snapshot_id`, `snapshot_lock_hash`, `policy_version_id`, `prompt_template_version_id`, `safety_decision`, `risk_level`, `blocked_action_ids text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `policy_version_id`, `safety_decision`, `created_at desc`.
+
+RLS notes: Users may read their own high-level explanation history only after privacy review. Raw audit logs are admin/security only.
+
+Admin/moderation notes: Never store provider keys, service-role keys, hidden sponsor payloads, or precise location data. Raw user questions should be redacted or separately retained with strict policy.
+
+## `calculator_ai_policy_versions` Future
+
+Purpose: Reviewed policy and prompt-template version records for calculator AI explanations.
+
+Key columns: `id uuid`, `policy_version_id`, `prompt_template_version_id`, `status`, `locale`, `allowed_action_ids text[]`, `blocked_action_ids text[]`, `escalation_trigger_ids text[]`, `banned_response_categories text[]`, `sponsor_separation_rules text[]`, `effective_from`, `retired_at nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: unique `policy_version_id`, `prompt_template_version_id`, `status`, `locale`, `effective_from`.
+
+RLS notes: Active policy metadata can be public read for transparency. Drafts and retired policy details are admin/editor only.
+
+Admin/moderation notes: Sponsor systems must not choose or modify policy versions. Policy changes need review and test coverage before activation.
+
+## `calculator_ai_rate_limits` Future
+
+Purpose: Rate-limit counters and unlock state for future calculator AI explanations.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `period_start`, `period_granularity`, `explanation_count`, `rewarded_unlock_count`, `blocked_count`, `last_summary_id nullable`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `period_start`, `period_granularity`, `updated_at`.
+
+RLS notes: Backend-owned writes only. Users may see a friendly remaining-limit summary, not raw abuse metadata.
+
+Admin/moderation notes: Basic calculator results and safety copy must not be rate-limited. Limits apply only to AI explanation convenience.
+
+## `calculator_ai_explanations` Future
+
+Purpose: Optional stored AI explanation outputs after backend execution, safety filtering, auth, consent, and retention review.
+
+Key columns: `id uuid`, `user_id`, `calculator_category`, `snapshot_id`, `policy_version_id`, `prompt_template_version_id`, `explanation_text`, `safety_status`, `created_at`, `deleted_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `snapshot_id`, `policy_version_id`, `created_at desc`, `deleted_at`.
+
+RLS notes: Users can read/delete their own explanations. Backend inserts only after passing safety filter.
+
+Admin/moderation notes: Explanations must not replace deterministic calculator results. Store snapshot references and policy versions for review.
+
+## `calculator_ai_safety_events` Future
+
+Purpose: Safety events for blocked actions, sponsor insertion attempts, chemical recommendation attempts, oversized payload rejection, and label override attempts.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `event_type`, `severity`, `policy_version_id`, `snapshot_id nullable`, `reason_codes text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `event_type`, `severity`, `created_at desc`.
+
+RLS notes: Safety events are backend/admin only by default. User-facing copy should be friendly and avoid exposing abuse heuristics.
+
+Admin/moderation notes: Use for safety review and model QA, not sponsor targeting or hidden product routing.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

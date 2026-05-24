@@ -206,6 +206,11 @@ M49 calculator models map conceptually into:
 - `calculator_export_events`
 - `calculator_share_templates`
 - `calculator_usage_stats`
+- `calculator_ai_audit_logs`
+- `calculator_ai_policy_versions`
+- `calculator_ai_rate_limits`
+- `calculator_ai_explanations`
+- `calculator_ai_safety_events`
 
 Type mapping:
 
@@ -228,10 +233,17 @@ Type mapping:
 - future expert review or dispute workflow -> `calculator_result_reviews`
 - future rewarded calculator convenience unlock -> `calculator_rewarded_ad_unlocks`
 - aggregate calculator usage counts -> future `calculator_usage_stats`
+- `CalculatorAIExecutionRequest` -> future backend request payload, not a frontend-write table
+- `CalculatorAIExecutionSnapshot` -> `calculator_ai_audit_logs.snapshot_id/snapshot_lock_hash` and `calculator_ai_explanations.snapshot_id`
+- `CalculatorAIPolicyVersion` -> `calculator_ai_policy_versions`
+- `CalculatorAISafetyDecision` -> `calculator_ai_audit_logs.safety_decision/risk_level` and `calculator_ai_safety_events`
+- `CalculatorAIRateLimitPlan` -> `calculator_ai_rate_limits`
+- `CalculatorAIAuditLogPlan` -> `calculator_ai_audit_logs`
+- `CalculatorAIEscalationRule` -> `calculator_ai_policy_versions.escalation_trigger_ids` plus `calculator_ai_safety_events.reason_codes`
 
-M49-M53 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+M49-M56 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures and local AI architecture review fixtures. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
 
-Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, or rule versions for targeting without explicit consent and policy review.
+Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, or safety events for targeting without explicit consent and policy review.
 
 ## My Farm Hub
 

@@ -171,3 +171,16 @@ Required behavior for future calculator AI:
 - Keep AI text visually separate from formula-owned result cards.
 
 M55 does not call AI providers, add network calls, write backend data, write Supabase data, or create a recommendation engine.
+
+## M56 Calculator AI Backend Review
+
+Before enabling real calculator explanations, the backend must:
+
+- lock deterministic calculator result snapshots
+- run policy version checks before prompt building
+- reject sponsor, chemical product, label override, and result mutation requests
+- apply rate limits and repeated-request controls
+- log audit metadata without raw secrets or hidden sponsor payloads
+- safety-filter generated explanations before display
+
+M56 only reviews this architecture locally. It still does not call AI, write backend data, write Supabase data, sync to cloud, or enable sponsor behavior.
