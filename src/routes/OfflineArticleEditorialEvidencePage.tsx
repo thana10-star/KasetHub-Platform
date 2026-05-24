@@ -61,6 +61,20 @@ export function OfflineArticleEditorialEvidencePage() {
           </Card>
         </Link>
 
+        <Link to="/app/articles/cms-persistence-plan">
+          <Card className="border-sky-200 bg-sky-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-sky-950">M72 CMS persistence plan</h2>
+                <p className="mt-1 text-sm leading-6 text-sky-900">
+                  วางสัญญา backend-owned CMS, role rules และ fallback policy โดยยังไม่เขียน Database จริง
+                </p>
+              </div>
+              <StatusPill tone="warning">no DB write</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

@@ -57,3 +57,9 @@ Future CMS can store evidence and release review rows, but the app must keep a s
 M71 adds local release audit fixtures for blocked publish attempts, reviewer change history, source/disclaimer/image change previews, release diff previews, and automation bypass attempts.
 
 Future CMS may propose article changes, but it must not publish by itself. CMS override or automation remains blocked until a human release approval, release reviewer, timestamp, note, and audit trail exist.
+
+## M72 CMS Persistence Planning
+
+M72 plans the future backend-owned CMS persistence contract for offline/online agriculture articles.
+
+The plan defines future tables, editor-only role boundaries, read/write contracts, release audit write requirements, offline fallback policy, and migration rollback checklist. It still does not run migrations, fetch CMS content, write database rows, or publish articles.

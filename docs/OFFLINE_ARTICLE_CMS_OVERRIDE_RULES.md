@@ -23,3 +23,8 @@ Seasonal, finance, government scheme, loan, and rate-sensitive content must show
 
 The service `offline-agri-cms-override.ts` validates local payload fixtures only. It does not fetch CMS content and does not write Supabase data.
 
+## M72 Persistence Boundary
+
+CMS override rows should never become release approval by themselves.
+
+Future `article_cms_overrides` must stay connected to release gate checks, release audit events, and offline fallback policy. If an override removes disclaimers or fails release evidence, the bundled offline article remains available.

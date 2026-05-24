@@ -867,3 +867,11 @@ M71 adds `/app/articles/release-audit`, a local-only release audit readiness rou
 The new service layer records blocked publish attempt fixtures, reviewer change history placeholders, release diff previews, disclaimer/source/image change tracking, and automation bypass attempts. CMS override and automation remain unable to publish without the human release gate.
 
 M71 still does not publish final articles, write Supabase/CMS data, generate text with AI, generate images, load external images, inject sponsors, or add production article publishing.
+
+## M72 Offline Article CMS Persistence Contract Planning
+
+M72 adds `/app/articles/cms-persistence-plan`, a local-only planning route for future backend-owned CMS persistence.
+
+The new service layer defines CMS roles, write/read contracts, release audit write requirements, future table planning, offline fallback policy, and migration rollback checklist. Viewer cannot edit, automation cannot publish, admin cannot silently bypass human release, and release manager remains blocked without evidence and audit requirements.
+
+M72 still does not run migrations, write Supabase/CMS data, fetch CMS content, upload images, generate articles with AI, inject sponsors, or publish production articles.

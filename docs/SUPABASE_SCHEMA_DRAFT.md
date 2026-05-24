@@ -1182,3 +1182,31 @@ M71 does not run migrations. Future release audit readiness may require:
 `article_release_diff_previews` should store reviewed before/after summaries and disclaimer/source/reviewer/image change previews.
 
 `article_automation_bypass_events` should record blocked CMS or automation attempts. No automation event should grant final publish.
+
+## M72 Offline Article CMS Persistence Contract Tables
+
+M72 does not run migrations. Future backend-owned CMS persistence should review these tables together:
+
+- `articles`
+- `article_versions`
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_image_assets`
+- `article_release_gates`
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_cms_overrides`
+
+RLS and role planning:
+
+- public read should expose reviewed/published content only
+- draft, review, source, image, release gate, and audit rows should be editor/reviewer/admin scoped
+- release audit writes should be backend-owned
+- service-role credentials must stay out of frontend code
+- release managers may request final release but cannot bypass blockers
+- admins cannot silently bypass the human release gate
+- automation cannot final publish
+
+Migration planning must include rollback before any staging migration is run.

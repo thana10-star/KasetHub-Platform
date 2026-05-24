@@ -29,3 +29,9 @@ Release remains blocked when:
 - freshness date is missing
 - CMS override is the only publish signal
 - automation attempts to set a final state
+
+## M72 CMS Persistence Boundary
+
+Future CMS persistence may store draft, review, release, and audit records, but no role can silently bypass the human release gate.
+
+Admins can manage workflow, and release managers can request final release, but final publication still requires explicit human approval, release reviewer, timestamp, note, and audit write evidence.

@@ -22,6 +22,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
+import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
 import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
@@ -146,6 +147,7 @@ export function NextPhasePage() {
   const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
   const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const ownershipGate = useMemo(() => buildOwnershipRlsGateStatus(), []);
+  const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -238,6 +240,26 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
                 เปิด M41 setup guide
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M72 offline article CMS persistence</h2>
+                <StatusPill tone="warning">{articleCmsPersistence.tableCount} future tables</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                วาง role rules, release audit write contract, offline fallback policy และ rollback checklist โดยยังไม่ run migration หรือเขียน Database จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/articles/cms-persistence-plan">
+                เปิด M72 CMS persistence plan
               </Link>
             </div>
           </div>

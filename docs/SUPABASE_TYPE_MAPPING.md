@@ -505,3 +505,26 @@ Future persistence may map:
 - automation or CMS bypass attempts -> `article_automation_bypass_events`
 
 M71 keeps every model local-only, keeps `finalPublishAllowed=false`, and performs no Supabase writes, CMS writes, or production publishing.
+
+## M72 Offline Article CMS Persistence Mapping Notes
+
+M72 adds frontend-only CMS persistence planning models:
+
+- `ArticleCmsPersistencePlan`
+- `ArticleCmsRole`
+- `ArticleCmsWriteContract`
+- `ArticleCmsReadContract`
+- `ArticleCmsReleaseAuditWriteContract`
+- `ArticleCmsMigrationChecklist`
+- `ArticleCmsFallbackPolicy`
+- `ArticleCmsPublishBlocker`
+
+Future persistence may map:
+
+- `ArticleCmsPersistencePlan.tables` -> reviewed migration checklist for article CMS tables
+- role contracts -> backend/editor RBAC policy docs
+- read contract -> public reviewed-only article reads and editor-only draft reads
+- release audit write contract -> `article_release_audit_events` and `article_release_attempts`
+- fallback policy -> bundled offline fallback behavior when CMS override is invalid
+
+M72 performs no Supabase writes, CMS writes, migrations, CMS fetches, or production publishing.

@@ -4,6 +4,7 @@ import {
   Calculator,
   CheckCircle2,
   ClipboardCheck,
+  Database,
   Eye,
   FileText,
   GitBranch,
@@ -114,6 +115,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M69 pilot article editorial review', route: '/app/articles/editorial-review' },
   { label: 'M70 editorial evidence and human release gate', route: '/app/articles/editorial-evidence' },
   { label: 'M71 offline article release audit', route: '/app/articles/release-audit' },
+  { label: 'M72 offline article CMS persistence plan', route: '/app/articles/cms-persistence-plan' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -299,6 +301,14 @@ export function QAPage() {
             description="ดู blocked release attempts, reviewer history, diff preview และ automation bypass policy"
             to="/app/articles/release-audit"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M72 CMS persistence plan"
+            description="ดู future tables, role rules, release audit write contract, fallback policy และ migration checklist"
+            to="/app/articles/cms-persistence-plan"
+            variant="white"
           />
         </Card>
 

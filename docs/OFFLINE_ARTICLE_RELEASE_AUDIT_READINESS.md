@@ -31,3 +31,8 @@ Audit event coverage:
 
 M71 keeps every release attempt as non-final. Audit data is bundled fixture data only.
 
+## M72 Persistence Contract Link
+
+M72 plans how future release audit events may be written by backend-owned CMS services.
+
+The frontend still must not write audit rows directly. Future persistence must preserve blocked release attempts, reviewer history, diff previews, and automation bypass events while keeping final publish behind the human release gate.

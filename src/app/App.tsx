@@ -52,6 +52,7 @@ import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
 import { OfflineAgriArticleDetailPage } from '@/routes/OfflineAgriArticleDetailPage';
 import { OfflineAgriArticlesPage } from '@/routes/OfflineAgriArticlesPage';
+import { OfflineArticleCmsPersistencePlanPage } from '@/routes/OfflineArticleCmsPersistencePlanPage';
 import { OfflineArticleEditorialEvidencePage } from '@/routes/OfflineArticleEditorialEvidencePage';
 import { OfflineArticleEditorialReviewPage } from '@/routes/OfflineArticleEditorialReviewPage';
 import { OfflineArticleFullContentReadinessPage } from '@/routes/OfflineArticleFullContentReadinessPage';
@@ -138,6 +139,7 @@ export default function App() {
         <Route path="articles/editorial-review" element={<OfflineArticleEditorialReviewPage />} />
         <Route path="articles/editorial-evidence" element={<OfflineArticleEditorialEvidencePage />} />
         <Route path="articles/release-audit" element={<OfflineArticleReleaseAuditPage />} />
+        <Route path="articles/cms-persistence-plan" element={<OfflineArticleCmsPersistencePlanPage />} />
         <Route path="articles/offline/:slug" element={<OfflineAgriArticleDetailPage />} />
         <Route path="articles/:articleId" element={<ArticleDetailPage />} />
         <Route path="content-admin-preview" element={<ContentAdminPreviewPage />} />

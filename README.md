@@ -708,6 +708,12 @@ M71 adds `/app/articles/release-audit` for local-only release audit review.
 
 It shows blocked release attempts, reviewer change history, release diff previews, disclaimer/source/image change tracking, and automation bypass blocks. CMS override or automation alone still cannot publish an article. No final article publish, Supabase write, CMS write, AI generation, external image loading, or sponsor injection is enabled.
 
+## M72 Offline Article CMS Persistence Contract
+
+M72 adds `/app/articles/cms-persistence-plan` for local-only future CMS persistence planning.
+
+It defines future article CMS tables, editor/reviewer/release roles, read/write contracts, release audit write requirements, offline fallback policy, and migration rollback checklist. Viewer cannot edit, automation cannot publish, admin cannot silently bypass the human release gate, and no database writes or migrations are run.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.

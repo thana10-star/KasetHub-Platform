@@ -47,6 +47,20 @@ export function OfflineArticleReleaseAuditPage() {
           ไม่มี Supabase write ไม่มี backend CMS write ไม่มี external image/CDN และไม่มีการ publish บทความจริง
         </NoticeBox>
 
+        <Link to="/app/articles/cms-persistence-plan">
+          <Card className="border-sky-200 bg-sky-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-sky-950">M72 CMS persistence plan</h2>
+                <p className="mt-1 text-sm leading-6 text-sky-900">
+                  วาง role rules, future tables, write contract, fallback policy และ migration checklist โดยยังไม่เขียน Database จริง
+                </p>
+              </div>
+              <StatusPill tone="warning">planning</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
@@ -197,6 +211,9 @@ export function OfflineArticleReleaseAuditPage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/editorial-review">
             กลับไป editorial review
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/articles/cms-persistence-plan">
+            เปิด M72 CMS persistence plan
           </Link>
         </div>
       </div>
