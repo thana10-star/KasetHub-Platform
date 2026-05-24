@@ -156,3 +156,18 @@ Required behavior:
 - Treat readiness score as a UX estimate only.
 
 Future AI Vision must still run backend-side safety checks, moderation, consent, provider-key protection, and expert escalation for risky pesticide, disease, fertilizer, or chemical advice.
+
+## M55 Calculator AI Explanation Boundary
+
+Agriculture calculator AI explanations are explanation-only until a reviewed recommendation system exists. The current M55 implementation only creates local explanation plans and prompt scaffold previews.
+
+Required behavior for future calculator AI:
+
+- Preserve deterministic calculator result values exactly.
+- Explain formulas and inputs in simple Thai.
+- Keep `ผลคำนวณเบื้องต้น` and no-guarantee copy visible.
+- Remind users to check real labels, soil tests, field measurements, prices, and experts.
+- Block sponsor products, chemical product recommendations, label overrides, and guaranteed yield/profit claims.
+- Keep AI text visually separate from formula-owned result cards.
+
+M55 does not call AI providers, add network calls, write backend data, write Supabase data, or create a recommendation engine.

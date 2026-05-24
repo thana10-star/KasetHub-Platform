@@ -74,3 +74,19 @@ M54 adds tests for text export templates and share fallback helpers. These tests
 - oversized summary truncation
 
 Template and share changes must not alter deterministic calculator formulas. Future AI explanations, sponsor placements, or rewarded unlocks must read calculator output as an input, not rewrite the formula result.
+
+## M55 AI Explanation Regression Safety
+
+M55 adds a local-only AI explanation planner. It is not an AI runtime. The planner must preserve calculator output by treating `CalculatorResultSummary.resultRecap` as a locked snapshot.
+
+Regression checks now cover:
+
+- formula explanation is allowed
+- sponsor product requests are blocked
+- chemical product recommendations are blocked
+- deterministic result mutation is blocked
+- calculator result values are preserved in the explanation plan
+- fertilizer and spray calculations receive extra safety disclaimers
+- `noRealAICall` remains `true`
+
+Future AI integrations must call the planner/policy before constructing prompts and must keep AI text separate from deterministic result cards.

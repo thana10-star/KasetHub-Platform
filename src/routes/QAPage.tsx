@@ -1,5 +1,6 @@
 import {
   BookOpenCheck,
+  BrainCircuit,
   Calculator,
   CheckCircle2,
   ClipboardCheck,
@@ -79,6 +80,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
   { label: 'ผลคำนวณที่บันทึกไว้', route: '/app/calculators/saved-results' },
   { label: 'ตัวอย่าง export เครื่องคำนวณ', route: '/app/calculators/export-preview' },
+  { label: 'แผน AI อธิบายผลคำนวณ', route: '/app/calculators/ai-explanation-preview' },
   { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
@@ -250,6 +252,14 @@ export function QAPage() {
             description="ดูสรุป local-only ที่คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้"
             to="/app/calculators/saved-results"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิดแผน AI อธิบายผล"
+            description="ดูขอบเขต prompt/policy ที่ยังไม่เรียก AI จริง และไม่เปลี่ยนผลคำนวณ"
+            to="/app/calculators/ai-explanation-preview"
+            variant="white"
           />
         </Card>
 

@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, FlaskConical, History, ShieldCheck, XCircle } from 'lucide-react';
+import { AlertTriangle, BrainCircuit, CheckCircle2, FlaskConical, History, ShieldCheck, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -202,6 +202,11 @@ export function CalculatorQAPage() {
         <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/export-preview">
           <FlaskConical aria-hidden="true" className="h-5 w-5" />
           เปิดตัวอย่าง export
+        </Link>
+
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
+          <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+          เปิดแผน AI อธิบายผล
         </Link>
 
         <CalculatorRewardedAdsPlanningCard compact />

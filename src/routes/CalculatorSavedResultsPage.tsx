@@ -1,4 +1,4 @@
-import { Calculator, ChevronDown, ChevronUp, Copy, Filter, History, Send, Share2, Trash2 } from 'lucide-react';
+import { BrainCircuit, Calculator, ChevronDown, ChevronUp, Copy, Filter, History, Send, Share2, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -147,6 +147,9 @@ function SavedResultCard({
           <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to={summary.calculatorRoute}>
             เปิดเครื่องคำนวณนี้
           </Link>
+          <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-explanation-preview">
+            ดูแผน AI อธิบายผล
+          </Link>
           {message ? <p className="mt-3 text-sm font-bold leading-6 text-kaset-deep">{message}</p> : null}
         </div>
       </div>
@@ -228,6 +231,11 @@ export function CalculatorSavedResultsPage() {
 
         <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/export-preview">
           ดูตัวอย่างข้อความ export
+        </Link>
+
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
+          <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+          ดูแผน AI อธิบายผล
         </Link>
 
         <section className="grid gap-3">

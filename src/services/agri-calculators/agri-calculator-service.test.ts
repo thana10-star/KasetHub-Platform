@@ -27,6 +27,11 @@ import {
   prepareCalculatorShareText,
   shareCalculatorExportText,
 } from '@/services/agri-calculators/calculator-export-template-service';
+import {
+  createFertilizerAIExplanationFixture,
+  createSprayMixAIExplanationFixture,
+} from '@/services/agri-calculators/calculator-ai-explanation-fixtures';
+import { buildCalculatorAIExplanationPlan } from '@/services/agri-calculators/calculator-ai-explanation-planner';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -611,5 +616,64 @@ describe('calculator export template service', () => {
     expect(result.message).toBe('อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง');
     expect(result.helperMessage).toBe('คัดลอกข้อความสำเร็จ');
     expect(copiedText).toBe('ข้อความสำหรับแชร์');
+  });
+});
+
+describe('calculator AI explanation planner', () => {
+  test('allows formula explanation without real AI calls', () => {
+    const request = createSprayMixAIExplanationFixture();
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.noRealAICall).toBe(true);
+    expect(plan.allowedRequestedActions).toContain('explain_formulas');
+    expect(plan.allowedSections.some((section) => section.id === 'explain_formulas')).toBe(true);
+    expect(plan.promptScaffoldPreview).toContain('อธิบายสูตร');
+    expect(plan.promptScaffoldPreview).toContain('ห้ามเปลี่ยนผลคำนวณ');
+  });
+
+  test('blocks sponsor product and chemical product recommendations', () => {
+    const request = {
+      ...createSprayMixAIExplanationFixture(),
+      requestedActions: ['mention_sponsor_product', 'recommend_chemical_products'] as const,
+    };
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('mention_sponsor_product');
+    expect(plan.blockedRequestedActions).toContain('recommend_chemical_products');
+    expect(plan.riskLevel).toBe('high');
+    expect(plan.blockedSections.find((section) => section.id === 'mention_sponsor_product')?.reason).toContain('policy');
+  });
+
+  test('blocks deterministic result mutation and preserves result values', () => {
+    const request = {
+      ...createSprayMixAIExplanationFixture(),
+      requestedActions: ['change_deterministic_result'] as const,
+    };
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('change_deterministic_result');
+    expect(plan.formulaIntegrity.deterministicResultUnchanged).toBe(true);
+    expect(plan.formulaIntegrity.noFormulaMutation).toBe(true);
+    expect(plan.resultValueSnapshot).toEqual(request.summary.resultRecap);
+  });
+
+  test('blocks fertilizer dose invented outside the calculator', () => {
+    const request = createFertilizerAIExplanationFixture();
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('recommend_exact_fertilizer_dose_not_in_calculator');
+    expect(plan.blockedRequestedActions).toContain('mention_sponsor_product');
+    expect(plan.promptScaffoldPreview).toContain('ห้ามเพิ่มคำแนะนำสินค้า');
+  });
+
+  test('adds specific disclaimers for fertilizer and spray calculations', () => {
+    const sprayPlan = buildCalculatorAIExplanationPlan(createSprayMixAIExplanationFixture());
+    const fertilizerPlan = buildCalculatorAIExplanationPlan(createFertilizerAIExplanationFixture());
+
+    expect(sprayPlan.safetyDisclaimers.join(' ')).toContain('ควรอ่านฉลากจริงก่อนใช้');
+    expect(sprayPlan.safetyDisclaimers.join(' ')).toContain('AI ห้าม override ฉลาก');
+    expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('ควรตรวจผลดิน/ผู้เชี่ยวชาญ');
+    expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('AI ห้ามเพิ่ม dose นอกสูตร');
+    expect(fertilizerPlan.noRealAICall).toBe(true);
   });
 });

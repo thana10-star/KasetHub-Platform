@@ -63,3 +63,9 @@ M54 share helpers handle:
 - No AI-generated recommendation.
 
 Every summary must keep `ผลคำนวณเบื้องต้น` and `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง` visible.
+
+## M55 AI Explanation Linkage
+
+Saved calculator summaries now include a route into `/app/calculators/ai-explanation-preview`. This does not send the saved summary to an AI provider. It only shows the local policy plan for how a future AI explanation should handle calculator output.
+
+The export/share summary remains the source text. Future AI explanations may reference the summary but must not rewrite formula results, hide warnings, remove disclaimers, add sponsor content, or create fertilizer/chemical recommendations outside reviewed rules.

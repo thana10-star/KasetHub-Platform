@@ -26,3 +26,16 @@ Basic calculations remain free. Ads should unlock convenience or advanced modes,
 ## Future Backend Needs
 
 A real implementation would need consent, fraud/rate-limit controls, server-side unlock validation, audit logs, privacy review, and clear separation between calculator history, ad events, and sponsor attribution.
+
+## M55 AI Explanation Boundary
+
+AI explanation remains planning-only in M55. Future rewarded ads may unlock convenience around longer explanations, comparison views, or export polish, but they must not:
+
+- block basic calculator results
+- block safety disclaimers
+- change deterministic formulas
+- add sponsor content to explanations
+- make chemical or fertilizer product suggestions
+- hide uncertainty or expert-confirmation reminders
+
+Any future monetized AI explanation must still use the calculator AI policy, keep `noRealAICall`-style dry-run fixtures available for QA, and show paid/sponsored surfaces separately from formula output.

@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpenCheck,
   Bot,
+  BrainCircuit,
   Calculator,
   CloudUpload,
   CloudSun,
@@ -339,6 +340,10 @@ export function AdminDashboardPage() {
                   </Link>
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/saved-results">
                     เปิดสรุปที่บันทึกไว้
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-explanation-preview">
+                    <BrainCircuit aria-hidden="true" className="h-4 w-4" />
+                    เปิดแผน AI อธิบายผล
                   </Link>
                 </div>
               </div>

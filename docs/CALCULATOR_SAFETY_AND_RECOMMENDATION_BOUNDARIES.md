@@ -67,3 +67,25 @@ Rewarded ads must not:
 ## Why Confirmation Matters
 
 Farm safety depends on context the calculator does not know: real label text, soil test, water availability, plant age, local regulations, worker safety, weather, disease pressure, and field history. These must be checked before real-world use.
+
+## M55 AI Explanation Boundary
+
+M55 makes the AI calculator boundary explicit. Future AI may explain:
+
+- entered inputs
+- formula meaning
+- result meaning
+- what to double-check
+- why an expert or label check matters
+
+Future AI must not:
+
+- change deterministic calculator results
+- recommend chemical products
+- recommend exact crop fertilizer doses outside reviewed calculator rules
+- mention sponsor products
+- claim guaranteed yield or profit
+- override real labels
+- hide uncertainty
+
+`/app/calculators/ai-explanation-preview` shows this boundary as a local preview only. It does not call AI, write backend data, write Supabase data, or route sponsor content.
