@@ -33,6 +33,7 @@ import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-set
 import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
 import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
+import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import type {
   NextPhaseOption,
   NextPhaseOptionId,
@@ -159,6 +160,7 @@ export function NextPhasePage() {
   const weatherMode = useMemo(() => getWeatherModeStatus(), []);
   const weatherPreference = useMemo(() => getWeatherLocalPreferenceStatus(), []);
   const weatherRiskRules = useMemo(() => getWeatherAgriRiskRuleSummary(), []);
+  const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -307,7 +309,7 @@ export function NextPhasePage() {
                 <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'warning'}>{weatherMode.mode}</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-sky-900">
-                Open-Meteo is no-key and flag-gated. M77 preference is {weatherPreference.selectedLabel} in localStorage only. M78 adds {weatherRiskRules.rules.length} planning-only weather risk rules with no GPS, no product recommendation, and no Supabase write.
+                Open-Meteo is no-key and flag-gated. M77 preference is {weatherPreference.selectedLabel} in localStorage only. M78 adds {weatherRiskRules.rules.length} planning-only weather risk rules, and M79 keeps {weatherRiskReview.pendingSignoffCount} expert signoffs pending with prescriptive output blocked.
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather">
                 เปิด M75 weather
@@ -320,6 +322,9 @@ export function NextPhasePage() {
               </Link>
               <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/risk-rules">
                 เปิด M78 risk rules
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/risk-review">
+                เปิด M79 risk review
               </Link>
             </div>
           </div>

@@ -628,3 +628,15 @@ Planning only. No generated Supabase types were added.
 - Future `weather_risk_notifications` and `weather_risk_user_acknowledgements` require separate push/consent review.
 
 M78 keeps all weather risk output local-only and planning-only.
+
+## Future Weather Risk Review Mapping From M79
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherRiskRuleVersion` may map to `weather_risk_rule_versions`.
+- `WeatherRiskSourceMetadata` may map to `weather_risk_source_reviews`.
+- `WeatherRiskReviewerSignoff` may map to `weather_risk_expert_signoffs`.
+- `WeatherRiskExpertApprovalGate` may map to `weather_risk_release_gates`.
+- `WeatherRiskPrescriptiveBlocker` may map to `weather_risk_audit_events` for blocked attempts.
+
+All M79 mappings keep `prescriptiveAllowed: false`.

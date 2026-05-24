@@ -14,11 +14,13 @@ import {
 } from '@/services/weather/weather-agri-risk-boundary';
 import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agri-risk-fixtures';
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
+import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 
 export function WeatherRiskRulesPage() {
   const summary = getWeatherAgriRiskRuleSummary();
   const fixtures = getWeatherAgriRiskFixtureSummary();
   const boundary = getWeatherAgriRiskBoundarySummary();
+  const expertReview = getWeatherRiskExpertReviewSummary();
 
   return (
     <div>
@@ -34,6 +36,9 @@ export function WeatherRiskRulesPage() {
                 <StatusPill className="bg-white/15 text-white ring-white/20" tone="warning">
                   M78 planning-only
                 </StatusPill>
+                <StatusPill className="ml-2 bg-white/15 text-white ring-white/20" tone="warning">
+                  M79 review pending
+                </StatusPill>
                 <h2 className="mt-3 text-2xl font-extrabold leading-8">Agriculture weather risk readiness</h2>
                 <p className="mt-2 text-sm leading-6 text-amber-50">
                   ใช้ดูฝน ลม ความชื้น ความร้อน และข้อมูลเก่าแบบกว้าง ๆ เท่านั้น ไม่มี AI ไม่มี GPS ไม่มีสินค้าแนะนำ และยังไม่ใช่คำแนะนำผู้เชี่ยวชาญ
@@ -44,7 +49,7 @@ export function WeatherRiskRulesPage() {
         </Card>
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่กฎ agronomy ที่ตรวจทานแล้ว">
-          เกณฑ์ทั้งหมดติดป้าย `เบื้องต้น` และ `planning-only` ต้องมีผู้เชี่ยวชาญตรวจทานก่อนใช้เป็นคำแนะนำจริง
+          เกณฑ์ทั้งหมดติดป้าย `เบื้องต้น` และ `planning-only` ต้องมีผู้เชี่ยวชาญตรวจทานก่อนใช้เป็นคำแนะนำจริง · M79 versions {expertReview.versionCount} · pending signoffs {expertReview.pendingSignoffCount}
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">
@@ -123,9 +128,12 @@ export function WeatherRiskRulesPage() {
           </ul>
         </NoticeBox>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/weather">
             กลับไปหน้าสภาพอากาศ
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
+            เปิด M79 expert review
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/qa">
             เปิด Weather QA

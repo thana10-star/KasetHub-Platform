@@ -30,3 +30,7 @@ Weather risk intelligence in KasetHub is general caution only.
 ## Data Boundary
 
 M78 uses weather adapter data only. It does not require GPS, precise farm location, Supabase writes, backend writes, or cloud sync.
+
+## M79 Expert Review Gate
+
+M79 requires safety reviewer sign-off before any future prescriptive behavior. The current implementation keeps all safety sign-offs pending and keeps `prescriptiveAllowed: false`.

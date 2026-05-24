@@ -1312,3 +1312,15 @@ Planning only. No migrations were run.
 - `weather_risk_user_acknowledgements`: future acknowledgement records for user-facing safety copy if weather risk advice becomes more personalized.
 
 No M78 table may store GPS, precise farm coordinates, product recommendations, chemical doses, sponsor payloads, or guaranteed-outcome claims.
+
+## Future Weather Risk Review Tables From M79
+
+Planning only. No migrations were run.
+
+- `weather_risk_rule_versions`: future version records for each reviewed risk rule.
+- `weather_risk_source_reviews`: future source metadata, citation, freshness, and applicability records.
+- `weather_risk_expert_signoffs`: future reviewer approvals scoped by role.
+- `weather_risk_release_gates`: future release approval records before any prescriptive behavior.
+- `weather_risk_audit_events`: future audit trail for rule changes, blocked release attempts, and safety decisions.
+
+M79 keeps every future table local-planning only. No Supabase writes, RLS policies, migrations, or app table rows were created.

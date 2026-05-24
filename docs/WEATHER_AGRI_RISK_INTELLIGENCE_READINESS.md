@@ -49,3 +49,9 @@ Weather risk cards must show:
 - label-first warning for chemical-related work
 
 The app must continue to work with local weather fixture data when Open-Meteo is disabled.
+
+## M79 Expert Review Readiness
+
+M79 adds local rule versions, source placeholders, pending reviewer sign-offs, false-positive examples, false-negative examples, and expert approval gates.
+
+Every rule remains `planning_only` and `prescriptiveAllowed: false`.

@@ -928,3 +928,11 @@ M78 adds `/app/weather/risk-rules`, a local-only readiness route for agriculture
 The weather route now shows general risk cards for spraying risk, irrigation timing, disease pressure, heat stress, field work risk, and harvest drying risk. These cards are deterministic and derived from the existing weather adapter/cache result.
 
 M78 remains planning-only: no expert-reviewed agronomy engine, no AI API call, no GPS/geolocation, no precise personal location storage, no Supabase write, no backend write, no cloud sync, no push notification, no product/sponsor recommendation, no exact chemical/fertilizer dose, and no guaranteed outcome.
+
+## M79 Weather Risk Expert-review Readiness
+
+M79 adds `/app/weather/risk-review`, a local-only expert-review readiness route for agriculture weather risk rules.
+
+The new service layer adds rule version metadata, source placeholders, pending reviewer sign-offs for agronomy, crop protection, weather data, and safety roles, false-positive examples, false-negative examples, and prescriptive blockers.
+
+M79 keeps every weather risk rule at `planning_only` with `prescriptiveAllowed=false`. No rule can become prescriptive, recommend products, provide exact chemical/fertilizer doses, use GPS, write Supabase data, call AI, or send push notifications.

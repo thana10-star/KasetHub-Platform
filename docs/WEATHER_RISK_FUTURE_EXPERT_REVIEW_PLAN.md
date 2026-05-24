@@ -26,3 +26,7 @@ No migrations are included in M78.
 ## Release Gate
 
 Before live risk intelligence becomes prescriptive or personalized, KasetHub needs a reviewed rule version, source/audit plan, consent model for any saved preferences, and RLS-reviewed storage.
+
+## M79 Local Fixtures
+
+M79 creates local fixtures for rule versions, source placeholders, pending sign-offs, false-positive examples, false-negative examples, and prescriptive blockers. These are readiness artifacts only and do not create a production agronomy engine.

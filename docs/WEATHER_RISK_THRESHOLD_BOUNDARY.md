@@ -33,3 +33,5 @@ Before these rules become real agronomy guidance, they need:
 - field applicability notes
 - rollback path
 - user-facing freshness/version copy
+
+M79 tracks this as rule version metadata and keeps all reviewer sign-offs pending.

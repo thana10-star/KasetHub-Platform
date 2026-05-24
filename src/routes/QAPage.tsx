@@ -88,6 +88,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'M76 weather QA / cache / coarse location', route: '/app/weather/qa' },
   { label: 'M77 weather local preferences', route: '/app/weather/preferences' },
   { label: 'M78 weather risk readiness', route: '/app/weather/risk-rules' },
+  { label: 'M79 weather risk expert review', route: '/app/weather/risk-review' },
   { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
   { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },

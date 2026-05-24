@@ -21,6 +21,7 @@ import {
 } from '@/services/weather/weather-agri-risk-boundary';
 import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agri-risk-fixtures';
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
+import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 
 const statusTone = {
   pass: 'success',
@@ -37,6 +38,7 @@ export function WeatherQAPage() {
   const riskRules = getWeatherAgriRiskRuleSummary();
   const riskFixtures = getWeatherAgriRiskFixtureSummary();
   const riskBoundary = getWeatherAgriRiskBoundarySummary();
+  const riskExpertReview = getWeatherRiskExpertReviewSummary();
   const sourceReadiness = buildWeatherSourceReadiness({
     modeStatus: summary.modeStatus,
     cacheStatus,
@@ -181,6 +183,23 @@ export function WeatherQAPage() {
         </section>
 
         <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">M79 expert review readiness</h2>
+          <Card className="p-4">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="neutral">versions {riskExpertReview.versionCount}</Badge>
+              <Badge tone="gold">pending signoffs {riskExpertReview.pendingSignoffCount}</Badge>
+              <Badge tone="sky">sources {riskExpertReview.sourcePlaceholderCount}</Badge>
+              <StatusPill tone={riskExpertReview.allPrescriptiveBlocked ? 'success' : 'danger'}>
+                prescriptive blocked {String(riskExpertReview.allPrescriptiveBlocked)}
+              </StatusPill>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              ทุก rule version ยังเป็น planning-only, reviewer signoff pending และ prescriptiveAllowed false ก่อน expert approval gate
+            </p>
+          </Card>
+        </section>
+
+        <section className="grid gap-3">
           <h2 className="text-lg font-extrabold text-kaset-ink">Failure fixture matrix</h2>
           {summary.fixtures.map((fixture) => (
             <Card className="p-4" key={fixture.id}>
@@ -243,6 +262,9 @@ export function WeatherQAPage() {
         </Link>
         <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-rules">
           เปิด M78 weather risk rules
+        </Link>
+        <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
+          เปิด M79 expert review
         </Link>
 
         <LargeActionButton
