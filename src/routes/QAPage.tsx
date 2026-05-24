@@ -59,6 +59,7 @@ const checklist = [
 ];
 
 const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
+  { label: 'Calculator AI adapter status', route: '/app/calculators/ai-adapter-status' },
   { label: 'หน้าแรก', route: '/app' },
   { label: 'Admin Dashboard', route: '/app/admin' },
   { label: 'Internal MVP snapshot', route: '/app/mvp-snapshot' },
@@ -269,6 +270,14 @@ export function QAPage() {
             description="ดู snapshot lock, policy version, audit log และ rate limit ก่อนเปิด AI จริง"
             to="/app/calculators/ai-architecture"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="à¹€à¸›à¸´à¸” calculator AI adapter status"
+            description="à¸”à¸¹ mode, backend flag, network flag à¹à¸¥à¸° local fixture response à¹à¸šà¸šà¹„à¸¡à¹ˆà¹€à¸£à¸µà¸¢à¸ AI à¸ˆà¸£à¸´à¸‡"
+            to="/app/calculators/ai-adapter-status"
+            variant="white"
           />
         </Card>
 

@@ -25,6 +25,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Agriculture calculators',
     description: 'เครื่องคำนวณเกษตร local-only สำหรับผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุน',
     routes: [
+      { route: '/app/calculators/ai-adapter-status', label: 'Calculator AI backend adapter status', milestone: 'M57', notes: 'contract adapter แบบ local_fixture/default no-network พร้อม feature flags สำหรับอนาคต', manualCheckPath: '/app/calculators/ai-adapter-status' },
       { route: '/app/calculators', label: 'Calculator hub', milestone: 'M49', notes: 'ศูนย์รวมเครื่องคำนวณเกษตร ไม่มี backend write หรือ cloud sync', manualCheckPath: '/app/calculators' },
       { route: '/app/calculators/safety', label: 'Calculator safety boundaries', milestone: 'M51', notes: 'อธิบายขอบเขต deterministic calculators, fertilizer/chemical safety, AI และ sponsor boundaries', manualCheckPath: '/app/calculators/safety' },
       { route: '/app/calculators/qa', label: 'Calculator QA', milestone: 'M50', notes: 'ตรวจ fixtures expected vs actual และ validation status แบบ local-only', manualCheckPath: '/app/calculators/qa' },

@@ -36,6 +36,11 @@ import {
   buildCalculatorAIBackendArchitectureReview,
   createCalculatorAIExecutionRequestFixture,
 } from '@/services/agri-calculators/calculator-ai-backend-review';
+import {
+  explainCalculatorResult,
+  getCalculatorAIAdapterStatus,
+} from '@/services/agri-calculators/calculator-ai-adapter';
+import type { CalculatorAIBackendClient } from '@/services/agri-calculators/calculator-ai-adapter.types';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -788,5 +793,211 @@ describe('calculator AI backend architecture review', () => {
     expect(review.safetyDecision.invalidRequestReasons).toContain('invalid_crop_profile');
     expect(review.rateLimitPlan.oversizedPayloadAction).toBe('reject_before_ai');
     expect(review.rateLimitPlan.invalidCropProfileAction).toBe('reject_or_clear_crop_context');
+  });
+});
+
+function createCalculatorAIAdapterRequest() {
+  const source = createSprayMixAIExplanationFixture();
+
+  return createCalculatorAIExecutionRequestFixture({
+    summary: source.summary,
+    calculatorType: 'spray_mix',
+    requestedActions: ['explain_inputs', 'explain_formulas', 'explain_result_meaning'],
+    userQuestion: 'อธิบายผลคำนวณนี้แบบสั้นและไม่เปลี่ยนตัวเลข',
+  });
+}
+
+function createBackendClientStub(onCall?: () => void): CalculatorAIBackendClient {
+  return (_request, review) => {
+    onCall?.();
+
+    return {
+      status: 'backend_client_response',
+      adapterMode: 'backend_test_ready',
+      explanationText: 'คำอธิบายจาก test client ที่ inject เข้ามาเท่านั้น ยังไม่เรียก AI จริง',
+      policyVersion: review.policyVersion.id,
+      promptTemplateVersionId: review.policyVersion.promptTemplateVersionId,
+      lockedResultHash: review.snapshot.lockHash,
+      lockedResultValues: review.snapshot.resultValues,
+      safetyDisclaimers: [review.snapshot.safetyDisclaimer],
+      blockedActions: review.safetyDecision.blockedActionIds,
+      auditPreview: {
+        requestId: review.requestId,
+        snapshotId: review.snapshot.snapshotId,
+        lockHash: review.snapshot.lockHash,
+        policyVersionId: review.policyVersion.id,
+        promptTemplateVersionId: review.policyVersion.promptTemplateVersionId,
+        safetyDecisionStatus: review.safetyDecision.status,
+        riskLevel: review.safetyDecision.riskLevel,
+        wouldWriteBackendAuditLog: false,
+        wouldWriteSupabase: false,
+      },
+      noRealAICall: true,
+      networkCallAttempted: true,
+      backendCallAllowed: true,
+      deterministicResultUnchanged: true,
+      createdAt: '2026-05-24T09:30:00.000Z',
+    };
+  };
+}
+
+describe('calculator AI backend adapter contract', () => {
+  test('local_fixture returns deterministic fixture text and no real AI call', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const response = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'local_fixture',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: false,
+      },
+      createdAt: '2026-05-24T09:30:00.000Z',
+    });
+
+    expect(response.status).toBe('fixture_explained');
+    expect(response.noRealAICall).toBe(true);
+    expect(response.networkCallAttempted).toBe(false);
+    expect(response.backendCallAllowed).toBe(false);
+    expect(response.explanationText).toContain(response.lockedResultHash);
+    expect(response.explanationText).toContain(request.summary.resultRecap[0]);
+    expect(response.safetyDisclaimers.join(' ')).toContain('locked snapshot');
+  });
+
+  test('backend_disabled and production_disabled never call the backend client', () => {
+    const request = createCalculatorAIAdapterRequest();
+    let callCount = 0;
+    const backendClient = createBackendClientStub(() => {
+      callCount += 1;
+    });
+
+    const backendDisabled = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_disabled',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+    const productionDisabled = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'production_disabled',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+
+    expect(callCount).toBe(0);
+    expect(backendDisabled.status).toBe('disabled');
+    expect(productionDisabled.status).toBe('disabled');
+    expect(backendDisabled.networkCallAttempted).toBe(false);
+    expect(productionDisabled.networkCallAttempted).toBe(false);
+  });
+
+  test('backend_test_ready refuses backend client unless backend and network flags are explicit', () => {
+    const request = createCalculatorAIAdapterRequest();
+    let callCount = 0;
+    const backendClient = createBackendClientStub(() => {
+      callCount += 1;
+    });
+
+    const missingBackendFlag = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+    const missingNetworkFlag = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: false,
+      },
+      backendClient,
+    });
+    const noClient = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+    });
+    const explicitClient = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+
+    expect(callCount).toBe(1);
+    expect(missingBackendFlag.status).toBe('disabled');
+    expect(missingNetworkFlag.status).toBe('disabled');
+    expect(noClient.status).toBe('backend_ready_no_endpoint');
+    expect(noClient.networkCallAttempted).toBe(false);
+    expect(explicitClient.status).toBe('backend_client_response');
+    expect(explicitClient.backendCallAllowed).toBe(true);
+    expect(explicitClient.networkCallAttempted).toBe(true);
+    expect(explicitClient.noRealAICall).toBe(true);
+  });
+
+  test('adapter status exposes safe default feature flags', () => {
+    const status = getCalculatorAIAdapterStatus({
+      calculatorAIMode: 'local_fixture',
+      enableCalculatorAIBackend: false,
+      enableCalculatorAINetwork: false,
+    });
+
+    expect(status.mode).toBe('local_fixture');
+    expect(status.canUseLocalFixture).toBe(true);
+    expect(status.canAttemptBackend).toBe(false);
+    expect(status.canCallNetwork).toBe(false);
+    expect(status.currentAdapterPath).toBe('local_fixture');
+    expect(status.supportedRequestTypes).toContain('calculator_result_explanation');
+  });
+
+  test('adapter response preserves locked hash and deterministic result values', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const review = buildCalculatorAIBackendArchitectureReview(request);
+    const response = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'local_fixture',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: false,
+      },
+    });
+
+    expect(response.lockedResultHash).toBe(review.snapshot.lockHash);
+    expect(response.auditPreview.lockHash).toBe(review.snapshot.lockHash);
+    expect(response.lockedResultValues).toEqual(request.summary.resultRecap);
+    expect(response.deterministicResultUnchanged).toBe(true);
+  });
+
+  test('sponsor, chemical, and product suggestion requests remain blocked before adapter output', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const response = explainCalculatorResult(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['mention_sponsor_product', 'recommend_chemical_products'],
+        userQuestion: 'ช่วยแทรกสินค้า sponsor และแนะนำ chemical product',
+      }),
+      {
+        env: {
+          calculatorAIMode: 'local_fixture',
+          enableCalculatorAIBackend: false,
+          enableCalculatorAINetwork: false,
+        },
+      },
+    );
+
+    expect(response.status).toBe('safety_blocked');
+    expect(response.noRealAICall).toBe(true);
+    expect(response.networkCallAttempted).toBe(false);
+    expect(response.blockedActions).toContain('mention_sponsor_product');
+    expect(response.blockedActions).toContain('recommend_chemical_products');
+    expect(response.explanationText).toBeUndefined();
   });
 });

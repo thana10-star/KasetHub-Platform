@@ -71,3 +71,14 @@ Future prompt execution should happen only in a backend-owned route or Edge Func
 - high-risk spray/fertilizer cases are escalated or filtered
 
 The frontend must not hold provider keys and must not send mutable calculator state directly to an AI provider.
+
+## M57 Adapter Gate
+
+The M57 adapter sits before any future backend prompt execution. It keeps `local_fixture` as the default, returns deterministic fixture text from the locked snapshot, and reports `noRealAICall: true`.
+
+`backend_test_ready` must not run a backend test client unless both flags are explicitly true:
+
+- `VITE_ENABLE_CALCULATOR_AI_BACKEND=true`
+- `VITE_ENABLE_CALCULATOR_AI_NETWORK=true`
+
+Even with those flags, M57 has no real endpoint URL and no provider call. Future prompt execution must remain backend-owned and must preserve the locked result hash.

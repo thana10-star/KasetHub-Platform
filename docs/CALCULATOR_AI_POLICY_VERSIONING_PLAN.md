@@ -58,3 +58,13 @@ Before a policy version becomes active:
 - logged in backend-owned audit metadata
 - protected by owner/admin-only RLS if synced to Supabase
 
+## M57 Adapter Policy Use
+
+M57 does not activate a real AI policy table. The adapter reads the local M56 policy fixtures, returns the selected policy id and prompt template id in every adapter response, and keeps `noRealAICall: true`.
+
+The adapter must not let feature flags change policy behavior silently. Future staging work must prove that:
+
+- deterministic result values are still locked before prompt creation
+- policy version ids are returned in responses and audit previews
+- sponsor/product requests remain blocked before AI
+- chemical and fertilizer-dose invention requests remain blocked before AI

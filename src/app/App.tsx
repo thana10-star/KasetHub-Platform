@@ -18,6 +18,7 @@ import { AuthPhoneStagingPage } from '@/routes/AuthPhoneStagingPage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
 import { CalculatorAIArchitecturePage } from '@/routes/CalculatorAIArchitecturePage';
+import { CalculatorAIAdapterStatusPage } from '@/routes/CalculatorAIAdapterStatusPage';
 import { CalculatorAIExplanationPreviewPage } from '@/routes/CalculatorAIExplanationPreviewPage';
 import { CalculatorExportPreviewPage } from '@/routes/CalculatorExportPreviewPage';
 import { CalculatorQAPage } from '@/routes/CalculatorQAPage';
@@ -94,6 +95,7 @@ export default function App() {
         <Route path="calculators/export-preview" element={<CalculatorExportPreviewPage />} />
         <Route path="calculators/ai-explanation-preview" element={<CalculatorAIExplanationPreviewPage />} />
         <Route path="calculators/ai-architecture" element={<CalculatorAIArchitecturePage />} />
+        <Route path="calculators/ai-adapter-status" element={<CalculatorAIAdapterStatusPage />} />
         <Route path="calculators/spray-mix" element={<SprayMixCalculatorPage />} />
         <Route path="calculators/plant-spacing" element={<PlantSpacingCalculatorPage />} />
         <Route path="calculators/fertilizer" element={<FertilizerCalculatorPage />} />

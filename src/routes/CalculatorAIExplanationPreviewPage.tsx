@@ -15,6 +15,11 @@ import {
   summarizeCalculatorAIExplanationPolicy,
 } from '@/services/agri-calculators/calculator-ai-explanation-planner';
 import { calculatorAIBlockedActions } from '@/services/agri-calculators/calculator-ai-explanation-policy';
+import {
+  explainCalculatorResult,
+  getCalculatorAIAdapterStatus,
+} from '@/services/agri-calculators/calculator-ai-adapter';
+import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
 type PreviewScenario = 'spray_mix' | 'fertilizer_mix';
@@ -26,6 +31,19 @@ export function CalculatorAIExplanationPreviewPage() {
     [scenario],
   );
   const plan = useMemo(() => buildCalculatorAIExplanationPlan(request), [request]);
+  const adapterRequest = useMemo(
+    () =>
+      createCalculatorAIExecutionRequestFixture({
+        summary: request.summary,
+        calculatorType: request.calculatorType,
+        cropLabel: request.cropLabel,
+        requestedActions: request.requestedActions,
+        userQuestion: request.userQuestion,
+      }),
+    [request],
+  );
+  const adapterStatus = useMemo(() => getCalculatorAIAdapterStatus(), []);
+  const adapterResponse = useMemo(() => explainCalculatorResult(adapterRequest), [adapterRequest]);
   const policySummary = summarizeCalculatorAIExplanationPolicy();
 
   return (
@@ -55,6 +73,35 @@ export function CalculatorAIExplanationPreviewPage() {
         <NoticeBox tone="warning" title="ยังไม่เรียก AI จริง">
           แผนนี้เป็น local preview สำหรับกำหนดขอบเขตเท่านั้น ผลคำนวณ deterministic ต้องคงเดิม และ AI ห้ามแนะนำสินค้าเคมี ปุ๋ยนอกสูตร sponsor หรือรับประกันผลผลิต/กำไร
         </NoticeBox>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M57 adapter contract preview</h2>
+                <StatusPill tone="info">mode: {adapterStatus.mode}</StatusPill>
+                <StatusPill tone={adapterResponse.status === 'fixture_explained' ? 'success' : 'warning'}>
+                  {adapterResponse.status}
+                </StatusPill>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-indigo-900">
+                local fixture result สร้างจาก locked snapshot เท่านั้น · noRealAICall {String(adapterResponse.noRealAICall)} · network {String(adapterResponse.networkCallAttempted)}
+              </p>
+              <p className="mt-3 rounded-lg bg-white p-3 text-sm font-bold leading-6 text-indigo-950">
+                lockedResultHash: {adapterResponse.lockedResultHash}
+              </p>
+              <pre className="mt-3 max-h-[240px] overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 text-sm leading-6 text-slate-700 ring-1 ring-indigo-900/10">
+                {adapterResponse.explanationText ?? adapterResponse.disabledReason}
+              </pre>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-adapter-status">
+                เปิด adapter status
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex flex-wrap gap-2">
@@ -195,7 +242,7 @@ export function CalculatorAIExplanationPreviewPage() {
           Allowed {policySummary.allowedCount} actions · blocked {calculatorAIBlockedActions.length} actions · noRealAICall true · deterministic output stays unchanged.
         </NoticeBox>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-4">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
             Calculator QA
           </Link>
@@ -204,6 +251,9 @@ export function CalculatorAIExplanationPreviewPage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/saved-results">
             Saved results
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-adapter-status">
+            Adapter status
           </Link>
         </div>
         <CalculatorBackLink />

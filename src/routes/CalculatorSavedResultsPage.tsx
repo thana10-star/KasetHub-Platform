@@ -150,6 +150,9 @@ function SavedResultCard({
           <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-explanation-preview">
             ดูแผน AI อธิบายผล
           </Link>
+          <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-adapter-status">
+            adapter status
+          </Link>
           {message ? <p className="mt-3 text-sm font-bold leading-6 text-kaset-deep">{message}</p> : null}
         </div>
       </div>
@@ -236,6 +239,11 @@ export function CalculatorSavedResultsPage() {
         <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
           <BrainCircuit aria-hidden="true" className="h-5 w-5" />
           ดูแผน AI อธิบายผล
+        </Link>
+
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-adapter-status">
+          <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+          à¸”à¸¹à¸ªà¸–à¸²à¸™à¸° AI adapter
         </Link>
 
         <section className="grid gap-3">

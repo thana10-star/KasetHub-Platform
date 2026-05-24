@@ -87,3 +87,17 @@ Calculator -> Snapshot Lock -> Backend Policy Check -> Prompt Builder -> AI Expl
 The snapshot lock freezes result recap values before AI. The backend review plan says AI receives an explanation-only snapshot, cannot recompute formulas, cannot mutate outputs, and must echo locked result values only.
 
 M56 still does not call AI, write backend data, write Supabase data, sync to cloud, or add sponsor/affiliate behavior.
+
+## M57 Adapter Contract
+
+M57 adds a frontend adapter contract for future calculator AI explanations:
+
+- `calculator-ai-adapter.types.ts`
+- `calculator-ai-adapter.ts`
+- `calculator-ai-local-fixtures.ts`
+
+The adapter default is `local_fixture`. It returns deterministic Thai fixture explanations from the locked snapshot and includes `noRealAICall: true`.
+
+`/app/calculators/ai-adapter-status` shows the current mode, backend flag, network flag, supported request type, locked hash, and future staging checklist.
+
+The adapter still blocks hidden sponsor content, chemical/product recommendations, deterministic result mutation, and fertilizer dose invention before any AI path can run.

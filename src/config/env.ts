@@ -11,6 +11,9 @@ export type PublicRuntimeEnv = {
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
   enableLocalAIProxyHandler: boolean;
+  calculatorAIMode: string;
+  enableCalculatorAIBackend: boolean;
+  enableCalculatorAINetwork: boolean;
   guestSyncMode: string;
   enableGuestSyncBackend: boolean;
   enableGuestSyncEdge: boolean;
@@ -58,6 +61,9 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),
   enableLocalAIProxyHandler: readBooleanEnv('VITE_ENABLE_LOCAL_AI_PROXY_HANDLER', false),
+  calculatorAIMode: readStringEnv('VITE_CALCULATOR_AI_MODE') || 'local_fixture',
+  enableCalculatorAIBackend: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_BACKEND', false),
+  enableCalculatorAINetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_NETWORK', false),
   guestSyncMode: readStringEnv('VITE_GUEST_SYNC_MODE') || 'local_fixture',
   enableGuestSyncBackend: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_BACKEND', false),
   enableGuestSyncEdge: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_EDGE', false),

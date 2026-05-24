@@ -57,3 +57,25 @@ A future backend AI explanation endpoint should:
 - no AdMob/payment integration
 - local architecture review only
 
+## M57 Adapter Contract Layer
+
+M57 adds `calculator-ai-adapter.ts` on top of this architecture. The adapter keeps `local_fixture` as the default mode and still performs no fetch by default.
+
+New route:
+
+- `/app/calculators/ai-adapter-status`
+
+Adapter modes:
+
+- `local_fixture`
+- `backend_disabled`
+- `backend_test_ready`
+- `production_disabled`
+
+Feature flags:
+
+- `VITE_CALCULATOR_AI_MODE=local_fixture`
+- `VITE_ENABLE_CALCULATOR_AI_BACKEND=false`
+- `VITE_ENABLE_CALCULATOR_AI_NETWORK=false`
+
+`backend_test_ready` cannot run a backend test client unless both backend and network flags are explicitly true. M57 still defines no real endpoint URL and no provider call.

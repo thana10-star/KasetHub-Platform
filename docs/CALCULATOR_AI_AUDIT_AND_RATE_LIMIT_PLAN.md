@@ -58,3 +58,18 @@ Planned tables:
 
 No migrations are run in M56.
 
+## M57 Adapter Audit Preview
+
+M57 adapter responses include an audit preview only:
+
+- request id
+- snapshot id
+- snapshot lock hash
+- policy version id
+- prompt template version id
+- safety decision status
+- risk level
+- `wouldWriteBackendAuditLog: false`
+- `wouldWriteSupabase: false`
+
+No rate-limit counter is enforced yet and no audit row is written. Future backend work must enforce daily limits server-side before enabling any real provider call.
