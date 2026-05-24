@@ -118,3 +118,18 @@ Regression checks now cover:
 - endpoint readiness remains `blocked_until_backend_exists`
 
 Future endpoint work must not add frontend provider keys, hidden sponsor content, formula mutation, or a network path that bypasses lock-hash, policy, audit, rate-limit, and safety checks.
+
+## M59 Edge Function Contract Regression Safety
+
+M59 adds tests for the future `calculator-ai-explain` Edge Function contract.
+
+Regression checks now cover:
+
+- typed request payloads exclude provider keys, service-role keys, and sponsor payloads
+- response previews keep provider, network, and Supabase writes disabled
+- lock-hash mismatch blocks before provider paths
+- policy mismatch blocks before provider paths
+- timeout plans cannot mutate deterministic results
+- audit and rate-limit hooks remain planning-only
+
+Future Edge Function work must keep these tests passing before adding a deployed function or staging network call.

@@ -72,3 +72,17 @@ Do not enable production AI explanations while any of these are missing:
 ## Current M58 Boundary
 
 M58 adds QA fixtures and an endpoint plan route only. It does not add a real backend endpoint, fetch, AI API call, Supabase write, cloud sync, AdMob/payment, sponsor integration, or live network path.
+
+## M59 Contract Draft
+
+M59 adds the typed Edge Function contract for `calculator-ai-explain`.
+
+The contract is ready for review only. Before deployment, the operator must still confirm:
+
+- Supabase project and auth ownership are ready for this surface
+- Edge Function secrets are configured outside frontend env
+- lock-hash verification runs server-side
+- policy version and prompt template registry are reviewed
+- audit and rate-limit tables have RLS and retention review
+- timeout behavior returns safe disabled copy
+- provider calls remain impossible from frontend code

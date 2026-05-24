@@ -43,6 +43,12 @@ import {
 import type { CalculatorAIBackendClient } from '@/services/agri-calculators/calculator-ai-adapter.types';
 import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
 import { buildCalculatorAIEndpointPlan } from '@/services/agri-calculators/calculator-ai-endpoint-plan';
+import {
+  CALCULATOR_AI_EDGE_FUNCTION_NAME,
+  buildCalculatorAIEdgeRequest,
+  buildCalculatorAIEdgeResponseContract,
+  getCalculatorAIEdgeFunctionContractSummary,
+} from '@/services/agri-calculators/calculator-ai-edge-contract';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -1071,5 +1077,58 @@ describe('calculator AI backend adapter contract', () => {
     expect(plan.requiredSafetyChecks.map((check) => check.id)).toContain('sponsor_separation');
     expect(plan.blockedProductionConditions.length).toBeGreaterThan(0);
     expect(defaultStatus.canCallNetwork).toBe(false);
+  });
+
+  test('M59 Edge Function contract drafts request and response without provider keys or network calls', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const edgeRequest = buildCalculatorAIEdgeRequest(request);
+    const edgeResponse = buildCalculatorAIEdgeResponseContract(request);
+    const summary = getCalculatorAIEdgeFunctionContractSummary(request);
+
+    expect(edgeRequest.endpointName).toBe(CALCULATOR_AI_EDGE_FUNCTION_NAME);
+    expect(edgeRequest.endpointName).toBe('calculator-ai-explain');
+    expect(edgeRequest.noProviderKeyInPayload).toBe(true);
+    expect(edgeRequest.noServiceRoleKeyInPayload).toBe(true);
+    expect(edgeRequest.authContext.frontendProviderKeysAllowed).toBe(false);
+    expect(edgeRequest.authContext.frontendServiceRoleAllowed).toBe(false);
+    expect(edgeResponse.status).toBe('design_stub_ready');
+    expect(edgeResponse.providerCallPlanned).toBe(false);
+    expect(edgeResponse.providerCallAttempted).toBe(false);
+    expect(edgeResponse.networkCallAttempted).toBe(false);
+    expect(edgeResponse.supabaseWriteAttempted).toBe(false);
+    expect(summary.deployed).toBe(false);
+    expect(summary.networkEnabledByDefault).toBe(false);
+  });
+
+  test('M59 Edge Function contract blocks lock hash and policy mismatches before provider paths', () => {
+    const hashMismatch = buildCalculatorAIEdgeResponseContract({
+      ...createCalculatorAIAdapterRequest(),
+      expectedLockedResultHash: 'calc-lock-mismatch-m59',
+    });
+    const policyMismatch = buildCalculatorAIEdgeResponseContract({
+      ...createCalculatorAIAdapterRequest(),
+      expectedPolicyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+    });
+
+    expect(hashMismatch.status).toBe('blocked_before_provider');
+    expect(hashMismatch.providerCallAttempted).toBe(false);
+    expect(hashMismatch.networkCallAttempted).toBe(false);
+    expect(policyMismatch.status).toBe('blocked_before_provider');
+    expect(policyMismatch.policyCheck.status).toBe('mismatch_blocked');
+    expect(policyMismatch.providerCallAttempted).toBe(false);
+    expect(policyMismatch.networkCallAttempted).toBe(false);
+  });
+
+  test('M59 Edge Function timeout, audit, and rate-limit hooks stay planning-only', () => {
+    const response = buildCalculatorAIEdgeResponseContract(createCalculatorAIAdapterRequest());
+
+    expect(response.timeoutPlan.retryCount).toBe(0);
+    expect(response.timeoutPlan.deterministicResultMutableOnTimeout).toBe(false);
+    expect(response.rateLimitCheck.status).toBe('planned_not_enforced');
+    expect(response.auditEvents.length).toBeGreaterThanOrEqual(5);
+    expect(response.auditEvents.every((event) => event.wouldWriteSupabase === false)).toBe(true);
+    expect(response.failureModes.map((mode) => mode.id)).toContain('network_disabled_by_default');
+    expect(response.deterministicResultUnchanged).toBe(true);
+    expect(response.noRealAICall).toBe(true);
   });
 });

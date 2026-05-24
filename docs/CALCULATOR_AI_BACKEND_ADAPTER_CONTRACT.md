@@ -94,3 +94,20 @@ Fixture states cover:
 `/app/calculators/ai-adapter-status` now shows an adapter state matrix, fixture-vs-disabled comparison, current flags, backend blocked reasons, no-network guarantee, safe fallback behavior, and locked hash preservation status.
 
 M58 also adds `/app/calculators/ai-endpoint-plan` for future staging endpoint readiness. It remains no-network and planning-only.
+
+## M59 Edge Function Contract Draft
+
+M59 adds `calculator-ai-edge-contract.types.ts` and `calculator-ai-edge-contract.ts`.
+
+The future endpoint name is `calculator-ai-explain`. The contract defines typed request/response payloads, auth context, policy check, audit event preview, rate-limit check, timeout plan, and failure modes.
+
+Current behavior remains disabled by default:
+
+- no deployed Edge Function
+- no fetch or provider call
+- no frontend provider key
+- no frontend service-role key
+- no Supabase writes
+- no sponsor or affiliate payload
+
+The contract proves that lock-hash mismatch and policy mismatch are blocked before any future provider path.

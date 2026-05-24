@@ -73,4 +73,10 @@ The adapter must not let feature flags change policy behavior silently. Future s
 
 M58 adds adapter QA fixtures and tests for policy mismatch blocking. If a request expects a policy version that does not match the selected policy version, the adapter returns `safety_blocked` with `policy_version_mismatch` before any backend or network path.
 
+## M59 Edge Policy Check
+
+`CalculatorAIEdgePolicyCheck` records the selected policy version, prompt template version, expected policy version, banned categories, blocked actions, and sponsor separation status for the future `calculator-ai-explain` Edge Function.
+
+Policy mismatch remains blocked before provider calls. Draft or unreviewed policy versions should remain `review_required` until an explicit policy promotion milestone exists.
+
 Future endpoint work must validate policy version ids server-side as well; frontend checks are only a planning and QA guard.

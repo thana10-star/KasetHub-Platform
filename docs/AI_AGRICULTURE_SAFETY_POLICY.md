@@ -200,3 +200,20 @@ Required future network boundary:
 - AI must explain locked calculator values only and must not mutate formulas or inject hidden recommendations
 
 M58 adds local adapter QA fixtures and an endpoint checklist route only. It still does not call AI, create a backend endpoint, write backend/Supabase data, sync to cloud, or enable sponsor behavior.
+
+## M59 Calculator AI Edge Function Contract
+
+The future calculator AI endpoint is named `calculator-ai-explain`. It must be backend-owned and explanation-only.
+
+Before any live provider call, the Edge Function must:
+
+- keep provider and service-role keys in server-side secret stores only
+- verify auth/session context where user history is involved
+- verify the locked calculator result hash
+- verify the policy and prompt template version
+- run rate-limit and abuse checks
+- handle timeout with safe disabled copy
+- safety-filter the output before display
+- prevent sponsor, affiliate, product, chemical, fertilizer-dose invention, formula mutation, label override, and guaranteed outcome content
+
+M59 is a contract draft only. It does not deploy an Edge Function, call a provider, write Supabase data, or enable a frontend network path.

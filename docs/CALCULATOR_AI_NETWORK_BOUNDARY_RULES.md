@@ -55,3 +55,9 @@ Sponsor or affiliate content must stay outside calculator AI prompts and results
 ## M58 Status
 
 `backend_test_ready` is still a contract gate. Even when future flags are set, M58 has no endpoint URL and no provider integration. Network remains inactive unless a later milestone explicitly adds and tests a backend-owned path.
+
+## M59 Edge Contract Status
+
+M59 names the future endpoint `calculator-ai-explain`, but it still does not add a URL, fetch call, deployed Edge Function, provider key, service-role key, or default network path.
+
+The typed Edge contract can preview request/response payloads only. Any future live call must still pass explicit staging flags and server-side checks for auth, lock hash, policy version, audit logging, rate limits, timeout behavior, and safety filtering.

@@ -89,3 +89,19 @@ Future endpoint readiness requires:
 - abuse prevention before provider calls
 
 No audit rows, rate-limit rows, or safety event rows are written in M58.
+
+## M59 Edge Contract Hooks
+
+M59 adds typed audit and rate-limit hook previews for the future `calculator-ai-explain` Edge Function.
+
+Planned audit events:
+
+- request received
+- snapshot lock verified
+- policy checked
+- rate limit checked
+- provider skipped/called
+- safety filtered
+- response returned
+
+The M59 service marks every audit event with `wouldWriteSupabase: false`. Real writes still require schema, RLS, retention, and admin/security review.

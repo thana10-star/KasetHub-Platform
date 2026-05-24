@@ -32,6 +32,8 @@ VITE_ENABLE_CALCULATOR_AI_NETWORK=true
 
 This is only a future staging gate. M57 still has no real endpoint URL and no real AI provider call.
 
+M59 names the future Edge Function `calculator-ai-explain`, but still does not add an endpoint URL, fetch path, provider key, or service-role key. The same flags remain a future staging gate only.
+
 Before this mode can be used for real network traffic, a later milestone must add:
 
 - backend-owned endpoint
@@ -41,6 +43,7 @@ Before this mode can be used for real network traffic, a later milestone must ad
 - snapshot lock hash verification
 - safety filter before display
 - audit logging plan with RLS review
+- Edge Function secret handling for provider and service-role keys
 
 ## Production Disabled State
 

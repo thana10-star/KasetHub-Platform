@@ -814,6 +814,30 @@ RLS notes: Backend/admin only by default. Users should see simple disabled/safet
 
 Admin/moderation notes: Events must prove no network path is active by default and must not become analytics for sponsor targeting without consent and policy review.
 
+## `calculator_ai_edge_invocations` Future
+
+Purpose: Backend-owned invocation records for the future `calculator-ai-explain` Supabase Edge Function after deployment, auth, RLS, audit, and retention review.
+
+Key columns: `id uuid`, `request_log_id`, `user_id nullable`, `session_hash nullable`, `edge_function_name`, `edge_status`, `snapshot_lock_hash`, `policy_version_id`, `timeout_status nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `user_id`, `session_hash`, `edge_function_name`, `edge_status`, `policy_version_id`, `created_at desc`.
+
+RLS notes: Backend inserts only. Users may see friendly explanation status after privacy review, not raw provider/audit details.
+
+Admin/moderation notes: Must not store provider keys, service-role keys, hidden sponsor payloads, or full raw prompts.
+
+## `calculator_ai_provider_attempts` Future
+
+Purpose: Provider-call attempt metadata for future backend-only calculator explanations after a provider integration milestone exists.
+
+Key columns: `id uuid`, `edge_invocation_id`, `provider_name`, `provider_status`, `provider_latency_ms`, `timeout_ms`, `safety_filter_status`, `created_at`, `metadata jsonb`.
+
+Indexes: `edge_invocation_id`, `provider_name`, `provider_status`, `safety_filter_status`, `created_at desc`.
+
+RLS notes: Admin/security only by default. User-facing surfaces should not expose provider internals.
+
+Admin/moderation notes: Provider attempts must prove deterministic result values were immutable and must not include provider secrets or sponsor targeting data.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

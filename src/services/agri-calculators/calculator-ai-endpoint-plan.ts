@@ -129,7 +129,7 @@ export function buildCalculatorAIEndpointPlan(): CalculatorAIEndpointPlan {
     ],
     recommendedRolloutOrder: [
       'M58: QA fixtures and endpoint checklist only',
-      'M59: backend endpoint request/response mock behind disabled network',
+      'M59: calculator-ai-explain Edge Function contract draft behind disabled network',
       'M60: staging-only endpoint dry run with no provider call',
       'M61: policy table and audit-log RLS review',
       'M62: provider integration in backend-only staging with strict safety filter',

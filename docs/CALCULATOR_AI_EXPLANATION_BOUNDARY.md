@@ -100,4 +100,6 @@ The adapter default is `local_fixture`. It returns deterministic Thai fixture ex
 
 `/app/calculators/ai-adapter-status` shows the current mode, backend flag, network flag, supported request type, locked hash, and future staging checklist.
 
+M59 adds `/app/calculators/ai-edge-contract` for the future `calculator-ai-explain` Edge Function contract. It keeps the same explanation-only boundary: AI may explain locked values later, but cannot change formulas, add hidden products, or override safety disclaimers.
+
 The adapter still blocks hidden sponsor content, chemical/product recommendations, deterministic result mutation, and fertilizer dose invention before any AI path can run.

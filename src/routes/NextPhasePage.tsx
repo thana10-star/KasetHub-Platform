@@ -209,6 +209,9 @@ export function NextPhasePage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
                 เปิด Env Safety
               </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-edge-contract">
+                เปิด AI Edge contract
+              </Link>
             </div>
           </div>
         </Card>

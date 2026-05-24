@@ -215,6 +215,8 @@ M49 calculator models map conceptually into:
 - `calculator_ai_policy_checks`
 - `calculator_ai_snapshot_locks`
 - `calculator_ai_backend_events`
+- `calculator_ai_edge_invocations`
+- `calculator_ai_provider_attempts`
 
 Type mapping:
 
@@ -250,10 +252,16 @@ Type mapping:
 - `CalculatorAIAdapterQAFixture` -> local QA fixture only; no production table unless converted into reviewed backend test cases
 - `CalculatorAIEndpointPlan` -> planning-only service; future checklist evidence may inform `calculator_ai_policy_checks` and backend readiness docs
 - locked result hash verification -> `calculator_ai_snapshot_locks.snapshot_lock_hash` plus `calculator_ai_policy_checks.check_status`
+- `CalculatorAIEdgeRequest` -> future `calculator_ai_edge_invocations` request envelope metadata after deployment
+- `CalculatorAIEdgeResponse` -> future `calculator_ai_edge_invocations.edge_status`, `calculator_ai_backend_events`, and `calculator_ai_explanations` after safety filtering
+- `CalculatorAIEdgePolicyCheck` -> future `calculator_ai_policy_checks`
+- `CalculatorAIEdgeAuditEvent` -> future `calculator_ai_audit_logs` and `calculator_ai_backend_events`
+- `CalculatorAIEdgeRateLimitCheck` -> future `calculator_ai_rate_limits`
+- `CalculatorAIEdgeTimeoutPlan` / `CalculatorAIEdgeFailureMode` -> future `calculator_ai_backend_events` and `calculator_ai_provider_attempts`
 
-M49-M58 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, and endpoint planning services. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+M49-M59 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, endpoint planning services, and Edge Function contract previews. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
 
-Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, validate endpoint/network boundaries, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, adapter events, request logs, snapshot locks, or safety events for targeting without explicit consent and policy review.
+Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, validate endpoint/network boundaries, keep provider/service-role keys server-only, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, adapter events, request logs, snapshot locks, Edge invocation logs, provider attempts, or safety events for targeting without explicit consent and policy review.
 
 ## My Farm Hub
 

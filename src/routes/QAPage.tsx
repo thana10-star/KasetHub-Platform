@@ -61,6 +61,7 @@ const checklist = [
 const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Calculator AI adapter status', route: '/app/calculators/ai-adapter-status' },
   { label: 'Calculator AI endpoint plan', route: '/app/calculators/ai-endpoint-plan' },
+  { label: 'Calculator AI Edge contract', route: '/app/calculators/ai-edge-contract' },
   { label: 'หน้าแรก', route: '/app' },
   { label: 'Admin Dashboard', route: '/app/admin' },
   { label: 'Internal MVP snapshot', route: '/app/mvp-snapshot' },
@@ -190,6 +191,14 @@ export function QAPage() {
             to="/app/mvp-snapshot"
             variant="soft"
           />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge contract"
+            description="ดู contract calculator-ai-explain, server-only provider key, audit, rate-limit hook และ timeout behavior"
+            to="/app/calculators/ai-edge-contract"
+            variant="white"
+          />
         </Card>
 
         <Card className="p-4">
@@ -287,6 +296,14 @@ export function QAPage() {
             description="ดู checklist backend-only prompt execution, lock hash, policy, audit, rate limit และ no-network boundary"
             to="/app/calculators/ai-endpoint-plan"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge contract"
+            description="ดู contract calculator-ai-explain, server-only provider key, audit, rate-limit hook และ timeout behavior"
+            to="/app/calculators/ai-edge-contract"
+            variant="white"
           />
         </Card>
 

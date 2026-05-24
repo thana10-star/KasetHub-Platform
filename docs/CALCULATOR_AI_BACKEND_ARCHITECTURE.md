@@ -103,3 +103,25 @@ The route and `calculator-ai-endpoint-plan.ts` define:
 - no hidden recommendation injection
 
 No endpoint is created in M58 and no network path is enabled.
+
+## M59 Edge Function Design Stub
+
+M59 narrows the future backend endpoint into a Supabase Edge Function contract named `calculator-ai-explain`.
+
+The Edge Function draft sits after the M58 endpoint plan:
+
+```text
+Frontend adapter
+-> calculator-ai-explain Edge Function
+-> auth/session check
+-> lock-hash verification
+-> policy version check
+-> rate-limit check
+-> prompt builder
+-> provider call inside backend only
+-> safety filter
+-> audit event
+-> final explanation display
+```
+
+M59 still stops before prompt building and provider calls. The route `/app/calculators/ai-edge-contract` shows the typed request, response, server-only key boundary, audit/rate-limit hooks, timeout plan, and failure modes.

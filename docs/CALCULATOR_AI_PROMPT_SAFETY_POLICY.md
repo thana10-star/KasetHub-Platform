@@ -96,3 +96,16 @@ Before any real prompt reaches an AI provider:
 - backend must enforce rate limits and timeout fallback behavior
 
 Prompt safety remains explanation-only. The model must not mutate formulas or inject hidden recommendations.
+
+## M59 Edge Prompt Boundary
+
+The future `calculator-ai-explain` Edge Function may build prompts only after:
+
+- auth/session context is verified
+- snapshot lock hash matches
+- policy version matches
+- rate-limit hook passes
+- sponsor/product payloads are absent
+- payload size is within the contract limit
+
+M59 does not build a live provider prompt. It only previews typed payloads, timeout behavior, audit hooks, and failure modes.
