@@ -936,3 +936,11 @@ M79 adds `/app/weather/risk-review`, a local-only expert-review readiness route 
 The new service layer adds rule version metadata, source placeholders, pending reviewer sign-offs for agronomy, crop protection, weather data, and safety roles, false-positive examples, false-negative examples, and prescriptive blockers.
 
 M79 keeps every weather risk rule at `planning_only` with `prescriptiveAllowed=false`. No rule can become prescriptive, recommend products, provide exact chemical/fertilizer doses, use GPS, write Supabase data, call AI, or send push notifications.
+
+## M80 Weather Risk Governance And Audit Readiness
+
+M80 adds `/app/weather/risk-audit`, a local-only release audit and governance QA route for weather risk rules.
+
+The service layer adds reviewed-source simulations, reviewer history fixtures, release audit events, diff previews, stale review warnings, and human approval gate blockers.
+
+M80 proves automation and CMS cannot turn a weather risk rule prescriptive. It still adds no AI calls, no production agronomy engine, no exact prescriptions, no product/sponsor recommendations, no GPS/geolocation, no Supabase writes, no backend writes, no cloud sync, and no automated push notifications.

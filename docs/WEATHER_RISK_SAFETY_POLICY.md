@@ -34,3 +34,7 @@ M78 uses weather adapter data only. It does not require GPS, precise farm locati
 ## M79 Expert Review Gate
 
 M79 requires safety reviewer sign-off before any future prescriptive behavior. The current implementation keeps all safety sign-offs pending and keeps `prescriptiveAllowed: false`.
+
+## M80 Human Release Safety
+
+M80 keeps final prescriptive release blocked even when governance fixtures exist. A human approval gate remains required before any future rule can move beyond general caution.

@@ -22,6 +22,7 @@ export type AppRoute =
   | '/app/weather/preferences'
   | '/app/weather/risk-rules'
   | '/app/weather/risk-review'
+  | '/app/weather/risk-audit'
   | '/app/calculators'
   | '/app/calculators/safety'
   | '/app/calculators/qa'

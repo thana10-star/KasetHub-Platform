@@ -28,3 +28,9 @@ All M79 sign-offs remain pending.
 M79 keeps `prescriptiveAllowed: false` for every rule version.
 
 No rule may recommend a product, sponsor, exact chemical dose, exact fertilizer dose, label override, or guaranteed outcome.
+
+## M80 Governance Polish
+
+M80 adds reviewer history fixtures, reviewed-source simulations, release audit events, diff previews, and a human approval gate.
+
+These fixtures prove that automation or CMS still cannot make a rule prescriptive without a distinct human release step.

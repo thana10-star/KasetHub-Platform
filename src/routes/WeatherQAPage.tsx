@@ -22,6 +22,9 @@ import {
 import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agri-risk-fixtures';
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskDiffPreviewSummary } from '@/services/weather/weather-risk-diff-preview';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
+import { getWeatherRiskReviewerHistorySummary } from '@/services/weather/weather-risk-review-history';
 
 const statusTone = {
   pass: 'success',
@@ -39,6 +42,9 @@ export function WeatherQAPage() {
   const riskFixtures = getWeatherAgriRiskFixtureSummary();
   const riskBoundary = getWeatherAgriRiskBoundarySummary();
   const riskExpertReview = getWeatherRiskExpertReviewSummary();
+  const riskReleaseAudit = getWeatherRiskReleaseAuditSummary();
+  const riskReviewerHistory = getWeatherRiskReviewerHistorySummary();
+  const riskDiffPreview = getWeatherRiskDiffPreviewSummary();
   const sourceReadiness = buildWeatherSourceReadiness({
     modeStatus: summary.modeStatus,
     cacheStatus,
@@ -200,6 +206,23 @@ export function WeatherQAPage() {
         </section>
 
         <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">M80 governance and audit readiness</h2>
+          <Card className="p-4">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="neutral">audit events {riskReleaseAudit.auditEventCount}</Badge>
+              <Badge tone="gold">history {riskReviewerHistory.historyCount}</Badge>
+              <Badge tone="sky">diff previews {riskDiffPreview.previewCount}</Badge>
+              <StatusPill tone={riskReleaseAudit.automationBypassBlocked ? 'success' : 'danger'}>
+                automation blocked {String(riskReleaseAudit.automationBypassBlocked)}
+              </StatusPill>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              stale review warnings {riskReleaseAudit.staleReviewWarnings.length} · release remains blocked {String(riskReleaseAudit.releaseBlocked)} · planning-only badge {riskReleaseAudit.planningOnlyBadge}
+            </p>
+          </Card>
+        </section>
+
+        <section className="grid gap-3">
           <h2 className="text-lg font-extrabold text-kaset-ink">Failure fixture matrix</h2>
           {summary.fixtures.map((fixture) => (
             <Card className="p-4" key={fixture.id}>
@@ -265,6 +288,9 @@ export function WeatherQAPage() {
         </Link>
         <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
           เปิด M79 expert review
+        </Link>
+        <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
+          เปิด M80 release audit
         </Link>
 
         <LargeActionButton

@@ -8,6 +8,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { weatherAgriRiskCategoryLabels } from '@/services/weather/weather-agri-risk-boundary';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { weatherRiskReviewerRoleLabels } from '@/services/weather/weather-risk-review-fixtures';
 
 const reviewTone = {
@@ -18,6 +19,7 @@ const reviewTone = {
 
 export function WeatherRiskReviewPage() {
   const summary = getWeatherRiskExpertReviewSummary();
+  const releaseAudit = getWeatherRiskReleaseAuditSummary();
 
   return (
     <div>
@@ -44,7 +46,7 @@ export function WeatherRiskReviewPage() {
         </Card>
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่คำแนะนำเชิงสั่งการ">
-          M79 ยังไม่อนุญาตให้กฎอากาศสั่งให้พ่นยา ให้น้ำ ใส่ปุ๋ย เลื่อนเก็บเกี่ยว หรือใช้สินค้าใด ๆ แบบเฉพาะเจาะจง
+          M79 ยังไม่อนุญาตให้กฎอากาศสั่งให้พ่นยา ให้น้ำ ใส่ปุ๋ย เลื่อนเก็บเกี่ยว หรือใช้สินค้าใด ๆ แบบเฉพาะเจาะจง · M80 release blocked {String(releaseAudit.releaseBlocked)} · automation blocked {String(releaseAudit.automationBypassBlocked)}
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -153,9 +155,12 @@ export function WeatherRiskReviewPage() {
           })}
         </section>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/weather/risk-rules">
             กลับไปกฎความเสี่ยง
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-audit">
+            เปิด M80 release audit
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/qa">
             เปิด Weather QA

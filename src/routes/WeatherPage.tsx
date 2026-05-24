@@ -32,6 +32,7 @@ import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-f
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
@@ -88,6 +89,7 @@ export function WeatherPage() {
   const offlineState = sourceReadiness.offlineState;
   const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
   const expertReviewSummary = getWeatherRiskExpertReviewSummary();
+  const releaseAuditSummary = getWeatherRiskReleaseAuditSummary();
 
   return (
     <div>
@@ -202,7 +204,7 @@ export function WeatherPage() {
             </div>
           </div>
           <NoticeBox tone="info" title="คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ">
-            การ์ดนี้เป็น preview จากกฎ planning-only ยังไม่ใช่ agronomy engine ที่ผู้เชี่ยวชาญตรวจทาน และไม่แนะนำสินค้า อัตราสารเคมี หรือผลลัพธ์รับประกัน · rule versions {expertReviewSummary.versionCount} · prescriptiveAllowed false
+            การ์ดนี้เป็น preview จากกฎ planning-only ยังไม่ใช่ agronomy engine ที่ผู้เชี่ยวชาญตรวจทาน และไม่แนะนำสินค้า อัตราสารเคมี หรือผลลัพธ์รับประกัน · rule versions {expertReviewSummary.versionCount} · audit events {releaseAuditSummary.auditEventCount} · prescriptiveAllowed false
           </NoticeBox>
           <div className="grid gap-3 md:grid-cols-2">
             {agriRiskAssessment.cards.slice(0, 6).map((card) => (
@@ -231,6 +233,9 @@ export function WeatherPage() {
           </Link>
           <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
             ดูสถานะ expert review
+          </Link>
+          <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
+            ดู release audit
           </Link>
         </section>
 

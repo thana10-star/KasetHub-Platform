@@ -1324,3 +1324,14 @@ Planning only. No migrations were run.
 - `weather_risk_audit_events`: future audit trail for rule changes, blocked release attempts, and safety decisions.
 
 M79 keeps every future table local-planning only. No Supabase writes, RLS policies, migrations, or app table rows were created.
+
+## Future Weather Risk Governance Tables From M80
+
+Planning only. No migrations were run.
+
+- `weather_risk_release_audit_events`: future backend-owned audit timeline for release attempts and blocked bypasses.
+- `weather_risk_reviewer_history`: future reviewer assignment/change/revert/stale-review history.
+- `weather_risk_rule_diff_previews`: future reviewed diff previews before activation.
+- `weather_risk_release_reviews`: future human release approvals, timestamps, notes, and rollback references.
+
+M80 keeps all governance data local-only and keeps final prescriptive release blocked.

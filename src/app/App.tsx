@@ -78,6 +78,7 @@ import { SupabaseSqlChecklistPage } from '@/routes/SupabaseSqlChecklistPage';
 import { WeatherPage } from '@/routes/WeatherPage';
 import { WeatherPreferencesPage } from '@/routes/WeatherPreferencesPage';
 import { WeatherQAPage } from '@/routes/WeatherQAPage';
+import { WeatherRiskAuditPage } from '@/routes/WeatherRiskAuditPage';
 import { WeatherRiskReviewPage } from '@/routes/WeatherRiskReviewPage';
 import { WeatherRiskRulesPage } from '@/routes/WeatherRiskRulesPage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="weather/preferences" element={<WeatherPreferencesPage />} />
         <Route path="weather/risk-rules" element={<WeatherRiskRulesPage />} />
         <Route path="weather/risk-review" element={<WeatherRiskReviewPage />} />
+        <Route path="weather/risk-audit" element={<WeatherRiskAuditPage />} />
         <Route path="calculators" element={<CalculatorsPage />} />
         <Route path="calculators/safety" element={<CalculatorSafetyPage />} />
         <Route path="calculators/qa" element={<CalculatorQAPage />} />

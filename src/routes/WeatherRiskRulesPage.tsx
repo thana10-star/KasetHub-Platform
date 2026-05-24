@@ -15,12 +15,14 @@ import {
 import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agri-risk-fixtures';
 import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 
 export function WeatherRiskRulesPage() {
   const summary = getWeatherAgriRiskRuleSummary();
   const fixtures = getWeatherAgriRiskFixtureSummary();
   const boundary = getWeatherAgriRiskBoundarySummary();
   const expertReview = getWeatherRiskExpertReviewSummary();
+  const releaseAudit = getWeatherRiskReleaseAuditSummary();
 
   return (
     <div>
@@ -49,7 +51,7 @@ export function WeatherRiskRulesPage() {
         </Card>
 
         <NoticeBox tone="warning" icon={AlertTriangle} title="ยังไม่ใช่กฎ agronomy ที่ตรวจทานแล้ว">
-          เกณฑ์ทั้งหมดติดป้าย `เบื้องต้น` และ `planning-only` ต้องมีผู้เชี่ยวชาญตรวจทานก่อนใช้เป็นคำแนะนำจริง · M79 versions {expertReview.versionCount} · pending signoffs {expertReview.pendingSignoffCount}
+          เกณฑ์ทั้งหมดติดป้าย `เบื้องต้น` และ `planning-only` ต้องมีผู้เชี่ยวชาญตรวจทานก่อนใช้เป็นคำแนะนำจริง · M79 versions {expertReview.versionCount} · M80 audit events {releaseAudit.auditEventCount} · release blocked {String(releaseAudit.releaseBlocked)}
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">
@@ -128,12 +130,15 @@ export function WeatherRiskRulesPage() {
           </ul>
         </NoticeBox>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/weather">
             กลับไปหน้าสภาพอากาศ
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
             เปิด M79 expert review
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
+            เปิด M80 release audit
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/qa">
             เปิด Weather QA

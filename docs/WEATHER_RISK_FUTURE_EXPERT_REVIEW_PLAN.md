@@ -30,3 +30,9 @@ Before live risk intelligence becomes prescriptive or personalized, KasetHub nee
 ## M79 Local Fixtures
 
 M79 creates local fixtures for rule versions, source placeholders, pending sign-offs, false-positive examples, false-negative examples, and prescriptive blockers. These are readiness artifacts only and do not create a production agronomy engine.
+
+## M80 Release Audit Planning
+
+M80 adds local release audit fixtures, reviewer history, diff previews, stale review warnings, and human release gate blockers.
+
+Future expert review must include audit persistence, reviewer identity, rollback, and human release approval before any prescriptive activation.

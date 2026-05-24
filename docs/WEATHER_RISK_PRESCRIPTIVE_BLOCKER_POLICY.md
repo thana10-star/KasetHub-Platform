@@ -24,3 +24,9 @@ Future prescriptive behavior would require:
 - release gate approved
 
 M79 still keeps `prescriptiveAllowed: false` even when the approval gate is represented locally.
+
+## M80 Automation / CMS Bypass Policy
+
+M80 adds explicit audit fixtures for automation bypass and CMS publish attempts. Both remain blocked.
+
+Future CMS or automation may prepare drafts, diffs, or review packets, but cannot approve prescriptive weather risk rules.

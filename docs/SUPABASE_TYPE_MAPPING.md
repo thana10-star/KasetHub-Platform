@@ -640,3 +640,14 @@ Planning only. No generated Supabase types were added.
 - `WeatherRiskPrescriptiveBlocker` may map to `weather_risk_audit_events` for blocked attempts.
 
 All M79 mappings keep `prescriptiveAllowed: false`.
+
+## Future Weather Risk Governance Mapping From M80
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherRiskReleaseAuditEvent` may map to `weather_risk_release_audit_events`.
+- `WeatherRiskReviewerHistory` may map to `weather_risk_reviewer_history`.
+- `WeatherRiskRuleDiffPreview` may map to `weather_risk_rule_diff_previews`.
+- `WeatherRiskHumanApprovalGate` may map to `weather_risk_release_reviews`.
+
+M80 keeps automation/CMS bypass blocked and keeps `finalPrescriptiveAllowed: false`.
