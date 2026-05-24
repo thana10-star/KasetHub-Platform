@@ -1,4 +1,4 @@
-import { BrainCircuit, KeyRound, LockKeyhole, ShieldAlert, ShieldCheck, TimerReset, WifiOff } from 'lucide-react';
+import { BrainCircuit, KeyRound, LockKeyhole, ServerOff, ShieldAlert, ShieldCheck, TimerReset, WifiOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -14,6 +14,7 @@ import {
   summarizeAITextFixtureResponse,
 } from '@/services/ai-text/ai-text-fixtures';
 import { explainAITextSync, getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 
 const requestTypeLabels = {
   calculator_explanation: 'อธิบายผลคำนวณ',
@@ -23,6 +24,7 @@ const requestTypeLabels = {
 
 export function AITextStatusPage() {
   const status = getAITextProxyStatus();
+  const endpointPlan = buildAITextEndpointDryRunPlan(aiTextCalculatorFixtureRequest);
   const fixtureResponses = [
     explainAITextSync(aiTextCalculatorFixtureRequest),
     explainAITextSync(aiTextWeatherFixtureRequest),
@@ -86,6 +88,28 @@ export function AITextStatusPage() {
         <NoticeBox tone="warning" icon={ShieldAlert} title="Proxy-only reminder">
           Real AI text จะทำงานได้เฉพาะ staging flags ครบและผ่าน backend-owned proxy ในอนาคตเท่านั้น M81 ไม่มี direct provider call จาก frontend และถ้า endpoint ยังไม่มีจะคืน controlled disabled state.
         </NoticeBox>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <ServerOff aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M82 endpoint dry-run</h2>
+                <StatusPill tone="warning">fetch {String(endpointPlan.fetchWouldRun)}</StatusPill>
+                <Badge tone="green">provider {String(endpointPlan.providerWouldRun)}</Badge>
+                <Badge tone="neutral">{endpointPlan.endpointUrlMasked}</Badge>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-indigo-900">
+                endpoint URL, network flag, and AI text mode are all insufficient by themselves. M82 keeps default no-network proof active and blocks provider calls until a backend-owned endpoint, audit, rate-limit, and release review exist.
+              </p>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -157,9 +181,12 @@ export function AITextStatusPage() {
           </Card>
         </section>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-4">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
             Calculator AI preview
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-endpoint-plan">
+            Endpoint plan
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-rules">
             Weather risk rules

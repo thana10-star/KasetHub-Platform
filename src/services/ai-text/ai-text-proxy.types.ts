@@ -140,4 +140,7 @@ export type AITextProxyEnv = {
   aiTextProxyMode?: string;
   enableAITextNetwork?: boolean;
   aiTextProxyEndpoint?: string;
+  aiTextEndpointUrl?: string;
+  enableAITextEndpointDryRun?: boolean;
+  enableAITextEndpointNetwork?: boolean;
 };

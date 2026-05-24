@@ -14,6 +14,9 @@ interface ImportMetaEnv {
   readonly VITE_AI_TEXT_MODE?: string;
   readonly VITE_AI_TEXT_PROXY_MODE?: string;
   readonly VITE_ENABLE_AI_TEXT_NETWORK?: string;
+  readonly VITE_AI_TEXT_ENDPOINT_URL?: string;
+  readonly VITE_ENABLE_AI_TEXT_ENDPOINT_DRY_RUN?: string;
+  readonly VITE_ENABLE_AI_TEXT_ENDPOINT_NETWORK?: string;
   readonly VITE_CALCULATOR_AI_MODE?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_BACKEND?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_NETWORK?: string;

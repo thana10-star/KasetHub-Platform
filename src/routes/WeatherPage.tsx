@@ -35,6 +35,7 @@ import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-ri
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -92,6 +93,7 @@ export function WeatherPage() {
   const expertReviewSummary = getWeatherRiskExpertReviewSummary();
   const releaseAuditSummary = getWeatherRiskReleaseAuditSummary();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
 
   return (
     <div>
@@ -211,6 +213,7 @@ export function WeatherPage() {
           <Card className="border-indigo-200 bg-indigo-50 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>M81 {aiTextStatus.mode}</StatusPill>
+              <StatusPill tone="warning">M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)}</StatusPill>
               <Badge tone="green">proxy only</Badge>
               <Badge tone="green">fixture fallback</Badge>
             </div>
@@ -219,6 +222,9 @@ export function WeatherPage() {
             </p>
             <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-status">
               เปิด M81 AI text status
+            </Link>
+            <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-950 ring-1 ring-indigo-900/10" to="/app/ai-text-endpoint-plan">
+              เปิด M82 endpoint plan
             </Link>
           </Card>
           <div className="grid gap-3 md:grid-cols-2">

@@ -947,3 +947,9 @@ M80 proves automation and CMS cannot turn a weather risk rule prescriptive. It s
 ## M81 Real AI Text Proxy Controlled Staging
 
 M81 adds `src/services/ai-text` for a controlled staging-only text proxy boundary. It supports calculator explanation, weather caution explanation, and general educational explanation requests while blocking exact chemical/fertilizer prescription, sponsor/product insertion, autonomous diagnosis, guaranteed outcomes, and legal/financial certainty. `/app/ai-text-status` shows mode, network flags, audit preview, rate-limit preview, immutable calculator-output proof, and fallback status. Defaults remain `VITE_AI_TEXT_MODE=local_fixture`, `VITE_ENABLE_REAL_AI_TEXT=false`, and `VITE_ENABLE_AI_TEXT_NETWORK=false`.
+
+## M82 AI Text Endpoint Contract Dry-run
+
+M82 adds `src/services/ai-text/ai-text-endpoint-contract.ts` and `/app/ai-text-endpoint-plan` for a backend-owned `ai-text-proxy` endpoint contract. The endpoint URL is masked, dry-run/network flags default false, audit/rate-limit output remains preview-only, and timeout fallback cannot mutate calculator outputs.
+
+The future endpoint is still not deployed. Frontend code cannot call a provider directly, cannot accept provider/service-role keys, cannot bypass blocked actions, and cannot enable production AI text behavior.

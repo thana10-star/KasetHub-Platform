@@ -21,6 +21,7 @@ import {
 } from '@/services/agri-calculators/calculator-ai-adapter';
 import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
 type PreviewScenario = 'spray_mix' | 'fertilizer_mix';
@@ -46,6 +47,7 @@ export function CalculatorAIExplanationPreviewPage() {
   const adapterStatus = useMemo(() => getCalculatorAIAdapterStatus(), []);
   const adapterResponse = useMemo(() => explainCalculatorResult(adapterRequest), [adapterRequest]);
   const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
+  const aiTextEndpointPlan = useMemo(() => buildAITextEndpointDryRunPlan(), []);
   const policySummary = summarizeCalculatorAIExplanationPolicy();
 
   return (
@@ -86,12 +88,16 @@ export function CalculatorAIExplanationPreviewPage() {
                 <h2 className="font-extrabold text-indigo-950">M81 real AI text staging readiness</h2>
                 <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>{aiTextStatus.mode}</StatusPill>
                 <Badge tone="green">immutable output</Badge>
+                <Badge tone="gold">M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)}</Badge>
               </div>
               <p className="mt-2 text-sm leading-6 text-indigo-900">
                 calculator explanation is allowed only through a backend-owned proxy boundary. Default still falls back to fixture, no provider key is exposed, and locked calculator values remain unchanged.
               </p>
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-status">
                 เปิด M81 AI text status
+              </Link>
+              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-950 ring-1 ring-indigo-900/10" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
               </Link>
             </div>
           </div>

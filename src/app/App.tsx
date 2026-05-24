@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { AIPage } from '@/routes/AIPage';
 import { AIProxyStatusPage } from '@/routes/AIProxyStatusPage';
+import { AITextEndpointPlanPage } from '@/routes/AITextEndpointPlanPage';
 import { AITextStatusPage } from '@/routes/AITextStatusPage';
 import { AICreditsPage } from '@/routes/AICreditsPage';
 import { AccountPreviewPage } from '@/routes/AccountPreviewPage';
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="ai" element={<AIPage />} />
         <Route path="ai-proxy-status" element={<AIProxyStatusPage />} />
         <Route path="ai-text-status" element={<AITextStatusPage />} />
+        <Route path="ai-text-endpoint-plan" element={<AITextEndpointPlanPage />} />
         <Route path="ai-credits" element={<AICreditsPage />} />
         <Route path="qa" element={<QAPage />} />
         <Route path="mvp-snapshot" element={<MvpSnapshotPage />} />

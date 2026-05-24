@@ -15,6 +15,9 @@ export type PublicRuntimeEnv = {
   aiTextMode: string;
   aiTextProxyMode: string;
   enableAITextNetwork: boolean;
+  aiTextEndpointUrl: string;
+  enableAITextEndpointDryRun: boolean;
+  enableAITextEndpointNetwork: boolean;
   calculatorAIMode: string;
   enableCalculatorAIBackend: boolean;
   enableCalculatorAINetwork: boolean;
@@ -82,6 +85,9 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   aiTextMode: readStringEnv('VITE_AI_TEXT_MODE') || 'local_fixture',
   aiTextProxyMode: readStringEnv('VITE_AI_TEXT_PROXY_MODE') || 'staging_proxy',
   enableAITextNetwork: readBooleanEnv('VITE_ENABLE_AI_TEXT_NETWORK', false),
+  aiTextEndpointUrl: readStringEnv('VITE_AI_TEXT_ENDPOINT_URL'),
+  enableAITextEndpointDryRun: readBooleanEnv('VITE_ENABLE_AI_TEXT_ENDPOINT_DRY_RUN', false),
+  enableAITextEndpointNetwork: readBooleanEnv('VITE_ENABLE_AI_TEXT_ENDPOINT_NETWORK', false),
   calculatorAIMode: readStringEnv('VITE_CALCULATOR_AI_MODE') || 'local_fixture',
   enableCalculatorAIBackend: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_BACKEND', false),
   enableCalculatorAINetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_NETWORK', false),

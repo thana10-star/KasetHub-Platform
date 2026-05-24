@@ -11,6 +11,7 @@ import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-ri
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { weatherRiskReviewerRoleLabels } from '@/services/weather/weather-risk-review-fixtures';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 
 const reviewTone = {
   pending: 'warning',
@@ -22,6 +23,7 @@ export function WeatherRiskReviewPage() {
   const summary = getWeatherRiskExpertReviewSummary();
   const releaseAudit = getWeatherRiskReleaseAuditSummary();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
 
   return (
     <div>
@@ -52,7 +54,7 @@ export function WeatherRiskReviewPage() {
         </NoticeBox>
 
         <NoticeBox tone="info" title="M81 AI text proxy remains blocked from prescriptions">
-          mode {aiTextStatus.mode} · proxy-only · no product/sponsor · no exact prescription. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
+          mode {aiTextStatus.mode} · M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)} · proxy-only · no product/sponsor · no exact prescription. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link> · <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-endpoint-plan">เปิด M82 endpoint plan</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -1374,3 +1374,43 @@ Purpose: Version blocked action policy for AI text requests.
 Key columns: `id uuid`, `policy_version`, `action_id`, `label`, `reason`, `active`, `created_at`.
 
 RLS notes: Public read may be allowed for active policy metadata only after review; writes backend/admin only.
+
+## `ai_text_endpoint_requests` Future
+
+Purpose: Store backend-owned AI text endpoint request envelopes after review.
+
+Key columns: `id uuid`, `request_type`, `source_route`, `policy_version`, `locked_snapshot_hash`, `status`, `created_at`.
+
+RLS notes: Backend writes only; frontend must not insert request rows directly.
+
+## `ai_text_endpoint_responses` Future
+
+Purpose: Store provider response metadata after safety filtering, without exposing sensitive prompts unnecessarily.
+
+Key columns: `id uuid`, `request_id`, `status`, `safety_status`, `provider_latency_ms`, `created_at`.
+
+RLS notes: Backend writes only; public reads are not planned.
+
+## `ai_text_endpoint_failures` Future
+
+Purpose: Track endpoint disabled, timeout, provider unavailable, unsafe request, audit unavailable, and rate-limit unavailable failures.
+
+Key columns: `id uuid`, `request_id`, `failure_mode`, `safe_fallback_used`, `created_at`.
+
+RLS notes: Backend writes only.
+
+## `ai_text_provider_usage` Future
+
+Purpose: Track provider usage for cost and abuse controls from backend only.
+
+Key columns: `id uuid`, `request_id`, `provider_name`, `token_count_preview`, `cost_bucket`, `created_at`.
+
+RLS notes: Service-side only; never frontend writable.
+
+## `ai_text_timeout_events` Future
+
+Purpose: Track provider/request timeout events and fallback behavior.
+
+Key columns: `id uuid`, `request_id`, `timeout_ms`, `fallback_status`, `created_at`.
+
+RLS notes: Backend writes only.

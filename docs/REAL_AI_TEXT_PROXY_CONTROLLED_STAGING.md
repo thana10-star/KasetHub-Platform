@@ -19,3 +19,9 @@ Controlled staging path:
 M81 still does not add a backend endpoint URL, so the staging path returns controlled disabled state until backend ownership, audit, rate limits, safety filtering, and release gates are implemented.
 
 The in-app status route is `/app/ai-text-status`.
+
+## M82 Endpoint Plan
+
+M82 adds `/app/ai-text-endpoint-plan` for the backend-owned endpoint contract and Edge dry-run planning. It shows masked endpoint URL state, request/response contract preview, audit/rate-limit dry-run output, timeout fallback, blocked actions, and production blockers.
+
+M82 still does not add a deployed endpoint or provider call.

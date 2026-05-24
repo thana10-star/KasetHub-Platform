@@ -26,6 +26,7 @@ import { getWeatherRiskDiffPreviewSummary } from '@/services/weather/weather-ris
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getWeatherRiskReviewerHistorySummary } from '@/services/weather/weather-risk-review-history';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 
 const statusTone = {
   pass: 'success',
@@ -47,6 +48,7 @@ export function WeatherQAPage() {
   const riskReviewerHistory = getWeatherRiskReviewerHistorySummary();
   const riskDiffPreview = getWeatherRiskDiffPreviewSummary();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
   const sourceReadiness = buildWeatherSourceReadiness({
     modeStatus: summary.modeStatus,
     cacheStatus,
@@ -97,7 +99,7 @@ export function WeatherQAPage() {
         </NoticeBox>
 
         <NoticeBox tone="info" title="M81 AI text status">
-          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · no provider key in frontend · blocked actions {aiTextStatus.blockedActions.length}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link>
+          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)} · no provider key in frontend · blocked actions {aiTextStatus.blockedActions.length}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link> · <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-endpoint-plan">เปิด M82 endpoint plan</Link>
         </NoticeBox>
 
         <section className="grid gap-3">

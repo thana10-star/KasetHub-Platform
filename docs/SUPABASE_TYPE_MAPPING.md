@@ -661,3 +661,13 @@ M80 keeps automation/CMS bypass blocked and keeps `finalPrescriptiveAllowed: fal
 - release gate requirements -> future `ai_text_release_gates`.
 
 M81 is frontend planning/staging UI only. No Supabase writes, migrations, provider calls, or direct frontend CMS/AI publish paths are added.
+
+## M82 AI Text Endpoint Future Mapping
+
+- `AITextEndpointRequest` -> future `ai_text_endpoint_requests`.
+- `AITextEndpointResponse` -> future `ai_text_endpoint_responses`.
+- `AITextEndpointFailureMode` -> future `ai_text_endpoint_failures`.
+- `AITextEndpointTimeoutPlan` -> future `ai_text_timeout_events`.
+- Future backend provider usage metadata -> `ai_text_provider_usage`.
+
+M82 remains contract/dry-run only. No generated Supabase types, migrations, writes, provider calls, or Edge deployments are added.

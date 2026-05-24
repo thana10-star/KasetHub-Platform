@@ -10,6 +10,7 @@ import { getWeatherRiskDiffPreviewSummary } from '@/services/weather/weather-ris
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getWeatherRiskReviewerHistorySummary } from '@/services/weather/weather-risk-review-history';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 
 const auditTone = {
   planning_only: 'info',
@@ -23,6 +24,7 @@ export function WeatherRiskAuditPage() {
   const history = getWeatherRiskReviewerHistorySummary();
   const diff = getWeatherRiskDiffPreviewSummary();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
 
   return (
     <div>
@@ -52,7 +54,7 @@ export function WeatherRiskAuditPage() {
         </NoticeBox>
 
         <NoticeBox tone="info" title="M81 AI text proxy governance">
-          AI text mode {aiTextStatus.mode} · automation cannot bypass the weather risk human gate · proxy remains fixture/disabled by default. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
+          AI text mode {aiTextStatus.mode} · M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)} · automation cannot bypass the weather risk human gate · proxy remains fixture/disabled by default. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link> · <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-endpoint-plan">เปิด M82 endpoint plan</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

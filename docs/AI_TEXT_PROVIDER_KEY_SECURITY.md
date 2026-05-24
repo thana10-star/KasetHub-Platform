@@ -20,3 +20,13 @@ VITE_ENABLE_AI_TEXT_NETWORK=false
 ```
 
 These flags do not contain secrets and do not authorize production behavior.
+
+## M82 Endpoint Env Additions
+
+```env
+VITE_AI_TEXT_ENDPOINT_URL=
+VITE_ENABLE_AI_TEXT_ENDPOINT_DRY_RUN=false
+VITE_ENABLE_AI_TEXT_ENDPOINT_NETWORK=false
+```
+
+These values still do not contain provider keys. The endpoint URL is masked in UI, and provider/service-role keys remain rejected from frontend config.

@@ -805,3 +805,11 @@ Open-Meteo is still disabled unless explicit local flags enable it. No GPS, prec
 - Blocks prescriptions, sponsor/product injection, diagnosis, guarantees, and unrestricted chat.
 - Keeps provider keys and service-role keys out of frontend config.
 - Adds audit and rate-limit previews without Supabase writes.
+
+## M82 AI Text Endpoint Contract Dry-run
+
+- Adds `/app/ai-text-endpoint-plan` for a backend-owned `ai-text-proxy` endpoint contract.
+- Adds endpoint env placeholders with empty/false defaults.
+- Adds planning-only draft artifacts under `supabase/drafts/ai-text-proxy/`.
+- Keeps provider calls blocked, provider keys backend-only, service-role keys out of frontend, and calculator outputs immutable.
+- No endpoint is deployed and no Supabase write occurs.

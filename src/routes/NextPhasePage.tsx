@@ -10,6 +10,7 @@ import {
   ListChecks,
   LockKeyhole,
   Phone,
+  ServerOff,
   ShieldCheck,
   Smartphone,
 } from 'lucide-react';
@@ -36,6 +37,7 @@ import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-r
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { getAITextEndpointDryRunStatus } from '@/services/ai-text/ai-text-endpoint-contract';
 import type {
   NextPhaseOption,
   NextPhaseOptionId,
@@ -165,6 +167,7 @@ export function NextPhasePage() {
   const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
   const weatherRiskAudit = useMemo(() => getWeatherRiskReleaseAuditSummary(), []);
   const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
+  const aiTextEndpointStatus = useMemo(() => getAITextEndpointDryRunStatus(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -352,6 +355,29 @@ export function NextPhasePage() {
               </p>
               <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
                 เปิด M81 AI text status
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-indigo-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-indigo-100 text-indigo-800">
+              <ServerOff aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M82 AI text endpoint contract</h2>
+                <StatusPill tone="warning">fetch {String(aiTextEndpointStatus.fetchWouldRun)}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                Endpoint URL masked as {aiTextEndpointStatus.endpointUrlMasked}; provider calls remain blocked, audit/rate-limit are dry-run only, and default frontend builds still cannot call AI text endpoints.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint contract
               </Link>
             </div>
           </div>
@@ -635,6 +661,9 @@ export function NextPhasePage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/ai-text-status">
             เปิด M81 AI text status
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/ai-text-endpoint-plan">
+            เปิด M82 endpoint plan
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/mvp-snapshot">
             เปิด MVP snapshot

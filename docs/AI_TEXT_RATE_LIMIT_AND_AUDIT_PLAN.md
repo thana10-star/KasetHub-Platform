@@ -27,3 +27,13 @@ Future backend tables are planning-only:
 - `ai_text_rate_limits`
 - `ai_text_release_gates`
 - `ai_text_blocked_actions`
+
+M82 extends the plan with endpoint-scoped dry-run events:
+
+- `ai_text_endpoint_requests`
+- `ai_text_endpoint_responses`
+- `ai_text_endpoint_failures`
+- `ai_text_provider_usage`
+- `ai_text_timeout_events`
+
+All are future planning notes only. No migrations or Supabase writes occur in M82.

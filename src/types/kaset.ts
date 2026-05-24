@@ -14,6 +14,7 @@ export type AppRoute =
   | '/app/ai'
   | '/app/ai-proxy-status'
   | '/app/ai-text-status'
+  | '/app/ai-text-endpoint-plan'
   | '/app/ai-credits'
   | '/app/qa'
   | '/app/mvp-snapshot'

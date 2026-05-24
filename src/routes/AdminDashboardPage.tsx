@@ -18,6 +18,7 @@ import {
   LockKeyhole,
   Phone,
   Ruler,
+  ServerOff,
   ShieldCheck,
   UsersRound,
   Video,
@@ -78,6 +79,7 @@ import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-r
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { getAITextEndpointDryRunStatus } from '@/services/ai-text/ai-text-endpoint-contract';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
 import { useCropWatch } from '@/hooks/useCropWatch';
@@ -276,6 +278,7 @@ export function AdminDashboardPage() {
   const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
   const weatherRiskAudit = useMemo(() => getWeatherRiskReleaseAuditSummary(), []);
   const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
+  const aiTextEndpointStatus = useMemo(() => getAITextEndpointDryRunStatus(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -346,6 +349,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={ShieldCheck} label="M79 risk review" value={`${weatherRiskReview.pendingSignoffCount} pending`} />
               <SummaryCard icon={ClipboardList} label="M80 risk audit" value={`${weatherRiskAudit.auditEventCount} events`} />
               <SummaryCard icon={BrainCircuit} label="M81 AI text" value={aiTextStatus.mode} />
+              <SummaryCard icon={ServerOff} label="M82 endpoint" value={`fetch ${String(aiTextEndpointStatus.fetchWouldRun)}`} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
@@ -1206,12 +1210,15 @@ export function AdminDashboardPage() {
                   <p className="mt-1 text-sm leading-6 text-indigo-900">
                     staging-only · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · no frontend provider key
                   </p>
-                  <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
-                    เปิด M81 AI text status
-                  </Link>
-                </div>
-              </div>
-            </Card>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
+                เปิด M81 AI text status
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
           </>
         ) : null}
 

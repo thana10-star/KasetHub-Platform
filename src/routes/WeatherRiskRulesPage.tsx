@@ -17,6 +17,7 @@ import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-r
 import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
 import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 
 export function WeatherRiskRulesPage() {
   const summary = getWeatherAgriRiskRuleSummary();
@@ -25,6 +26,7 @@ export function WeatherRiskRulesPage() {
   const expertReview = getWeatherRiskExpertReviewSummary();
   const releaseAudit = getWeatherRiskReleaseAuditSummary();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
 
   return (
     <div>
@@ -57,7 +59,7 @@ export function WeatherRiskRulesPage() {
         </NoticeBox>
 
         <NoticeBox tone="info" title="M81 AI text proxy readiness">
-          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · weather explanations stay proxy-only and non-prescriptive. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link>
+          mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)} · weather explanations stay proxy-only and non-prescriptive. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิดสถานะ M81</Link> · <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-endpoint-plan">เปิด M82 endpoint plan</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">
@@ -136,7 +138,7 @@ export function WeatherRiskRulesPage() {
           </ul>
         </NoticeBox>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/weather">
             กลับไปหน้าสภาพอากาศ
           </Link>
@@ -145,6 +147,9 @@ export function WeatherRiskRulesPage() {
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
             เปิด M80 release audit
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-endpoint-plan">
+            เปิด M82 endpoint
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/qa">
             เปิด Weather QA

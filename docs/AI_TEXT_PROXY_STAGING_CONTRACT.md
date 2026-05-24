@@ -34,3 +34,9 @@ Backend contract for future work:
 - Broader rollout requires a release gate.
 
 No backend endpoint is implemented by M81.
+
+## M82 Endpoint Contract Dry-run
+
+M82 adds a backend-owned `ai-text-proxy` endpoint contract and dry-run plan. Endpoint URL, endpoint network, AI text network, and AI text mode must all be reviewed together, and even then M82 does not call a provider.
+
+The endpoint contract keeps provider keys and service-role keys backend-only, requires audit/rate-limit planning, preserves immutable calculator snapshots, and returns safe fallback states for timeout or disabled provider paths.

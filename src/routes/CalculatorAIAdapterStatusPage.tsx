@@ -13,6 +13,7 @@ import {
 import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
 import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
 import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
 const stagingChecklist = [
@@ -36,6 +37,7 @@ export function CalculatorAIAdapterStatusPage() {
   const sampleResponse = explainCalculatorResult(sampleRequest);
   const qaSuite = runCalculatorAIAdapterQASuite();
   const aiTextStatus = getAITextProxyStatus();
+  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
 
   return (
     <div>
@@ -66,7 +68,7 @@ export function CalculatorAIAdapterStatusPage() {
         </NoticeBox>
 
         <NoticeBox tone="info" title="M81 real AI text proxy">
-          calculator explanation can later use the controlled AI text proxy only through backend-owned staging. mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link>
+          calculator explanation can later use the controlled AI text proxy only through backend-owned staging. mode {aiTextStatus.mode} · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)}. <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-status">เปิด M81 AI text status</Link> · <Link className="font-extrabold text-kaset-deep" to="/app/ai-text-endpoint-plan">เปิด M82 endpoint plan</Link>
         </NoticeBox>
 
         <section className="grid grid-cols-2 gap-3">
