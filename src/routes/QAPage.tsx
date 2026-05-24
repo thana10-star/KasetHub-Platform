@@ -62,6 +62,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'Calculator AI adapter status', route: '/app/calculators/ai-adapter-status' },
   { label: 'Calculator AI endpoint plan', route: '/app/calculators/ai-endpoint-plan' },
   { label: 'Calculator AI Edge contract', route: '/app/calculators/ai-edge-contract' },
+  { label: 'Calculator AI Edge dry run', route: '/app/calculators/ai-edge-dry-run' },
   { label: 'หน้าแรก', route: '/app' },
   { label: 'Admin Dashboard', route: '/app/admin' },
   { label: 'Internal MVP snapshot', route: '/app/mvp-snapshot' },
@@ -198,6 +199,14 @@ export function QAPage() {
             description="ดู contract calculator-ai-explain, server-only provider key, audit, rate-limit hook และ timeout behavior"
             to="/app/calculators/ai-edge-contract"
             variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge dry-run"
+            description="ดู endpoint URL gate, validation fixtures, secret checklist, audit/rate-limit preview และ no-fetch proof"
+            to="/app/calculators/ai-edge-dry-run"
+            variant="soft"
           />
         </Card>
 

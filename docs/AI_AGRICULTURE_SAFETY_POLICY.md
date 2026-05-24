@@ -217,3 +217,18 @@ Before any live provider call, the Edge Function must:
 - prevent sponsor, affiliate, product, chemical, fertilizer-dose invention, formula mutation, label override, and guaranteed outcome content
 
 M59 is a contract draft only. It does not deploy an Edge Function, call a provider, write Supabase data, or enable a frontend network path.
+
+## M60 Calculator AI Edge Dry-run Plan
+
+M60 prepares a staging-only dry-run plan for the future `calculator-ai-explain` endpoint, but still does not call an endpoint or provider.
+
+Safety requirements:
+
+- endpoint URL is empty by default and masked if configured locally
+- dry-run and network flags are off by default
+- dry-run plus network flags still must not run `fetch` in M60
+- provider keys and service-role keys are not accepted in frontend config
+- validation fixtures block missing snapshots, lock-hash mismatch, policy mismatch, oversized payload, sponsor insertion, chemical recommendations, missing auth, and timeout fallback cases
+- production remains blocked until auth, audit logs, rate limits, RLS, and backend safety filters are implemented
+
+M60 adds no real AI call, backend write, Supabase write, cloud sync, sponsor behavior, payment, AdMob, or production behavior.

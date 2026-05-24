@@ -28,6 +28,7 @@ export type AppRoute =
   | '/app/calculators/ai-adapter-status'
   | '/app/calculators/ai-endpoint-plan'
   | '/app/calculators/ai-edge-contract'
+  | '/app/calculators/ai-edge-dry-run'
   | '/app/calculators/spray-mix'
   | '/app/calculators/plant-spacing'
   | '/app/calculators/fertilizer'

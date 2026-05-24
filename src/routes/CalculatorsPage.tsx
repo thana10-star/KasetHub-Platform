@@ -116,6 +116,9 @@ export function CalculatorsPage() {
               <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-contract">
                 AI Edge contract
               </Link>
+              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-dry-run">
+                AI Edge dry-run
+              </Link>
             </div>
           </div>
         </Card>

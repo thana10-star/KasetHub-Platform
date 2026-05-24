@@ -61,3 +61,19 @@ Sponsor or affiliate content must stay outside calculator AI prompts and results
 M59 names the future endpoint `calculator-ai-explain`, but it still does not add a URL, fetch call, deployed Edge Function, provider key, service-role key, or default network path.
 
 The typed Edge contract can preview request/response payloads only. Any future live call must still pass explicit staging flags and server-side checks for auth, lock hash, policy version, audit logging, rate limits, timeout behavior, and safety filtering.
+
+## M60 Dry-run Network Boundary
+
+M60 adds dry-run flags:
+
+- `VITE_CALCULATOR_AI_EDGE_URL`
+- `VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN`
+- `VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK`
+
+Rules:
+
+- endpoint URL alone is not enough
+- network flag alone is not enough
+- dry-run flag plus network flag still does not fetch in M60
+- production remains blocked
+- provider keys and service-role keys remain forbidden in frontend config

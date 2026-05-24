@@ -49,6 +49,10 @@ import {
   buildCalculatorAIEdgeResponseContract,
   getCalculatorAIEdgeFunctionContractSummary,
 } from '@/services/agri-calculators/calculator-ai-edge-contract';
+import {
+  buildCalculatorAIEdgeDryRunPlan,
+  buildCalculatorAIEdgeDryRunValidationCases,
+} from '@/services/agri-calculators/calculator-ai-edge-dry-run-plan';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -1130,5 +1134,97 @@ describe('calculator AI backend adapter contract', () => {
     expect(response.failureModes.map((mode) => mode.id)).toContain('network_disabled_by_default');
     expect(response.deterministicResultUnchanged).toBe(true);
     expect(response.noRealAICall).toBe(true);
+  });
+
+  test('M60 default and partial dry-run flags cannot call the Edge endpoint', () => {
+    const defaultPlan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: '',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: false,
+      isProd: false,
+    });
+    const urlOnly = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: false,
+      isProd: false,
+    });
+    const networkOnly = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: '',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: true,
+      isProd: false,
+    });
+
+    expect(defaultPlan.canCallEndpoint).toBe(false);
+    expect(defaultPlan.fetchWouldRun).toBe(false);
+    expect(defaultPlan.readiness).toBe('blocked_by_default');
+    expect(urlOnly.canCallEndpoint).toBe(false);
+    expect(urlOnly.readiness).toBe('blocked_missing_dry_run_flag');
+    expect(networkOnly.canCallEndpoint).toBe(false);
+    expect(networkOnly.readiness).toBe('blocked_missing_endpoint');
+  });
+
+  test('M60 dry-run plus network flags still do not fetch in this milestone', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: true,
+      enableCalculatorAIEdgeNetwork: true,
+      calculatorAIMode: 'backend_test_ready',
+      enableCalculatorAIBackend: true,
+      enableCalculatorAINetwork: true,
+      isProd: false,
+    });
+
+    expect(plan.readiness).toBe('ready_for_local_dry_run_review');
+    expect(plan.endpointUrlConfigured).toBe(true);
+    expect(plan.endpointUrlMasked).not.toContain('functions/v1/calculator-ai-explain');
+    expect(plan.canCallEndpoint).toBe(false);
+    expect(plan.fetchWouldRun).toBe(false);
+    expect(plan.noRealEndpointCall).toBe(true);
+    expect(plan.noSupabaseWrite).toBe(true);
+  });
+
+  test('M60 frontend config rejects provider and service-role secrets', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan();
+
+    expect(plan.frontendProviderKeyAccepted).toBe(false);
+    expect(plan.frontendServiceRoleAccepted).toBe(false);
+    expect(plan.secretChecklist.find((item) => item.id === 'provider_key_server_only')?.passed).toBe(true);
+    expect(plan.secretChecklist.find((item) => item.id === 'service_role_server_only')?.passed).toBe(true);
+  });
+
+  test('M60 validation fixtures classify expected dry-run failures', () => {
+    const cases = buildCalculatorAIEdgeDryRunValidationCases();
+    const byId = Object.fromEntries(cases.map((item) => [item.id, item]));
+
+    expect(cases.every((item) => item.passed)).toBe(true);
+    expect(cases.every((item) => item.noFetch)).toBe(true);
+    expect(byId.valid_locked_snapshot.actualStatus).toBe('would_pass');
+    expect(byId.missing_snapshot.actualStatus).toBe('blocked_missing_snapshot');
+    expect(byId.lock_hash_mismatch.actualStatus).toBe('blocked_lock_hash_mismatch');
+    expect(byId.policy_mismatch.actualStatus).toBe('blocked_policy_mismatch');
+    expect(byId.oversized_payload.actualStatus).toBe('blocked_oversized_payload');
+    expect(byId.sponsor_injection_attempt.actualStatus).toBe('blocked_sponsor_injection');
+    expect(byId.chemical_recommendation_attempt.actualStatus).toBe('blocked_chemical_recommendation');
+    expect(byId.no_auth_session.actualStatus).toBe('blocked_auth_required');
+    expect(byId.timeout_fallback.actualStatus).toBe('timeout_fallback_planned');
+  });
+
+  test('M60 production blockers remain until auth, audit, and rate limits are implemented', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: true,
+      enableCalculatorAIEdgeNetwork: true,
+      isProd: true,
+    });
+
+    expect(plan.readiness).toBe('blocked_for_production');
+    expect(plan.noProductionBehavior).toBe(true);
+    expect(plan.productionBlockers.map((blocker) => blocker.id)).toEqual(
+      expect.arrayContaining(['auth_not_ready', 'audit_not_implemented', 'rate_limit_not_enforced']),
+    );
+    expect(plan.auditPreview.wouldWriteSupabase).toBe(false);
+    expect(plan.rateLimitPreview.wouldEnforceNow).toBe(false);
   });
 });

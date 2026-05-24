@@ -14,6 +14,9 @@ export type PublicRuntimeEnv = {
   calculatorAIMode: string;
   enableCalculatorAIBackend: boolean;
   enableCalculatorAINetwork: boolean;
+  calculatorAIEdgeUrl: string;
+  enableCalculatorAIEdgeDryRun: boolean;
+  enableCalculatorAIEdgeNetwork: boolean;
   guestSyncMode: string;
   enableGuestSyncBackend: boolean;
   enableGuestSyncEdge: boolean;
@@ -64,6 +67,9 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   calculatorAIMode: readStringEnv('VITE_CALCULATOR_AI_MODE') || 'local_fixture',
   enableCalculatorAIBackend: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_BACKEND', false),
   enableCalculatorAINetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_NETWORK', false),
+  calculatorAIEdgeUrl: readStringEnv('VITE_CALCULATOR_AI_EDGE_URL'),
+  enableCalculatorAIEdgeDryRun: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN', false),
+  enableCalculatorAIEdgeNetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK', false),
   guestSyncMode: readStringEnv('VITE_GUEST_SYNC_MODE') || 'local_fixture',
   enableGuestSyncBackend: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_BACKEND', false),
   enableGuestSyncEdge: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_EDGE', false),

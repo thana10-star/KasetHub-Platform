@@ -69,3 +69,13 @@ Sponsor or affiliate content must not be mixed into prompts, policy checks, AI e
 ## M59 Status
 
 No Edge Function is deployed. No provider is called. No Supabase write occurs. No network path is active by default.
+
+## M60 Dry-run Secret Gate
+
+M60 adds local dry-run flags but no secrets:
+
+- `VITE_CALCULATOR_AI_EDGE_URL`
+- `VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN`
+- `VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK`
+
+The dry-run planner rejects provider-key and service-role-key concepts in frontend config. A URL alone is not enough to call the endpoint, and flags alone are not enough to call the endpoint.

@@ -838,6 +838,42 @@ RLS notes: Admin/security only by default. User-facing surfaces should not expos
 
 Admin/moderation notes: Provider attempts must prove deterministic result values were immutable and must not include provider secrets or sponsor targeting data.
 
+## `calculator_ai_dry_run_events` Future
+
+Purpose: Staging-only dry-run event records for future `calculator-ai-explain` endpoint validation before provider integration.
+
+Key columns: `id uuid`, `session_hash nullable`, `edge_function_name`, `dry_run_mode`, `readiness`, `endpoint_url_hash nullable`, `can_call_endpoint`, `fetch_would_run`, `created_at`, `metadata jsonb`.
+
+Indexes: `session_hash`, `edge_function_name`, `dry_run_mode`, `readiness`, `created_at desc`.
+
+RLS notes: Backend/admin only by default. If exposed to users, show only friendly readiness copy.
+
+Admin/moderation notes: Never store full endpoint URLs, provider keys, service-role keys, or raw prompts.
+
+## `calculator_ai_validation_failures` Future
+
+Purpose: Validation failure records for dry-run and future backend checks such as missing snapshot, lock-hash mismatch, policy mismatch, oversized payload, sponsor injection, chemical request, auth missing, and timeout fallback.
+
+Key columns: `id uuid`, `dry_run_event_id nullable`, `request_log_id nullable`, `failure_code`, `severity`, `calculator_category nullable`, `snapshot_lock_hash nullable`, `policy_version_id nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `dry_run_event_id`, `request_log_id`, `failure_code`, `severity`, `created_at desc`.
+
+RLS notes: Admin/security only by default.
+
+Admin/moderation notes: Use for safety QA and regression review, not sponsor targeting.
+
+## `calculator_ai_endpoint_health_checks` Future
+
+Purpose: Staging endpoint health check metadata for future backend-owned `calculator-ai-explain` dry runs.
+
+Key columns: `id uuid`, `edge_function_name`, `environment_label`, `status`, `latency_ms nullable`, `checked_at`, `metadata jsonb`.
+
+Indexes: `edge_function_name`, `environment_label`, `status`, `checked_at desc`.
+
+RLS notes: Admin/operator only. Public app surfaces should not expose infrastructure details.
+
+Admin/moderation notes: M60 does not run health checks. Future checks must be explicit staging-only and must not call providers.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

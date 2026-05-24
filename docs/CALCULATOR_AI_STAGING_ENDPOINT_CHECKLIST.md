@@ -86,3 +86,21 @@ The contract is ready for review only. Before deployment, the operator must stil
 - audit and rate-limit tables have RLS and retention review
 - timeout behavior returns safe disabled copy
 - provider calls remain impossible from frontend code
+
+## M60 Dry-run Checklist
+
+M60 adds `/app/calculators/ai-edge-dry-run`.
+
+The route must show:
+
+- endpoint URL status without exposing the full value
+- dry-run flag state
+- edge network flag state
+- backend adapter flag state
+- secret checklist
+- validation fixtures
+- audit/rate-limit dry-run preview
+- production blockers
+- "ยังไม่เรียก endpoint จริง"
+
+M60 still does not deploy or call `calculator-ai-explain`.

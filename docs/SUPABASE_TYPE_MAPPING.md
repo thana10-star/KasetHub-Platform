@@ -217,6 +217,9 @@ M49 calculator models map conceptually into:
 - `calculator_ai_backend_events`
 - `calculator_ai_edge_invocations`
 - `calculator_ai_provider_attempts`
+- `calculator_ai_dry_run_events`
+- `calculator_ai_validation_failures`
+- `calculator_ai_endpoint_health_checks`
 
 Type mapping:
 
@@ -258,8 +261,13 @@ Type mapping:
 - `CalculatorAIEdgeAuditEvent` -> future `calculator_ai_audit_logs` and `calculator_ai_backend_events`
 - `CalculatorAIEdgeRateLimitCheck` -> future `calculator_ai_rate_limits`
 - `CalculatorAIEdgeTimeoutPlan` / `CalculatorAIEdgeFailureMode` -> future `calculator_ai_backend_events` and `calculator_ai_provider_attempts`
+- `CalculatorAIEdgeDryRunPlan` -> future `calculator_ai_dry_run_events` only after staging review
+- `CalculatorAIEdgeDryRunValidationCase` -> future `calculator_ai_validation_failures`
+- `CalculatorAIEdgeDryRunAuditPreview` -> planning-only preview for future `calculator_ai_audit_logs`
+- `CalculatorAIEdgeDryRunRateLimitPreview` -> planning-only preview for future `calculator_ai_rate_limits`
+- endpoint URL status/health check -> future `calculator_ai_endpoint_health_checks`
 
-M49-M59 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, endpoint planning services, and Edge Function contract previews. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+M49-M60 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, endpoint planning services, Edge Function contract previews, and Edge dry-run plans. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
 
 Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, validate endpoint/network boundaries, keep provider/service-role keys server-only, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, adapter events, request logs, snapshot locks, Edge invocation logs, provider attempts, or safety events for targeting without explicit consent and policy review.
 

@@ -45,6 +45,27 @@ Before this mode can be used for real network traffic, a later milestone must ad
 - audit logging plan with RLS review
 - Edge Function secret handling for provider and service-role keys
 
+## M60 Edge Dry-run Flags
+
+M60 adds Edge-specific dry-run placeholders:
+
+```env
+VITE_CALCULATOR_AI_EDGE_URL=
+VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN=false
+VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK=false
+```
+
+These flags do not replace the adapter flags. They only let the app show readiness for a future staging dry run.
+
+M60 rules:
+
+- empty URL, dry-run false, and network false is the default
+- URL alone is not enough
+- network flag alone is not enough
+- dry-run flag plus network flag is still not enough to call `fetch`
+- provider keys and service-role keys are never accepted in frontend config
+- production remains blocked
+
 ## Production Disabled State
 
 ```env

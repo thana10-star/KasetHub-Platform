@@ -111,3 +111,9 @@ Current behavior remains disabled by default:
 - no sponsor or affiliate payload
 
 The contract proves that lock-hash mismatch and policy mismatch are blocked before any future provider path.
+
+## M60 Edge Dry-run Gate
+
+M60 adds a local dry-run readiness plan after the adapter and Edge contract. The adapter still controls calculator AI mode, while the dry-run plan checks the future Edge URL and Edge-specific dry-run/network flags.
+
+Even when `VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN=true` and `VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK=true`, M60 does not call fetch. A later milestone must explicitly add a staging-only client and tests.

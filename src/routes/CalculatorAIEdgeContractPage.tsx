@@ -176,7 +176,10 @@ export function CalculatorAIEdgeContractPage() {
           request timeout {edgeResponse.timeoutPlan.requestTimeoutMs}ms · provider timeout {edgeResponse.timeoutPlan.providerTimeoutMs}ms · retry {edgeResponse.timeoutPlan.retryCount} · timeout ต้องไม่เปลี่ยนผลคำนวณ
         </NoticeBox>
 
-        <div className="grid gap-2 sm:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-5">
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-800 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-edge-dry-run">
+            Edge dry-run
+          </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-endpoint-plan">
             Endpoint plan
           </Link>

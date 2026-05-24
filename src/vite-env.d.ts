@@ -13,6 +13,9 @@ interface ImportMetaEnv {
   readonly VITE_CALCULATOR_AI_MODE?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_BACKEND?: string;
   readonly VITE_ENABLE_CALCULATOR_AI_NETWORK?: string;
+  readonly VITE_CALCULATOR_AI_EDGE_URL?: string;
+  readonly VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN?: string;
+  readonly VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK?: string;
   readonly VITE_GUEST_SYNC_MODE?: string;
   readonly VITE_ENABLE_GUEST_SYNC_BACKEND?: string;
   readonly VITE_ENABLE_GUEST_SYNC_EDGE?: string;

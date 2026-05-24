@@ -105,3 +105,18 @@ Planned audit events:
 - response returned
 
 The M59 service marks every audit event with `wouldWriteSupabase: false`. Real writes still require schema, RLS, retention, and admin/security review.
+
+## M60 Edge Dry-run Audit Preview
+
+M60 adds local dry-run output for a future staging-only Edge endpoint review.
+
+The dry-run preview includes:
+
+- `calculator_ai_dry_run_events`
+- `calculator_ai_validation_failures`
+- `calculator_ai_endpoint_health_checks`
+- `wouldWriteSupabase: false`
+- rate-limit values copied from the reviewed plan
+- `wouldEnforceNow: false`
+
+M60 still does not call `calculator-ai-explain`, run a health check, write audit rows, update rate-limit counters, or call an AI provider. Future staging work must keep dry-run events separate from production explanation logs until auth, RLS, retention, and abuse review are complete.

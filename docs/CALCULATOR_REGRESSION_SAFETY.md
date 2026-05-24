@@ -133,3 +133,19 @@ Regression checks now cover:
 - audit and rate-limit hooks remain planning-only
 
 Future Edge Function work must keep these tests passing before adding a deployed function or staging network call.
+
+## M60 Edge Dry-run Regression Safety
+
+M60 adds tests for the staging-only Edge dry-run plan.
+
+Regression checks now cover:
+
+- default frontend builds cannot call the endpoint
+- a configured dry-run URL alone is not enough
+- the Edge network flag alone is not enough
+- dry-run plus network flags still do not run `fetch` in M60
+- frontend config rejects provider keys and service-role keys
+- validation fixtures classify missing snapshot, lock-hash mismatch, policy mismatch, oversized payload, sponsor insertion, chemical request, missing auth, and timeout fallback cases
+- production blockers remain until auth, audit logging, and rate limits are implemented
+
+Future dry-run clients must keep these checks passing before adding any fetch path, Edge deployment, provider integration, Supabase write, or production behavior.

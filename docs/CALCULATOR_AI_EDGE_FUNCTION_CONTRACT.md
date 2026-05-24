@@ -70,3 +70,17 @@ Before any future provider call, the Edge Function must:
 ## Current Boundary
 
 M59 keeps the adapter and Edge contract disabled-by-default. `calculator-ai-explain` exists only as a typed contract and in-app review screen.
+
+## M60 Dry-run Plan
+
+M60 adds a staging-only dry-run planning layer for this contract.
+
+New frontend placeholders:
+
+```env
+VITE_CALCULATOR_AI_EDGE_URL=
+VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN=false
+VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK=false
+```
+
+The dry-run plan can inspect whether these values are present, but still returns `canCallEndpoint: false` and `fetchWouldRun: false`. No fetch implementation is added in M60.

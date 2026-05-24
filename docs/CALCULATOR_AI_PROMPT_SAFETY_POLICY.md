@@ -109,3 +109,19 @@ The future `calculator-ai-explain` Edge Function may build prompts only after:
 - payload size is within the contract limit
 
 M59 does not build a live provider prompt. It only previews typed payloads, timeout behavior, audit hooks, and failure modes.
+
+## M60 Edge Dry-run Prompt Boundary
+
+M60 still does not build a provider prompt or call an endpoint. It only checks whether future dry-run inputs would be safe enough to reach a backend validation layer.
+
+The dry-run validation cases block:
+
+- missing locked snapshots
+- lock-hash mismatches
+- policy version mismatches
+- oversized payloads
+- sponsor insertion attempts
+- chemical recommendation attempts
+- missing auth/session ownership
+
+Even when dry-run and network flags are both true, M60 reports `fetchWouldRun: false`. Any future prompt execution must remain backend-owned and must reuse the lock-hash, policy, audit, rate-limit, and timeout boundaries before a provider is contacted.
