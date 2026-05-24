@@ -60,6 +60,20 @@ export function OfflineArticleQAPage() {
           </Card>
         </Link>
 
+        <Link to="/app/articles/pilot-draft-review">
+          <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-kaset-ink">M68 pilot article draft</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-700">
+                  ดู workflow ร่างบทความดิน 6 ชนิด พร้อม checklist และ publish blockers
+                </p>
+              </div>
+              <StatusPill tone="warning">review needed</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <BookOpenCheck aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

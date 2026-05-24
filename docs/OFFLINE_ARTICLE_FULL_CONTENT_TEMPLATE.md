@@ -33,3 +33,11 @@ Some pilot IDs map to existing bundled offline fallback articles until a dedicat
 - No official finance, loan, government, fertilizer, or crop-dose facts are hardcoded.
 - No external image or CDN dependency.
 - Offline fallback articles remain available even after future CMS content exists.
+
+## M68 Pilot Draft Workflow
+
+M68 adds the first richer local-only pilot draft for `soil-types-before-planting`.
+
+The pilot uses the M67 template structure but fills draft-only Thai body sections for intro, soil-type comparison, simple observation steps, broad use examples, improvement ideas, common mistakes, expert escalation, related app actions, and summary.
+
+The draft is still not an official final article. It remains blocked from full publish until source placeholders, reviewer metadata, last reviewed date, image review, and final human editorial review are completed.

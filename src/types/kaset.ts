@@ -49,6 +49,7 @@ export type AppRoute =
   | '/app/articles/offline'
   | '/app/articles/offline-qa'
   | '/app/articles/full-content-readiness'
+  | '/app/articles/pilot-draft-review'
   | '/app/content-admin-preview'
   | '/app/notifications'
   | '/app/notification-settings'

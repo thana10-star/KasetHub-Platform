@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, BookOpenCheck, Calculator, Check, Clock, FileText, ShieldAlert } from 'lucide-react';
+import { ArrowRight, Bookmark, BookOpenCheck, Calculator, Check, Clock, FileImage, FileText, ListChecks, ShieldAlert } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { ShareButton } from '@/components/kaset/ShareButton';
 import { VisualPlaceholder } from '@/components/kaset/VisualPlaceholder';
@@ -16,6 +16,10 @@ import {
 import { getOfflineAgriArticleQaBySlug } from '@/services/content/offline-agri-article-qa';
 import { getFullArticleReadinessForArticleSlug } from '@/services/content/offline-agri-full-article-readiness';
 import { findOfflineAgriFullArticleTemplateForArticleSlug } from '@/services/content/offline-agri-full-article-template';
+import {
+  findOfflineAgriPilotArticleDraftBySlug,
+  getPilotArticleDraftPublishGate,
+} from '@/services/content/offline-agri-pilot-article-drafts';
 import {
   getOfflineAgriArticleCategoryMeta,
   offlineAgriArticleDifficultyLabels,
@@ -49,6 +53,10 @@ export function OfflineAgriArticleDetailPage() {
   const articleQa = getOfflineAgriArticleQaBySlug(article.slug);
   const fullArticleGate = getFullArticleReadinessForArticleSlug(article.slug);
   const fullArticleTemplate = findOfflineAgriFullArticleTemplateForArticleSlug(article.slug);
+  const pilotDraft = findOfflineAgriPilotArticleDraftBySlug(article.slug);
+  const pilotDraftGate = getPilotArticleDraftPublishGate(article.slug);
+  const displayTitle = pilotDraft?.titleTh ?? article.titleTh;
+  const displaySummary = pilotDraft?.summaryTh ?? article.shortSummaryTh;
 
   return (
     <div>
@@ -73,8 +81,8 @@ export function OfflineAgriArticleDetailPage() {
               </>
             ) : null}
           </div>
-          <h1 className="text-2xl font-extrabold leading-8 text-kaset-ink">{article.titleTh}</h1>
-          <p className="text-base leading-7 text-slate-700">{article.shortSummaryTh}</p>
+          <h1 className="text-2xl font-extrabold leading-8 text-kaset-ink">{displayTitle}</h1>
+          <p className="text-base leading-7 text-slate-700">{displaySummary}</p>
           <div className="flex flex-wrap gap-3 text-xs font-bold text-slate-500">
             <span>KasetHub Offline Library</span>
             <span className="inline-flex items-center gap-1">
@@ -149,6 +157,104 @@ export function OfflineAgriArticleDetailPage() {
               เปิด publish gate M67
             </Link>
           </Card>
+        ) : null}
+
+        {pilotDraft && pilotDraftGate ? (
+          <section className="grid gap-4">
+            <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusPill tone="warning">review-needed</StatusPill>
+                <Badge tone="sky">M68 pilot draft</Badge>
+                <Badge tone="neutral">{pilotDraft.status}</Badge>
+              </div>
+              <h2 className="mt-3 text-lg font-extrabold text-kaset-ink">ยังไม่ใช่บทความฉบับตรวจทานสุดท้าย</h2>
+              <p className="mt-2 text-sm leading-7 text-slate-700">{pilotDraft.reasonTh}</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-amber-900">
+                publish blocked: {pilotDraftGate.blockers.slice(0, 4).join(', ')}
+              </p>
+            </Card>
+
+            {pilotDraft.sections.map((section) => (
+              <Card className="p-5" key={section.id}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusPill tone="info">{section.kind}</StatusPill>
+                  {section.relatedRoute ? <Badge tone="sky">มีเครื่องมือเกี่ยวข้อง</Badge> : null}
+                </div>
+                <h2 className="mt-3 text-lg font-extrabold text-kaset-ink">{section.headingTh}</h2>
+                <div className="mt-3 grid gap-3">
+                  {section.bodyTh.map((paragraph) => (
+                    <p className="text-sm leading-7 text-slate-700" key={paragraph}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+                {section.kind === 'comparison_table' ? (
+                  <div className="mt-4 grid gap-3">
+                    {pilotDraft.comparisonRows.map((row) => (
+                      <div className="rounded-lg bg-kaset-mist p-3" key={row.soilTypeTh}>
+                        <h3 className="font-extrabold text-kaset-ink">{row.soilTypeTh}</h3>
+                        <div className="mt-2 grid gap-2 text-xs leading-5 text-slate-700">
+                          <p><span className="font-extrabold text-kaset-deep">สังเกต:</span> {row.easyObservationTh}</p>
+                          <p><span className="font-extrabold text-kaset-deep">น้ำ:</span> {row.waterBehaviorTh}</p>
+                          <p><span className="font-extrabold text-kaset-deep">ตัวอย่างกว้าง ๆ:</span> {row.broadUseCaseTh}</p>
+                          <p><span className="font-extrabold text-kaset-deep">แนวคิดปรับปรุง:</span> {row.cautiousImprovementIdeaTh}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {section.bulletsTh ? (
+                  <div className="mt-4 grid gap-2">
+                    {section.bulletsTh.map((bullet) => (
+                      <div className="flex items-center gap-2 rounded-lg bg-kaset-mint px-3 py-2 text-sm font-bold text-kaset-deep" key={bullet}>
+                        <Check aria-hidden="true" className="h-4 w-4 shrink-0" />
+                        {bullet}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {section.relatedRoute ? (
+                  <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to={section.relatedRoute}>
+                    เปิดหน้าที่เกี่ยวข้อง
+                  </Link>
+                ) : null}
+              </Card>
+            ))}
+
+            <Card className="p-4">
+              <h2 className="inline-flex items-center gap-2 font-extrabold text-kaset-ink">
+                <ListChecks aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+                Source / review placeholders
+              </h2>
+              <div className="mt-3 grid gap-2">
+                {pilotDraft.review.sourcePlaceholders.map((source) => (
+                  <div className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={source.id}>
+                    <span className="font-extrabold text-kaset-deep">{source.labelTh}</span> · {source.status}
+                    <p className="mt-1 text-xs leading-5 text-slate-600">{source.noteTh}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-xs font-bold text-amber-900">
+                reviewer: {pilotDraft.review.reviewerPlaceholder} · last reviewed: {pilotDraft.review.lastReviewedPlaceholder}
+              </p>
+            </Card>
+
+            <Card className="p-4">
+              <h2 className="inline-flex items-center gap-2 font-extrabold text-kaset-ink">
+                <FileImage aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+                Image needs
+              </h2>
+              <div className="mt-3 grid gap-2">
+                {pilotDraft.review.imageRequirements.map((image) => (
+                  <div className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={image.id}>
+                    <span className="font-extrabold text-kaset-deep">{image.labelTh}</span> · {image.aspectRatio} · {image.status}
+                    <p className="mt-1 break-all text-xs font-bold text-slate-600">{image.plannedPath}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">{image.altTextTh}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </section>
         ) : null}
 
         <Card className="p-4">

@@ -835,3 +835,11 @@ M67 adds `/app/articles/full-content-readiness` and full-article draft template 
 The publish gate blocks all pilots until source placeholders, reviewer metadata, last reviewed dates, image metadata, freshness dates when needed, required disclaimers, and expert escalation notes are complete. Offline fallback articles remain available.
 
 M67 still does not publish full official articles, write Supabase/CMS data, generate article text with AI, generate images, load external images, inject sponsors, or hardcode official finance/loan/government facts.
+
+## M68 One Reviewed Pilot Article Draft Workflow
+
+M68 adds `/app/articles/pilot-draft-review` and the first richer local-only pilot article draft workflow for `soil-types-before-planting`.
+
+The pilot title is `ดิน 6 ชนิด รู้จักก่อนปลูก`. It includes draft-only Thai body sections, a simple soil comparison table, observation steps, broad use examples, improvement ideas, mistakes to avoid, expert escalation notes, related app links, source placeholders, image requirements, and publish blockers.
+
+The article detail route `/app/articles/offline/soil-types-before-planting` can show the richer draft, but the publish gate remains blocked. M68 still does not publish official full content, write Supabase/CMS data, generate articles with AI, generate images, load external images, inject sponsors, or hardcode official finance/loan/government facts.

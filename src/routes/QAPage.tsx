@@ -110,6 +110,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'คลังความรู้เกษตรออฟไลน์', route: '/app/articles/offline' },
   { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },
   { label: 'M67 เตรียมบทความเต็มออฟไลน์', route: '/app/articles/full-content-readiness' },
+  { label: 'M68 pilot article draft review', route: '/app/articles/pilot-draft-review' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -263,6 +264,14 @@ export function QAPage() {
             description="ดู pilot templates, source placeholders, publish gate และ expert escalation ก่อนเพิ่มบทความเต็ม"
             to="/app/articles/full-content-readiness"
             variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BookOpenCheck}
+            label="เปิด M68 pilot article draft"
+            description="ดูร่างบทความ ดิน 6 ชนิด รู้จักก่อนปลูก พร้อม checklist และ publish blockers"
+            to="/app/articles/pilot-draft-review"
+            variant="white"
           />
         </Card>
 

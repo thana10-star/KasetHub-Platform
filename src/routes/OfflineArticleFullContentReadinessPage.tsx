@@ -43,6 +43,20 @@ export function OfflineArticleFullContentReadinessPage() {
           หน้านี้อ่านจาก fixture ในแอปเท่านั้น ไม่มี Supabase CMS write ไม่มี AI generation ไม่มีรูปจริง และไม่มีการโหลดรูปจาก CDN ภายนอก
         </NoticeBox>
 
+        <Link to="/app/articles/pilot-draft-review">
+          <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-extrabold text-kaset-ink">M68 pilot draft workflow</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-700">
+                  ตรวจร่างบทความ ดิน 6 ชนิด รู้จักก่อนปลูก พร้อม source placeholders และ publish blockers
+                </p>
+              </div>
+              <StatusPill tone="warning">draft</StatusPill>
+            </div>
+          </Card>
+        </Link>
+
         <section className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <FileText aria-hidden="true" className="h-5 w-5 text-kaset-deep" />

@@ -20,3 +20,17 @@ All pilot templates are `draft_template`. They are designed to show blockers cle
 ## CMS Rule
 
 Future CMS content may extend article bodies, but it cannot remove required disclaimers or bypass the publish gate.
+
+## M68 Pilot Draft Gate
+
+The `soil-types-before-planting` pilot is a `reviewed_draft_candidate`, not a final publishable article.
+
+It must remain blocked while:
+
+- source placeholders are still placeholders
+- final reviewer metadata is not complete
+- final reviewed date is missing
+- planned image assets are not reviewed
+- the M68 publish blocker is active
+
+The pilot can be useful for local reading and editorial review, but it must not be labeled as official final content.

@@ -684,6 +684,12 @@ It adds pilot full-content templates, source placeholders, review metadata place
 
 M67 does not add official full article bodies, Supabase writes, CMS writes, AI article generation, real image generation, external images, sponsor/affiliate injection, or hardcoded official finance/loan/government facts.
 
+## M68 Offline Article Pilot Draft Workflow
+
+M68 adds `/app/articles/pilot-draft-review` and richer local-only draft content for `soil-types-before-planting` (`ดิน 6 ชนิด รู้จักก่อนปลูก`).
+
+The draft includes review/source placeholders, image needs, safety disclaimers, and publish blockers. It is still not a final official article, and no Supabase/CMS writes, AI article generation, external images, or sponsor/affiliate injection are added.
+
 ## M43 Supabase Read-only Probe
 
 M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.
