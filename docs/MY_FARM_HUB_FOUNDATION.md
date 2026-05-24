@@ -24,6 +24,7 @@ M34 aggregates existing local sources only:
 - Saved plant analysis result summaries.
 - Farm area saved plots from `kasethub.farmArea.v1`.
 - Crop Watch followed crops and alert preferences from `kasethub.cropWatch.v1`.
+- Agriculture calculator history and favorites from `kasethub.agriCalculators.v1`.
 - Weather fixture context from the selected/default mock weather location.
 - Saved articles and videos from Guest Memory.
 - Recent AI questions from Guest Memory.
@@ -68,6 +69,7 @@ Quick actions:
 
 - วิเคราะห์โรคพืช
 - วัดพื้นที่แปลง
+- เครื่องคำนวณเกษตร
 - ดูสภาพอากาศ
 - ติดตามราคาพืช
 - ถาม AI
@@ -112,12 +114,20 @@ Recommended future tables:
 
 These should complement existing/future records such as `farm_records`, `farm_plots`, `farm_plot_measurements`, `crop_price_watches`, saved content, and AI history.
 
+M49 adds calculator-related future records that can also feed My Farm after auth and consent:
+
+- `calculator_history`
+- `fertilizer_profiles`
+- `planting_profiles`
+- `farm_cost_records`
+
 ## Safety Rules
 
 - Do not upload raw images from My Farm.
 - Do not treat mock weather as real forecast.
 - Do not treat crop prices as production prices.
 - Do not treat farm area estimates as official land survey results.
+- Do not treat calculator output as an agronomist recommendation, product label, yield guarantee, or financial advice.
 - Do not delete local data from the hub without an explicit, reviewed recovery/confirmation flow.
 - Do not sync until real auth ownership and RLS are verified.
 - Do not treat local notification preferences as real push/LINE/SMS consent.

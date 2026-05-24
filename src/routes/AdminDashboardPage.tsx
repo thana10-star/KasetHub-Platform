@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpenCheck,
   Bot,
+  Calculator,
   CloudUpload,
   CloudSun,
   ClipboardList,
@@ -62,6 +63,7 @@ import { useCropWatch } from '@/hooks/useCropWatch';
 import { useFarmArea } from '@/hooks/useFarmArea';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
+import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 
 type AdminTab = 'overview' | 'content' | 'moderation' | 'crop_prices' | 'ai_safety' | 'system';
 
@@ -196,6 +198,7 @@ function RiskCard({ risk }: { risk: AdminRiskItem }) {
 export function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const moderation = useCommunityModeration();
+  const agriCalculators = useAgriCalculators();
   const cropWatch = useCropWatch();
   const farmArea = useFarmArea();
   const aiCredits = useAICredits();
@@ -274,6 +277,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
               <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
+              <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
               <SummaryCard icon={Bot} label="AI safety items" value={dashboard.summary.aiSafetyItems} />
               <SummaryCard icon={Video} label="YouTube candidates" value={dashboard.summary.youtubeImportCandidates} />
@@ -304,6 +308,26 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/next-phase">
                     เปิดแผน next phase
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                  <Calculator aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M49 Agriculture calculators</h2>
+                    <StatusPill tone="success">local-only</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {agriCalculators.counts.recentCalculations} recent calculations · favorites {agriCalculators.counts.favorites} · no Supabase writes
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators">
+                    เปิดเครื่องคำนวณเกษตร
                   </Link>
                 </div>
               </div>

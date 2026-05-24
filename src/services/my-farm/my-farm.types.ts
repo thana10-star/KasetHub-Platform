@@ -5,6 +5,7 @@ export type MyFarmHubModule =
   | 'farm_area'
   | 'crop_watch'
   | 'weather'
+  | 'calculator'
   | 'saved_content'
   | 'ai_history'
   | 'settings';
@@ -23,7 +24,7 @@ export type MyFarmQuickAction = {
   label: string;
   description: string;
   route: AppRoute;
-  iconKey: 'scan' | 'area' | 'weather' | 'price' | 'ai';
+  iconKey: 'scan' | 'area' | 'weather' | 'price' | 'ai' | 'calculator';
   tone: 'primary' | 'soft' | 'white' | 'warning';
 };
 

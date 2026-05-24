@@ -33,6 +33,17 @@ const moduleReadiness: MvpModuleReadiness[] = [
     routes: routeListFor('core_app'),
   },
   {
+    id: 'agriculture_calculators',
+    name: 'Agriculture calculators',
+    status: 'ready_mock',
+    riskLevel: 'medium',
+    summary: 'เครื่องคำนวณเกษตร M49 พร้อมเป็น foundation แบบ local-only แต่ยังไม่ใช่คำแนะนำทางวิชาการเกษตร',
+    currentStorageMode: 'pure calculation utilities + localStorage history/favorites/last inputs',
+    mockBoundaries: ['ไม่มี backend write', 'ไม่มี AI recommendation', 'ไม่มี agronomist guarantee', 'ไม่มี sponsor/affiliate routing'],
+    nextAction: 'ทดสอบสูตรกับผู้ใช้จริงและแยกชั้น future recommendation/sponsor integration ให้ไม่ปะปนกับผลคำนวณพื้นฐาน',
+    routes: routeListFor('agriculture_calculators'),
+  },
+  {
     id: 'content_youtube',
     name: 'Content / YouTube',
     status: 'needs_backend',
@@ -129,7 +140,7 @@ export function runMvpReadinessAudit(): MvpReadinessAudit {
   const highRiskCount = moduleReadiness.filter((module) => highRiskLevels.includes(module.riskLevel)).length;
 
   return {
-    generatedAt: '2026-05-23T00:00:00+07:00',
+    generatedAt: '2026-05-24T00:00:00+07:00',
     overallStatus: 'production_blocked',
     overallLabel: 'Internal MVP / Prototype ready for staging preparation, not production',
     routeCount,
@@ -143,6 +154,11 @@ export function runMvpReadinessAudit(): MvpReadinessAudit {
         label: 'Guest Memory',
         status: 'ready_mock',
         detail: 'บันทึก saved items, likes, follows, My Farm และ AI history ใน localStorage เท่านั้น',
+      },
+      {
+        label: 'Agriculture calculators',
+        status: 'ready_mock',
+        detail: 'ประวัติ รายการโปรด และค่าล่าสุดอยู่ใน localStorage เท่านั้น ไม่มี Supabase write หรือ cloud sync',
       },
       {
         label: 'Supabase staging',

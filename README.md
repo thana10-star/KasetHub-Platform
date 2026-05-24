@@ -1,8 +1,8 @@
 # KasetHub Platform
 
-KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, M20 added the content management and publishing foundation, M21 added crop price data source foundations, M22 added local crop watch plus price alert UX, M22.5 added the real owner YouTube channel link config, M23 added local/mock community moderation UX, M24 added a local/mock Admin Dashboard foundation, M25 added a Supabase staging setup checklist plus readiness audit, M26 added a Supabase staging connection dry-run boundary, M27 added the manual SQL staging execution guide plus verification pack, M28 added a Supabase Auth phone OTP staging plan, M29 added a Guest Sync Edge Function staging contract, M30 added an Internal MVP QA plus prototype snapshot, M31 added local-only image compression plus preflight quality checks, M32 added local/mock agriculture weather forecast UX, M33 added a local/mock farm area measurement planner, and M34 upgrades My Farm into a local-first farmer workspace without deploying endpoints, enabling cloud sync/auth, writing data, adding keys, uploading images, calling AI/weather/map APIs, requesting geolocation, using GPS, or making network calls by default.
+KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, M20 added the content management and publishing foundation, M21 added crop price data source foundations, M22 added local crop watch plus price alert UX, M22.5 added the real owner YouTube channel link config, M23 added local/mock community moderation UX, M24 added a local/mock Admin Dashboard foundation, M25 added a Supabase staging setup checklist plus readiness audit, M26 added a Supabase staging connection dry-run boundary, M27 added the manual SQL staging execution guide plus verification pack, M28 added a Supabase Auth phone OTP staging plan, M29 added a Guest Sync Edge Function staging contract, M30 added an Internal MVP QA plus prototype snapshot, M31 added local-only image compression plus preflight quality checks, M32 added local/mock agriculture weather forecast UX, M33 added a local/mock farm area measurement planner, M34 upgrades My Farm into a local-first farmer workspace, and M49 adds local agriculture calculators for spray mixing, fertilizer math, planting density, yield estimates, and cost estimates without deploying endpoints, enabling cloud sync/auth, writing data, adding keys, uploading images, calling AI/weather/map APIs, requesting geolocation, using GPS, or making network calls by default.
 
-M35-M44 continue the safe staging path with local notifications, real backend phase planning, the `staging/supabase` branch workflow, local env safety checks, manual Supabase project/SQL prep, the M41 real staging setup walkthrough, the successful M42 manual execution review, the M43 read-only public table probe, and the M44 public read/RLS review checkpoint. The project still must not commit real keys, expose service-role keys, enable auth/cloud sync, run SQL automatically, write Supabase data, or change production behavior.
+M35-M44 continue the safe staging path with local notifications, real backend phase planning, the `staging/supabase` branch workflow, local env safety checks, manual Supabase project/SQL prep, the M41 real staging setup walkthrough, the successful M42 manual execution review, the M43 read-only public table probe, and the M44 public read/RLS review checkpoint. M49 returns to farmer utility by adding calculator foundations while keeping all storage local. The project still must not commit real keys, expose service-role keys, enable auth/cloud sync, run SQL automatically, write Supabase data, or change production behavior.
 
 ## Tech Stack
 
@@ -312,6 +312,16 @@ M35-M44 continue the safe staging path with local notifications, real backend ph
 - Links My Farm from Analyze, Farm Area, Weather, Crop Watch, Profile, and QA
 - Keeps My Farm local-only: no real backend, Supabase writes, auth requirement, AI/weather API, GPS/map, sync, destructive clear action, or network calls
 
+## M49 Agriculture Calculator Core Foundation
+
+- Adds typed agriculture calculator utilities in `src/services/agri-calculators`
+- Adds `useAgriCalculators()` for local recent calculations, favorite calculators, and last inputs
+- Adds `/app/calculators` plus spray mix, fertilizer, plant spacing, yield estimate, and cost estimate routes
+- Links calculator access from Home, My Farm, Profile, QA, and Admin
+- Uses Thai land unit rules: 1 ไร่ = 1,600 ตร.ม., 1 งาน = 400 ตร.ม., 1 ตารางวา = 4 ตร.ม.
+- Keeps safety copy visible: preliminary calculation only, no guarantee, no agronomist replacement, read real labels before spray use
+- Keeps calculators local-only: no backend writes, Supabase writes, AI calls, geolocation/map, cloud sync, payment, sponsor routing, or network calls
+
 ## Routes
 
 - `/` - public landing and app preview
@@ -332,6 +342,12 @@ M35-M44 continue the safe staging path with local notifications, real backend ph
 - `/app/ai-credits` - AI credit and rewarded unlock dashboard
 - `/app/qa` - farmer accessibility, visual QA, and M30 route coverage checklist
 - `/app/weather` - agriculture weather forecast mock and crop-work recommendations
+- `/app/calculators` - agriculture calculator hub
+- `/app/calculators/spray-mix` - spray/chemical mixing calculator
+- `/app/calculators/plant-spacing` - plant spacing and seedling count calculator
+- `/app/calculators/fertilizer` - fertilizer NPK helper foundation
+- `/app/calculators/yield-estimate` - yield estimate foundation
+- `/app/calculators/cost` - farm cost estimate foundation
 - `/app/farm-area` - local farm area calculator and saved plot estimates
 - `/app/farm-area-guide` - manual farm area measurement guide
 - `/app/analyze` - plant image upload and disease analysis mock workflow
@@ -437,6 +453,10 @@ M21-M22 price and watch features are local-only. They do not call OAE, DIT, ต�
 ## Farm Area Measurement Boundary
 
 M33 farm area features are local/mock only. Saved plot estimates stay in `kasethub.farmArea.v1`. The app does not request GPS, geolocation, map tiles, map APIs, backend writes, Supabase writes, or network calls. Every area result must keep the disclaimer: “เป็นการคำนวณประมาณการ ไม่ใช่การรังวัดที่ดินอย่างเป็นทางการ”.
+
+## Agriculture Calculator Boundary
+
+M49 calculator features are local-only. Recent calculations, favorites, and last inputs stay in `kasethub.agriCalculators.v1`. The app does not write backend data, write Supabase data, call AI APIs, request geolocation, load maps, sync to cloud, take payments, route sponsor/affiliate offers, or make network calls. Calculator results are preliminary arithmetic, not guarantees and not replacements for product labels, soil tests, agronomists, official surveys, or financial advice.
 
 ## My Farm Hub Boundary
 

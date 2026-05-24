@@ -17,13 +17,16 @@ import { AuthPhonePage } from '@/routes/AuthPhonePage';
 import { AuthPhoneStagingPage } from '@/routes/AuthPhoneStagingPage';
 import { AuthStatusPage } from '@/routes/AuthStatusPage';
 import { AuthSyncPreviewPage } from '@/routes/AuthSyncPreviewPage';
+import { CalculatorsPage } from '@/routes/CalculatorsPage';
 import { CommunityPage } from '@/routes/CommunityPage';
 import { CommunityRulesPage } from '@/routes/CommunityRulesPage';
 import { ArticleDetailPage } from '@/routes/ArticleDetailPage';
+import { CostCalculatorPage } from '@/routes/CostCalculatorPage';
 import { GuestSyncEdgePage } from '@/routes/GuestSyncEdgePage';
 import { GuestSyncStatusPage } from '@/routes/GuestSyncStatusPage';
 import { FarmAreaGuidePage } from '@/routes/FarmAreaGuidePage';
 import { FarmAreaPage } from '@/routes/FarmAreaPage';
+import { FertilizerCalculatorPage } from '@/routes/FertilizerCalculatorPage';
 import { ImagePrivacyPage } from '@/routes/ImagePrivacyPage';
 import { ImagePreflightPage } from '@/routes/ImagePreflightPage';
 import { LandingPage } from '@/routes/LandingPage';
@@ -35,12 +38,14 @@ import { MyFarmSettingsPage } from '@/routes/MyFarmSettingsPage';
 import { NextPhasePage } from '@/routes/NextPhasePage';
 import { NotificationSettingsPage } from '@/routes/NotificationSettingsPage';
 import { NotificationsPage } from '@/routes/NotificationsPage';
+import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
 import { PriceDetailPage } from '@/routes/PriceDetailPage';
 import { PricesPage } from '@/routes/PricesPage';
 import { ProfilePage } from '@/routes/ProfilePage';
 import { QAPage } from '@/routes/QAPage';
 import { SavedArticlesPage } from '@/routes/SavedArticlesPage';
 import { SavedVideosPage } from '@/routes/SavedVideosPage';
+import { SprayMixCalculatorPage } from '@/routes/SprayMixCalculatorPage';
 import { SupabaseConnectionPage } from '@/routes/SupabaseConnectionPage';
 import { SupabaseReadinessPage } from '@/routes/SupabaseReadinessPage';
 import { SupabaseReadonlyProbePage } from '@/routes/SupabaseReadonlyProbePage';
@@ -52,6 +57,7 @@ import { YoutubePage } from '@/routes/YoutubePage';
 import { ContentAdminPreviewPage } from '@/routes/ContentAdminPreviewPage';
 import { CropWatchPage } from '@/routes/CropWatchPage';
 import { EnvSafetyPage } from '@/routes/EnvSafetyPage';
+import { YieldEstimateCalculatorPage } from '@/routes/YieldEstimateCalculatorPage';
 
 export default function App() {
   return (
@@ -75,6 +81,12 @@ export default function App() {
         <Route path="mvp-snapshot" element={<MvpSnapshotPage />} />
         <Route path="next-phase" element={<NextPhasePage />} />
         <Route path="weather" element={<WeatherPage />} />
+        <Route path="calculators" element={<CalculatorsPage />} />
+        <Route path="calculators/spray-mix" element={<SprayMixCalculatorPage />} />
+        <Route path="calculators/plant-spacing" element={<PlantSpacingCalculatorPage />} />
+        <Route path="calculators/fertilizer" element={<FertilizerCalculatorPage />} />
+        <Route path="calculators/yield-estimate" element={<YieldEstimateCalculatorPage />} />
+        <Route path="calculators/cost" element={<CostCalculatorPage />} />
         <Route path="farm-area" element={<FarmAreaPage />} />
         <Route path="farm-area-guide" element={<FarmAreaGuidePage />} />
         <Route path="analyze" element={<AnalyzePage />} />

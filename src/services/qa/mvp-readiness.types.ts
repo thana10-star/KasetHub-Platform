@@ -2,6 +2,7 @@ import type { AppRoute } from '@/types/kaset';
 
 export type MvpRouteGroupId =
   | 'core_app'
+  | 'agriculture_calculators'
   | 'content_youtube'
   | 'ai_plant_analysis'
   | 'prices_crop_watch'

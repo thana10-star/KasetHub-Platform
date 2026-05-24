@@ -188,6 +188,29 @@ Type mapping:
 
 M33 state is localStorage-only under `kasethub.farmArea.v1`. Production persistence requires real auth, owner-scoped RLS, private boundary defaults, deletion controls, and clear copy that estimates are not official land surveys. Precise GPS/map geometry should never be public-read by default.
 
+## Agriculture Calculators
+
+M49 calculator models map conceptually into:
+
+- `calculator_history`
+- `fertilizer_profiles`
+- `planting_profiles`
+- `farm_cost_records`
+
+Type mapping:
+
+- `CalculatorCategory` -> `calculator_history.calculator_category`
+- `CalculatorHistoryRecord` -> `calculator_history`
+- `SprayMixInput` / `SprayMixResult` -> `calculator_history.input_payload/result_payload` with category `spray_mix`
+- `FertilizerMixInput` / `FertilizerMixResult` -> `calculator_history` and future `fertilizer_profiles`
+- `PlantSpacingInput` / `PlantSpacingResult` -> `calculator_history` and future `planting_profiles`
+- `YieldEstimateInput` / `YieldEstimateResult` -> `calculator_history` until a future harvest record table exists
+- `CostEstimateInput` / `CostEstimateResult` -> `farm_cost_records` plus optional `calculator_history`
+
+M49 state is localStorage-only under `kasethub.agriCalculators.v1`. It stores recent calculations, favorite calculators, and last inputs only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+
+Future AI recommendations should not overwrite deterministic calculator output. Future sponsor or affiliate integrations must be labeled and must not use calculator history for targeting without explicit consent and policy review.
+
 ## My Farm Hub
 
 M34 My Farm hub models map conceptually into generated dashboard views and user-owned preferences:

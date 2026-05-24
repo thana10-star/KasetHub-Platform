@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Bell,
   Bot,
+  Calculator,
   CalendarDays,
   Camera,
   ChevronRight,
@@ -30,6 +31,7 @@ const quickActionIcons: Record<MyFarmQuickAction['iconKey'], LucideIcon> = {
   weather: CloudSun,
   price: Bell,
   ai: Bot,
+  calculator: Calculator,
 };
 
 const timelineIcons: Record<MyFarmTimelineItemType, LucideIcon> = {

@@ -1,5 +1,6 @@
 import {
   Bot,
+  Calculator,
   CloudSun,
   Coins,
   MessageCircleQuestion,
@@ -64,6 +65,13 @@ export const quickActions: QuickAction[] = [
     href: '/app/weather',
     icon: CloudSun,
     accent: 'sky',
+  },
+  {
+    label: 'เครื่องคำนวณเกษตร',
+    description: 'ผสมยา ปุ๋ย ระยะปลูก',
+    href: '/app/calculators',
+    icon: Calculator,
+    accent: 'gold',
   },
   {
     label: 'วัดพื้นที่แปลง',

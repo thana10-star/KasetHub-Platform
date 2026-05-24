@@ -538,6 +538,54 @@ RLS notes: Users can CRUD their own notes. Backend-generated notes should be lab
 
 Admin/moderation notes: Future support/admin views should avoid broad access to private plot notes unless explicit support consent and audit logging exist.
 
+## `calculator_history` Future
+
+Purpose: Optional cloud version of M49 local agriculture calculator history after real auth and sync consent exist.
+
+Key columns: `id uuid`, `user_id`, `local_id`, `calculator_category`, `input_payload jsonb`, `result_payload jsonb`, `result_summary`, `disclaimers text[]`, `created_at`, `synced_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `created_at desc`, `(user_id, local_id)`.
+
+RLS notes: Users can read/delete their own calculator history. Inserts should require authenticated ownership and explicit sync consent.
+
+Admin/moderation notes: Calculator history can reveal farm economics, chemical use, and production planning. Support/admin access should be rare, audited, and purpose-limited.
+
+## `fertilizer_profiles` Future
+
+Purpose: User-owned or admin-reviewed fertilizer formula profiles used by future calculator defaults and recommendation workflows.
+
+Key columns: `id uuid`, `owner_user_id nullable`, `profile_type`, `label`, `n_percent`, `p_percent`, `k_percent`, `source_label`, `review_status`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `owner_user_id`, `profile_type`, `review_status`, `(n_percent, p_percent, k_percent)`.
+
+RLS notes: Public can read only approved generic profiles. Users can manage their own private profiles. Admin-reviewed profiles require backend/admin policies.
+
+Admin/moderation notes: Product-specific fertilizer profiles must not become hidden ads. Sponsored or affiliate profiles need clear labeling and audit logs.
+
+## `planting_profiles` Future
+
+Purpose: Saved crop/spacing presets and planting density assumptions for future user-owned farm planning.
+
+Key columns: `id uuid`, `user_id`, `crop_name`, `row_spacing_cm`, `plant_spacing_cm`, `seedling_buffer_percent`, `usable_area_percent`, `source_label`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `crop_name`, `created_at desc`.
+
+RLS notes: Users can CRUD their own planting profiles. Public/default presets should be backend-reviewed and clearly labeled as examples.
+
+Admin/moderation notes: Presets should not imply guaranteed yield. AI or sponsor-generated presets must be labeled separately from farmer-entered profiles.
+
+## `farm_cost_records` Future
+
+Purpose: User-owned farm cost estimates and actual cost records derived from future cost calculator and My Farm workflows.
+
+Key columns: `id uuid`, `user_id`, `farm_plot_id nullable`, `season_label nullable`, `record_type`, `area_rai`, `fertilizer_cost`, `labor_cost`, `water_cost`, `machinery_cost`, `other_cost`, `total_cost`, `expected_yield_kg nullable`, `break_even_payload jsonb`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `farm_plot_id`, `record_type`, `season_label`, `created_at desc`.
+
+RLS notes: Users can CRUD their own cost records. Public read is disabled by default.
+
+Admin/moderation notes: Cost records are sensitive financial planning data. They must not be used for credit, ads, affiliate targeting, or pricing offers without explicit consent and policy review.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

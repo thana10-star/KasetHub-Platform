@@ -35,6 +35,14 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
     tone: 'soft',
   },
   {
+    id: 'calculators',
+    label: 'เครื่องคำนวณเกษตร',
+    description: 'ผสมยา ปุ๋ย ระยะปลูก ต้นทุน',
+    route: '/app/calculators',
+    iconKey: 'calculator',
+    tone: 'warning',
+  },
+  {
     id: 'weather',
     label: 'ดูสภาพอากาศ',
     description: 'ฝน แดด ลม ความชื้นตัวอย่าง',
@@ -233,6 +241,16 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       route: '/app/weather',
       badgeLabel: 'mock weather',
       tone: 'neutral',
+    },
+    {
+      id: 'calculator',
+      module: 'calculator',
+      title: 'เครื่องคำนวณเกษตร',
+      detail: 'คำนวณผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุนแบบ local-only',
+      valueLabel: '5 เครื่องมือ',
+      route: '/app/calculators',
+      badgeLabel: 'M49',
+      tone: 'gold',
     },
     {
       id: 'saved-content',

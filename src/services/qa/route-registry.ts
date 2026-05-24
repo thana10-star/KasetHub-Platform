@@ -21,6 +21,19 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     ],
   },
   {
+    id: 'agriculture_calculators',
+    label: 'Agriculture calculators',
+    description: 'เครื่องคำนวณเกษตร local-only สำหรับผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุน',
+    routes: [
+      { route: '/app/calculators', label: 'Calculator hub', milestone: 'M49', notes: 'ศูนย์รวมเครื่องคำนวณเกษตร ไม่มี backend write หรือ cloud sync', manualCheckPath: '/app/calculators' },
+      { route: '/app/calculators/spray-mix', label: 'Spray mix calculator', milestone: 'M49', notes: 'คำนวณอัตราผสมตามฉลากและเตือนเมื่อความเข้มข้นสูง', manualCheckPath: '/app/calculators/spray-mix' },
+      { route: '/app/calculators/plant-spacing', label: 'Plant spacing calculator', milestone: 'M49', notes: 'ประมาณจำนวนต้นและแปลงหน่วย ไร่ งาน ตารางวา ตารางเมตร', manualCheckPath: '/app/calculators/plant-spacing' },
+      { route: '/app/calculators/fertilizer', label: 'Fertilizer helper', milestone: 'M49', notes: 'NPK target helper เบื้องต้น ไม่ใช่คำแนะนำปุ๋ยจริง', manualCheckPath: '/app/calculators/fertilizer' },
+      { route: '/app/calculators/yield-estimate', label: 'Yield estimate calculator', milestone: 'M49', notes: 'คำนวณผลผลิตรวม kg/ton และผลผลิตต่อไร่จากตัวอย่าง', manualCheckPath: '/app/calculators/yield-estimate' },
+      { route: '/app/calculators/cost', label: 'Cost estimate calculator', milestone: 'M49', notes: 'รวมต้นทุนหลัก ต้นทุนต่อไร่ และ break-even placeholder', manualCheckPath: '/app/calculators/cost' },
+    ],
+  },
+  {
     id: 'content_youtube',
     label: 'Content / YouTube',
     description: 'บทความ วิดีโอ YouTube และตัวอย่างหลังบ้านคอนเทนต์',
