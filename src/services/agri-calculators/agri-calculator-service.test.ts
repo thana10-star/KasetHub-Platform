@@ -15,6 +15,10 @@ import {
 } from '@/services/agri-calculators/agri-calculator-edge-fixtures';
 import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-calculator-test-fixtures';
 import { agriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
+import {
+  buildCalculatorResultSummary,
+  getSavedCalculatorResultSummaries,
+} from '@/services/agri-calculators/calculator-result-summary-service';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -418,5 +422,40 @@ describe('edge-case fixture regression suite', () => {
       const run = runCropProfileEdgeFixture(fixture);
       expect(run.isMatch, run.id).toBe(true);
     });
+  });
+});
+
+describe('calculator result summary service', () => {
+  test('builds local share metadata and Thai result recap for valid results', () => {
+    const input = {
+      tankLiters: 20,
+      tankSizeOption: 20 as const,
+      dosageAmount: 20,
+      dosageUnit: 'cc' as const,
+      dosageWaterLiters: 20,
+    };
+    const result = calculateSprayMix(input);
+    const summary = buildCalculatorResultSummary('spray_mix', input, result, {
+      createdAt: '2026-05-24T08:00:00.000Z',
+      id: 'summary-test',
+    });
+
+    expect(summary.id).toBe('summary-test');
+    expect(summary.summaryTitle).toContain('สรุปผลคำนวณเบื้องต้น');
+    expect(summary.inputRecap.join(' ')).toContain('ถังน้ำ 20 ลิตร');
+    expect(summary.resultRecap.join(' ')).toContain('ต้องใช้ยา/สาร');
+    expect(summary.safetyDisclaimer).toContain('ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญ');
+    expect(summary.shareText).toContain('สรุปผลคำนวณเบื้องต้น');
+    expect(summary.shareMetadata.native.source).toBe('native');
+    expect(summary.shareMetadata.line.source).toBe('line');
+    expect(summary.shareMetadata.facebook.source).toBe('facebook');
+    expect(summary.calculatorRoute).toBe('/app/calculators/spray-mix');
+  });
+
+  test('returns an empty saved-results state outside browser storage', () => {
+    const state = getSavedCalculatorResultSummaries();
+
+    expect(state.version).toBe(1);
+    expect(state.savedResults).toEqual([]);
   });
 });

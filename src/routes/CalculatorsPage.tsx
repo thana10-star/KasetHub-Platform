@@ -10,7 +10,7 @@ import { cropCalculatorProfiles } from '@/services/agri-calculators/crop-calcula
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import { RecentCalculations } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
-import { FlaskConical, ShieldCheck, Sprout, Star } from 'lucide-react';
+import { FlaskConical, History, ShieldCheck, Sprout, Star } from 'lucide-react';
 
 export function CalculatorsPage() {
   const calculators = useAgriCalculators();
@@ -82,6 +82,26 @@ export function CalculatorsPage() {
               <p className="mt-1 text-sm leading-6 text-sky-900">ดู test case, expected vs actual และคำเตือนของสูตรหลักแบบ local-only</p>
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-sky-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
                 เปิด QA เครื่องคำนวณ
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+              <History aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">ผลคำนวณที่บันทึกไว้</h2>
+                <StatusPill tone="success">local-only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-700">
+                ดูสรุปที่กดบันทึกไว้ คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้ ไม่มี cloud sync
+              </p>
+              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/saved-results">
+                เปิดผลคำนวณที่บันทึกไว้
               </Link>
             </div>
           </div>

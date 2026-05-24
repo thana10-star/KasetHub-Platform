@@ -56,6 +56,7 @@ const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> 
   { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
   { label: 'สภาพอากาศเกษตรตัวอย่าง', icon: CloudSun, href: '/app/weather' },
   { label: 'เครื่องคำนวณเกษตร', icon: Calculator, href: '/app/calculators' },
+  { label: 'ผลคำนวณที่บันทึกไว้', icon: History, href: '/app/calculators/saved-results' },
   { label: 'ความปลอดภัยเครื่องคำนวณ', icon: ShieldCheck, href: '/app/calculators/safety' },
   { label: 'คำนวณพื้นที่แปลง', icon: Ruler, href: '/app/farm-area' },
   { label: 'กติกาชุมชน', icon: ShieldCheck, href: '/app/community-rules' },

@@ -1,5 +1,5 @@
-import { Calculator, ChevronRight, Copy, History, RotateCcw, Share2, ShieldCheck, Sprout, Star } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { Calculator, ChevronRight, Copy, Gift, History, RotateCcw, Save, Send, Share2, ShieldCheck, Sprout, Star } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -8,7 +8,10 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { calculatorCards } from '@/services/agri-calculators/agri-calculator-fixtures';
-import { createCalculatorShareSummary } from '@/services/agri-calculators/agri-calculator-service';
+import {
+  buildCalculatorResultSummary,
+  saveCalculatorResultSummary,
+} from '@/services/agri-calculators/calculator-result-summary-service';
 import { calculatorPlanningOnlyDisclaimer } from '@/services/agri-calculators/crop-calculator-boundaries';
 import {
   cropCalculatorProfileOptions,
@@ -275,8 +278,7 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
   result: AgriCalculatorResultByCategory[C];
 }) {
   const [message, setMessage] = useState('');
-  const card = calculatorCards.find((item) => item.id === category);
-  const summary = createCalculatorShareSummary(category, input, result);
+  const summary = useMemo(() => buildCalculatorResultSummary(category, input, result), [category, input, result]);
 
   if (!result.isValid) {
     return (
@@ -293,7 +295,7 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
         return;
       }
 
-      await navigator.clipboard.writeText(summary);
+      await navigator.clipboard.writeText(summary.shareText);
       setMessage('คัดลอกสรุปผลแล้ว');
     } catch {
       setMessage('คัดลอกไม่สำเร็จ ลองเลือกข้อความจากสรุปแทน');
@@ -301,14 +303,20 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
   };
 
   const shareSummary = async () => {
-    const shareResult = await shareContent({
-      title: 'สรุปผลคำนวณเบื้องต้น',
-      description: summary,
-      url: card?.route ?? '/app/calculators',
-      source: 'native',
-    });
+    const shareResult = await shareContent(summary.shareMetadata.native, 'native');
 
     setMessage(shareResult.message);
+  };
+
+  const shareToLine = async () => {
+    const shareResult = await shareContent(summary.shareMetadata.line, 'line');
+
+    setMessage(shareResult.message);
+  };
+
+  const saveSummary = () => {
+    saveCalculatorResultSummary(summary);
+    setMessage('บันทึกสรุปไว้ในเครื่องนี้แล้ว');
   };
 
   return (
@@ -320,19 +328,74 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
         </div>
       </div>
       <div className="mt-3 rounded-lg bg-kaset-mist p-3 text-sm font-bold leading-6 text-kaset-deep">
-        สรุปผลคำนวณเบื้องต้น · ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง
+        ผลคำนวณเบื้องต้น · ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง
+      </div>
+      <div className="mt-3 grid gap-2 rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10">
+        <p className="text-sm font-extrabold text-kaset-ink">{summary.summaryTitle}</p>
+        {summary.resultRecap.slice(0, 3).map((line) => (
+          <p className="text-sm leading-6 text-slate-600" key={line}>
+            {line}
+          </p>
+        ))}
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Button className="min-h-[52px] px-3 text-sm" onClick={copySummary} variant="secondary">
           <Copy aria-hidden="true" className="h-5 w-5" />
-          คัดลอก
+          คัดลอกสรุป
         </Button>
         <Button className="min-h-[52px] px-3 text-sm" onClick={shareSummary} variant="soft">
           <Share2 aria-hidden="true" className="h-5 w-5" />
           แชร์สรุป
         </Button>
+        <Button className="min-h-[52px] px-3 text-sm" onClick={saveSummary} variant="secondary">
+          <Save aria-hidden="true" className="h-5 w-5" />
+          บันทึกสรุป
+        </Button>
+        <Button className="min-h-[52px] px-3 text-sm" onClick={shareToLine} variant="soft">
+          <Send aria-hidden="true" className="h-5 w-5" />
+          ส่งให้เพื่อนใน LINE
+        </Button>
       </div>
+      <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/saved-results">
+        ดูผลคำนวณที่บันทึกไว้
+      </Link>
       {message ? <p className="mt-3 text-sm font-bold leading-6 text-kaset-deep">{message}</p> : null}
+    </Card>
+  );
+}
+
+export function CalculatorRewardedAdsPlanningCard({ compact = false }: { compact?: boolean }) {
+  return (
+    <Card className="border-amber-200 bg-amber-50 p-4">
+      <div className="flex gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+          <Gift aria-hidden="true" className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-extrabold text-amber-950">Rewarded ads planning</h2>
+            <StatusPill tone="warning">future only</StatusPill>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-amber-900">
+            ยังไม่มีโฆษณาจริง ไม่มี AdMob และไม่มี payment ตอนนี้ พื้นฐานเครื่องคำนวณต้องใช้ฟรีเสมอ
+          </p>
+          <div className={cx('mt-3 grid gap-2', compact ? '' : 'sm:grid-cols-2')}>
+            {[
+              'โฆษณาในอนาคตควรปลดล็อกความสะดวกหรือโหมดขั้นสูง ไม่บังข้อมูลความปลอดภัย',
+              'ห้ามซ่อนสินค้า sponsor ไว้ในผลคำนวณหรือ AI recommendation',
+              'ผลคำนวณหลักยังเป็น deterministic และต้องไม่เปลี่ยนตามโฆษณา',
+              'share/export ขั้นพื้นฐานควรยังเข้าถึงได้แบบ local-only',
+            ].map((note) => (
+              <p className="rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950" key={note}>
+                {note}
+              </p>
+            ))}
+          </div>
+          <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/calculators/safety">
+            อ่านขอบเขตความปลอดภัยและรายได้
+          </Link>
+        </div>
+      </div>
     </Card>
   );
 }

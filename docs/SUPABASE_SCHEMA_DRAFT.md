@@ -634,6 +634,42 @@ RLS notes: Public can read only approved, active rule metadata. Rule authoring a
 
 Admin/moderation notes: Future AI recommendations must cite rule versions and must not mix sponsor influence into deterministic calculator output or expert-reviewed rule logic.
 
+## `calculator_saved_results` Future
+
+Purpose: Optional cloud sync target for M53 saved calculator summaries after real auth, consent, and owner-scoped RLS exist.
+
+Key columns: `id uuid`, `user_id`, `local_id`, `calculator_category`, `summary_title`, `input_recap text[]`, `result_recap text[]`, `warning_recap text[]`, `safety_disclaimer`, `calculator_route`, `share_text`, `created_at`, `synced_at`, `deleted_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `created_at desc`, `(user_id, local_id)`, `deleted_at`.
+
+RLS notes: Users can read/delete their own saved summaries. Inserts require explicit sync consent and must never trust client payloads as official recommendations.
+
+Admin/moderation notes: Saved summaries may reveal chemical use, costs, yield expectations, and farm planning. Support/admin access must be audited and purpose-limited.
+
+## `calculator_share_events` Future
+
+Purpose: Optional analytics/audit events for calculator summary shares after consent and privacy review.
+
+Key columns: `id uuid`, `user_id nullable`, `saved_result_id nullable`, `calculator_category`, `share_channel`, `share_status`, `shared_at`, `consent_version nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `saved_result_id`, `calculator_category`, `share_channel`, `shared_at desc`.
+
+RLS notes: If stored, users should see their own share history. Event inserts should be backend-owned or consent-gated, not automatic local tracking.
+
+Admin/moderation notes: Do not store raw share text unless necessary. Avoid sponsor targeting without explicit consent.
+
+## `calculator_rewarded_ad_unlocks` Future
+
+Purpose: Future rewarded-ad unlock records for calculator convenience or advanced modes, never for essential safety information.
+
+Key columns: `id uuid`, `user_id`, `unlock_type`, `calculator_category nullable`, `ad_provider`, `provider_reward_id nullable`, `status`, `granted_at`, `expires_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `unlock_type`, `calculator_category`, `status`, `granted_at desc`.
+
+RLS notes: Users can read their own unlock history. Grant validation should be backend-owned and rate limited.
+
+Admin/moderation notes: Basic calculator results and safety copy must stay free. Unlocks must not insert hidden sponsor/product recommendations into deterministic results.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

@@ -10,6 +10,8 @@ M52 implements the first formal service-level tests with Vitest:
 
 The tests are pure calculation utility tests. They do not render React, call network services, write Supabase data, or invoke AI.
 
+M53 extends the same service-level coverage with result-summary model checks so copy/share/save metadata can change safely without changing calculator formulas.
+
 ## Planned Groups
 
 - spray mix math
@@ -19,6 +21,7 @@ The tests are pure calculation utility tests. They do not render React, call net
 - yield estimate
 - cost estimate
 - crop profile example loading
+- calculator result summary model
 
 ## High-priority Assertions
 
@@ -70,6 +73,13 @@ Crop profile loading:
 - every profile keeps `fertilizerPlanningStatus = planning_only`.
 - no profile contains pesticide or product recommendations.
 
+Result summaries:
+
+- valid calculator results produce Thai input recap and result recap lines.
+- share metadata is built for native, LINE, and Facebook channels.
+- saved-results state returns an empty safe state outside browser storage.
+- summary safety copy includes `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง`.
+
 ## Future Runner
 
-M52 uses `npm run test` for Vitest. Future milestones can add more service tests before any component/browser tests. Tests should continue to avoid network dependencies and should keep deterministic formulas separate from recommendation logic.
+M52 uses `npm run test` for Vitest and M53 keeps that path. Future milestones can add more service tests before any component/browser tests. Tests should continue to avoid network dependencies and should keep deterministic formulas separate from recommendation logic, export/share convenience, rewarded ads, and future AI explanations.

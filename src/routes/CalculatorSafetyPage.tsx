@@ -11,7 +11,7 @@ import {
 } from '@/services/agri-calculators/crop-calculator-boundaries';
 import { cropCalculatorProfiles } from '@/services/agri-calculators/crop-calculator-profiles';
 import { summarizeAgriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
-import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
+import { CalculatorBackLink, CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 
 const confirmationReasons = [
   'ฉลากจริงเป็นแหล่งข้อมูลหลักสำหรับยา/สารเคมี เพราะมีอัตราใช้ คำเตือน และข้อกฎหมาย',
@@ -92,6 +92,8 @@ export function CalculatorSafetyPage() {
           </div>
         </Card>
 
+        <CalculatorRewardedAdsPlanningCard />
+
         <Card className="p-4">
           <div className="flex gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
@@ -124,7 +126,7 @@ export function CalculatorSafetyPage() {
             <div className="min-w-0 flex-1">
               <h2 className="font-extrabold text-kaset-ink">Unit-test readiness</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                แผน unit test มี {unitTestPlan.totalCount} รายการ · high priority {unitTestPlan.highPriorityCount} · ยังไม่เพิ่ม test runner
+                แผน unit test มี {unitTestPlan.totalCount} รายการ · high priority {unitTestPlan.highPriorityCount} · ใช้ Vitest สำหรับ service tests แล้ว
               </p>
             </div>
           </div>

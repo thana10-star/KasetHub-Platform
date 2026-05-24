@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, FlaskConical, ShieldCheck, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FlaskConical, History, ShieldCheck, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -11,7 +11,7 @@ import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-cal
 import type { AgriCalculatorEdgeRun } from '@/services/agri-calculators/agri-calculator-edge-fixtures';
 import { runAgriCalculatorEdgeSuite } from '@/services/agri-calculators/agri-calculator-edge-fixtures';
 import { summarizeAgriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
-import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
+import { CalculatorBackLink, CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
 
 const statusLabels: Record<AgriCalculatorTestStatus, string> = {
@@ -193,6 +193,13 @@ export function CalculatorQAPage() {
           <ShieldCheck aria-hidden="true" className="h-5 w-5" />
           เปิดขอบเขตความปลอดภัย
         </Link>
+
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/saved-results">
+          <History aria-hidden="true" className="h-5 w-5" />
+          เปิดผลคำนวณที่บันทึกไว้
+        </Link>
+
+        <CalculatorRewardedAdsPlanningCard compact />
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">

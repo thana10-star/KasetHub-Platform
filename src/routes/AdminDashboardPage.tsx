@@ -65,6 +65,7 @@ import { useFarmArea } from '@/hooks/useFarmArea';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
+import { CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 
 type AdminTab = 'overview' | 'content' | 'moderation' | 'crop_prices' | 'ai_safety' | 'system';
 
@@ -322,7 +323,7 @@ export function AdminDashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-kaset-ink">M50 Agriculture calculators</h2>
+                    <h2 className="font-extrabold text-kaset-ink">M53 Agriculture calculators</h2>
                     <StatusPill tone={calculatorQa.failCount > 0 ? 'danger' : calculatorQa.warnCount > 0 ? 'warning' : 'success'}>
                       {calculatorQa.failCount > 0 ? 'QA fail' : calculatorQa.warnCount > 0 ? 'QA warn' : 'QA pass'}
                     </StatusPill>
@@ -336,9 +337,14 @@ export function AdminDashboardPage() {
                   <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/qa">
                     เปิด QA เครื่องคำนวณ
                   </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/saved-results">
+                    เปิดสรุปที่บันทึกไว้
+                  </Link>
                 </div>
               </div>
             </Card>
+
+            <CalculatorRewardedAdsPlanningCard compact />
 
             <Card className="border-sky-200 bg-sky-50 p-4">
               <div className="flex gap-3">

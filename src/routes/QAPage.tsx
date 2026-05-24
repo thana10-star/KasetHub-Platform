@@ -6,6 +6,7 @@ import {
   Eye,
   GitBranch,
   Hand,
+  History,
   ImageUp,
   ListChecks,
   MessageCircle,
@@ -20,6 +21,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
+import { CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 import type { AppRoute } from '@/types/kaset';
 
 const checklist = [
@@ -75,6 +77,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
   { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
   { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
+  { label: 'ผลคำนวณที่บันทึกไว้', route: '/app/calculators/saved-results' },
   { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
@@ -239,7 +242,17 @@ export function QAPage() {
             to="/app/calculators/safety"
             variant="white"
           />
+          <LargeActionButton
+            className="mt-3"
+            icon={History}
+            label="เปิดผลคำนวณที่บันทึกไว้"
+            description="ดูสรุป local-only ที่คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้"
+            to="/app/calculators/saved-results"
+            variant="soft"
+          />
         </Card>
+
+        <CalculatorRewardedAdsPlanningCard compact />
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">

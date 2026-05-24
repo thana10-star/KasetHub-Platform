@@ -1,6 +1,6 @@
 # Agriculture Calculator Foundation
 
-M49 adds the first real agriculture calculator foundation for KasetHub. M50 hardens that foundation with validation helpers, deterministic QA fixtures, safer warning states, and local share summaries. M51 adds crop-specific planning profiles and safety boundaries while staying fully local-only.
+M49 adds the first real agriculture calculator foundation for KasetHub. M50 hardens that foundation with validation helpers, deterministic QA fixtures, safer warning states, and local share summaries. M51 adds crop-specific planning profiles and safety boundaries while staying fully local-only. M52 adds formal Vitest service tests and edge-case fixtures. M53 adds structured result summaries, local saved summaries, and rewarded-ads strategy planning without enabling real ads.
 
 ## Current Scope
 
@@ -10,15 +10,18 @@ M49 adds the first real agriculture calculator foundation for KasetHub. M50 hard
 - No geolocation, GPS, or map.
 - No cloud sync.
 - No payment or sponsor transaction.
+- No real ads or AdMob SDK.
 - No network call is required.
 - Recent calculations, favorite calculators, and last inputs are stored only in `kasethub.agriCalculators.v1`.
-- Share summaries are generated on device only and are not uploaded or saved to a backend.
+- Share summaries are generated on device only and are not uploaded to a backend.
+- Saved result summaries are stored only in `kasethub.calculatorResultSummaries.v1`.
 
 ## Routes
 
 - `/app/calculators`
 - `/app/calculators/safety`
 - `/app/calculators/qa`
+- `/app/calculators/saved-results`
 - `/app/calculators/spray-mix`
 - `/app/calculators/fertilizer`
 - `/app/calculators/plant-spacing`
@@ -40,6 +43,8 @@ Files:
 - `src/services/agri-calculators/crop-calculator-profiles.ts`
 - `src/services/agri-calculators/crop-calculator-boundaries.ts`
 - `src/services/agri-calculators/agri-calculator-unit-test-plan.ts`
+- `src/services/agri-calculators/calculator-result-summary.types.ts`
+- `src/services/agri-calculators/calculator-result-summary-service.ts`
 - `src/hooks/useAgriCalculators.ts`
 
 Core types:
@@ -98,6 +103,14 @@ M51 also adds `/app/calculators/safety` so users can see what calculators can an
 - last inputs
 
 The local state is intentionally not synced. Future sync must wait for real auth, owner-scoped RLS, consent, and a backend-owned merge path.
+
+M53 adds `kasethub.calculatorResultSummaries.v1` for local saved summaries. These summaries support copy/share again and delete local item. They are not PDFs, not cloud records, and not share analytics.
+
+## M53 Export/Share And Monetization Planning
+
+Valid calculator results now create structured summaries with input recap, result recap, safety copy, route metadata, and LINE/Facebook/native share metadata. The saved-results route is `/app/calculators/saved-results`.
+
+Rewarded ads are planning-only. Basic calculations remain free, safety information must never be blocked by ads, and sponsored products must not be hidden inside calculator results or future AI explanations.
 
 ## Future AI Recommendation Boundary
 

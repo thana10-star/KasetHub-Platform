@@ -52,6 +52,18 @@ Future AI can explain inputs and surface missing assumptions. It must not:
 
 Sponsored products must never be silently mixed into calculator output or AI explanations. Paid placement must be labeled, separated from deterministic results, and never use calculator history without explicit consent and backend-owned audit logs.
 
+## Rewarded Ads Boundary
+
+M53 keeps rewarded ads as planning-only. Basic calculator results, safety disclaimers, label reminders, and expert-confirmation notes must remain free. Future ads may unlock convenience or advanced comparison modes only after policy, consent, backend validation, and audit controls exist.
+
+Rewarded ads must not:
+
+- change deterministic formula output
+- hide safety copy
+- steer fertilizer or chemical choices
+- unlock hidden sponsor recommendations
+- send calculator history to ad or sponsor systems without explicit consent
+
 ## Why Confirmation Matters
 
 Farm safety depends on context the calculator does not know: real label text, soil test, water availability, plant age, local regulations, worker safety, weather, disease pressure, and field history. These must be checked before real-world use.

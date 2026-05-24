@@ -200,6 +200,9 @@ M49 calculator models map conceptually into:
 - `calculator_safety_notes`
 - `calculator_result_reviews`
 - `crop_rule_versions`
+- `calculator_saved_results`
+- `calculator_share_events`
+- `calculator_rewarded_ad_unlocks`
 
 Type mapping:
 
@@ -213,12 +216,15 @@ Type mapping:
 - `CropCalculatorProfile` -> future `crop_calculator_profiles`
 - `CropCalculatorKey` -> `crop_calculator_profiles.crop_key` and future `crop_rule_versions.crop_key`
 - `CalculatorSafetyBoundarySection` -> future `calculator_safety_notes`
+- `CalculatorResultSummary` -> future `calculator_saved_results`
+- `CalculatorResultShareMetadata` -> future `calculator_share_events.share_channel/share_status` payload metadata
 - future reviewed crop rule metadata -> `crop_rule_versions`
 - future expert review or dispute workflow -> `calculator_result_reviews`
+- future rewarded calculator convenience unlock -> `calculator_rewarded_ad_unlocks`
 
-M49-M51 state is localStorage-only under `kasethub.agriCalculators.v1` plus static crop calculator fixtures. It stores recent calculations, favorite calculators, and last inputs only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+M49-M53 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
 
-Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future sponsor or affiliate integrations must be labeled and must not use calculator history, crop profiles, safety notes, or rule versions for targeting without explicit consent and policy review.
+Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, crop profiles, safety notes, or rule versions for targeting without explicit consent and policy review.
 
 ## My Farm Hub
 

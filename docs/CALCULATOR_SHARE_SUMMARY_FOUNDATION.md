@@ -1,6 +1,6 @@
 # Calculator Share Summary Foundation
 
-M50 adds a local-only share summary foundation for agriculture calculator results. It supports copying result text and using the existing share service when available, without creating files or saving to a backend.
+M50 adds a local-only share summary foundation for agriculture calculator results. M53 upgrades it with a structured result summary model, saved local summaries, and LINE/native share metadata, without creating files or saving to a backend.
 
 ## Scope
 
@@ -9,6 +9,7 @@ M50 adds a local-only share summary foundation for agriculture calculator result
 - No backend save.
 - No Supabase write.
 - No analytics, sponsor, affiliate, or payment integration.
+- No real AdMob or rewarded ad runtime.
 - No network calls are required by calculator logic.
 
 ## Supported Calculators
@@ -45,8 +46,15 @@ The UI supports:
 
 - copy result text through `navigator.clipboard.writeText`
 - native share through the existing `shareContent` service, with copy-link fallback when the device does not support native sharing
+- save local summary under `kasethub.calculatorResultSummaries.v1`
+- send to LINE through the existing share service when the user taps the LINE action
+- copy/share/delete again from `/app/calculators/saved-results`
 
 The current implementation does not create a downloadable document. Future export should keep the same disclaimer language and avoid uploading user inputs without explicit consent.
+
+## M53 Summary Model
+
+`CalculatorResultSummary` stores title, input recap, result recap, warnings, safety disclaimer, calculator route, share text, native/LINE/Facebook metadata, local id, and timestamp.
 
 ## Safety Boundary
 
