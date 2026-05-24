@@ -13,6 +13,9 @@ Rules:
 
 User-facing stale copy:
 
+M78 adds risk-card behavior for stale forecasts. Weather risk cards should treat stale data as a reason to increase caution messaging and should remind users to check current field conditions and official weather sources.
+
+Stale status must not produce exact prescriptions, chemical instructions, product recommendations, or guaranteed outcomes.
+
 - `ใช้ข้อมูลล่าสุดที่มีในเครื่อง`
 - `ตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติม`
-

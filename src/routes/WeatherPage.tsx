@@ -21,6 +21,12 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { useWeather } from '@/hooks/useWeather';
+import {
+  weatherAgriRiskCategoryLabels,
+  weatherAgriRiskLevelLabels,
+  weatherAgriRiskLevelTone,
+} from '@/services/weather/weather-agri-risk-boundary';
+import { assessWeatherAgriRisk } from '@/services/weather/weather-agri-risk-rules';
 import { computeWeatherStaleAgeLabel, getWeatherCacheFreshnessQa } from '@/services/weather/weather-cache-qa';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
@@ -79,6 +85,7 @@ export function WeatherPage() {
   const cacheFreshnessQa = getWeatherCacheFreshnessQa(cacheStatus.freshness);
   const staleAgeLabel = computeWeatherStaleAgeLabel(cacheStatus);
   const offlineState = sourceReadiness.offlineState;
+  const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
 
   return (
     <div>
@@ -181,6 +188,43 @@ export function WeatherPage() {
         <NoticeBox tone="warning" title="ข้อควรระวังสำหรับงานเกษตร">
           ก่อนพ่นยาให้ดูฝนและลม ข้อมูลอากาศเป็นการพยากรณ์ อาจคลาดเคลื่อนได้ ควรตรวจสภาพจริงที่แปลงก่อนตัดสินใจ
         </NoticeBox>
+
+        <section className="grid gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold text-kaset-ink">ความเสี่ยงอากาศเบื้องต้น</h2>
+            <StatusPill tone={weatherAgriRiskLevelTone[agriRiskAssessment.overallLevel]}>
+              {weatherAgriRiskLevelLabels[agriRiskAssessment.overallLevel]}
+            </StatusPill>
+          </div>
+          <NoticeBox tone="info" title="คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ">
+            การ์ดนี้เป็น preview จากกฎ planning-only ยังไม่ใช่ agronomy engine ที่ผู้เชี่ยวชาญตรวจทาน และไม่แนะนำสินค้า อัตราสารเคมี หรือผลลัพธ์รับประกัน
+          </NoticeBox>
+          <div className="grid gap-3 md:grid-cols-2">
+            {agriRiskAssessment.cards.slice(0, 6).map((card) => (
+              <Card className="p-4" key={card.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Badge tone="neutral">{weatherAgriRiskCategoryLabels[card.category]}</Badge>
+                    <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{card.title}</h3>
+                  </div>
+                  <StatusPill tone={weatherAgriRiskLevelTone[card.level]}>{weatherAgriRiskLevelLabels[card.level]}</StatusPill>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{card.summary}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {card.signals.slice(0, 3).map((signal) => (
+                    <Badge key={signal.id} tone="sky">
+                      {signal.label}: {String(signal.value)}{signal.unit ?? ''}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs font-bold leading-5 text-amber-900">{card.boundaryNote}</p>
+              </Card>
+            ))}
+          </div>
+          <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-rules">
+            ดูกฎความเสี่ยงเบื้องต้น
+          </Link>
+        </section>
 
         {locations.length > 1 ? (
           <section className="grid gap-3">

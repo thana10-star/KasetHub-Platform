@@ -617,3 +617,14 @@ Planning only. No generated Supabase types were added.
 - `weather_refresh_events` maps to future refresh audit records.
 - `weather_cache_health` maps to coarse cache freshness summaries.
 - `weather_source_audit` maps to source attribution and fallback status events.
+
+## Future Weather Risk Type Mapping From M78
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherAgriRiskAssessment` may map to `weather_risk_assessments` only after backend ownership, consent, and RLS review.
+- `WeatherAgriRiskRule` may map to `weather_risk_rule_versions` only after expert review and source metadata exist.
+- `WeatherAgriRiskBlockedAction` maps to policy checks that block product recommendation, label override, exact dose generation, and guaranteed outcomes.
+- Future `weather_risk_notifications` and `weather_risk_user_acknowledgements` require separate push/consent review.
+
+M78 keeps all weather risk output local-only and planning-only.

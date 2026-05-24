@@ -23,3 +23,15 @@ Risk notes must remain general. They must not:
 ## Detail Rule
 
 When a note mentions spraying, it must remind users to check the real label and local field conditions. This keeps weather guidance useful without becoming hidden agronomy or chemical advice.
+
+## M78 Risk Readiness Extension
+
+M78 adds planning-only weather risk assessment cards for spraying risk, irrigation timing, disease pressure, heat stress, field work, and harvest drying.
+
+These cards must remain general caution. They must not become crop-specific instructions, product recommendations, sponsor placement, chemical dose advice, or guaranteed-outcome claims.
+
+Required boundary copy remains:
+
+- `คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ`
+- `อ่านฉลากจริงก่อนใช้เสมอ`
+- `พยากรณ์อากาศอาจคลาดเคลื่อนได้`

@@ -1301,3 +1301,14 @@ Planning only. No migrations were run.
 - `weather_refresh_events`: future backend-owned refresh/audit events if weather refresh becomes server-mediated.
 - `weather_cache_health`: future cache health summaries, not raw precise user locations.
 - `weather_source_audit`: future source attribution and fallback event audit.
+
+## Future Weather Risk Tables From M78
+
+Planning only. No migrations were run.
+
+- `weather_risk_assessments`: future reviewed/stored weather risk output snapshots if backend-owned risk assessment is introduced.
+- `weather_risk_rule_versions`: future expert-reviewed rule versions, source metadata, threshold notes, and rollback status.
+- `weather_risk_notifications`: future notification planning records only after separate push/consent review.
+- `weather_risk_user_acknowledgements`: future acknowledgement records for user-facing safety copy if weather risk advice becomes more personalized.
+
+No M78 table may store GPS, precise farm coordinates, product recommendations, chemical doses, sponsor payloads, or guaranteed-outcome claims.

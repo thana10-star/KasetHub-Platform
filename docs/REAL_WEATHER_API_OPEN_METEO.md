@@ -94,3 +94,11 @@ The API still never uses browser geolocation or farm-level coordinates.
 M77 keeps Open-Meteo flag-gated and adds clearer source attribution, manual refresh policy, local-only coarse-location preference, stale cache messaging, and offline fallback copy.
 
 Manual refresh remains disabled unless Open-Meteo is explicitly ready. No background refresh job was added.
+
+## M78 Agriculture Weather Risk Readiness
+
+M78 adds deterministic, planning-only agriculture weather risk cards on top of the existing weather adapter/cache result.
+
+Risk readiness uses the same weather data already shown in the UI. It does not call AI, request GPS, store precise farm coordinates, write Supabase data, send notifications, or recommend products.
+
+Risk categories include spraying risk, irrigation timing, disease pressure, heat stress, field work risk, and harvest drying risk. Thresholds are marked `เบื้องต้น` and require expert review before becoming real agronomy guidance.

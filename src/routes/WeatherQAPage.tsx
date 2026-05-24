@@ -13,6 +13,14 @@ import { getWeatherQaSummary } from '@/services/weather/weather-qa-fixtures';
 import { buildWeatherRefreshPolicy } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 import { buildWeatherSourceReadiness, getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
+import {
+  getWeatherAgriRiskBoundarySummary,
+  weatherAgriRiskCategoryLabels,
+  weatherAgriRiskLevelLabels,
+  weatherAgriRiskLevelTone,
+} from '@/services/weather/weather-agri-risk-boundary';
+import { getWeatherAgriRiskFixtureSummary } from '@/services/weather/weather-agri-risk-fixtures';
+import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
 
 const statusTone = {
   pass: 'success',
@@ -26,6 +34,9 @@ export function WeatherQAPage() {
   const cacheQa = buildWeatherCacheQaSummary(defaultWeatherCoarseLocation.id);
   const preferenceStatus = getWeatherLocalPreferenceStatus();
   const refreshPolicy = buildWeatherRefreshPolicy({ modeStatus: summary.modeStatus });
+  const riskRules = getWeatherAgriRiskRuleSummary();
+  const riskFixtures = getWeatherAgriRiskFixtureSummary();
+  const riskBoundary = getWeatherAgriRiskBoundarySummary();
   const sourceReadiness = buildWeatherSourceReadiness({
     modeStatus: summary.modeStatus,
     cacheStatus,
@@ -124,6 +135,52 @@ export function WeatherQAPage() {
         </NoticeBox>
 
         <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">M78 risk rule QA matrix</h2>
+          {riskRules.rules.map((rule) => (
+            <Card className="p-4" key={rule.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-kaset-ink">{rule.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {weatherAgriRiskCategoryLabels[rule.category]} · {rule.thresholdLabel}
+                  </p>
+                </div>
+                <StatusPill tone={weatherAgriRiskLevelTone[rule.level]}>{weatherAgriRiskLevelLabels[rule.level]}</StatusPill>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone="gold">planning-only {String(rule.planningOnly)}</Badge>
+                <Badge tone="neutral">expertReviewed {String(rule.expertReviewed)}</Badge>
+              </div>
+            </Card>
+          ))}
+        </section>
+
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">Stale forecast and blocked-action proof</h2>
+          {riskFixtures.assessments.map((assessment) => (
+            <Card className="p-4" key={assessment.id + assessment.generatedAt}>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone="neutral">{assessment.locationLabel}</Badge>
+                <StatusPill tone={weatherAgriRiskLevelTone[assessment.overallLevel]}>
+                  {weatherAgriRiskLevelLabels[assessment.overallLevel]}
+                </StatusPill>
+                <Badge tone="gold">no product {String(assessment.noProductRecommendation)}</Badge>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {assessment.cards
+                  .filter((card) => card.level !== 'low')
+                  .slice(0, 2)
+                  .map((card) => `${weatherAgriRiskCategoryLabels[card.category]} ${weatherAgriRiskLevelLabels[card.level]}`)
+                  .join(' · ') || 'no elevated example'}
+              </p>
+            </Card>
+          ))}
+          <NoticeBox tone="warning" icon={ShieldCheck} title="No product/sponsor proof">
+            blocked: {riskBoundary.blockedActions.map((action) => action.label).join(' · ')}
+          </NoticeBox>
+        </section>
+
+        <section className="grid gap-3">
           <h2 className="text-lg font-extrabold text-kaset-ink">Failure fixture matrix</h2>
           {summary.fixtures.map((fixture) => (
             <Card className="p-4" key={fixture.id}>
@@ -183,6 +240,9 @@ export function WeatherQAPage() {
         </Link>
         <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
           เปิด M77 weather preferences
+        </Link>
+        <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-rules">
+          เปิด M78 weather risk rules
         </Link>
 
         <LargeActionButton
