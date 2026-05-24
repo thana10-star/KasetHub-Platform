@@ -82,3 +82,17 @@ The M57 adapter sits before any future backend prompt execution. It keeps `local
 - `VITE_ENABLE_CALCULATOR_AI_NETWORK=true`
 
 Even with those flags, M57 has no real endpoint URL and no provider call. Future prompt execution must remain backend-owned and must preserve the locked result hash.
+
+## M58 Network Boundary
+
+M58 adds `docs/CALCULATOR_AI_NETWORK_BOUNDARY_RULES.md` and `docs/CALCULATOR_AI_STAGING_ENDPOINT_CHECKLIST.md`.
+
+Before any real prompt reaches an AI provider:
+
+- frontend must pass only a locked snapshot to a backend-owned route
+- backend must verify lock hash and policy version
+- backend must reject sponsor, chemical/product, fertilizer-dose invention, and result-mutation requests
+- backend must record audit metadata after RLS/privacy review
+- backend must enforce rate limits and timeout fallback behavior
+
+Prompt safety remains explanation-only. The model must not mutate formulas or inject hidden recommendations.

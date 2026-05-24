@@ -14,6 +14,8 @@ export type CalculatorAIAdapterStatus =
 
 export type CalculatorAIAdapterRequest = CalculatorAIExecutionRequest & {
   adapterRequestId?: string;
+  expectedLockedResultHash?: string;
+  expectedPolicyVersionId?: string;
 };
 
 export type CalculatorAIAdapterError = {
@@ -23,6 +25,8 @@ export type CalculatorAIAdapterError = {
     | 'network_flags_required'
     | 'no_backend_client'
     | 'safety_blocked'
+    | 'locked_hash_mismatch'
+    | 'policy_version_mismatch'
     | 'adapter_exception';
   message: string;
   retryable: boolean;
@@ -52,6 +56,7 @@ export type CalculatorAIAdapterResponse = {
   lockedResultValues: readonly string[];
   safetyDisclaimers: string[];
   blockedActions: CalculatorAIExplanationBlockedAction[];
+  backendBlockedReasons: string[];
   auditPreview: CalculatorAIAdapterAuditPreview;
   noRealAICall: true;
   networkCallAttempted: boolean;

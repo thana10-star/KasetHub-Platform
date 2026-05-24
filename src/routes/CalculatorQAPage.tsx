@@ -11,6 +11,7 @@ import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-cal
 import type { AgriCalculatorEdgeRun } from '@/services/agri-calculators/agri-calculator-edge-fixtures';
 import { runAgriCalculatorEdgeSuite } from '@/services/agri-calculators/agri-calculator-edge-fixtures';
 import { summarizeAgriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
+import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
 import { CalculatorBackLink, CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
 
@@ -127,6 +128,7 @@ export function CalculatorQAPage() {
   const suite = runAgriCalculatorTestSuite();
   const edgeSuite = runAgriCalculatorEdgeSuite();
   const unitTestPlan = summarizeAgriCalculatorUnitTestPlan();
+  const adapterQaSuite = runCalculatorAIAdapterQASuite();
 
   return (
     <div>
@@ -189,6 +191,20 @@ export function CalculatorQAPage() {
           </div>
         </Card>
 
+        <Card className="p-4">
+          <h2 className="font-extrabold text-kaset-ink">Calculator AI adapter QA</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            adapter state matrix {adapterQaSuite.passCount} pass · {adapterQaSuite.warnCount} warn · {adapterQaSuite.failCount} fail · no network {String(adapterQaSuite.noNetworkGuarantee)} · locked hash preserved {adapterQaSuite.lockedHashPreservedCount}/{adapterQaSuite.totalCount}
+          </p>
+          <div className="mt-3 grid gap-2">
+            {adapterQaSuite.runs.slice(0, 4).map((run) => (
+              <p className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={run.id}>
+                {run.title}: {run.responseStatus} · network {String(run.networkCallAttempted)}
+              </p>
+            ))}
+          </div>
+        </Card>
+
         <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/safety">
           <ShieldCheck aria-hidden="true" className="h-5 w-5" />
           เปิดขอบเขตความปลอดภัย
@@ -217,6 +233,11 @@ export function CalculatorQAPage() {
         <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-adapter-status">
           <BrainCircuit aria-hidden="true" className="h-5 w-5" />
           à¹€à¸›à¸´à¸” calculator AI adapter status
+        </Link>
+
+        <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-endpoint-plan">
+          <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+          à¹€à¸›à¸´à¸” calculator AI endpoint plan
         </Link>
 
         <CalculatorRewardedAdsPlanningCard compact />

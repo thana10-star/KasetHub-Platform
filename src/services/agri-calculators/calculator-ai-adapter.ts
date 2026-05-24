@@ -145,6 +145,19 @@ function inferBlockedActions(review: ReturnType<typeof buildCalculatorAIBackendA
   return Array.from(blocked);
 }
 
+function uniqueNonEmpty(values: Array<string | undefined>) {
+  return Array.from(new Set(values.filter((value): value is string => Boolean(value?.trim()))));
+}
+
+function inferBackendBlockedReasons(review: ReturnType<typeof buildCalculatorAIBackendArchitectureReview>) {
+  return uniqueNonEmpty([
+    ...review.safetyDecision.reasons,
+    ...review.safetyDecision.invalidRequestReasons,
+    ...review.safetyDecision.bannedCategoryMatches,
+    ...review.safetyDecision.blockedActionIds,
+  ]);
+}
+
 function baseResponse(
   request: CalculatorAIAdapterRequest,
   mode: CalculatorAIAdapterMode,
@@ -159,6 +172,7 @@ function baseResponse(
     lockedResultValues: review.snapshot.resultValues,
     safetyDisclaimers: getLocalCalculatorAIDisclaimers(review),
     blockedActions: inferBlockedActions(review),
+    backendBlockedReasons: inferBackendBlockedReasons(review),
     auditPreview: buildAuditPreview(review),
     noRealAICall: true as const,
     networkCallAttempted: false,
@@ -168,6 +182,28 @@ function baseResponse(
   };
 
   return { review, responseBase };
+}
+
+function safetyBlockedResponse(
+  request: CalculatorAIAdapterRequest,
+  mode: CalculatorAIAdapterMode,
+  reason: string,
+  code: 'safety_blocked' | 'locked_hash_mismatch' | 'policy_version_mismatch',
+  options?: ExplainCalculatorResultOptions,
+): CalculatorAIAdapterResponse {
+  const { responseBase } = baseResponse(request, mode, options);
+
+  return {
+    ...responseBase,
+    status: 'safety_blocked',
+    disabledReason: reason,
+    backendBlockedReasons: uniqueNonEmpty([...responseBase.backendBlockedReasons, reason, code]),
+    error: {
+      code,
+      message: reason,
+      retryable: false,
+    },
+  };
 }
 
 function disabledResponse(
@@ -200,17 +236,34 @@ export function explainCalculatorResult(
   const adapterStatus = getCalculatorAIAdapterStatus(options?.env);
   const { review, responseBase } = baseResponse(request, mode, options);
 
+  if (request.expectedLockedResultHash && request.expectedLockedResultHash !== review.snapshot.lockHash) {
+    return safetyBlockedResponse(
+      request,
+      mode,
+      'locked result hash ไม่ตรงกับ snapshot ล่าสุด จึงบล็อกก่อนเรียก AI',
+      'locked_hash_mismatch',
+      options,
+    );
+  }
+
+  if (request.expectedPolicyVersionId && request.expectedPolicyVersionId !== review.policyVersion.id) {
+    return safetyBlockedResponse(
+      request,
+      mode,
+      'policy version ไม่ตรงกับ request ที่คาดไว้ จึงบล็อกก่อนสร้าง prompt',
+      'policy_version_mismatch',
+      options,
+    );
+  }
+
   if (review.safetyDecision.status === 'rejected_before_ai') {
-    return {
-      ...responseBase,
-      status: 'safety_blocked',
-      disabledReason: 'คำขอนี้ถูกบล็อกก่อนเรียก AI เพราะไม่ผ่านนโยบาย snapshot/prompt safety',
-      error: {
-        code: 'safety_blocked',
-        message: 'คำขอนี้ถูกบล็อกก่อนเรียก AI เพราะไม่ผ่านนโยบาย snapshot/prompt safety',
-        retryable: false,
-      },
-    };
+    return safetyBlockedResponse(
+      request,
+      mode,
+      'คำขอนี้ถูกบล็อกก่อนเรียก AI เพราะไม่ผ่านนโยบาย snapshot/prompt safety',
+      'safety_blocked',
+      options,
+    );
   }
 
   if (mode === 'local_fixture') {
@@ -278,6 +331,7 @@ export function explainCalculatorResult(
       promptTemplateVersionId: review.policyVersion.promptTemplateVersionId,
       safetyDisclaimers: getLocalCalculatorAIDisclaimers(review),
       blockedActions: inferBlockedActions(review),
+      backendBlockedReasons: inferBackendBlockedReasons(review),
       auditPreview: buildAuditPreview(review),
       noRealAICall: true,
       networkCallAttempted: true,

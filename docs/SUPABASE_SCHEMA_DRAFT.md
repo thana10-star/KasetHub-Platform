@@ -766,6 +766,54 @@ RLS notes: Safety events are backend/admin only by default. User-facing copy sho
 
 Admin/moderation notes: Use for safety review and model QA, not sponsor targeting or hidden product routing.
 
+## `calculator_ai_request_logs` Future
+
+Purpose: Backend-owned request envelope logs for future calculator AI explanation attempts after real auth, consent, retention policy, and endpoint ownership are reviewed.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `adapter_mode`, `request_status`, `snapshot_lock_hash`, `expected_policy_version_id nullable`, `payload_size_bytes`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `adapter_mode`, `request_status`, `created_at desc`.
+
+RLS notes: Backend inserts only. User-facing history should expose friendly explanation status only after privacy review.
+
+Admin/moderation notes: Store metadata, not provider secrets or raw hidden sponsor payloads. Redact user text when possible.
+
+## `calculator_ai_policy_checks` Future
+
+Purpose: Backend policy validation records for policy-version selection, mismatches, banned category checks, and escalation decisions.
+
+Key columns: `id uuid`, `request_log_id`, `policy_version_id`, `prompt_template_version_id`, `check_status`, `reason_codes text[]`, `blocked_action_ids text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `policy_version_id`, `check_status`, `created_at desc`.
+
+RLS notes: Admin/security read by default. Public policy metadata belongs in `calculator_ai_policy_versions`, not this operational table.
+
+Admin/moderation notes: Use for QA and safety review. Sponsor systems must not write or select policy check outcomes.
+
+## `calculator_ai_snapshot_locks` Future
+
+Purpose: Immutable snapshot-lock records for deterministic calculator values before any future AI explanation.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `snapshot_lock_hash`, `result_value_snapshot jsonb`, `input_recap jsonb`, `result_recap jsonb`, `created_at`, `metadata jsonb`.
+
+Indexes: unique `snapshot_lock_hash`, `user_id`, `session_hash`, `calculator_category`, `created_at desc`.
+
+RLS notes: Users may read their own snapshot references only after sync consent. Backend owns writes.
+
+Admin/moderation notes: Snapshots must be immutable. AI explanations can echo these values but must not recompute or mutate them.
+
+## `calculator_ai_backend_events` Future
+
+Purpose: Operational backend events for adapter execution, endpoint readiness checks, network-disabled blocks, timeout handling, and safety-filter outcomes.
+
+Key columns: `id uuid`, `request_log_id nullable`, `event_type`, `event_status`, `adapter_mode`, `backend_enabled`, `network_enabled`, `reason_codes text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `event_type`, `event_status`, `adapter_mode`, `created_at desc`.
+
+RLS notes: Backend/admin only by default. Users should see simple disabled/safety messages, not internal heuristics.
+
+Admin/moderation notes: Events must prove no network path is active by default and must not become analytics for sponsor targeting without consent and policy review.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.

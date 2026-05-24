@@ -103,3 +103,18 @@ M56 extends tests from local explanation planning into backend architecture plan
 - oversized payload and invalid crop profile rejection
 
 Future backend AI work must keep these checks passing before adding network calls or provider integration.
+
+## M57-M58 Adapter And Endpoint Regression Safety
+
+M57 adds the disabled-by-default adapter contract. M58 adds deterministic adapter QA fixtures plus a staging endpoint design checklist. These are still local-only safety layers, not a backend integration.
+
+Regression checks now cover:
+
+- `local_fixture` responses keep `noRealAICall: true`
+- `backend_disabled` and `production_disabled` stay disabled
+- `backend_test_ready` refuses a backend path unless explicit backend and network flags are enabled
+- invalid, oversized, sponsor, chemical/product, result-mutation, invalid-crop, policy-mismatch, and locked-hash-mismatch requests are blocked before any network path
+- locked result hashes remain preserved in adapter responses and QA fixtures
+- endpoint readiness remains `blocked_until_backend_exists`
+
+Future endpoint work must not add frontend provider keys, hidden sponsor content, formula mutation, or a network path that bypasses lock-hash, policy, audit, rate-limit, and safety checks.

@@ -296,6 +296,9 @@ export function NextPhasePage() {
               <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-architecture">
                 เปิด AI architecture review
               </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-endpoint-plan">
+                เปิด AI endpoint plan
+              </Link>
             </div>
           </div>
         </Card>

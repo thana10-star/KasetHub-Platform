@@ -68,3 +68,9 @@ The adapter must not let feature flags change policy behavior silently. Future s
 - policy version ids are returned in responses and audit previews
 - sponsor/product requests remain blocked before AI
 - chemical and fertilizer-dose invention requests remain blocked before AI
+
+## M58 Policy QA
+
+M58 adds adapter QA fixtures and tests for policy mismatch blocking. If a request expects a policy version that does not match the selected policy version, the adapter returns `safety_blocked` with `policy_version_mismatch` before any backend or network path.
+
+Future endpoint work must validate policy version ids server-side as well; frontend checks are only a planning and QA guard.

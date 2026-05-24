@@ -211,6 +211,10 @@ M49 calculator models map conceptually into:
 - `calculator_ai_rate_limits`
 - `calculator_ai_explanations`
 - `calculator_ai_safety_events`
+- `calculator_ai_request_logs`
+- `calculator_ai_policy_checks`
+- `calculator_ai_snapshot_locks`
+- `calculator_ai_backend_events`
 
 Type mapping:
 
@@ -240,10 +244,16 @@ Type mapping:
 - `CalculatorAIRateLimitPlan` -> `calculator_ai_rate_limits`
 - `CalculatorAIAuditLogPlan` -> `calculator_ai_audit_logs`
 - `CalculatorAIEscalationRule` -> `calculator_ai_policy_versions.escalation_trigger_ids` plus `calculator_ai_safety_events.reason_codes`
+- `CalculatorAIAdapterRequest` -> future `calculator_ai_request_logs` request envelope metadata, not a frontend-write table
+- `CalculatorAIAdapterResponse` -> future `calculator_ai_backend_events` status/error metadata and `calculator_ai_explanations` only after backend safety filtering
+- `CalculatorAIAdapterModeStatus` -> future `calculator_ai_backend_events.adapter_mode/backend_enabled/network_enabled`
+- `CalculatorAIAdapterQAFixture` -> local QA fixture only; no production table unless converted into reviewed backend test cases
+- `CalculatorAIEndpointPlan` -> planning-only service; future checklist evidence may inform `calculator_ai_policy_checks` and backend readiness docs
+- locked result hash verification -> `calculator_ai_snapshot_locks.snapshot_lock_hash` plus `calculator_ai_policy_checks.check_status`
 
-M49-M56 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures and local AI architecture review fixtures. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+M49-M58 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, and endpoint planning services. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
 
-Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, or safety events for targeting without explicit consent and policy review.
+Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, validate endpoint/network boundaries, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, adapter events, request logs, snapshot locks, or safety events for targeting without explicit consent and policy review.
 
 ## My Farm Hub
 

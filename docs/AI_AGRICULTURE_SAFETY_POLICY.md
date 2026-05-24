@@ -184,3 +184,19 @@ Before enabling real calculator explanations, the backend must:
 - safety-filter generated explanations before display
 
 M56 only reviews this architecture locally. It still does not call AI, write backend data, write Supabase data, sync to cloud, or enable sponsor behavior.
+
+## M57-M58 Calculator AI Adapter And Network Boundary
+
+Calculator AI explanations remain disabled by default for real backend execution. The frontend adapter may use local fixtures, but it must not call a provider or backend endpoint unless a future reviewed staging milestone explicitly enables backend ownership and network flags.
+
+Required future network boundary:
+
+- prompt execution must be backend-owned
+- provider keys must never appear in frontend code or frontend env
+- request validation must happen before prompt building
+- locked result hashes and policy versions must be verified server-side
+- audit logs, rate limits, abuse prevention, and timeout handling must exist before live AI
+- sponsor or affiliate payloads must stay separate from explanation prompts and outputs
+- AI must explain locked calculator values only and must not mutate formulas or inject hidden recommendations
+
+M58 adds local adapter QA fixtures and an endpoint checklist route only. It still does not call AI, create a backend endpoint, write backend/Supabase data, sync to cloud, or enable sponsor behavior.

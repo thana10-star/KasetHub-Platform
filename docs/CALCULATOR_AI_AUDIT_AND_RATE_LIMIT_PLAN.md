@@ -73,3 +73,19 @@ M57 adapter responses include an audit preview only:
 - `wouldWriteSupabase: false`
 
 No rate-limit counter is enforced yet and no audit row is written. Future backend work must enforce daily limits server-side before enabling any real provider call.
+
+## M58 Endpoint Readiness Notes
+
+M58 adds endpoint planning that keeps audit/rate-limit work blocked until a backend exists.
+
+Future endpoint readiness requires:
+
+- backend request logs
+- policy check records
+- snapshot lock records
+- backend safety events
+- timeout handling
+- rate-limit counters
+- abuse prevention before provider calls
+
+No audit rows, rate-limit rows, or safety event rows are written in M58.

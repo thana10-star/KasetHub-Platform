@@ -73,3 +73,24 @@ The adapter may explain locked calculator values, but it must not:
 ## Current Boundary
 
 M57 is still local-only. The default path has no network, no real AI, no backend endpoint, no cloud sync, no Supabase write, no sponsor integration, and no payment or AdMob behavior.
+
+## M58 QA Hardening
+
+M58 adds deterministic adapter QA fixtures in `calculator-ai-adapter-qa-fixtures.ts`.
+
+Fixture states cover:
+
+- local fixture success
+- backend disabled
+- backend network disabled
+- backend test ready but blocked because no endpoint/client exists
+- invalid request
+- oversized request
+- sponsor insertion blocked
+- deterministic locked-hash mismatch blocked
+- policy version mismatch blocked
+- invalid crop profile blocked
+
+`/app/calculators/ai-adapter-status` now shows an adapter state matrix, fixture-vs-disabled comparison, current flags, backend blocked reasons, no-network guarantee, safe fallback behavior, and locked hash preservation status.
+
+M58 also adds `/app/calculators/ai-endpoint-plan` for future staging endpoint readiness. It remains no-network and planning-only.

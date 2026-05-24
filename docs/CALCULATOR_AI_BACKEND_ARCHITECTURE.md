@@ -79,3 +79,27 @@ Feature flags:
 - `VITE_ENABLE_CALCULATOR_AI_NETWORK=false`
 
 `backend_test_ready` cannot run a backend test client unless both backend and network flags are explicitly true. M57 still defines no real endpoint URL and no provider call.
+
+## M58 Endpoint Plan
+
+M58 adds a planning-only endpoint checklist route:
+
+- `/app/calculators/ai-endpoint-plan`
+
+The route and `calculator-ai-endpoint-plan.ts` define:
+
+- backend-only prompt execution
+- no frontend provider keys
+- backend route or Edge Function ownership
+- request validation
+- lock-hash verification
+- policy version validation
+- audit log requirement
+- rate limits
+- abuse prevention
+- timeout handling
+- sponsor separation
+- no formula mutation
+- no hidden recommendation injection
+
+No endpoint is created in M58 and no network path is enabled.

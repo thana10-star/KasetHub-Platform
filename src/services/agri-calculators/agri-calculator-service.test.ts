@@ -41,6 +41,8 @@ import {
   getCalculatorAIAdapterStatus,
 } from '@/services/agri-calculators/calculator-ai-adapter';
 import type { CalculatorAIBackendClient } from '@/services/agri-calculators/calculator-ai-adapter.types';
+import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
+import { buildCalculatorAIEndpointPlan } from '@/services/agri-calculators/calculator-ai-endpoint-plan';
 import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
 import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
 
@@ -821,6 +823,7 @@ function createBackendClientStub(onCall?: () => void): CalculatorAIBackendClient
       lockedResultValues: review.snapshot.resultValues,
       safetyDisclaimers: [review.snapshot.safetyDisclaimer],
       blockedActions: review.safetyDecision.blockedActionIds,
+      backendBlockedReasons: review.safetyDecision.reasons,
       auditPreview: {
         requestId: review.requestId,
         snapshotId: review.snapshot.snapshotId,
@@ -999,5 +1002,74 @@ describe('calculator AI backend adapter contract', () => {
     expect(response.blockedActions).toContain('mention_sponsor_product');
     expect(response.blockedActions).toContain('recommend_chemical_products');
     expect(response.explanationText).toBeUndefined();
+  });
+
+  test('M58 adapter QA fixture matrix keeps disabled, invalid, oversized, sponsor, hash, policy, and crop cases safe', () => {
+    const suite = runCalculatorAIAdapterQASuite();
+
+    expect(suite.totalCount).toBe(10);
+    expect(suite.failCount).toBe(0);
+    expect(suite.warnCount).toBe(1);
+    expect(suite.noNetworkGuarantee).toBe(true);
+    expect(suite.lockedHashPreservedCount).toBe(suite.totalCount);
+
+    const byId = Object.fromEntries(suite.runs.map((run) => [run.id, run]));
+    expect(byId.backend_disabled.responseStatus).toBe('disabled');
+    expect(byId.backend_network_disabled.errorCode).toBe('network_flags_required');
+    expect(byId.invalid_request.responseStatus).toBe('safety_blocked');
+    expect(byId.oversized_request.responseStatus).toBe('safety_blocked');
+    expect(byId.sponsor_insertion_blocked.responseStatus).toBe('safety_blocked');
+    expect(byId.deterministic_mismatch_blocked.errorCode).toBe('locked_hash_mismatch');
+    expect(byId.policy_version_mismatch.errorCode).toBe('policy_version_mismatch');
+    expect(byId.invalid_crop_profile.backendBlockedReasons).toContain('invalid_crop_profile');
+  });
+
+  test('locked hash mismatch and policy mismatch are blocked by the adapter before network paths', () => {
+    const hashMismatch = explainCalculatorResult(
+      {
+        ...createCalculatorAIAdapterRequest(),
+        expectedLockedResultHash: 'calc-lock-not-the-real-hash',
+      },
+      {
+        env: {
+          calculatorAIMode: 'backend_test_ready',
+          enableCalculatorAIBackend: true,
+          enableCalculatorAINetwork: true,
+        },
+      },
+    );
+    const policyMismatch = explainCalculatorResult(
+      {
+        ...createCalculatorAIAdapterRequest(),
+        expectedPolicyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+      },
+      {
+        env: {
+          calculatorAIMode: 'backend_test_ready',
+          enableCalculatorAIBackend: true,
+          enableCalculatorAINetwork: true,
+        },
+      },
+    );
+
+    expect(hashMismatch.status).toBe('safety_blocked');
+    expect(hashMismatch.error?.code).toBe('locked_hash_mismatch');
+    expect(hashMismatch.networkCallAttempted).toBe(false);
+    expect(policyMismatch.status).toBe('safety_blocked');
+    expect(policyMismatch.error?.code).toBe('policy_version_mismatch');
+    expect(policyMismatch.networkCallAttempted).toBe(false);
+  });
+
+  test('endpoint plan remains planning-only with no network path active by default', () => {
+    const plan = buildCalculatorAIEndpointPlan();
+    const defaultStatus = getCalculatorAIAdapterStatus();
+
+    expect(plan.noRealNetworkInM58).toBe(true);
+    expect(plan.backendEndpointExists).toBe(false);
+    expect(plan.frontendProviderKeysAllowed).toBe(false);
+    expect(plan.requiredBackendChecks.map((check) => check.id)).toContain('lock_hash_verification');
+    expect(plan.requiredSafetyChecks.map((check) => check.id)).toContain('sponsor_separation');
+    expect(plan.blockedProductionConditions.length).toBeGreaterThan(0);
+    expect(defaultStatus.canCallNetwork).toBe(false);
   });
 });

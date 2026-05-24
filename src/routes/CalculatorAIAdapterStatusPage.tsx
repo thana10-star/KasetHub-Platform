@@ -10,6 +10,7 @@ import {
   explainCalculatorResult,
   getCalculatorAIAdapterStatus,
 } from '@/services/agri-calculators/calculator-ai-adapter';
+import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
 import { createCalculatorAIExecutionRequestFixture } from '@/services/agri-calculators/calculator-ai-backend-review';
 import { CalculatorBackLink } from '@/routes/calculators/CalculatorUi';
 
@@ -32,6 +33,7 @@ export function CalculatorAIAdapterStatusPage() {
     userQuestion: 'อธิบายผลนี้แบบง่ายและไม่เปลี่ยนตัวเลข',
   });
   const sampleResponse = explainCalculatorResult(sampleRequest);
+  const qaSuite = runCalculatorAIAdapterQASuite();
 
   return (
     <div>
@@ -126,6 +128,44 @@ export function CalculatorAIAdapterStatusPage() {
           </div>
         </Card>
 
+        <section className="grid gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold text-kaset-ink">adapter state matrix</h2>
+            <StatusPill tone={qaSuite.failCount > 0 ? 'danger' : qaSuite.warnCount > 0 ? 'warning' : 'success'}>
+              {qaSuite.passCount} pass · {qaSuite.warnCount} warn · {qaSuite.failCount} fail
+            </StatusPill>
+          </div>
+          <NoticeBox tone="info" title="fixture vs disabled comparison">
+            local fixture ใช้ข้อความตัวอย่างในเครื่อง ส่วน disabled/backend blocked states ต้องไม่เรียก network และต้องเก็บ locked hash เดิมไว้เสมอ · no-network guarantee {String(qaSuite.noNetworkGuarantee)}
+          </NoticeBox>
+          {qaSuite.runs.map((run) => (
+            <Card className="p-4" key={run.id}>
+              <div className="flex gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                  <CheckCircle2 aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-extrabold text-kaset-ink">{run.title}</h3>
+                    <StatusPill tone={run.qaStatus === 'fail' ? 'danger' : run.qaStatus === 'warn' ? 'warning' : 'success'}>
+                      {run.qaStatus}
+                    </StatusPill>
+                    <Badge tone="neutral">{run.responseStatus}</Badge>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">{run.description}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold leading-5 text-slate-600">
+                    <p className="rounded-lg bg-kaset-mist p-2">mode: {run.mode}</p>
+                    <p className="rounded-lg bg-kaset-mist p-2">path: {run.adapterPath}</p>
+                    <p className="rounded-lg bg-kaset-mist p-2">network: {String(run.networkCallAttempted)}</p>
+                    <p className="rounded-lg bg-kaset-mist p-2">locked hash: {run.lockedHashPreserved ? 'preserved' : 'check'}</p>
+                  </div>
+                  {run.errorCode ? <p className="mt-2 text-xs font-bold text-rose-800">blocked reason: {run.errorCode}</p> : null}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </section>
+
         <Card className="p-4">
           <div className="flex gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
@@ -163,9 +203,12 @@ export function CalculatorAIAdapterStatusPage() {
           </div>
         </Card>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-4">
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-architecture">
             AI architecture
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-endpoint-plan">
+            Endpoint plan
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/admin">
             Admin

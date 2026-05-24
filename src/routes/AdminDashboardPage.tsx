@@ -358,6 +358,11 @@ export function AdminDashboardPage() {
               calculator AI adapter status
             </Link>
 
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-endpoint-plan">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+              calculator AI endpoint plan
+            </Link>
+
             <CalculatorRewardedAdsPlanningCard compact />
 
             <Card className="border-sky-200 bg-sky-50 p-4">
