@@ -33,7 +33,7 @@ const areaUnitOptions: Array<{ value: ThaiAreaUnit; label: string }> = [
 export function PlantSpacingCalculatorPage() {
   const calculators = useAgriCalculators();
   const [input, setInput] = useState<PlantSpacingInput>(() => calculators.getLastInput('plant_spacing') ?? defaultPlantSpacingInput);
-  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('rice');
+  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('maize');
   const result = useMemo(() => calculatePlantSpacing(input), [input]);
   const selectedCropProfile = getCropCalculatorProfile(selectedCropKey);
 
@@ -94,7 +94,7 @@ export function PlantSpacingCalculatorPage() {
         >
           <Card className="p-4">
             <div className="grid gap-4">
-              <div className="grid grid-cols-[1fr_132px] gap-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_132px]">
                 <NumberField label="ขนาดพื้นที่" onChange={(landSizeValue) => updateInput({ landSizeValue })} value={input.landSizeValue} />
                 <SelectField<ThaiAreaUnit>
                   label="หน่วย"

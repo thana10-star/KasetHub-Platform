@@ -53,7 +53,7 @@ export function SprayMixCalculatorPage() {
 
   return (
     <div>
-      <PageHeader title="คำนวณผสมยา" subtitle="คำนวณตามอัตราบนฉลาก" showBack />
+      <PageHeader title="คำนวณตามฉลากยา/สาร" subtitle="ช่วยคูณปริมาณจากฉลากที่ผู้ใช้กรอกเอง" showBack />
       <div className="grid gap-5 px-5 pb-6">
         <CalculatorHero
           category="spray_mix"
@@ -61,7 +61,7 @@ export function SprayMixCalculatorPage() {
           onToggleFavorite={() => calculators.toggleFavorite('spray_mix')}
         />
 
-        <SafetyNotice>คำนวณจากอัตราที่กรอกเองเท่านั้น ควรอ่านฉลากจริงก่อนใช้ และไม่ควรเพิ่มความเข้มข้นเอง</SafetyNotice>
+        <SafetyNotice>เครื่องมือนี้ไม่แนะนำอัตราใช้ยา ใช้เฉพาะคูณปริมาณจากฉลากจริงที่ผู้ใช้กรอกเอง และควรตรวจฉลากกับคำแนะนำเจ้าหน้าที่ก่อนใช้</SafetyNotice>
 
         <form
           className="grid gap-4"
@@ -87,7 +87,7 @@ export function SprayMixCalculatorPage() {
                 value={input.tankLiters}
               />
               <NumberField
-                label="ปริมาณยา/สารตามฉลาก"
+                label="ปริมาณจากฉลากที่กรอกเอง"
                 onChange={(dosageAmount) => updateInput({ dosageAmount })}
                 suffix={mixAmountUnitLabels[input.dosageUnit]}
                 value={input.dosageAmount}
@@ -115,7 +115,7 @@ export function SprayMixCalculatorPage() {
         <Card className="p-5">
           <h2 className="text-lg font-extrabold text-kaset-ink">ผลคำนวณ</h2>
           <div className="mt-3 grid gap-3">
-            <ResultMetric featured label="ต้องใช้ยา/สาร" tone="rose" value={result.requiredAmountLabel} />
+            <ResultMetric featured label="ปริมาณตามฉลากที่คำนวณได้" tone="rose" value={result.requiredAmountLabel} />
             <ResultMetric label="ความเข้มข้นต่อ 1 ลิตร" tone={result.isConcentrationHigh ? 'rose' : 'green'} value={result.concentrationLabel} />
             <ResultMetric label="ขนาดถังที่ใช้คิด" tone="sky" value={`${formatAgriNumber(result.tankLiters, 0)} ลิตร`} />
           </div>

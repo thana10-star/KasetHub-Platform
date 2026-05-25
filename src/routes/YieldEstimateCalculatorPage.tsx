@@ -92,7 +92,7 @@ export function YieldEstimateCalculatorPage() {
         >
           <Card className="p-4">
             <div className="grid gap-4">
-              <div className="grid grid-cols-[1fr_132px] gap-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_132px]">
                 <NumberField label="ขนาดพื้นที่" onChange={(landSizeValue) => updateInput({ landSizeValue })} value={input.landSizeValue} />
                 <SelectField<ThaiAreaUnit>
                   label="หน่วย"

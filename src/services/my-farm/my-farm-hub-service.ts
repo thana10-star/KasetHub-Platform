@@ -50,7 +50,7 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   {
     id: 'calculators',
     label: 'เครื่องคำนวณเกษตร',
-    description: 'ผสมยา ปุ๋ย ระยะปลูก ต้นทุน',
+    description: 'ระยะปลูก ปุ๋ย ผลผลิต ต้นทุน',
     route: '/app/calculators',
     iconKey: 'calculator',
     tone: 'warning',
@@ -348,7 +348,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       id: 'calculator',
       module: 'calculator',
       title: 'เครื่องคำนวณเกษตร',
-      detail: 'คำนวณผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุนในเครื่องนี้',
+      detail: 'คำนวณระยะปลูก ปุ๋ย/การให้ปุ๋ย ผลผลิต และต้นทุนในเครื่องนี้',
       valueLabel: '5 เครื่องมือ',
       route: '/app/calculators',
       badgeLabel: 'เครื่องมือ',

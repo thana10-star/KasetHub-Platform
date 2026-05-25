@@ -5,7 +5,7 @@ import type {
 
 const planningOnlyNote = 'ตัวอย่างนี้เป็นค่าเริ่มต้นเพื่อช่วยกรอก ไม่ใช่คำแนะนำทางวิชาการสุดท้าย';
 const fertilizerPlanningNote =
-  'สถานะปุ๋ยยังเป็น planning_only ใช้ช่วยจัดช่องกรอกเท่านั้น ยังไม่แนะนำอัตราปุ๋ยตามชนิดพืช ดิน หรือฤดู';
+  'ใช้ช่วยวางแผนจากค่าที่ผู้ใช้กรอกเอง ยังไม่ใช่อัตราแนะนำตามชนิดพืช ดิน หรือฤดู';
 
 export const cropCalculatorProfiles: CropCalculatorProfile[] = [
   {
@@ -199,6 +199,150 @@ export const cropCalculatorProfiles: CropCalculatorProfile[] = [
     fertilizerPlanningStatus: 'planning_only',
     fertilizerPlanningNote,
     safetyDisclaimerNotes: ['ต้องระบุชนิดข้าวโพดและฤดูปลูกก่อนคำแนะนำใด ๆ', 'ไม่แนะนำสารกำจัดศัตรูพืช'],
+  },
+  {
+    cropKey: 'eucalyptus',
+    thaiDisplayName: 'ยูคาลิปตัส / ยูคา',
+    shortLabel: 'ยูคา',
+    commonSpacingExamples: [
+      {
+        id: 'eucalyptus-300x200',
+        label: 'ยูคา 3 x 2 ม. ตัวอย่าง',
+        rowSpacingCm: 300,
+        plantSpacingCm: 200,
+        usableAreaPercent: 88,
+        seedlingBufferPercent: 5,
+        note: planningOnlyNote,
+      },
+    ],
+    commonUnitExamples: [
+      { id: 'eucalyptus-10rai', label: 'สวนตัวอย่าง 10 ไร่', areaValue: 10, areaUnit: 'rai', note: planningOnlyNote },
+    ],
+    yieldEstimateInputExamples: [
+      {
+        id: 'eucalyptus-tree-sample',
+        label: 'ตัวอย่างน้ำหนักต่อหน่วยที่กรอกเอง',
+        landSizeValue: 10,
+        landSizeUnit: 'rai',
+        sampleCount: 20,
+        averageWeightKg: 1,
+        estimatedTotalUnits: 2600,
+        note: planningOnlyNote,
+      },
+    ],
+    costInputExample: {
+      id: 'eucalyptus-cost-scaffold',
+      label: 'โครงต้นทุนยูคา 10 ไร่',
+      landSizeValue: 10,
+      landSizeUnit: 'rai',
+      fertilizerCost: 0,
+      laborCost: 0,
+      waterCost: 0,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 0,
+      note: 'เติมพื้นที่และหมวดต้นทุนก่อน ผู้ใช้ต้องกรอกจำนวนเงินจริงเอง',
+    },
+    costCategoriesCommonlyUsed: ['ค่าต้นพันธุ์', 'ค่าเตรียมดิน', 'ค่าปลูก', 'ค่าดูแลสวน', 'ค่าตัด/ขนส่ง'],
+    fertilizerPlanningStatus: 'planning_only',
+    fertilizerPlanningNote,
+    safetyDisclaimerNotes: ['ระยะปลูกจริงขึ้นกับพันธุ์ พื้นที่ และเป้าหมายการตัด', 'ไม่แนะนำสารเคมีหรืออัตราปุ๋ยเฉพาะแปลง'],
+  },
+  {
+    cropKey: 'chili',
+    thaiDisplayName: 'พริก',
+    shortLabel: 'พริก',
+    commonSpacingExamples: [
+      {
+        id: 'chili-80x50',
+        label: 'พริก 80 x 50 ซม. ตัวอย่าง',
+        rowSpacingCm: 80,
+        plantSpacingCm: 50,
+        usableAreaPercent: 78,
+        seedlingBufferPercent: 12,
+        note: planningOnlyNote,
+      },
+    ],
+    commonUnitExamples: [
+      { id: 'chili-2ngan', label: 'แปลงตัวอย่าง 2 งาน', areaValue: 2, areaUnit: 'ngan', note: planningOnlyNote },
+    ],
+    yieldEstimateInputExamples: [
+      {
+        id: 'chili-plant-sample',
+        label: 'ตัวอย่างชั่งผลผลิตพริกต่อต้น',
+        landSizeValue: 2,
+        landSizeUnit: 'ngan',
+        sampleCount: 20,
+        averageWeightKg: 0.08,
+        estimatedTotalUnits: 1200,
+        note: planningOnlyNote,
+      },
+    ],
+    costInputExample: {
+      id: 'chili-cost-scaffold',
+      label: 'โครงต้นทุนพริก 2 งาน',
+      landSizeValue: 2,
+      landSizeUnit: 'ngan',
+      fertilizerCost: 0,
+      laborCost: 0,
+      waterCost: 0,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 0,
+      note: 'เติมพื้นที่และหมวดต้นทุนก่อน ผู้ใช้ต้องกรอกจำนวนเงินจริงเอง',
+    },
+    costCategoriesCommonlyUsed: ['ค่าต้นกล้า/เมล็ด', 'ค่าวัสดุปลูก', 'ค่าปุ๋ย', 'ค่าน้ำ', 'ค่าแรงเก็บ/คัด'],
+    fertilizerPlanningStatus: 'planning_only',
+    fertilizerPlanningNote,
+    safetyDisclaimerNotes: ['พริกมีรอบเก็บเกี่ยวและโรคแมลงแตกต่างกันมากตามพื้นที่', 'ไม่แนะนำสารกำจัดศัตรูพืชหรืออัตราใช้ยา'],
+  },
+  {
+    cropKey: 'oil_palm',
+    thaiDisplayName: 'ปาล์มน้ำมัน',
+    shortLabel: 'ปาล์ม',
+    commonSpacingExamples: [
+      {
+        id: 'oil-palm-900x900',
+        label: 'ปาล์มน้ำมัน 9 x 9 ม. ตัวอย่าง',
+        rowSpacingCm: 900,
+        plantSpacingCm: 900,
+        usableAreaPercent: 84,
+        seedlingBufferPercent: 4,
+        note: planningOnlyNote,
+      },
+    ],
+    commonUnitExamples: [
+      { id: 'oil-palm-10rai', label: 'สวนตัวอย่าง 10 ไร่', areaValue: 10, areaUnit: 'rai', note: planningOnlyNote },
+    ],
+    yieldEstimateInputExamples: [
+      {
+        id: 'oil-palm-bunch-sample',
+        label: 'ตัวอย่างชั่งทะลายปาล์ม',
+        landSizeValue: 10,
+        landSizeUnit: 'rai',
+        sampleCount: 12,
+        averageWeightKg: 18,
+        estimatedTotalUnits: 220,
+        note: planningOnlyNote,
+      },
+    ],
+    costInputExample: {
+      id: 'oil-palm-cost-scaffold',
+      label: 'โครงต้นทุนปาล์ม 10 ไร่',
+      landSizeValue: 10,
+      landSizeUnit: 'rai',
+      fertilizerCost: 0,
+      laborCost: 0,
+      waterCost: 0,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 0,
+      note: 'เติมพื้นที่และหมวดต้นทุนก่อน ผู้ใช้ต้องกรอกจำนวนเงินจริงเอง',
+    },
+    costCategoriesCommonlyUsed: ['ค่าต้นพันธุ์', 'ค่าดูแลสวน', 'ค่าปุ๋ย', 'ค่าเก็บเกี่ยว', 'ค่าขนส่ง'],
+    fertilizerPlanningStatus: 'planning_only',
+    fertilizerPlanningNote,
+    safetyDisclaimerNotes: ['ต้องแยกอายุปาล์ม สภาพดิน และผลผลิตจริงก่อนวางแผน', 'ไม่แนะนำอัตราปุ๋ยเฉพาะสวนหรือสารเคมีใด'],
   },
   {
     cropKey: 'durian',

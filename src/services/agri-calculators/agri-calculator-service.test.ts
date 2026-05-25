@@ -419,8 +419,20 @@ describe('cost estimate calculator', () => {
 });
 
 describe('crop profile example loading', () => {
-  test('loads all required crop profiles as planning-only examples', () => {
-    const requiredCropKeys = ['rice', 'cassava', 'sugarcane', 'maize', 'durian', 'longan', 'rubber', 'vegetable_mixed'];
+  test('loads all required crop profiles as safe planning examples', () => {
+    const requiredCropKeys = [
+      'rice',
+      'cassava',
+      'sugarcane',
+      'maize',
+      'eucalyptus',
+      'chili',
+      'oil_palm',
+      'durian',
+      'longan',
+      'rubber',
+      'vegetable_mixed',
+    ];
 
     expect(cropCalculatorProfiles.map((profile) => profile.cropKey).sort()).toEqual([...requiredCropKeys].sort());
 
@@ -432,7 +444,7 @@ describe('crop profile example loading', () => {
       expect(profile.costCategoriesCommonlyUsed.length).toBeGreaterThan(0);
       expect(profile.safetyDisclaimerNotes.length).toBeGreaterThan(0);
       expect(profile.fertilizerPlanningStatus).toBe('planning_only');
-      expect(profile.fertilizerPlanningNote).toContain('ยังไม่แนะนำอัตราปุ๋ย');
+      expect(profile.fertilizerPlanningNote).toContain('ยังไม่ใช่อัตราแนะนำ');
     });
   });
 

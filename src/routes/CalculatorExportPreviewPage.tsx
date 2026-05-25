@@ -73,7 +73,7 @@ export function CalculatorExportPreviewPage() {
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-kaset-ink">LINE-friendly format</h2>
+                <h2 className="font-extrabold text-kaset-ink">รูปแบบข้อความสำหรับส่งต่อ</h2>
                 <StatusPill tone="success">short</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">ออกแบบให้เป็นบรรทัดสั้น อ่านง่าย และคงคำเตือนสำคัญไว้เสมอ</p>
@@ -143,4 +143,3 @@ export function CalculatorExportPreviewPage() {
     </div>
   );
 }
-

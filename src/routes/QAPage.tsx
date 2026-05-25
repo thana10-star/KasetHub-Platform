@@ -99,7 +99,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ตัวอย่าง export เครื่องคำนวณ', route: '/app/calculators/export-preview' },
   { label: 'แผน AI อธิบายผลคำนวณ', route: '/app/calculators/ai-explanation-preview' },
   { label: 'สถาปัตยกรรม AI backend เครื่องคำนวณ', route: '/app/calculators/ai-architecture' },
-  { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
+  { label: 'คำนวณตามฉลากยา/สาร', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
   { label: 'คำนวณผลผลิต', route: '/app/calculators/yield-estimate' },
@@ -376,7 +376,7 @@ export function QAPage() {
                 <StatusPill tone="success">local fixtures</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                ตรวจสูตรผสมยา ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
+                ตรวจสูตรคำนวณตามฉลาก ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
               </p>
             </div>
           </div>

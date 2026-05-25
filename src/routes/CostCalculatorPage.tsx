@@ -90,7 +90,7 @@ export function CostCalculatorPage() {
         >
           <Card className="p-4">
             <div className="grid gap-4">
-              <div className="grid grid-cols-[1fr_132px] gap-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_132px]">
                 <NumberField label="ขนาดพื้นที่" onChange={(landSizeValue) => updateInput({ landSizeValue })} value={input.landSizeValue} />
                 <SelectField<ThaiAreaUnit>
                   label="หน่วย"
@@ -99,7 +99,7 @@ export function CostCalculatorPage() {
                   value={input.landSizeUnit}
                 />
               </div>
-              <NumberField label="ค่าปุ๋ย/ยา" onChange={(fertilizerCost) => updateInput({ fertilizerCost })} step={1} suffix="บาท" value={input.fertilizerCost} />
+              <NumberField label="ค่าปุ๋ย/วัสดุ" onChange={(fertilizerCost) => updateInput({ fertilizerCost })} step={1} suffix="บาท" value={input.fertilizerCost} />
               <NumberField label="ค่าแรง" onChange={(laborCost) => updateInput({ laborCost })} step={1} suffix="บาท" value={input.laborCost} />
               <NumberField label="ค่าน้ำ" onChange={(waterCost) => updateInput({ waterCost })} step={1} suffix="บาท" value={input.waterCost} />
               <NumberField label="ค่าเครื่องจักร" onChange={(machineryCost) => updateInput({ machineryCost })} step={1} suffix="บาท" value={input.machineryCost} />

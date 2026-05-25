@@ -25,7 +25,7 @@ export const sprayMixSafetyDisclaimer =
   'คำนวณตามอัตราที่ผู้ใช้กรอกจากฉลากเท่านั้น ควรอ่านฉลากจริงก่อนใช้ และปฏิบัติตามกฎหมาย/คำเตือนของผลิตภัณฑ์';
 
 export const fertilizerFoundationDisclaimer =
-  'เป็นการคำนวณเบื้องต้นเพื่อช่วยคิดตัวเลข NPK จากข้อมูลที่กรอก ยังไม่ใช่คำแนะนำการใส่ปุ๋ยจริง';
+  'ใช้ช่วยวางแผนปุ๋ยจากสูตรและอัตราที่ผู้ใช้กรอกเอง รวมถึงการหว่าน/โรยหรือให้ผ่านน้ำหยด ยังไม่ใช่คำแนะนำการใส่ปุ๋ยจริง';
 
 export const thaiAreaUnitLabels: Record<ThaiAreaUnit, { label: string; shortLabel: string }> = {
   rai: { label: 'ไร่', shortLabel: 'ไร่' },
@@ -85,20 +85,10 @@ export const fertilizerProfiles: FertilizerProfile[] = [
 
 export const calculatorCards: CalculatorCard[] = [
   {
-    id: 'spray_mix',
-    label: 'คำนวณผสมยา',
-    shortLabel: 'ผสมยา',
-    description: 'คำนวณปริมาณยา/สารที่ต้องใช้ตามอัตราบนฉลาก',
-    route: '/app/calculators/spray-mix',
-    iconKey: 'spray',
-    tone: 'rose',
-    disclaimer: sprayMixSafetyDisclaimer,
-  },
-  {
     id: 'fertilizer_mix',
-    label: 'คำนวณปุ๋ย',
-    shortLabel: 'ปุ๋ย',
-    description: 'ช่วยคิด NPK และปริมาณปุ๋ยโดยประมาณตามพื้นที่',
+    label: 'คำนวณปุ๋ย/การให้ปุ๋ย',
+    shortLabel: 'ปุ๋ย/น้ำหยด',
+    description: 'วางแผนปุ๋ยต่อไร่ หว่าน/โรย หรือให้ผ่านน้ำหยดจากอัตราที่ผู้ใช้กรอกเอง',
     route: '/app/calculators/fertilizer',
     iconKey: 'fertilizer',
     tone: 'green',
@@ -133,6 +123,16 @@ export const calculatorCards: CalculatorCard[] = [
     iconKey: 'cost',
     tone: 'earth',
     disclaimer: agricultureSafetyDisclaimer,
+  },
+  {
+    id: 'spray_mix',
+    label: 'คำนวณตามฉลากยา/สาร',
+    shortLabel: 'ตามฉลาก',
+    description: 'ช่วยคูณปริมาณจากอัตราบนฉลากที่ผู้ใช้กรอกเอง ไม่แนะนำอัตราใช้ยา',
+    route: '/app/calculators/spray-mix',
+    iconKey: 'spray',
+    tone: 'rose',
+    disclaimer: sprayMixSafetyDisclaimer,
   },
 ];
 

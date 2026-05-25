@@ -88,7 +88,15 @@ Validation now handles empty/zero/negative/non-number values, corrupted or missi
 
 ## M51 Crop-specific Planning
 
-M51 adds crop profile fixtures for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. These profiles provide spacing examples, area examples, yield input examples, cost category labels, and safety notes.
+M51 adds crop profile fixtures for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. M98.1 adds eucalyptus, chili, and oil palm to the calculator-facing crop options. These profiles provide spacing examples, area examples, yield input examples, cost category labels, and safety notes.
+
+M98.1 also changes the calculator presentation layer:
+
+- Crop selectors use a highlighted tappable control with `พืชที่เลือก` and `แตะเพื่อเปลี่ยนชนิดพืช`.
+- Plant spacing defaults to maize instead of rice because spacing tools fit crops with clearer row/plant distance assumptions.
+- Area/unit and N/P/K inputs stack on mobile to avoid horizontal overflow.
+- `คำนวณปุ๋ย/การให้ปุ๋ย` is the main fertilizer planning tool, including safe crop-stage and application-method fields such as drip fertigation.
+- `คำนวณตามฉลากยา/สาร` remains label-only arithmetic and must not recommend pesticide/chemical dosage.
 
 Every profile keeps `fertilizerPlanningStatus = planning_only`. Crop examples are only starter values for form filling and must show: `ตัวอย่างนี้เป็นค่าเริ่มต้นเพื่อช่วยกรอก ไม่ใช่คำแนะนำทางวิชาการสุดท้าย`.
 
