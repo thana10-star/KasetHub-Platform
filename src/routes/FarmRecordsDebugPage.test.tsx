@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import { createDemoFarmRecordsState } from '@/services/farm-records/farm-records-fixtures';
 import { createEmptyFarmRecordsState, createFarmRecordsService, createMemoryFarmRecordsStorage } from '@/services/farm-records/farm-records-service';
-import { FarmRecordsDebugPage } from '@/routes/FarmRecordsDebugPage';
+import { FarmRecordsDebugPage, HarvestForm } from '@/routes/FarmRecordsDebugPage';
 import {
   activityFormFromRecord,
   buildFarmRecordsViewModel,
@@ -37,13 +37,22 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).toContain('Break-even price / kg');
     expect(html).toContain('This is not official accounting, tax, loan, or financial advice.');
     expect(html).toContain('Enter expected yield in kg');
-    expect(html).toContain('Harvest &amp; Yield');
-    expect(html).toContain('Harvested kg');
-    expect(html).toContain('Cost per kg');
-    expect(html).toContain('Yield per rai');
-    expect(html).toContain('Profit per kg');
-    expect(html).toContain('Actual break-even / kg');
-    expect(html).toContain('Add harvest');
+    expect(html).toContain('ผลผลิตและการเก็บเกี่ยว');
+    expect(html).toContain('ผลผลิตรวม');
+    expect(html).toContain('ต้นทุนต่อกก.');
+    expect(html).toContain('ผลผลิตต่อไร่');
+    expect(html).toContain('กำไรต่อกก.');
+    expect(html).toContain('จุดคุ้มทุนจริง/กก.');
+    expect(html).toContain('เพิ่มผลผลิต');
+    expect(html).not.toContain('Add harvest');
+    expect(html).not.toContain('LOCAL HARVEST ESTIMATE ONLY');
+    expect(html).not.toContain('Harvest records');
+    expect(html).not.toContain('Yield per rai');
+    expect(html).not.toContain('Cost per kg');
+    expect(html).not.toContain('à¸');
+    expect(html).not.toContain('à¹');
+    expect(html).not.toContain('Â');
+    expect(html).not.toContain('�');
     expect(html).toContain('Recent Farm Timeline');
     expect(html).toContain('Export &amp; Data Control');
     expect(html).toContain('Download JSON Backup');
@@ -129,6 +138,44 @@ describe('M90 farm records farmer-facing page', () => {
 
     expect(validation.isValid).toBe(false);
     expect(validation.errors.length).toBeGreaterThan(0);
+    expect(validation.errors).toContain('ปริมาณผลผลิตต้องเป็นตัวเลข 0 หรือมากกว่า');
+  });
+
+  test('renders the harvest create form with readable Thai labels', () => {
+    const state = createDemoFarmRecordsState();
+    const html = renderToString(
+      <HarvestForm
+        cycles={state.cropCycles}
+        errors={[]}
+        onCancel={() => undefined}
+        onChange={() => undefined}
+        onSubmit={(event) => event.preventDefault()}
+        plots={state.farmPlots}
+        values={createInitialHarvestForm('2026-09-01')}
+      />,
+    );
+
+    expect(html).toContain('เพิ่มข้อมูลผลผลิต');
+    expect(html).toContain('บันทึกผลผลิตที่เก็บเกี่ยวได้จากแปลงหรือรอบปลูกนี้');
+    expect(html).toContain('วันที่เก็บเกี่ยว');
+    expect(html).toContain('ชื่อพืช (ถ้ามี)');
+    expect(html).toContain('ปริมาณผลผลิต');
+    expect(html).toContain('หน่วย');
+    expect(html).toContain('เกรด/คุณภาพ (ถ้ามี)');
+    expect(html).toContain('ผู้ซื้อ (ถ้ามี)');
+    expect(html).toContain('ราคาขายต่อกก. (ถ้ามี)');
+    expect(html).toContain('หมายเหตุ');
+    expect(html).toContain('ข้าว, มะม่วง, มันสำปะหลัง');
+    expect(html).toContain('บันทึก');
+    expect(html).not.toContain('Add harvest');
+    expect(html).not.toContain('Harvest date');
+    expect(html).not.toContain('Crop name');
+    expect(html).not.toContain('Quantity');
+    expect(html).not.toContain('Unit');
+    expect(html).not.toContain('à¸');
+    expect(html).not.toContain('à¹');
+    expect(html).not.toContain('Â');
+    expect(html).not.toContain('�');
   });
 
   test('blocks invalid finance amounts before local create', () => {

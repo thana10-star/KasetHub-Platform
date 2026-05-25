@@ -1,13 +1,13 @@
-import { Bot, Home, PlaySquare, UserRound, UsersRound } from 'lucide-react';
+import { Bot, Calculator, Home, Sprout, UserRound } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cx } from '@/components/ui/classNames';
 import type { AppRoute } from '@/types/kaset';
 
 const items: Array<{ label: string; href: AppRoute; icon: typeof Home }> = [
   { label: 'หน้าแรก', href: '/app', icon: Home },
-  { label: 'วิดีโอ', href: '/app/youtube', icon: PlaySquare },
-  { label: 'AI', href: '/app/ai', icon: Bot },
-  { label: 'ชุมชน', href: '/app/community', icon: UsersRound },
+  { label: 'ฟาร์มของฉัน', href: '/app/my-farm', icon: Sprout },
+  { label: 'เครื่องมือ', href: '/app/calculators', icon: Calculator },
+  { label: 'ถาม AI', href: '/app/ai', icon: Bot },
   { label: 'โปรไฟล์', href: '/app/profile', icon: UserRound },
 ];
 

@@ -496,19 +496,19 @@ export function validateHarvestForm(values: HarvestFormValues, availablePlots: F
   const quantity = Number(trimmedQuantity);
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('à¹€à¸¥à¸·à¸­à¸à¹à¸›à¸¥à¸‡à¸›à¸¥à¸¹à¸à¸à¹ˆà¸­à¸™à¸šà¸±à¸™à¸—à¸¶à¸à¸œà¸¥à¸œà¸¥à¸´à¸•');
+    errors.push('กรุณาเลือกแปลง');
   }
 
   if (!hasValidDate(values.harvestDate)) {
-    errors.push('à¹ƒà¸ªà¹ˆà¸§à¸±à¸™à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¹€à¸à¸µà¹ˆà¸¢à¸§à¹ƒà¸«à¹‰à¸–à¸¹à¸à¸•à¹‰à¸­à¸‡');
+    errors.push('กรุณาเลือกวันที่เก็บเกี่ยว');
   }
 
   if (!trimmedQuantity || !Number.isFinite(quantity) || quantity < 0) {
-    errors.push('à¸›à¸£à¸´à¸¡à¸²à¸“à¸œà¸¥à¸œà¸¥à¸´à¸•à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
+    errors.push(trimmedQuantity ? 'ปริมาณผลผลิตต้องเป็นตัวเลข 0 หรือมากกว่า' : 'กรุณากรอกปริมาณผลผลิต');
   }
 
   if (values.salePricePerKg.trim() && parseOptionalNonNegativeNumber(values.salePricePerKg) === undefined) {
-    errors.push('à¸£à¸²à¸„à¸²à¸‚à¸²à¸¢à¸•à¹ˆà¸­ kg à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
+    errors.push('ราคาขายต่อกก. ต้องเป็นตัวเลข 0 หรือมากกว่า');
   }
 
   return { isValid: errors.length === 0, errors };

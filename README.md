@@ -909,3 +909,12 @@ Open-Meteo is still disabled unless explicit local flags enable it. No GPS, prec
 - Keeps one elder-friendly Thai primary action: `เปิดฟาร์มของฉัน`.
 - Adds `docs/ux/HOME_FIRST_NAVIGATION_M92.md` with the profile/menu simplification plan and future bottom navigation proposal.
 - Keeps M92 navigation-only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI record processing, no receipt upload, and no route removal.
+
+## M93 Elder-Friendly Navigation Cleanup
+
+- Adds a dedicated bottom-nav slot for `ฟาร์มของฉัน` and renames calculator access to `เครื่องมือ`.
+- Refactors Profile from a long flat route list into grouped cards: `บัญชีของฉัน`, `ข้อมูลและความเป็นส่วนตัว`, `ช่วยเหลือ`, and `สำหรับทีมงานหรือทดสอบ`.
+- Keeps Admin, QA, readiness, Supabase staging, and other internal tools accessible under the Advanced group instead of mixing them into the main farmer-facing menu.
+- Keeps the compact M92.1 Home Farm Hub unchanged and preserves `/app/my-farm`, `/app/farm-records`, and all existing deep links.
+- Adds `docs/ux/ELDER_FRIENDLY_NAVIGATION_CLEANUP_M93.md`.
+- Keeps M93 navigation-only: no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, and no route removal.

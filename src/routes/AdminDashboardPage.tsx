@@ -385,11 +385,11 @@ export function AdminDashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-kaset-ink">M92.1 Compact My Farm Home Entry</h2>
+                    <h2 className="font-extrabold text-kaset-ink">M93 Elder-friendly Farm Navigation</h2>
                     <StatusPill tone="info">local-first</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Home now links clearly to My Farm without showing dense Farm Records metrics - {farmRecords.counts.plots} plots - {farmRecords.counts.activeCropCycles} active cycles - {farmRecords.counts.activityRecords} activities - {farmRecords.counts.harvestRecords} harvest records - net {farmRecords.summary.netProfit.toLocaleString('th-TH')} THB
+                    Home stays compact, bottom nav includes My Farm, and Profile separates internal/Admin/QA links from farmer-facing routes - {farmRecords.counts.plots} plots - {farmRecords.counts.activeCropCycles} active cycles - {farmRecords.counts.activityRecords} activities - {farmRecords.counts.harvestRecords} harvest records - net {farmRecords.summary.netProfit.toLocaleString('th-TH')} THB
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/farm-records">
                     Open Farm Records

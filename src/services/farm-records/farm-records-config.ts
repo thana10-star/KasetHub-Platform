@@ -118,11 +118,11 @@ export const allowedFarmRecordUnits: FarmUnitConfig[] = [
 ];
 
 export const farmHarvestQuantityUnits: FarmHarvestQuantityUnitConfig[] = [
-  { id: 'kg', label: { en: 'Kilogram', th: 'Kilogram' }, normalizesToKg: true },
-  { id: 'ton', label: { en: 'Ton', th: 'Ton' }, normalizesToKg: true },
-  { id: 'sack', label: { en: 'Sack', th: 'Sack' }, normalizesToKg: false },
-  { id: 'basket', label: { en: 'Basket', th: 'Basket' }, normalizesToKg: false },
-  { id: 'other', label: { en: 'Other', th: 'Other' }, normalizesToKg: false },
+  { id: 'kg', label: { en: 'Kilogram', th: 'กิโลกรัม' }, normalizesToKg: true },
+  { id: 'ton', label: { en: 'Ton', th: 'ตัน' }, normalizesToKg: true },
+  { id: 'sack', label: { en: 'Sack', th: 'กระสอบ' }, normalizesToKg: false },
+  { id: 'basket', label: { en: 'Basket', th: 'ตะกร้า' }, normalizesToKg: false },
+  { id: 'other', label: { en: 'Other', th: 'อื่น ๆ' }, normalizesToKg: false },
 ];
 
 export const farmActivityTypeIds = farmActivityTypes.map((item) => item.id);

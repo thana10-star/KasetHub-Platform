@@ -1034,4 +1034,14 @@ The home card no longer shows Farm Records metrics, cost dashboard links, harves
 
 M92 remains UX/navigation only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation/map pins, no AI record processing, no receipt upload, no OCR, no notifications, no tax/bank/loan integration, and no backend feature changes.
 
+## M93 Elder-Friendly Navigation Cleanup
+
+M93 reduces profile/menu clutter and makes My Farm easier to discover without relying on hidden settings. Bottom navigation now uses the farmer-facing hierarchy `หน้าแรก`, `ฟาร์มของฉัน`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`.
+
+The Profile page now groups navigation into `บัญชีของฉัน`, `ข้อมูลและความเป็นส่วนตัว`, `ช่วยเหลือ`, and `สำหรับทีมงานหรือทดสอบ`. Admin, QA, Supabase readiness, staging, and internal tools remain accessible, but they are separated from the main farmer-facing links.
+
+`docs/ux/ELDER_FRIENDLY_NAVIGATION_CLEANUP_M93.md` documents the navigation audit, user behavior assumption, bottom-nav decision, profile grouping, implemented changes, future cleanup, and non-goals.
+
+M93 remains UX/navigation only: no route removal, no Farm Records storage change, no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, and no tax/bank/loan integration.
+
 The future endpoint is still not deployed. Frontend code cannot call a provider directly, cannot accept provider/service-role keys, cannot bypass blocked actions, and cannot enable production AI text behavior.

@@ -81,6 +81,14 @@ M92 adds a Home Farm Hub card on `/app` so farmers can open My Farm without hunt
 
 Detailed Farm Records summaries, cost/yield metrics, export/restore controls, and sync consent status stay inside `/app/my-farm` and `/app/farm-records`. M92.1 does not create a new store, does not sync, and does not change Farm Records service behavior.
 
+## M93 Elder-friendly Navigation
+
+M93 makes My Farm easier to reach from the persistent bottom navigation with a dedicated `ฟาร์มของฉัน` slot. Profile remains a secondary access path, but it is no longer the discovery surface for My Farm.
+
+Profile is grouped into account, data/privacy, help, and advanced/internal testing sections. Farm Records backup/restore and local data control remain available from the data/privacy group, while Admin, QA, readiness, and staging tools move into `สำหรับทีมงานหรือทดสอบ`.
+
+M93 does not change My Farm data aggregation, Farm Records local storage, sync consent state, export/restore behavior, or any backend boundary.
+
 ## Timeline Rules
 
 The local timeline is built from:
@@ -128,7 +136,7 @@ M49 adds calculator-related future records that can also feed My Farm after auth
 - `planting_profiles`
 - `farm_cost_records`
 
-M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, M90 links My Farm to the local Farm Cost Dashboard, M91 adds harvest/yield and cost-per-kg summary visibility, and M92/M92.1 make My Farm visible from Home with a compact Thai launcher while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
+M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, M90 links My Farm to the local Farm Cost Dashboard, M91 adds harvest/yield and cost-per-kg summary visibility, M92/M92.1 make My Farm visible from Home with a compact Thai launcher, and M93 adds a dedicated bottom-nav entry plus grouped Profile navigation while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
 
 - `farm_plots`
 - `crop_cycles`

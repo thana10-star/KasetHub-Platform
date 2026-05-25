@@ -22,10 +22,10 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
     routes: [
-      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1', notes: 'mobile-first home now surfaces a compact My Farm launcher with one elder-friendly Thai primary action; detailed Farm Records metrics stay in My Farm/Farm Records', manualCheckPath: '/app' },
-      { route: '/app/profile', label: 'Profile', milestone: 'M02-M29', notes: 'โปรไฟล์ตัวอย่างและจุดเข้า route สำคัญ', manualCheckPath: '/app/profile' },
+      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93', notes: 'mobile-first home surfaces a compact My Farm launcher; detailed Farm Records metrics stay in My Farm/Farm Records and bottom nav now includes My Farm', manualCheckPath: '/app' },
+      { route: '/app/profile', label: 'Profile', milestone: 'M02-M29/M93', notes: 'โปรไฟล์ตัวอย่างจัดกลุ่มบัญชี ข้อมูล/ความเป็นส่วนตัว ช่วยเหลือ และ Advanced สำหรับทีมงาน/QA', manualCheckPath: '/app/profile' },
       { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
-      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92', notes: 'My Farm local hub with Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, and a home-first entry point; no cloud sync', manualCheckPath: '/app/my-farm' },
+      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92-M93', notes: 'My Farm local hub with Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, compact Home entry point, and dedicated bottom-nav slot; no cloud sync', manualCheckPath: '/app/my-farm' },
       { route: '/app/my-farm/settings', label: 'My Farm settings', milestone: 'M34', notes: 'สถานะข้อมูล local และแผน cloud sync ในอนาคต', manualCheckPath: '/app/my-farm/settings' },
       { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32/M75', notes: 'Open-Meteo public weather API is flag-gated; default local fixture remains, with no GPS/geolocation, no personal location storage, and no Supabase writes', manualCheckPath: '/app/weather' },
       { route: '/app/weather/qa', label: 'Weather QA Cache Coarse Location', milestone: 'M76', notes: 'cache freshness, coarse province/city-center locations, failure fixtures, stale examples, and no-GPS/no-precise-storage proof', manualCheckPath: '/app/weather/qa' },

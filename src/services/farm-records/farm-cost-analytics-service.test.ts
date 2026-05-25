@@ -136,7 +136,7 @@ describe('M90 farm cost analytics service', () => {
 
     expect(orchardSummary.totalHarvestKg).toBe(0);
     expect(orchardSummary.costPerKg).toBeUndefined();
-    expect(orchardSummary.warnings.join(' ')).toContain('Harvest');
+    expect(orchardSummary.warnings.join(' ')).toContain('ข้อมูลผลผลิต');
     expect(dateFilteredSummary.totalHarvestKg).toBe(3200);
     expect(missingDateSummary.harvestRecordCount).toBe(0);
     expect(missingDateSummary.totalHarvestKg).toBe(0);

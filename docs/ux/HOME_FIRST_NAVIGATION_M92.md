@@ -97,3 +97,15 @@ Do not move sync, backup, or privacy controls out of settings entirely. Those co
 ## M92.1 Decision
 
 M92.1 does not remove existing routes or profile entries. It keeps My Farm visible on Home, reduces vertical space, and preserves detailed Farm Records experiences inside My Farm and Farm Records.
+
+## M93 Follow-up
+
+M93 implements the bottom-navigation part of this plan with:
+
+- `หน้าแรก`
+- `ฟาร์มของฉัน`
+- `เครื่องมือ`
+- `ถาม AI`
+- `โปรไฟล์`
+
+M93 also groups Profile into Account, Data & Privacy, Help, and Advanced/internal testing sections. The Home card stays compact and does not reintroduce Farm Records metrics.
