@@ -102,6 +102,23 @@ describe('M75 real weather Open-Meteo adapter', () => {
     expect(result.forecast.source.sourceType).toBe('demo');
   });
 
+  test('open_meteo_ready still requires valid configured coordinates before fetch', async () => {
+    let calls = 0;
+    const fetcher: OpenMeteoFetch = async () => {
+      calls += 1;
+      return { ok: true, status: 200, json: async () => openMeteoFixture };
+    };
+
+    const result = await loadWeatherAdapterResult(undefined, {
+      env: { ...readyEnv, weatherDefaultLat: 999 },
+      fetcher,
+    });
+
+    expect(calls).toBe(0);
+    expect(result.modeStatus.canFetchOpenMeteo).toBe(false);
+    expect(result.forecast.source.sourceType).toBe('demo');
+  });
+
   test('open_meteo_ready builds correct endpoint with configured lat/lon', async () => {
     const url = buildOpenMeteoForecastUrl({ latitude: 13.7563, longitude: 100.5018 });
     expect(url).toContain('latitude=13.7563');

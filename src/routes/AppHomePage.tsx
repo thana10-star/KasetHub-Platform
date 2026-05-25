@@ -12,7 +12,8 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { articles, communityPosts, cropPrices, videos } from '@/data/mockData';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
-import { Bell, HelpCircle, Sprout } from 'lucide-react';
+import { AI_HOME_PROMPT_EXAMPLES } from '@/services/ai/ai-farmer-assistant-copy';
+import { Bell, Bot, HelpCircle, Sprout } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AppHomePage() {
@@ -25,6 +26,42 @@ export function AppHomePage() {
       <PageHeader title="หน้าแรก" subtitle="ความรู้และเครื่องมือเกษตรไทย" />
       <div className="grid gap-5 px-5 pb-6">
         <HeroCard />
+
+        <section aria-labelledby="home-ai-title" data-testid="home-ai-primary-entry">
+          <Card className="overflow-hidden bg-kaset-deep text-white">
+            <div className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <Bot aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 id="home-ai-title" className="text-xl font-extrabold leading-7">
+                    ถาม AI เกษตร
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-emerald-50/90">
+                    ถามเรื่องพืช ดิน ปุ๋ย โรค แมลง อากาศ และการจัดการฟาร์ม
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {AI_HOME_PROMPT_EXAMPLES.map((example) => (
+                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white" key={example}>
+                        {example}
+                      </span>
+                    ))}
+                  </div>
+                  <Link
+                    className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-lg bg-white px-4 text-base font-extrabold leading-6 text-kaset-deep transition hover:bg-kaset-mint"
+                    to="/app/ai"
+                  >
+                    ถาม AI ตอนนี้
+                  </Link>
+                  <p className="mt-2 text-xs font-semibold leading-5 text-emerald-50/80">
+                    ใช้เป็นข้อมูลเบื้องต้น ควรตรวจสอบกับผู้เชี่ยวชาญก่อนลงมือจริง
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </section>
 
         <section aria-labelledby="home-farm-hub-title">
           <Card className="p-4">

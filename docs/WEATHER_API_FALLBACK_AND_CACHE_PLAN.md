@@ -15,7 +15,7 @@ Fallback to local fixture data when:
 - Open-Meteo returns an error
 - request times out
 
-Fallback copy should clearly say the app is using local/mock weather data.
+Fallback copy should clearly say the app is using backup weather data in this device.
 
 ## Timeout
 
@@ -68,3 +68,13 @@ Weather cache and preference state remain local-only. The app now shows stale ag
 - `ตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติม`
 
 If Open-Meteo fails and stale cache exists, the stale cache can be shown with a warning. If no cache exists, bundled local fixture data remains available.
+
+## M100 User-facing Copy Update
+
+Normal farmer-facing weather copy should avoid development-style words such as mock, debug, QA, or mode labels. Use:
+
+- `ข้อมูลสำรองในเครื่อง`
+- `ข้อมูลพยากรณ์ล่าสุด`
+- `ข้อมูลอาจล่าช้าหรือคลาดเคลื่อนได้`
+
+Technical fallback labels can remain in QA/internal weather routes.

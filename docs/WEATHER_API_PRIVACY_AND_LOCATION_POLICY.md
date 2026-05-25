@@ -29,6 +29,8 @@ Real weather fetching requires both:
 - `VITE_WEATHER_MODE=open_meteo_ready`
 - `VITE_ENABLE_REAL_WEATHER_API=true`
 
+M100 confirms the current Open-Meteo public forecast endpoint does not require an API key. If a future provider requires a secret key, the integration should move behind a backend or Edge proxy before V1/store release.
+
 ## User-Facing Copy
 
 Weather screens should state:

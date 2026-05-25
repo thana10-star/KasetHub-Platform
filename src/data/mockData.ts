@@ -33,7 +33,7 @@ export const quickActions: QuickAction[] = [
   },
   {
     label: 'AI ผู้ช่วยเกษตร',
-    description: 'ถามปัญหาได้ทันที',
+    description: 'ถามเรื่องเกษตรได้ทันที',
     href: '/app/ai',
     icon: Bot,
     accent: 'gold',
@@ -61,14 +61,14 @@ export const quickActions: QuickAction[] = [
   },
   {
     label: 'สภาพอากาศเกษตร',
-    description: 'Open-Meteo flag + ตั้งค่าพื้นที่ในเครื่อง',
+    description: 'เช็กฝน ลม และความเสี่ยง',
     href: '/app/weather',
     icon: CloudSun,
     accent: 'sky',
   },
   {
     label: 'เครื่องคำนวณเกษตร',
-    description: 'ผสมยา ปุ๋ย ระยะปลูก',
+    description: 'ปุ๋ย ระยะปลูก ต้นทุน',
     href: '/app/calculators',
     icon: Calculator,
     accent: 'gold',

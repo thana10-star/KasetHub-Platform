@@ -153,12 +153,12 @@ function getFallbackReason(input: WeatherSourceReadinessInput): WeatherFallbackR
 export function getWeatherFallbackLabel(reason: WeatherFallbackReason): string {
   const labels: Record<WeatherFallbackReason, string> = {
     none: 'ไม่มี fallback',
-    local_fixture_default: 'ใช้ข้อมูลออฟไลน์/ข้อมูลจำลองตามค่าเริ่มต้น',
+    local_fixture_default: 'ใช้ข้อมูลสำรองในเครื่องตามค่าเริ่มต้น',
     api_disabled: 'Open-Meteo ถูกปิดด้วย flag',
     production_disabled: 'production path ถูกปิด',
     api_unavailable: 'API ภายนอกใช้งานไม่ได้',
     stale_cache: 'ใช้ข้อมูลล่าสุดที่มีในเครื่อง',
-    no_cache: 'ไม่มี cache จึงใช้ข้อมูลจำลอง',
+    no_cache: 'ไม่มีข้อมูลล่าสุดในเครื่อง จึงใช้ข้อมูลสำรอง',
     manual_refresh_cooldown: 'รอ cooldown ก่อนรีเฟรชอีกครั้ง',
   };
 
@@ -203,8 +203,8 @@ export function buildWeatherOfflineState(input: WeatherSourceReadinessInput): We
 
   return {
     status: input.modeStatus.mode === 'local_fixture' ? 'local_fixture' : 'disabled',
-    badgeLabel: 'ข้อมูลออฟไลน์/ข้อมูลจำลอง',
-    message: 'ข้อมูลออฟไลน์/ข้อมูลจำลองพร้อมใช้เมื่อยังไม่เปิด API หรือไม่มีเครือข่าย',
+    badgeLabel: 'ข้อมูลสำรองในเครื่อง',
+    message: 'ข้อมูลสำรองในเครื่องพร้อมใช้เมื่อยังไม่เปิดแหล่งพยากรณ์ออนไลน์หรือไม่มีเครือข่าย',
     fallbackReason,
     useLocalFixture: true,
     useStaleCache: false,
@@ -232,7 +232,7 @@ function buildReadinessMatrix(
       status: input.isOpenMeteo ? 'open_meteo_live_ready' : 'local_fixture',
       ready: true,
       tone: 'success',
-      detail: input.isOpenMeteo ? 'แสดงข้อมูลอ้างอิงจาก Open-Meteo' : 'แสดงข้อมูลออฟไลน์/ข้อมูลจำลอง',
+      detail: input.isOpenMeteo ? 'แสดงข้อมูลอ้างอิงจาก Open-Meteo' : 'แสดงข้อมูลสำรองในเครื่อง',
     },
     {
       id: 'cache-freshness',
@@ -271,8 +271,8 @@ export function buildWeatherSourceReadiness(input: WeatherSourceReadinessInput):
     modeStatus: input.modeStatus,
     cacheFreshness: input.cacheStatus.freshness,
     fallbackReason: offlineState.fallbackReason,
-    attributionLabel: input.isOpenMeteo ? 'ข้อมูลอ้างอิงจาก Open-Meteo' : 'ข้อมูลออฟไลน์/ข้อมูลจำลอง',
-    fetchedTimeLabel: input.fetchedAtLabel ?? 'ยังไม่มีเวลาจาก API จริง',
+    attributionLabel: input.isOpenMeteo ? 'ข้อมูลอ้างอิงจาก Open-Meteo' : 'ข้อมูลสำรองในเครื่อง',
+    fetchedTimeLabel: input.fetchedAtLabel ?? 'ยังไม่มีเวลาอัปเดตล่าสุด',
     staleAgeLabel,
     offlineState,
     privacyBoundary: getWeatherPrivacyBoundary(),
@@ -287,8 +287,8 @@ export function buildCurrentWeatherSourceReadiness(locationId = defaultWeatherCo
     apiEnabled: false,
     canFetchOpenMeteo: false,
     sourceLabel: 'local fixture',
-    statusLabel: 'ปิด API: ใช้ข้อมูลตัวอย่างในเครื่อง',
-    disabledReason: 'ใช้ข้อมูลตัวอย่างในเครื่อง',
+    statusLabel: 'ปิด API: ใช้ข้อมูลสำรองในเครื่อง',
+    disabledReason: 'ใช้ข้อมูลสำรองในเครื่อง',
     fallbackActive: true,
     noGeolocation: true,
     noPreciseLocationStorage: true,

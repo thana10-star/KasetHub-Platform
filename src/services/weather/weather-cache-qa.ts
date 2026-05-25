@@ -37,7 +37,7 @@ const freshnessQa: Record<WeatherCacheFreshness, WeatherCacheFreshnessQa> = {
     freshness: 'empty',
     label: 'ยังไม่มี cache',
     badgeTone: 'neutral',
-    message: 'ถ้า API ใช้ไม่ได้ จะกลับไปใช้ข้อมูลจำลองในเครื่อง',
+    message: 'ถ้าแหล่งพยากรณ์ออนไลน์ใช้ไม่ได้ จะกลับไปใช้ข้อมูลสำรองในเครื่อง',
   },
 };
 
@@ -46,7 +46,7 @@ export function getWeatherCacheFreshnessQa(freshness: WeatherCacheFreshness): We
 }
 
 export function computeWeatherStaleAgeLabel(status: Pick<WeatherCacheStatus, 'ageMinutes' | 'freshness'>) {
-  if (status.ageMinutes === undefined) return 'ยังไม่มี cache';
+  if (status.ageMinutes === undefined) return 'ยังไม่มีข้อมูลล่าสุด';
   if (status.ageMinutes <= 0) return 'เพิ่งบันทึก';
   return `${status.ageMinutes} นาที`;
 }
@@ -70,8 +70,8 @@ export const weatherCacheQaExamples: WeatherCacheQaExample[] = [
     id: 'no-cache-local-fixture',
     title: 'No cache fallback',
     freshness: 'empty',
-    fallbackReason: 'ไม่มี cache และ API ไม่พร้อม จึงใช้ข้อมูลออฟไลน์/ข้อมูลจำลอง',
-    userMessage: 'ข้อมูลออฟไลน์/ข้อมูลจำลอง',
+    fallbackReason: 'ไม่มี cache และแหล่งพยากรณ์ออนไลน์ไม่พร้อม จึงใช้ข้อมูลสำรองในเครื่อง',
+    userMessage: 'ข้อมูลสำรองในเครื่อง',
   },
 ];
 

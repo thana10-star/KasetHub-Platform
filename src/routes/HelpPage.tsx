@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { LargeActionButton } from '@/components/ui/LargeActionButton';
 import { NoticeBox } from '@/components/ui/NoticeBox';
+import { AI_FARMER_ASSISTANT_SAFETY_NOTE } from '@/services/ai/ai-farmer-assistant-copy';
 
 const guideSections = [
   {
@@ -30,7 +31,7 @@ const guideSections = [
   {
     title: 'ใช้เครื่องมือ / ถาม AI / เช็กอากาศ',
     icon: HelpCircle,
-    lines: ['เครื่องมือช่วยคำนวณ', 'ถาม AI สำหรับความรู้ทั่วไป', 'เช็กอากาศและความเสี่ยงเกษตร'],
+    lines: ['เครื่องมือช่วยคำนวณ', 'ถาม AI เกษตรสำหรับคำถามทั่วไป', 'เช็กอากาศและความเสี่ยงเกษตร'],
   },
 ];
 
@@ -78,6 +79,26 @@ export function HelpPage() {
           </div>
         </Card>
 
+        <Card className="border-kaset-deep/10 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+              <Bot aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">ถาม AI เกษตร</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ถามเรื่องพืช ดิน ปุ๋ย โรค แมลง อากาศ และการจัดการฟาร์มได้ด้วยภาษาง่าย ๆ
+              </p>
+              <p className="mt-2 rounded-lg bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-900">
+                {AI_FARMER_ASSISTANT_SAFETY_NOTE}
+              </p>
+              <Link className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/ai">
+                ถาม AI ตอนนี้
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <section className="grid gap-3">
           {guideSections.map((section) => {
             const Icon = section.icon;
@@ -111,7 +132,7 @@ export function HelpPage() {
             <LargeActionButton description="เปิดศูนย์รวมข้อมูลฟาร์มและสมุดบันทึก" icon={Sprout} label="เปิดฟาร์มของฉัน" to="/app/my-farm" variant="soft" />
             <LargeActionButton description="เพิ่มแปลง บันทึกรายรับรายจ่าย และผลผลิต" icon={ClipboardList} label="เปิดสมุดฟาร์ม" to="/app/farm-records" variant="white" />
             <LargeActionButton description="คำนวณปุ๋ย ระยะปลูก ต้นทุน และผลผลิต" icon={Calculator} label="เปิดเครื่องมือ" to="/app/calculators" variant="white" />
-            <LargeActionButton description="ถามเรื่องความรู้ทั่วไป ยังไม่อ่านสมุดฟาร์มของคุณ" icon={Bot} label="ถาม AI" to="/app/ai" variant="white" />
+            <LargeActionButton description="ถามเรื่องพืช ดิน ปุ๋ย โรค แมลง อากาศ และการจัดการฟาร์ม" icon={Bot} label="ถาม AI เกษตร" to="/app/ai" variant="white" />
             <LargeActionButton description="ดูอากาศและความเสี่ยงเกษตร" icon={CloudSun} label="เช็กอากาศ" to="/app/weather" variant="white" />
           </div>
         </section>

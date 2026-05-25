@@ -51,6 +51,8 @@ M97.1 follow-up: `/app/help` now presents the default basic flow as three steps:
 
 It explains that `บันทึกงานในฟาร์ม` can be added later.
 
+M101 follow-up: `/app/help` now includes a clearer `ถาม AI เกษตร` section with a link to `/app/ai`, examples of what to ask, and the standard AI safety note.
+
 ## 4. Field-test Checklist
 
 `/app/field-test-feedback` is a static/local checklist for the project owner to use while observing farmers or elderly users.

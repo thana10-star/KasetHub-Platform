@@ -102,7 +102,7 @@ export function getWeatherModeStatus(overrides?: WeatherAdapterEnv): WeatherMode
 
   const disabledReason =
     env.weatherMode === 'local_fixture'
-      ? 'ใช้ข้อมูลตัวอย่างในเครื่อง'
+      ? 'ใช้ข้อมูลสำรองในเครื่อง'
       : env.weatherMode === 'open_meteo_disabled'
         ? 'Open-Meteo ถูกปิดไว้'
         : env.weatherMode === 'production_disabled'
@@ -160,7 +160,7 @@ function enrichLocalForecast(
     fetchedAtLabel: forecast.updatedAtLabel,
     isStale: false,
     isFallback: true,
-    fallbackReason: status.disabledReason ?? 'local fixture',
+    fallbackReason: status.disabledReason ?? 'ใช้ข้อมูลสำรองในเครื่อง',
     privacyNotice: 'ไม่มีการขอ GPS และไม่มีการเก็บตำแหน่งส่วนตัว',
     current: {
       temperatureC: today.maxTempC - 2,
@@ -397,7 +397,7 @@ function localFallbackWithReason(
       staleAfterMs: cacheOptions.staleAfterMs,
       storage: cacheOptions.cacheStorage,
       failureReason: reason,
-      fallbackReason: 'ใช้ local fixture เพราะไม่มี cache ที่ใช้ได้',
+      fallbackReason: 'ใช้ข้อมูลสำรองในเครื่องเพราะไม่มีข้อมูลล่าสุดที่ใช้ได้',
     }),
     forecast: {
       ...result.forecast,
@@ -439,7 +439,7 @@ export async function loadWeatherAdapterResult(
         isFallback: false,
         isStale: false,
         fallbackReason: undefined,
-        updatedAtLabel: 'จาก cache ล่าสุด',
+        updatedAtLabel: 'จากข้อมูลล่าสุดในเครื่อง',
       },
       sources: getWeatherSources(),
       futureSources: getFutureWeatherSources(),
@@ -497,7 +497,7 @@ export async function loadWeatherAdapterResult(
           isFallback: true,
           isStale: true,
           fallbackReason: reason,
-          updatedAtLabel: 'ใช้ cache เก่า',
+          updatedAtLabel: 'ใช้ข้อมูลเก่าในเครื่อง',
         },
         sources: getWeatherSources(),
         futureSources: getFutureWeatherSources(),

@@ -58,7 +58,7 @@ describe('M77 weather UX and data-source readiness', () => {
   test('cache freshness states map correctly', () => {
     expect(getWeatherCacheFreshnessQa('fresh').badgeTone).toBe('green');
     expect(getWeatherCacheFreshnessQa('stale').badgeTone).toBe('gold');
-    expect(getWeatherCacheFreshnessQa('empty').message).toContain('ข้อมูลจำลอง');
+    expect(getWeatherCacheFreshnessQa('empty').message).toContain('ข้อมูลสำรองในเครื่อง');
   });
 
   test('selected location persists locally only', () => {
@@ -121,8 +121,8 @@ describe('M77 weather UX and data-source readiness', () => {
       isFallback: true,
     });
 
-    expect(summary.offlineState.badgeLabel).toBe('ข้อมูลออฟไลน์/ข้อมูลจำลอง');
-    expect(getWeatherFallbackLabel(summary.fallbackReason)).toContain('ข้อมูลออฟไลน์');
+    expect(summary.offlineState.badgeLabel).toBe('ข้อมูลสำรองในเครื่อง');
+    expect(getWeatherFallbackLabel(summary.fallbackReason)).toContain('ข้อมูลสำรองในเครื่อง');
   });
 
   test('no GPS or geolocation is used in privacy boundary', () => {

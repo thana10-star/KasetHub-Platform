@@ -27,11 +27,11 @@ import {
   weatherAgriRiskLevelTone,
 } from '@/services/weather/weather-agri-risk-boundary';
 import { assessWeatherAgriRisk } from '@/services/weather/weather-agri-risk-rules';
-import { computeWeatherStaleAgeLabel, getWeatherCacheFreshnessQa } from '@/services/weather/weather-cache-qa';
+import { computeWeatherStaleAgeLabel } from '@/services/weather/weather-cache-qa';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
-import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
+import { buildWeatherSourceReadiness } from '@/services/weather/weather-source-readiness';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -82,10 +82,16 @@ export function WeatherPage() {
     isFallback: forecast.isFallback,
     fetchedAtLabel: forecast.fetchedAtLabel ?? forecast.updatedAtLabel,
   });
-  const cacheFreshnessQa = getWeatherCacheFreshnessQa(cacheStatus.freshness);
   const staleAgeLabel = computeWeatherStaleAgeLabel(cacheStatus);
   const offlineState = sourceReadiness.offlineState;
   const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
+  const freshnessLabel = cacheStatus.isFresh ? 'ข้อมูลล่าสุด' : cacheStatus.isStale ? 'ข้อมูลอาจเก่า' : 'ข้อมูลสำรอง';
+  const connectionLabel =
+    offlineState.status === 'live'
+      ? 'เชื่อมต่อแหล่งพยากรณ์'
+      : offlineState.status === 'stale_cache'
+        ? 'ใช้ข้อมูลล่าสุดในเครื่อง'
+        : 'ใช้ข้อมูลสำรอง';
   return (
     <div>
       <PageHeader title="สภาพอากาศเกษตร" subtitle="ฝน ลม ความชื้น และพยากรณ์สำหรับวางแผนงานแปลง" showBack />
@@ -112,30 +118,33 @@ export function WeatherPage() {
 
         <Card className="p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone={modeStatus.canFetchOpenMeteo ? 'success' : 'warning'}>{modeStatus.mode}</StatusPill>
+            <StatusPill tone={modeStatus.canFetchOpenMeteo ? 'success' : 'warning'}>
+              {isOpenMeteo ? 'ข้อมูลพยากรณ์ล่าสุด' : 'ข้อมูลสำรองในเครื่อง'}
+            </StatusPill>
             <Badge tone="neutral">ไม่ใช้ GPS</Badge>
             <Badge tone="neutral">ไม่บันทึกตำแหน่งส่วนตัว</Badge>
-            <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>
-              {cacheFreshnessQa.label}
-            </Badge>
+            <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>{freshnessLabel}</Badge>
             <Badge tone={offlineState.status === 'live' ? 'green' : offlineState.status === 'stale_cache' ? 'gold' : 'neutral'}>
-              {offlineState.badgeLabel}
+              {connectionLabel}
             </Badge>
-            {isLoading ? <Badge tone="sky">loading</Badge> : null}
+            {isLoading ? <Badge tone="sky">กำลังโหลด</Badge> : null}
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             อัปเดต: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}
           </p>
           <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
-            <p>{sourceReadiness.attributionLabel}</p>
-            <p>{offlineState.message}</p>
-            <p>ข้อมูลสำรอง: {getWeatherFallbackLabel(sourceReadiness.fallbackReason)}</p>
+            <p>{isOpenMeteo ? 'ข้อมูลอ้างอิงจาก Open-Meteo' : 'ตอนนี้แสดงข้อมูลสำรองในเครื่อง'}</p>
+            <p>
+              {isOpenMeteo
+                ? 'ใช้พื้นที่กลางจังหวัดหรือเมืองโดยประมาณ ไม่ขอ GPS'
+                : 'เมื่อเปิดแหล่งพยากรณ์ออนไลน์แล้ว ระบบจะดึงข้อมูลล่าสุดให้'}
+            </p>
             <p>ข้อมูลอาจล่าช้าหรือคลาดเคลื่อนได้</p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
               <Settings2 aria-hidden="true" className="h-4 w-4" />
-              ตั้งค่า
+              ตั้งค่าพื้นที่
             </Link>
             <button
               className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white disabled:bg-slate-200 disabled:text-slate-500"
@@ -144,14 +153,14 @@ export function WeatherPage() {
               type="button"
             >
               <RefreshCw aria-hidden="true" className="h-4 w-4" />
-              รีเฟรช
+              อัปเดตข้อมูล
             </button>
             <button
               className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10"
               onClick={clearSelectedCache}
               type="button"
             >
-              ล้างข้อมูลอากาศพื้นที่นี้
+              ล้างข้อมูลพื้นที่นี้
             </button>
           </div>
           <p className="mt-3 flex items-center gap-2 text-xs font-bold leading-5 text-slate-500">
@@ -166,7 +175,7 @@ export function WeatherPage() {
         </Card>
 
         {forecast.isStale || cacheStatus.isStale ? (
-          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูล cache เก่า">
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลอาจเก่า">
             ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติมและดูสภาพจริงก่อนตัดสินใจ
           </NoticeBox>
         ) : null}
@@ -223,19 +232,29 @@ export function WeatherPage() {
           <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-rules">
             ดูกฎความเสี่ยงเบื้องต้น
           </Link>
-          <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
-            ดูสถานะ expert review
-          </Link>
-          <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
-            ดู release audit
-          </Link>
+          <details className="rounded-lg bg-white p-4 ring-1 ring-kaset-deep/10">
+            <summary className="cursor-pointer text-sm font-extrabold text-kaset-deep">
+              ข้อมูลเพิ่มเติมสำหรับทีมงาน
+            </summary>
+            <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+              ข้อมูลพยากรณ์จริงพร้อมใช้งานเมื่อเปิดการตั้งค่าเซิร์ฟเวอร์
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
+                ตรวจสถานะคำแนะนำ
+              </Link>
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
+                ตรวจรายการก่อนปล่อยใช้งาน
+              </Link>
+            </div>
+          </details>
         </section>
 
         {locations.length > 1 ? (
           <section className="grid gap-3">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่แบบหยาบ</h2>
-              <StatusPill tone="info">province/city center</StatusPill>
+              <StatusPill tone="info">พื้นที่กลางจังหวัด/เมือง</StatusPill>
             </div>
             <div className="-mx-5 overflow-x-auto px-5">
               <div className="flex min-w-max gap-2">
@@ -393,9 +412,9 @@ export function WeatherPage() {
         ) : null}
 
         <LargeActionButton
-          description="ดูร่วมกับแปลง พืชที่ติดตาม และคำถาม AI ล่าสุดในหน้าเดียว"
+          description="ดูร่วมกับแปลง พืชที่ติดตาม และข้อมูลฟาร์มในหน้าเดียว"
           icon={Sprout}
-          label="กลับไป My Farm Hub"
+          label="กลับไปฟาร์มของฉัน"
           to="/app/my-farm"
           variant="white"
         />

@@ -21,6 +21,25 @@ describe('M92.1 compact home Farm Hub launcher', () => {
     expect(html).toContain('บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต');
   });
 
+  test('renders a prominent AI-first farmer entry without crowding Home', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <AppHomePage />
+      </MemoryRouter>,
+    );
+    const aiEntryIndex = html.indexOf('data-testid="home-ai-primary-entry"');
+    const myFarmIndex = html.indexOf('home-farm-hub-title');
+
+    expect(aiEntryIndex).toBeGreaterThan(-1);
+    expect(myFarmIndex).toBeGreaterThan(aiEntryIndex);
+    expect(html).toContain('ถาม AI เกษตร');
+    expect(html).toContain('ถาม AI ตอนนี้');
+    expect(html).toContain('/app/ai');
+    expect(html).toContain('ใบเหลืองเกิดจากอะไร');
+    expect(html).toContain('เตรียมดินก่อนปลูกยังไง');
+    expect(html).toContain('ฝนแบบนี้ควรพ่นยาไหม');
+  });
+
   test('does not render detailed Farm Records metrics on the home card', () => {
     const html = renderToString(
       <MemoryRouter>

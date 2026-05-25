@@ -62,8 +62,8 @@ Daily:
 - 5-7 day forecast
 - data source
 - fetched time
-- API mode/status
-- fallback notice
+- farmer-facing backup/live source state
+- fallback notice when latest data is unavailable
 - farmer-friendly warnings before spraying
 
 ## Safety Copy
@@ -89,6 +89,12 @@ M76 keeps Open-Meteo flag-gated but adds:
 - `/app/weather/qa` for cache, failure, and privacy QA
 
 The API still never uses browser geolocation or farm-level coordinates.
+
+## M100 Production Readiness Update
+
+M100 confirms Open-Meteo remains the real provider path for V1. The public forecast endpoint used here does not require an API key, but Cloudflare Pages must still set `VITE_WEATHER_MODE=open_meteo_ready` and `VITE_ENABLE_REAL_WEATHER_API=true` before the production app fetches live weather.
+
+The normal `/app/weather` page now hides implementation-mode labels from the primary farmer view and uses backup/latest/source wording instead. Technical QA and release-check routes remain available separately.
 ## M77 UX / Source Readiness Update
 
 M77 keeps Open-Meteo flag-gated and adds clearer source attribution, manual refresh policy, local-only coarse-location preference, stale cache messaging, and offline fallback copy.

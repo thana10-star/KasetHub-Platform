@@ -8,7 +8,7 @@ M34 upgrades `/app/my-farm` from a plant-analysis history page into a local-firs
 - No Supabase write.
 - No real auth requirement.
 - No real AI API.
-- No real weather API.
+- No weather API call by default; Open-Meteo is available only when explicit weather flags are enabled.
 - No map or GPS.
 - No network call.
 - No destructive data loss action.
@@ -26,7 +26,7 @@ M34 aggregates existing local sources only:
 - M83-M97.2 Farm Records and Farm Finance Ledger from `kasethub.farmRecords.v1` and `/app/farm-records`, including local edit/timeline/export/restore/recovery/data-control, sync consent prototype status, cost summary, category breakdowns, harvest/yield records, cost-per-kg metrics, break-even estimate status, a Home-first My Farm entry point, Profile settings data-control links, a farmer start guide link, simplified first Add Plot/Add Activity forms, Basic Farm Records Mode, production-facing local-data copy, and cloud sync shown as off.
 - Crop Watch followed crops and alert preferences from `kasethub.cropWatch.v1`.
 - Agriculture calculator history and favorites from `kasethub.agriCalculators.v1`.
-- Weather fixture context from the selected/default mock weather location.
+- Weather context from the selected/default coarse weather location. By default this uses backup data in the app; when M100 Open-Meteo flags are enabled, `/app/weather` can fetch public forecast data without GPS.
 - Saved articles and videos from Guest Memory.
 - Recent AI questions from Guest Memory.
 
@@ -182,6 +182,14 @@ The first screen stays focused on:
 - `ผลผลิตรวม`
 
 M98 also tightens Thai-first labels in Farm Records forms/lists and keeps seed display copy from looking like test data. It does not change the My Farm source of truth, does not change `kasethub.farmRecords.v1`, and does not enable cloud sync, GPS, Supabase writes, receipt upload, OCR, notifications, or AI Farm Records processing.
+
+## M99 Release Preview QA
+
+M99 verifies the merged `main` branch after the M83-M98.1 work landed.
+
+The release smoke pass confirms `/app`, `/app/my-farm`, `/app/farm-records`, `/app/calculators`, `/app/help`, `/app/profile`, and other key routes return HTTP 200 locally. It also confirms lint, build, and tests pass on `main`.
+
+No My Farm or Farm Records behavior changed in M99. The milestone adds release-preview documentation only and preserves the local-first storage boundary.
 
 ## Timeline Rules
 
