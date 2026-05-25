@@ -54,6 +54,22 @@ const nutrientLabels: Record<NutrientKey, string> = {
   potassium: 'K',
 };
 
+type CropStageOption = 'start' | 'growth' | 'flowering' | 'yielding';
+type FertilizerApplicationMethod = 'broadcast' | 'drip' | 'water_mix';
+
+const cropStageOptions: Array<{ value: CropStageOption; label: string }> = [
+  { value: 'start', label: 'เริ่มปลูก/ตั้งตัว' },
+  { value: 'growth', label: 'ระยะเจริญเติบโต' },
+  { value: 'flowering', label: 'ก่อนออกดอก/สะสมอาหาร' },
+  { value: 'yielding', label: 'ระยะให้ผลผลิต' },
+];
+
+const fertilizerMethodOptions: Array<{ value: FertilizerApplicationMethod; label: string }> = [
+  { value: 'broadcast', label: 'หว่าน/โรย' },
+  { value: 'drip', label: 'ผ่านน้ำหยด' },
+  { value: 'water_mix', label: 'ผสมน้ำรด' },
+];
+
 function applyProfile(profile: FertilizerProfile): Partial<FertilizerMixInput> {
   return {
     fertilizerNPercent: profile.nPercent,
@@ -66,10 +82,15 @@ export function FertilizerCalculatorPage() {
   const calculators = useAgriCalculators();
   const [input, setInput] = useState<FertilizerMixInput>(() => calculators.getLastInput('fertilizer_mix') ?? defaultFertilizerMixInput);
   const [profileId, setProfileId] = useState(fertilizerProfiles[0].id);
-  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('rice');
+  const [selectedCropKey, setSelectedCropKey] = useState<CropCalculatorKey>('maize');
+  const [cropStage, setCropStage] = useState<CropStageOption>('growth');
+  const [fertilizerMethod, setFertilizerMethod] = useState<FertilizerApplicationMethod>('broadcast');
   const result = useMemo(() => calculateFertilizerMix(input), [input]);
   const selectedProfile = fertilizerProfiles.find((profile) => profile.id === profileId) ?? fertilizerProfiles[0];
   const selectedCropProfile = getCropCalculatorProfile(selectedCropKey);
+  const selectedCropStageLabel = cropStageOptions.find((option) => option.value === cropStage)?.label ?? cropStageOptions[0].label;
+  const selectedFertilizerMethodLabel =
+    fertilizerMethodOptions.find((option) => option.value === fertilizerMethod)?.label ?? fertilizerMethodOptions[0].label;
 
   const updateInput = (patch: Partial<FertilizerMixInput>) => {
     setInput((current) => ({
@@ -80,6 +101,8 @@ export function FertilizerCalculatorPage() {
 
   const resetInput = () => {
     setProfileId(fertilizerProfiles[0].id);
+    setCropStage('growth');
+    setFertilizerMethod('broadcast');
     setInput(defaultFertilizerMixInput);
   };
 
@@ -95,7 +118,7 @@ export function FertilizerCalculatorPage() {
 
   return (
     <div>
-      <PageHeader title="คำนวณปุ๋ย" subtitle="ตัวช่วยคิด NPK เบื้องต้น" showBack />
+      <PageHeader title="คำนวณปุ๋ย/การให้ปุ๋ย" subtitle="วางแผนปุ๋ยต่อไร่ หว่าน/โรย หรือผ่านน้ำหยด" showBack />
       <div className="grid gap-5 px-5 pb-6">
         <CalculatorHero
           category="fertilizer_mix"
@@ -103,12 +126,12 @@ export function FertilizerCalculatorPage() {
           onToggleFavorite={() => calculators.toggleFavorite('fertilizer_mix')}
         />
 
-        <SafetyNotice>เป็นการคำนวณเบื้องต้น ยังไม่ใช่คำแนะนำการใส่ปุ๋ยจริง ควรตรวจดิน พืช ฤดู และคำแนะนำจากเจ้าหน้าที่ก่อนใช้</SafetyNotice>
+        <SafetyNotice>ผลลัพธ์เป็นค่าประมาณจากข้อมูลที่กรอกเอง ยังไม่ใช่อัตราแนะนำตามพืช ควรตรวจดิน อายุพืช สภาพพื้นที่ และคำแนะนำเจ้าหน้าที่ก่อนใช้งานจริง</SafetyNotice>
 
         <CropProfilePicker selectedCropKey={selectedCropKey} onChange={setSelectedCropKey} onUseExample={applyCropExample}>
           <div className="grid gap-2">
             <div className="rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10">
-              <p className="text-sm font-extrabold text-kaset-ink">สถานะคำแนะนำปุ๋ย: planning_only</p>
+              <p className="text-sm font-extrabold text-kaset-ink">ใช้ช่วยวางแผนจากค่าที่คุณกรอก</p>
               <p className="mt-1 text-xs font-bold leading-5 text-slate-500">
                 ใช้ตัวอย่างพื้นที่ของ {selectedCropProfile.thaiDisplayName} เท่านั้น ไม่เปลี่ยนเป้าหมาย NPK และไม่แนะนำอัตราปุ๋ยเฉพาะพืช
               </p>
@@ -130,13 +153,27 @@ export function FertilizerCalculatorPage() {
         >
           <Card className="p-4">
             <div className="grid gap-4">
-              <div className="grid grid-cols-[1fr_132px] gap-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_132px]">
                 <NumberField label="ขนาดพื้นที่" onChange={(areaValue) => updateInput({ areaValue })} value={input.areaValue} />
                 <SelectField<ThaiAreaUnit>
                   label="หน่วย"
                   onChange={(areaUnit) => updateInput({ areaUnit })}
                   options={areaUnitOptions}
                   value={input.areaUnit}
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SelectField<CropStageOption>
+                  label="อายุพืช / ระยะพืช"
+                  onChange={setCropStage}
+                  options={cropStageOptions}
+                  value={cropStage}
+                />
+                <SelectField<FertilizerApplicationMethod>
+                  label="วิธีให้ปุ๋ย"
+                  onChange={setFertilizerMethod}
+                  options={fertilizerMethodOptions}
+                  value={fertilizerMethod}
                 />
               </div>
               <SelectField<string>
@@ -150,7 +187,7 @@ export function FertilizerCalculatorPage() {
                 value={profileId}
               />
               <p className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-600">{selectedProfile.note}</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid gap-3 sm:grid-cols-3" data-testid="fertilizer-npk-grid">
                 <NumberField label="N" onChange={(fertilizerNPercent) => updateInput({ fertilizerNPercent })} step={1} suffix="%" value={input.fertilizerNPercent} />
                 <NumberField label="P" onChange={(fertilizerPPercent) => updateInput({ fertilizerPPercent })} step={1} suffix="%" value={input.fertilizerPPercent} />
                 <NumberField label="K" onChange={(fertilizerKPercent) => updateInput({ fertilizerKPercent })} step={1} suffix="%" value={input.fertilizerKPercent} />
@@ -189,6 +226,23 @@ export function FertilizerCalculatorPage() {
           </div>
         </Card>
 
+        <Card className="p-4" data-testid="fertigation-planning-context">
+          <h2 className="text-lg font-extrabold text-kaset-ink">แผนการให้ปุ๋ย</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg bg-kaset-mist p-3">
+              <p className="text-xs font-bold leading-5 text-slate-600">ระยะพืชที่เลือก</p>
+              <p className="mt-1 font-extrabold text-kaset-ink">{selectedCropStageLabel}</p>
+            </div>
+            <div className="rounded-lg bg-kaset-mist p-3">
+              <p className="text-xs font-bold leading-5 text-slate-600">วิธีให้ปุ๋ยที่เลือก</p>
+              <p className="mt-1 font-extrabold text-kaset-ink">{selectedFertilizerMethodLabel}</p>
+            </div>
+          </div>
+          <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-950">
+            ตัวเลขยังคำนวณจากเป้าหมายต่อไร่ที่คุณกรอกเอง ถ้าให้ผ่านน้ำหยด ให้ตรวจความเข้ากันได้ของปุ๋ย ความเข้มข้น และระบบกรองก่อนใช้งานจริง
+          </p>
+        </Card>
+
         <Card className="p-4">
           <h2 className="text-lg font-extrabold text-kaset-ink">ธาตุอาหารรวมโดยประมาณ</h2>
           <div className="mt-3 grid gap-3">
@@ -208,7 +262,7 @@ export function FertilizerCalculatorPage() {
         <CalculatorShareActions category="fertilizer_mix" input={input} result={result} />
 
         <NoticeBox tone="warning" title="ขอบเขตของหน้านี้">
-          ยังไม่มีคำแนะนำปุ๋ยตามชนิดพืช ดิน อายุพืช หรือฤดูกาล และยังไม่เชื่อม AI หรือผู้สนับสนุนสินค้าใด ๆ
+          หน้านี้ไม่แนะนำอัตราปุ๋ยเฉพาะแปลงตามชนิดดิน อายุพืช หรือฤดูกาล และไม่เลือกสินค้าแทนผู้ใช้
         </NoticeBox>
 
         <RecentCalculations records={calculators.recentCalculations.filter((record) => record.category === 'fertilizer_mix')} />

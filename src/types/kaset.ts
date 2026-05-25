@@ -43,6 +43,8 @@ export type AppRoute =
   | '/app/calculators/cost'
   | '/app/farm-area'
   | '/app/farm-area-guide'
+  | '/app/help'
+  | '/app/field-test-feedback'
   | '/app/farm-records'
   | '/app/analyze'
   | '/app/analysis-history'

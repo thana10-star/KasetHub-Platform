@@ -1,25 +1,30 @@
+import type { LucideIcon } from 'lucide-react';
 import {
-  Bookmark,
+  Bell,
   BookOpenCheck,
   Bot,
-  Bell,
   Calculator,
+  ChevronDown,
   ChevronRight,
   ClipboardCheck,
-  Clock3,
+  CloudOff,
   CloudSun,
+  CloudUpload,
+  DatabaseBackup,
   FileLock2,
   FileText,
   GitBranch,
+  HelpCircle,
   History,
-  Leaf,
+  Languages,
+  LifeBuoy,
   Link2,
+  LockKeyhole,
   LogOut,
   Ruler,
   Server,
   ShieldCheck,
   Settings,
-  CloudUpload,
   Sprout,
   UserRound,
 } from 'lucide-react';
@@ -30,162 +35,435 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
-import { demoUser, profileStats } from '@/data/mockData';
-import { useCropWatch } from '@/hooks/useCropWatch';
+import { cx } from '@/components/ui/classNames';
+import { demoUser } from '@/data/mockData';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
-import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import type { AppRoute } from '@/types/kaset';
 
-const menuItems: Array<{ label: string; icon: typeof Clock3; href?: AppRoute }> = [
-  { label: 'เครดิตและประวัติ AI', icon: Bot, href: '/app/ai-credits' },
-  { label: 'สถานะ AI Proxy', icon: Server, href: '/app/ai-proxy-status' },
-  { label: 'Admin Dashboard ตัวอย่าง', icon: ShieldCheck, href: '/app/admin' },
-  { label: 'Internal MVP Snapshot', icon: ClipboardCheck, href: '/app/mvp-snapshot' },
-  { label: 'Next Phase Decision', icon: GitBranch, href: '/app/next-phase' },
-  { label: 'Supabase staging readiness', icon: Server, href: '/app/supabase-readiness' },
-  { label: 'Supabase staging setup guide', icon: ClipboardCheck, href: '/app/supabase-setup-guide' },
-  { label: 'Phone OTP staging checklist', icon: ShieldCheck, href: '/app/auth/phone-staging' },
-  { label: 'ประวัติการใช้ AI', icon: Clock3, href: '/app/ai-credits' },
-  { label: 'ประวัติพืชของฉัน', icon: Leaf, href: '/app/my-farm' },
-  { label: 'ตั้งค่า My Farm', icon: Settings, href: '/app/my-farm/settings' },
-  { label: 'ตั้งค่าการแจ้งเตือน', icon: Bell, href: '/app/notification-settings' },
-  { label: 'พืชที่ติดตามและแจ้งเตือนราคา', icon: Bell, href: '/app/crop-watch' },
-  { label: 'M75 สภาพอากาศ Open-Meteo / local fallback', icon: CloudSun, href: '/app/weather' },
-  { label: 'M77 ตั้งค่าสภาพอากาศในเครื่อง', icon: CloudSun, href: '/app/weather/preferences' },
-  { label: 'เครื่องคำนวณเกษตร', icon: Calculator, href: '/app/calculators' },
-  { label: 'ผลคำนวณที่บันทึกไว้', icon: History, href: '/app/calculators/saved-results' },
-  { label: 'ความปลอดภัยเครื่องคำนวณ', icon: ShieldCheck, href: '/app/calculators/safety' },
-  { label: 'คำนวณพื้นที่แปลง', icon: Ruler, href: '/app/farm-area' },
-  { label: 'กติกาชุมชน', icon: ShieldCheck, href: '/app/community-rules' },
-  { label: 'ศูนย์รายงานชุมชน', icon: ClipboardCheck, href: '/app/moderation-center' },
-  { label: 'ประวัติวิเคราะห์ภาพ', icon: History, href: '/app/analysis-history' },
-  { label: 'ความเป็นส่วนตัวของรูปภาพ', icon: FileLock2, href: '/app/image-privacy' },
-  { label: 'เตรียมรูปก่อนวิเคราะห์', icon: FileLock2, href: '/app/image-preflight' },
-  { label: 'สมัคร/สำรองข้อมูล', icon: ShieldCheck, href: '/app/auth' },
-  { label: 'สถานะบัญชีทดสอบ', icon: ShieldCheck, href: '/app/auth/status' },
-  { label: 'กติกาเชื่อมบัญชี Phone + LINE', icon: Link2, href: '/app/auth/linking' },
-  { label: 'ตรวจความพร้อม UX', icon: ClipboardCheck, href: '/app/qa' },
-  { label: 'ตัวอย่างผู้ดูแลเนื้อหา', icon: FileText, href: '/app/content-admin-preview' },
-  { label: 'สถานะ Guest Sync', icon: CloudUpload, href: '/app/guest-sync-status' },
-  { label: 'แผน Guest Sync Edge Function', icon: CloudUpload, href: '/app/guest-sync-edge' },
-  { label: 'สำรองข้อมูลในอนาคต', icon: UserRound, href: '/app/account-preview' },
-  { label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้', icon: Sprout, href: '/app/memory' },
-  { label: 'คลังความรู้เกษตรออฟไลน์', icon: BookOpenCheck, href: '/app/articles/offline' },
-  { label: 'บทความที่บันทึกไว้', icon: BookOpenCheck, href: '/app/saved-articles' },
-  { label: 'วิดีโอที่บันทึกไว้', icon: Bookmark, href: '/app/saved-videos' },
-  { label: 'โพสต์ของฉัน', icon: FileText },
-  { label: 'ตั้งค่าบัญชี', icon: Settings },
+type ProfileMenuHref = AppRoute | `${AppRoute}#${string}`;
+type ProfileMenuTone = 'primary' | 'privacy' | 'help' | 'advanced';
+type ProfileStatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+
+type ProfileMenuItem = {
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  href?: ProfileMenuHref;
+  status?: string;
+  statusTone?: ProfileStatusTone;
+};
+
+type ProfileMenuGroup = {
+  title: string;
+  subtitle: string;
+  tone: ProfileMenuTone;
+  items: ProfileMenuItem[];
+};
+
+const profileMenuGroups: ProfileMenuGroup[] = [
+  {
+    title: 'บัญชีของฉัน',
+    subtitle: 'เรื่องบัญชี ภาษา และสิ่งที่บันทึกไว้',
+    tone: 'primary',
+    items: [
+      {
+        label: 'สถานะบัญชี',
+        description: 'ดูสถานะการใช้งานบนเครื่องนี้',
+        icon: ShieldCheck,
+        href: '/app/auth/status',
+      },
+      {
+        label: 'สมัครหรือสำรองข้อมูลภายหลัง',
+        description: 'บัญชีและการสำรองข้อมูลจะเพิ่มในเวอร์ชันถัดไป',
+        icon: UserRound,
+        href: '/app/auth',
+        status: 'เร็ว ๆ นี้',
+        statusTone: 'neutral',
+      },
+      {
+        label: 'ภาษา',
+        description: 'เลือกภาษาไทยหรืออังกฤษในอนาคต',
+        icon: Languages,
+        status: 'เร็ว ๆ นี้',
+        statusTone: 'info',
+      },
+      {
+        label: 'วิดีโอที่บันทึกไว้',
+        description: 'กลับไปดูวิดีโอเกษตรที่เก็บไว้',
+        icon: BookOpenCheck,
+        href: '/app/saved-videos',
+      },
+      {
+        label: 'บทความที่บันทึกไว้',
+        description: 'เปิดบทความที่เก็บไว้อ่านภายหลัง',
+        icon: BookOpenCheck,
+        href: '/app/saved-articles',
+      },
+      {
+        label: 'ตั้งค่าการแจ้งเตือน',
+        description: 'จัดการรายการแจ้งเตือนที่บันทึกไว้ในเครื่องนี้',
+        icon: Bell,
+        href: '/app/notification-settings',
+      },
+    ],
+  },
+  {
+    title: 'ข้อมูลและความเป็นส่วนตัว',
+    subtitle: 'ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้',
+    tone: 'privacy',
+    items: [
+      {
+        label: 'ฟาร์มของฉัน',
+        description: 'ดูสมุดฟาร์ม ต้นทุน ผลผลิต และสถานะข้อมูล',
+        icon: Sprout,
+        href: '/app/my-farm',
+      },
+      {
+        label: 'ตั้งค่าฟาร์มของฉัน',
+        description: 'ดูสถานะข้อมูลในเครื่องและแผนสำรองในอนาคต',
+        icon: Settings,
+        href: '/app/my-farm/settings',
+      },
+      {
+        label: 'ข้อมูลและความเป็นส่วนตัว',
+        description: 'สำรอง กู้คืน และตรวจสอบสถานะการซิงก์',
+        icon: LockKeyhole,
+        href: '/app/farm-records#farm-records-export',
+      },
+      {
+        label: 'กู้คืนข้อมูลฟาร์ม',
+        description: 'กู้คืนจากไฟล์สำรองในเครื่องนี้เมื่อพร้อม',
+        icon: DatabaseBackup,
+        href: '/app/farm-records#farm-records-restore',
+      },
+      {
+        label: 'การซิงก์ข้อมูล',
+        description: 'ยังไม่เปิดใช้งาน ข้อมูลยังอยู่ในเครื่องนี้',
+        icon: CloudOff,
+        href: '/app/farm-records#farm-records-sync',
+        status: 'ปิดอยู่',
+        statusTone: 'warning',
+      },
+      {
+        label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้',
+        description: 'ดูข้อมูลที่แอพบันทึกไว้ในเครื่องนี้',
+        icon: Sprout,
+        href: '/app/memory',
+      },
+      {
+        label: 'ความเป็นส่วนตัวของรูปภาพ',
+        description: 'ขอบเขตรูปภาพและการวิเคราะห์ภาพ',
+        icon: FileLock2,
+        href: '/app/image-privacy',
+      },
+      {
+        label: 'สำรองข้อมูลในอนาคต',
+        description: 'แผนบัญชีและการสำรองข้อมูลสำหรับเวอร์ชันถัดไป',
+        icon: CloudUpload,
+        href: '/app/account-preview',
+      },
+    ],
+  },
+  {
+    title: 'ช่วยเหลือ',
+    subtitle: 'คำแนะนำและทางลัดที่ใช้บ่อย',
+    tone: 'help',
+    items: [
+      {
+        label: 'วิธีใช้แอพ',
+        description: 'คู่มือเริ่มต้นสำหรับเกษตรกร',
+        icon: HelpCircle,
+        href: '/app/help',
+      },
+      {
+        label: 'ติดต่อทีมงาน',
+        description: 'ช่องทางช่วยเหลือจะเพิ่มในเวอร์ชันถัดไป',
+        icon: LifeBuoy,
+        status: 'เร็ว ๆ นี้',
+        statusTone: 'info',
+      },
+      {
+        label: 'เครื่องคำนวณเกษตร',
+        description: 'ปุ๋ย ระยะปลูก ต้นทุน และผลผลิต',
+        icon: Calculator,
+        href: '/app/calculators',
+      },
+      {
+        label: 'สภาพอากาศเกษตร',
+        description: 'ดูอากาศและคำเตือนจากพื้นที่โดยประมาณ',
+        icon: CloudSun,
+        href: '/app/weather',
+      },
+      {
+        label: 'คำนวณพื้นที่แปลง',
+        description: 'แปลงไร่ งาน ตารางวา',
+        icon: Ruler,
+        href: '/app/farm-area',
+      },
+      {
+        label: 'คลังความรู้เกษตรออฟไลน์',
+        description: 'อ่านบทความที่เตรียมไว้ในแอป',
+        icon: BookOpenCheck,
+        href: '/app/articles/offline',
+      },
+      {
+        label: 'กติกาชุมชน',
+        description: 'อ่านกติกาก่อนถามตอบในชุมชน',
+        icon: ShieldCheck,
+        href: '/app/community-rules',
+      },
+    ],
+  },
+  {
+    title: 'สำหรับทีมงานหรือทดสอบ',
+    subtitle: 'เครื่องมือภายใน สถานะความพร้อม และหน้าทดสอบ',
+    tone: 'advanced',
+    items: [
+      {
+        label: 'Admin',
+        description: 'ภาพรวมผู้ดูแลแบบ local/mock',
+        icon: ShieldCheck,
+        href: '/app/admin',
+      },
+      {
+        label: 'ตรวจสอบระบบ',
+        description: 'QA และ route review สำหรับทีมงาน',
+        icon: ClipboardCheck,
+        href: '/app/qa',
+      },
+      {
+        label: 'บันทึกทดสอบผู้ใช้',
+        description: 'เช็กลิสต์ภาคสนามแบบ static/local ไม่มีการส่งข้อมูล',
+        icon: ClipboardCheck,
+        href: '/app/field-test-feedback',
+      },
+      {
+        label: 'ภาพรวม MVP ภายใน',
+        description: 'ภาพรวม route coverage และสถานะความพร้อม',
+        icon: ClipboardCheck,
+        href: '/app/mvp-snapshot',
+      },
+      {
+        label: 'แผนขั้นต่อไป',
+        description: 'แผนขั้นต่อไปแบบไม่เปิด backend จริง',
+        icon: GitBranch,
+        href: '/app/next-phase',
+      },
+      {
+        label: 'สถานะความพร้อม Supabase staging',
+        description: 'เช็กลิสต์ staging เท่านั้น ยังไม่เชื่อม production',
+        icon: Server,
+        href: '/app/supabase-readiness',
+      },
+      {
+        label: 'คู่มือ Supabase staging',
+        description: 'คู่มือ setup แบบ manual review',
+        icon: ClipboardCheck,
+        href: '/app/supabase-setup-guide',
+      },
+      {
+        label: 'เช็กลิสต์ Phone OTP staging',
+        description: 'แผนทดสอบ phone auth ยังไม่ส่ง OTP จริง',
+        icon: ShieldCheck,
+        href: '/app/auth/phone-staging',
+      },
+      {
+        label: 'สถานะ AI Proxy',
+        description: 'ขอบเขต backend/AI proxy แบบ disabled by default',
+        icon: Bot,
+        href: '/app/ai-proxy-status',
+      },
+      {
+        label: 'เครดิตและประวัติ AI',
+        description: 'เครดิต local และประวัติการใช้ AI ตัวอย่าง',
+        icon: History,
+        href: '/app/ai-credits',
+      },
+      {
+        label: 'ทดสอบระบบรูปภาพก่อนวิเคราะห์',
+        description: 'image preflight readiness แบบ local',
+        icon: FileLock2,
+        href: '/app/image-preflight',
+      },
+      {
+        label: 'ศูนย์รายงานชุมชน',
+        description: 'moderation center แบบ local/mock',
+        icon: ClipboardCheck,
+        href: '/app/moderation-center',
+      },
+      {
+        label: 'ตัวอย่างผู้ดูแลเนื้อหา',
+        description: 'content admin preview สำหรับทีมงาน',
+        icon: FileText,
+        href: '/app/content-admin-preview',
+      },
+      {
+        label: 'สถานะความพร้อม Guest Sync',
+        description: 'สถานะและ Edge Function plan แบบไม่ sync จริง',
+        icon: CloudUpload,
+        href: '/app/guest-sync-status',
+      },
+      {
+        label: 'แผน Guest Sync Edge Function',
+        description: 'contract review ไม่มีการเรียก backend',
+        icon: CloudUpload,
+        href: '/app/guest-sync-edge',
+      },
+      {
+        label: 'กติกาเชื่อมบัญชี Phone + LINE',
+        description: 'account linking preview สำหรับ future auth',
+        icon: Link2,
+        href: '/app/auth/linking',
+      },
+    ],
+  },
 ];
+
+const groupToneClass: Record<ProfileMenuTone, string> = {
+  primary: 'bg-kaset-mint text-kaset-deep',
+  privacy: 'bg-emerald-100 text-emerald-800',
+  help: 'bg-sky-100 text-sky-800',
+  advanced: 'bg-slate-100 text-slate-700',
+};
+
+const rowIconToneClass: Record<ProfileMenuTone, string> = {
+  primary: 'bg-kaset-mint text-kaset-deep',
+  privacy: 'bg-emerald-100 text-emerald-800',
+  help: 'bg-sky-100 text-sky-800',
+  advanced: 'bg-slate-100 text-slate-600',
+};
+
+function ProfileMenuRow({ item, tone }: { item: ProfileMenuItem; tone: ProfileMenuTone }) {
+  const Icon = item.icon;
+  const rowClassName = cx(
+    'flex min-h-[76px] w-full items-center gap-3 border-t border-kaset-deep/8 px-4 py-4 text-left first:border-t-0',
+    item.href && 'transition hover:bg-kaset-mint/45',
+    tone === 'advanced' && 'min-h-[68px] bg-white/70',
+  );
+  const content = (
+    <>
+      <span className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-lg', rowIconToneClass[tone])}>
+        <Icon aria-hidden="true" className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-extrabold leading-6 text-kaset-ink">{item.label}</span>
+        <span className="mt-0.5 block text-sm leading-5 text-slate-600">{item.description}</span>
+      </span>
+      {item.status ? (
+        <StatusPill className="shrink-0" tone={item.statusTone ?? 'neutral'}>
+          {item.status}
+        </StatusPill>
+      ) : null}
+      {item.href ? <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-400" /> : null}
+    </>
+  );
+
+  if (!item.href) {
+    return <div className={rowClassName}>{content}</div>;
+  }
+
+  return (
+    <Link className={rowClassName} to={item.href}>
+      {content}
+    </Link>
+  );
+}
+
+function ProfileMenuGroupCard({ group }: { group: ProfileMenuGroup }) {
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-start gap-3 p-4">
+        <span className={`mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg ${groupToneClass[group.tone]}`}>
+          {group.tone === 'advanced' ? (
+            <ClipboardCheck aria-hidden="true" className="h-5 w-5" />
+          ) : group.tone === 'privacy' ? (
+            <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+          ) : group.tone === 'help' ? (
+            <BookOpenCheck aria-hidden="true" className="h-5 w-5" />
+          ) : (
+            <UserRound aria-hidden="true" className="h-5 w-5" />
+          )}
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">{group.title}</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{group.subtitle}</p>
+        </div>
+      </div>
+      <div>
+        {group.items.map((item) => (
+          <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} tone={group.tone} />
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ProfileAdvancedGroupCard({ group }: { group: ProfileMenuGroup }) {
+  return (
+    <Card className="overflow-hidden border-slate-200 bg-slate-50/80 shadow-none">
+      <details className="group" data-testid="profile-advanced-section">
+        <summary className="flex min-h-[76px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+          <span className={`mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg ${groupToneClass[group.tone]}`}>
+            <ClipboardCheck aria-hidden="true" className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-extrabold leading-7 text-slate-800">{group.title}</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{group.subtitle}</p>
+          </div>
+          <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" />
+        </summary>
+        <div className="border-t border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-sm leading-6 text-slate-600">ส่วนนี้สำหรับทีมพัฒนา ไม่จำเป็นต้องใช้ในการใช้งานทั่วไป</p>
+        </div>
+        <div className="bg-white/80">
+          {group.items.map((item) => (
+            <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} tone={group.tone} />
+          ))}
+        </div>
+      </details>
+    </Card>
+  );
+}
 
 export function ProfilePage() {
   const { savedCount } = useSavedArticles();
   const { savedCount: savedVideoCount } = useSavedVideos();
   const { counts, state } = useGuestMemory();
-  const { counts: cropWatchCounts } = useCropWatch();
   const notificationCenter = useNotificationCenter();
   const accountStatus = getAccountStatus(state);
-  const phaseDecision = runPhaseDecisionPlan();
+
+  const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
+  const advancedMenuGroup = profileMenuGroups.find((group) => group.tone === 'advanced');
 
   return (
     <div>
-      <PageHeader title="โปรไฟล์" subtitle="บัญชีผู้ใช้ตัวอย่าง" showBack />
+      <PageHeader title="โปรไฟล์และการตั้งค่า" subtitle="บัญชี ข้อมูลในเครื่อง และความช่วยเหลือ" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        <Card className="overflow-hidden">
-          <div className="bg-kaset-deep px-5 pb-14 pt-5 text-white">
-            <Badge className="bg-white/15 text-white" tone="green">
-              {demoUser.badge}
-            </Badge>
-          </div>
-          <div className="-mt-10 px-5 pb-5">
-            <div className="grid h-20 w-20 place-items-center rounded-full border-4 border-white bg-kaset-mint text-kaset-deep shadow-soft">
-              <UserRound aria-hidden="true" className="h-9 w-9" />
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-kaset-mint text-kaset-deep shadow-soft">
+              <UserRound aria-hidden="true" className="h-8 w-8" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <Badge tone="green">{demoUser.badge}</Badge>
+              <h2 className="mt-2 text-xl font-extrabold leading-7 text-kaset-ink">{demoUser.name}</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {demoUser.province} · {demoUser.plan}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">สนใจ: {demoUser.cropFocus}</p>
             </div>
-            <h2 className="mt-4 text-2xl font-extrabold text-kaset-ink">{demoUser.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {demoUser.province} · {demoUser.plan}
-            </p>
-            <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700">
-              สนใจ: {demoUser.cropFocus}
-            </p>
           </div>
         </Card>
 
-        <NoticeBox tone="success" title="โปรไฟล์ตัวอย่างแบบไม่บังคับสมัคร">
-          ใช้งานฟีเจอร์หลักได้ก่อน ข้อมูลที่บันทึกไว้จะอยู่ในเครื่องนี้จนกว่าจะมีระบบสำรองข้อมูลจริง
+        <NoticeBox tone="info" title="สิ่งที่ควรรู้ตอนนี้">
+          <p>ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้</p>
+          <p>การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน</p>
+          <p>บางการตั้งค่าจะเพิ่มในเวอร์ชันถัดไป</p>
         </NoticeBox>
-
-        <Card className="p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Bell aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-kaset-ink">ศูนย์แจ้งเตือน</h2>
-                <StatusPill tone={notificationCenter.digest.unreadCount > 0 ? 'warning' : 'success'}>
-                  {notificationCenter.digest.unreadCount} ยังไม่อ่าน
-                </StatusPill>
-              </div>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {notificationCenter.digest.totalCount} รายการ local/mock · ไม่มี push, LINE, SMS หรือ email จริง
-              </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/notifications">
-                  เปิดแจ้งเตือน
-                </Link>
-                <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/notification-settings">
-                  ตั้งค่า
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
-              <GitBranch aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-kaset-ink">แผนขั้นต่อไป</h2>
-                <StatusPill tone="warning">prototype only</StatusPill>
-              </div>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {phaseDecision.recommendation.title} · ยังไม่เปิด backend/API/auth จริง
-              </p>
-              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/next-phase">
-                เปิด Next Phase Decision
-              </Link>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
-              <Bell aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold text-kaset-ink">พืชที่ติดตามและแจ้งเตือนราคา</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {cropWatchCounts.enabledWatches} พืชที่เปิดติดตาม · {cropWatchCounts.enabledAlerts} preference แจ้งเตือนตัวอย่าง
-              </p>
-              <p className="mt-2 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-                ข้อมูลนี้อยู่ในเครื่องนี้เท่านั้น ยังไม่มี push notification หรือราคา API จริง
-              </p>
-            </div>
-          </div>
-          <Link to="/app/crop-watch">
-            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
-              เปิดพืชที่ติดตาม
-            </span>
-          </Link>
-        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">
@@ -196,187 +474,60 @@ export function ProfilePage() {
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-extrabold text-kaset-ink">สถานะบัญชี</h2>
                 <StatusPill tone={accountStatus.phoneMockSession ? 'success' : 'warning'}>
-                  {accountStatus.phoneMockSession ? 'phone mock' : 'guest'}
+                  {accountStatus.phoneMockSession ? 'บัญชีในเครื่อง' : 'ใช้งานได้ทันที'}
                 </StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">{accountStatus.description}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                LINE: {accountStatus.lineMockSession ? accountStatus.lineMockSession.displayName : 'ยังไม่เชื่อมจำลอง'} ·{' '}
-                {accountStatus.linkingPlan.label}
+                บันทึกไว้ในเครื่องนี้: {counts.farmRecords} ฟาร์ม · {counts.savedArticles} บทความ ·{' '}
+                {counts.savedVideos} วิดีโอ · {counts.recentAIQuestions} คำถาม AI
               </p>
-              <Link to="/app/auth/status">
-                <span className="mt-3 inline-flex text-sm font-bold text-kaset-deep">ดูสถานะบัญชีทดสอบ</span>
-              </Link>
             </div>
           </div>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Bookmark aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold text-kaset-ink">วิดีโอที่บันทึกไว้</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {savedVideoCount} รายการ · เก็บวิดีโอจาก YouTube Hub เพื่อกลับมาดูภายหลัง
-              </p>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="font-extrabold text-kaset-ink">ข้อมูลในเครื่องนี้</h2>
+            <StatusPill tone="warning">คลาวด์ปิดอยู่</StatusPill>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg bg-kaset-mist p-3 text-center">
+              <p className="text-xl font-extrabold text-kaset-deep">{notificationCenter.digest.unreadCount}</p>
+              <p className="mt-1 text-[11px] font-bold leading-4 text-slate-500">ยังไม่อ่าน</p>
+            </div>
+            <div className="rounded-lg bg-kaset-mist p-3 text-center">
+              <p className="text-xl font-extrabold text-kaset-deep">{savedCount}</p>
+              <p className="mt-1 text-[11px] font-bold leading-4 text-slate-500">บทความ</p>
+            </div>
+            <div className="rounded-lg bg-kaset-mist p-3 text-center">
+              <p className="text-xl font-extrabold text-kaset-deep">{savedVideoCount}</p>
+              <p className="mt-1 text-[11px] font-bold leading-4 text-slate-500">วิดีโอ</p>
             </div>
           </div>
-          <Link to="/app/saved-videos">
-            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-kaset-mint px-4 text-sm font-bold text-kaset-deep transition hover:bg-emerald-100">
-              เปิดวิดีโอที่บันทึกไว้
-            </span>
-          </Link>
         </Card>
 
-        <Card className="p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <ShieldCheck aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold text-kaset-ink">สมัคร/สำรองข้อมูล</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                ใช้งานต่อได้เลย ไม่ต้องสมัคร · สมัครภายหลังเพื่อสำรองข้อมูลที่บันทึกไว้
-              </p>
-            </div>
-          </div>
-          <Link to="/app/auth">
-            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
-              เปิดตัวอย่างการสมัคร
-            </span>
-          </Link>
-        </Card>
+        {primaryMenuGroups.map((group) => (
+          <ProfileMenuGroupCard group={group} key={group.title} />
+        ))}
+
+        {advancedMenuGroup ? <ProfileAdvancedGroupCard group={advancedMenuGroup} /> : null}
 
         <Card className="p-4">
           <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Sprout aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold text-kaset-ink">ข้อมูลที่บันทึกไว้ในเครื่องนี้</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                ข้อมูลนี้อยู่ในเครื่องนี้เท่านั้น · ใช้งานได้ทันที ไม่ต้องสมัคร
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.savedArticles}</p>
-              <p className="text-[10px] font-semibold text-slate-500">บทความ</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.savedVideos}</p>
-              <p className="text-[10px] font-semibold text-slate-500">วิดีโอ</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.likedPosts}</p>
-              <p className="text-[10px] font-semibold text-slate-500">ไลก์</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.followedTopics}</p>
-              <p className="text-[10px] font-semibold text-slate-500">ติดตาม</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.farmRecords}</p>
-              <p className="text-[10px] font-semibold text-slate-500">ฟาร์ม</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-2 text-center">
-              <p className="font-extrabold text-kaset-deep">{counts.recentAIQuestions}</p>
-              <p className="text-[10px] font-semibold text-slate-500">AI</p>
-            </div>
-          </div>
-          <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm leading-6 text-amber-900">
-            สำรองข้อมูลด้วยเบอร์โทรในอนาคต · สมัครด้วยเบอร์โทรหรือ LINE ในอนาคตเพื่อสำรองและย้ายข้อมูลไปเครื่องอื่น
-          </p>
-          <Link to="/app/memory">
-            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-bold text-white transition hover:bg-kaset-ink">
-              เปิดหน่วยความจำ
-            </span>
-          </Link>
-        </Card>
-
-        <div className="grid grid-cols-3 gap-3">
-          {profileStats.map((stat) => (
-            <Card className="p-3 text-center" key={stat.label}>
-              <p className="text-xl font-extrabold text-kaset-deep">{stat.value}</p>
-              <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{stat.label}</p>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="bg-kaset-deep p-4 text-white">
-          <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
-              <BookOpenCheck aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold">บทความที่บันทึกไว้</h2>
-              <p className="mt-1 text-sm leading-6 text-emerald-50/90">
-                {savedCount} รายการ · บันทึกไว้สำหรับอ่านภายหลัง / เตรียมรองรับโหมดออฟไลน์
-              </p>
-            </div>
-          </div>
-          <Link to="/app/saved-articles">
-            <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-4 text-sm font-bold text-kaset-deep transition hover:bg-kaset-mint">
-              เปิดบทความที่บันทึกไว้
-            </span>
-          </Link>
-        </Card>
-
-        <Card className="overflow-hidden">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const content = (
-              <>
-                <span className="grid h-10 w-10 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-                  <Icon aria-hidden="true" className="h-5 w-5" />
-                </span>
-                <span className="flex-1 text-[15px] font-bold leading-6 text-kaset-ink">{item.label}</span>
-                <ChevronRight aria-hidden="true" className="h-5 w-5 text-slate-400" />
-              </>
-            );
-
-            if (item.href) {
-              return (
-                <Link
-                  className="flex min-h-[64px] w-full items-center gap-3 border-b border-kaset-deep/8 px-4 py-4 text-left last:border-b-0"
-                  key={item.label}
-                  to={item.href}
-                >
-                  {content}
-                </Link>
-              );
-            }
-
-            return (
-              <button
-                className="flex min-h-[64px] w-full items-center gap-3 border-b border-kaset-deep/8 px-4 py-4 text-left last:border-b-0"
-                key={item.label}
-                type="button"
-              >
-                {content}
-              </button>
-            );
-          })}
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Sprout aria-hidden="true" className="h-5 w-5" />
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
+              <CloudOff aria-hidden="true" className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="font-extrabold text-kaset-ink">KasetHub M02</h2>
+              <h2 className="font-extrabold text-kaset-ink">สถานะระบบตอนนี้</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                โปรไฟล์นี้เป็นข้อมูลตัวอย่างสำหรับทดสอบ retention, sharing และ saved content ก่อนเชื่อมต่อระบบสมาชิกจริง
+                ใช้งานได้จากข้อมูลในเครื่องนี้ก่อน การสำรองขึ้นคลาวด์และช่องทางช่วยเหลือจริงยังเป็นแผนสำหรับเวอร์ชันถัดไป
               </p>
             </div>
           </div>
           <Button className="mt-4 w-full" variant="secondary">
             <LogOut aria-hidden="true" className="h-4 w-4" />
-            ออกจากระบบตัวอย่าง
+            ออกจากระบบ
           </Button>
         </Card>
       </div>

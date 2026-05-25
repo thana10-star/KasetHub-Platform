@@ -2,7 +2,7 @@
 
 ## Product Vision
 
-KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, admin operations, weather planning, farm area planning, My Farm workspace, agriculture calculators, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations. M24 adds a local/mock Admin Dashboard foundation. M25 adds a Supabase staging setup checklist plus readiness audit. M26 adds a safe Supabase staging connection dry-run boundary. M27 adds the manual SQL staging execution guide and verification checklist. M28 adds a Supabase Auth phone OTP staging plan. M29 adds the Guest Sync Edge Function staging contract. M30 adds the Internal MVP snapshot. M31 adds local image compression/preflight. M32 adds agriculture weather forecast UX with local fixtures only. M33 adds local/mock farm area measurement planning. M34 upgrades My Farm into a local-first farmer workspace. M49 adds local-only agriculture calculators for spray mixing, fertilizer helper math, planting density, yield estimates, and cost estimates. M50 hardens those calculators with validation, expected-vs-actual QA fixtures, safer Thai disclaimers, and local share summaries. M51 adds crop-specific planning profiles, unit-test readiness, and a calculator safety route. M52 adds formal Vitest service tests plus edge-case fixtures. M53 adds calculator copy/share/save summary polish and rewarded-ads strategy planning. M54 adds text export templates, saved-summary QA polish, share fallback hardening, and export preview UX. M55 defines the AI explanation boundary for calculator results. M56 reviews the future backend AI explanation architecture. M57 adds a disabled-by-default calculator AI backend adapter contract with local fixture mode and feature flags. M58 hardens adapter QA and adds a staging endpoint design checklist. M59 drafts the disabled-by-default `calculator-ai-explain` Edge Function contract. M60 adds a staging-only Edge dry-run implementation plan. M61 returns to the production-readiness roadmap with a no-real-OTP Supabase Phone Auth staging test review while still making no real AI call, backend write, Supabase write, cloud sync, production auth enablement, SMS send, sponsor routing, payment, real ad, PDF, or network call by default.
+KasetHub Platform is planned as a full agriculture ecosystem for Thailand: a knowledge hub, farmer community, AI assistant, plant disease analysis tool, price tracker, content platform, retention layer, organic sharing flow, YouTube channel hub, guest memory layer, auth-ready backend model, AI credit system, backend-owned AI proxy, plant image analysis pipeline, farmer accessibility layer, guest sync boundary, phone-first auth boundary, LINE account linking, admin operations, weather planning, farm area planning, My Farm workspace, agriculture calculators, and future marketplace. M01 establishes the frontend architecture and visual prototype without real backend or paid systems. M02 adds frontend foundations for LINE sharing, My Farm history, and saved/offline articles. M02.5 expands this into a reusable social sharing foundation for LINE, Facebook, native sharing, and copy link. M03 creates an API-ready YouTube channel integration foundation using mock data only. M04 adds a framework-first local memory system for guest users. M05 defines Supabase/auth-ready data models and guest-to-account sync planning without connecting a backend. M06 adds a Supabase client and environment foundation behind feature flags, still without real auth or cloud sync. M07 prototypes farmer-friendly auth UX and defines the backend-owned Guest Memory sync endpoint contract. M08 adds the local AI credit and rewarded-ad unlock UX foundation. M09 defines AI provider routing, credit cost policy, backend proxy contracts, and agriculture safety policy. M10 upgrades plant image upload and analysis UX without real upload or AI vision. M11 adds backend-shaped mock AI proxy fixtures for text AI and plant analysis without network calls. M12 drafts Supabase Storage, plant media, moderation, deletion, and image-analysis job lifecycle foundations without enabling real uploads. M13 adds an AI proxy adapter so screens can switch from local fixtures to a future backend test endpoint without UI rewrites. M14 adds an in-process local backend boundary prototype for AI proxy requests without deployment, provider keys, or real network calls. M15 improves readability, tap targets, plain Thai copy, and visual QA readiness for older/non-tech farmers. M16 adds a Guest Memory sync proof of concept that previews payload, handler, merge, conflict, and failure behavior without real auth or cloud writes. M17 adds a mock-only phone OTP auth boundary that proves sync ownership requirements before real Supabase Auth. M18 drafts Supabase SQL and RLS policies. M19 adds local-only LINE Login and account-linking rules. M20 adds content management and publishing foundations. M21 adds crop price data source foundations. M22 adds local crop watch and demo price alert UX. M22.5 adds the owner YouTube channel link config. M23 adds local/mock community moderation foundations. M24 adds a local/mock Admin Dashboard foundation. M25 adds a Supabase staging setup checklist plus readiness audit. M26 adds a safe Supabase staging connection dry-run boundary. M27 adds the manual SQL staging execution guide and verification checklist. M28 adds a Supabase Auth phone OTP staging plan. M29 adds the Guest Sync Edge Function staging contract. M30 adds the Internal MVP snapshot. M31 adds local image compression/preflight. M32 adds agriculture weather forecast UX with local fixtures only. M33 adds local/mock farm area measurement planning. M34 upgrades My Farm into a local-first farmer workspace. M49 adds local-only agriculture calculators for spray mixing, fertilizer helper math, planting density, yield estimates, and cost estimates. M50 hardens those calculators with validation, expected-vs-actual QA fixtures, safer Thai disclaimers, and local share summaries. M51 adds crop-specific planning profiles, unit-test readiness, and a calculator safety route. M52 adds formal Vitest service tests plus edge-case fixtures. M53 adds calculator copy/share/save summary polish and rewarded-ads strategy planning. M54 adds text export templates, saved-summary QA polish, share fallback hardening, and export preview UX. M55 defines the AI explanation boundary for calculator results. M56 reviews the future backend AI explanation architecture. M57 adds a disabled-by-default calculator AI backend adapter contract with local fixture mode and feature flags. M58 hardens adapter QA and adds a staging endpoint design checklist. M59 drafts the disabled-by-default `calculator-ai-explain` Edge Function contract. M60 adds a staging-only Edge dry-run implementation plan. M61 returns to the production-readiness roadmap with a no-real-OTP Supabase Phone Auth staging test review while still making no real AI call, backend write, Supabase write, cloud sync, production auth enablement, SMS send, sponsor routing, payment, real ad, PDF, or network call by default. M94 polishes Profile into elder-friendly settings with safe placeholders and collapsed internal tools, M95 adds a farmer start guide plus static/local field-test checklist, M96 simplifies the first-use Farm Records path, M97 polishes the first Add Plot/Add Activity flow, M97.1 adds Basic Farm Records Mode, M97.2 makes normal user-facing copy production-facing while keeping local-first safety and internal QA/admin surfaces intact, M98 triages the mobile farmer basic flow with small copy/layout fixes, and M98.1 improves calculator mobile UX, crop selection affordance, and safe fertilizer/fertigation planning.
 
 M35-M44 extend the safe path toward real staging by adding local notifications, backend phase planning, a Supabase staging branch workflow, local env safety checks, manual project/SQL preparation, the M41 real Supabase staging setup walkthrough with localStorage-only progress, manual execution review, read-only public probes, and RLS review checkpoints. M49-M60 add, harden, plan, test, polish, QA-harden, define AI explanation boundaries, review backend AI architecture, add a no-network adapter contract, document staging endpoint gates, draft an Edge Function contract, and add a no-fetch dry-run plan for crop-aware local calculator utility without enabling live backend AI. M61 resumes the Supabase/Auth readiness path with staging Phone Auth checklist surfaces, env flag review, redirect/SMS/test-number planning, ownership warnings, and rollback proof. These milestones still keep service-role keys out of the frontend, keep `.env.local` out of git, avoid automatic SQL execution, and stop before production auth/cloud sync/uploads/AI proxy/real ads.
 
@@ -682,7 +682,7 @@ M50 does not add files/PDF export, backend save, Supabase write, AI call, OCR, p
 
 ## M51 Crop-specific Calculator Expansion Planning
 
-M51 adds crop profile planning fixtures for ข้าว, มันสำปะหลัง, อ้อย, ข้าวโพด, ทุเรียน, ลำไย, ยางพารา, and ผักผสม. Each profile includes Thai display name, spacing examples, area examples, yield input examples, common cost categories, `fertilizerPlanningStatus = planning_only`, and safety notes.
+M51 adds crop profile planning fixtures for ข้าว, มันสำปะหลัง, อ้อย, ข้าวโพด, ทุเรียน, ลำไย, ยางพารา, and ผักผสม. M98.1 expands the calculator-facing options with ยูคาลิปตัส / ยูคา, พริก, and ปาล์มน้ำมัน. Each profile includes Thai display name, spacing examples, area examples, yield input examples, common cost categories, `fertilizerPlanningStatus = planning_only`, and safety notes.
 
 Crop-aware selectors now appear on fertilizer, plant spacing, yield estimate, and cost calculators. The action `ใช้ตัวอย่างของพืชนี้` fills starter form values only and keeps the note `ตัวอย่างนี้เป็นค่าเริ่มต้นเพื่อช่วยกรอก ไม่ใช่คำแนะนำทางวิชาการสุดท้าย`. Fertilizer examples fill area context only and do not inject crop-specific NPK targets, fertilizer doses, or product names.
 
@@ -1026,12 +1026,132 @@ M91 keeps the same local-only boundary and adds no Supabase schema, Supabase rea
 
 ## M92 Home First Farm Hub + Elder-Friendly Navigation
 
-M92 moves Farm Records discovery onto the first app screen. `/app` now includes a large Home Farm Hub card with Thai-first copy, direct actions for `/app/my-farm` and `/app/farm-records`, and a short local Farm Records summary from the existing `kasethub.farmRecords.v1` state.
+M92 moves Farm Records discovery onto the first app screen. M92.1 compacts `/app` into a Home Farm Hub launcher with Thai-first copy and one primary action for `/app/my-farm`.
 
-The home card keeps the farmer-facing summary intentionally small: net profit/loss, cost per kg or rai when available, harvest kg when available, and latest farm record date. Large quick actions link to My Farm, farm work records, farm income/expense cost view, and weather.
+The home card no longer shows Farm Records metrics, cost dashboard links, harvest details, or a 2x2 Farm Records quick-action grid. Those details remain in `/app/my-farm`, `/app/farm-records`, `/app/farm-records#farm-cost-dashboard`, and `/app/farm-records#farm-harvest-yield`.
 
-`docs/ux/HOME_FIRST_NAVIGATION_M92.md` documents the current navigation problem, why Farm Records should not be hidden in Profile, what should remain in Profile, what should be on Home, and a future bottom navigation proposal. M92 does not remove routes or change Farm Records data behavior.
+`docs/ux/HOME_FIRST_NAVIGATION_M92.md` documents the current navigation problem, the M92.1 compact decision after mobile preview, why Farm Records should not be hidden in Profile, what should remain in Profile, what should be on Home, and a future bottom navigation proposal. M92.1 does not remove routes or change Farm Records data behavior.
 
 M92 remains UX/navigation only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation/map pins, no AI record processing, no receipt upload, no OCR, no notifications, no tax/bank/loan integration, and no backend feature changes.
+
+## M93 Elder-Friendly Navigation Cleanup
+
+M93 reduces profile/menu clutter and makes My Farm easier to discover without relying on hidden settings. Bottom navigation now uses the farmer-facing hierarchy `หน้าแรก`, `ฟาร์มของฉัน`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`.
+
+The Profile page now groups navigation into `บัญชีของฉัน`, `ข้อมูลและความเป็นส่วนตัว`, `ช่วยเหลือ`, and `สำหรับทีมงานหรือทดสอบ`. Admin, QA, Supabase readiness, staging, and internal tools remain accessible, but they are separated from the main farmer-facing links.
+
+`docs/ux/ELDER_FRIENDLY_NAVIGATION_CLEANUP_M93.md` documents the navigation audit, user behavior assumption, bottom-nav decision, profile grouping, implemented changes, future cleanup, and non-goals.
+
+M93 remains UX/navigation only: no route removal, no Farm Records storage change, no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, and no tax/bank/loan integration.
+
+## M94 Elder-Friendly Settings Polish
+
+M94 turns `/app/profile` into `โปรไฟล์และการตั้งค่า` with a simpler account card, local-only safety copy, and Thai-first settings rows.
+
+It adds placeholders for `ภาษา`, `วิธีใช้แอพ`, and `ติดต่อทีมงาน`, links data/privacy to Farm Records export, restore, and sync status anchors, and shows `การซิงก์ข้อมูล` as `ปิดอยู่`.
+
+The `สำหรับทีมงานหรือทดสอบ` section is collapsed by default using a native disclosure. Admin, QA/system checks, readiness, Supabase staging, AI proxy, content admin, moderation, and Guest Sync planning links remain accessible.
+
+`docs/ux/ELDER_FRIENDLY_SETTINGS_POLISH_M94.md` documents purpose, grouping, placeholders, advanced/internal policy, future work, and non-goals.
+
+M94 remains UX/settings-only: no route removal, no Farm Records storage change, no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, no real support chat, no real language switching, and no legal-final PDPA copy.
+
+## M95 Farmer Help Start Guide + Field-Test Feedback
+
+M95 adds `/app/help` as a short Thai-first guide titled `วิธีเริ่มใช้ KasetHub`.
+
+The guide explains starting from `ฟาร์มของฉัน`, recording farm work, recording income/expense, reviewing cost/profit/harvest, and using tools, AI, and weather. It links to `/app/my-farm`, `/app/farm-records`, `/app/calculators`, `/app/ai`, and `/app/weather`.
+
+Profile `วิธีใช้แอพ` now links to `/app/help`. Home gets a compact `เริ่มใช้แอพ` card, and `/app/my-farm` gets a compact helper with `เปิดสมุดฟาร์ม` and `ดูวิธีใช้`; M96 later refines that helper into `เริ่มใช้ฟาร์มของฉัน`.
+
+M95 also adds `/app/field-test-feedback`, a static/local checklist for observing real farmers or elderly users. It warns not to enter real names, phone numbers, addresses, or personal details. It does not submit to a backend and does not create a localStorage feedback key.
+
+`docs/ux/FARMER_START_GUIDE_AND_FIELD_TEST_M95.md` documents the assumptions, guide structure, field-test checklist, privacy boundary, future work, and non-goals.
+
+M95 remains UX/help/field-test readiness only: no Supabase read/write, no backend feedback submission, no support chat, no notifications, no cloud sync, no sync queue, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, no legal-final PDPA copy, no real language switching, and no Farm Records storage/schema change.
+
+## M96 First-Use Farm Records Flow Simplification
+
+M96 makes the first-use path clearer for elderly and non-technical farmers who may not know the difference between `แปลง`, `รอบปลูก`, `กิจกรรม`, `รายรับรายจ่าย`, and `ผลผลิต`.
+
+`/app/my-farm` now shows `เริ่มใช้ฟาร์มของฉัน` with the 4-step path: `เพิ่มแปลง`, `บันทึกงานในฟาร์ม`, `บันทึกรายรับรายจ่าย`, and `บันทึกผลผลิต`.
+
+`/app/farm-records` now repeats the same path, starts its primary action order with `เพิ่มแปลง`, and improves empty states for no plots, no farm work, no finance entries, and no harvest records.
+
+Create-form copy is simpler and Thai-first: plot, activity, finance, crop cycle, and harvest fields mark required fields, move optional fields behind `ถ้ามี`, and use labels such as `งานในฟาร์ม`, `รายรับรายจ่าย`, `ผู้ซื้อ/ร้านค้า`, `สิ่งที่ใช้`, `ปริมาณที่ใช้`, and `หมายเหตุ`.
+
+`/app/help` adds `เริ่มบันทึกฟาร์ม 4 ขั้นตอน`, and `/app/field-test-feedback` adds first-use observation questions for whether users understand starting with plots, activity wording, `เพิ่มเงิน`, `เพิ่มผลผลิต`, and required vs optional fields.
+
+`docs/ux/FIRST_USE_FARM_RECORDS_FLOW_M96.md` documents the flow, assumptions, empty-state strategy, field-test updates, future work, and non-goals.
+
+M96 remains UX/copy/flow-only: no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, no notifications, no personal-data collection, and no Farm Records local storage/schema change.
+
+## M97 First Add Plot + Add Activity Flow Polish
+
+M97 polishes the first two Farm Records actions for elderly and non-technical farmers: `เพิ่มแปลง` and `บันทึกงานในฟาร์ม`.
+
+The Add Plot form now emphasizes `ตั้งชื่อแปลงก่อน`, keeps location optional, uses `พื้นที่กี่ไร่ (ถ้ามี)`, explains `ไม่ต้องกรอกที่อยู่ละเอียดก็ได้`, and states `ระบบยังไม่ใช้ GPS`. Missing plot-name validation now says `กรุณากรอกชื่อแปลง`.
+
+The Add Activity form now uses the title `บันทึกงานในฟาร์ม`, presents required fields first, changes `ชื่องานในฟาร์ม` to `หัวข้อสั้น ๆ`, renders Thai-only activity type and unit options in the form, and uses friendlier activity labels such as `พ่นยา`, `จ้างแรงงาน`, `ใช้เครื่องจักร`, `โรค/แมลง`, and `สภาพอากาศ`.
+
+Empty states now point users to one next action: no plots use `เริ่มจากตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน` with `เพิ่มแปลง`, and no activity uses `บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ` with `เพิ่มกิจกรรม`.
+
+`/app/help` adds plot/activity examples, and `/app/field-test-feedback` adds observation questions for plot-name entry, activity wording, activity type choice, and optional fields.
+
+`docs/ux/FIRST_ADD_PLOT_ACTIVITY_FLOW_M97.md` documents the UX boundary and non-goals.
+
+M97 remains UX/copy/form-flow-only: no Farm Records storage/schema change, no Supabase read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, no notifications, and no route removal.
+
+## M97.1 Basic Farm Records Mode
+
+M97.1 reduces the default `/app/farm-records` presentation so elderly and non-technical farmers see a basic recording surface first instead of analytics/status-heavy content.
+
+`/app/farm-records` now starts with `สมุดฟาร์มแบบง่าย` and three large actions:
+
+1. `เพิ่มแปลง`
+2. `บันทึกรายรับ/รายจ่าย`
+3. `บันทึกผลผลิต`
+
+`บันทึกงานในฟาร์ม` remains available as a secondary action under `จดงานในฟาร์มเพิ่มเติม`.
+
+Advanced content stays available lower on the page under `ข้อมูลเพิ่มเติม / ขั้นสูง`, including crop cycles, detailed activity/ledger lists, Farm Cost Dashboard, break-even/cost-per-kg details, export, restore, restore recovery, and the Cloud Sync Consent Prototype. Existing anchors such as `#farm-cost-dashboard`, `#farm-harvest-yield`, `#farm-records-export`, `#farm-records-restore`, and `#farm-records-sync` remain intact.
+
+`/app/my-farm` now opens with a simpler `ฟาร์มของฉัน` card, primary links to Farm Records, and only two simple facts near the top: `กำไร/ขาดทุน` and `ผลผลิตรวม`.
+
+`/app/help` now explains a 3-step basic flow, and `/app/field-test-feedback` adds questions about whether users understand the three main buttons, income/expense, harvest entry, excessive content, advanced words, and whether activity recording should remain on the first screen.
+
+`docs/ux/BASIC_FARM_RECORDS_MODE_M97_1.md` documents the basic-mode presentation and boundaries.
+
+M97.1 remains UX/presentation-only: no feature removal, no route removal, no Farm Records storage/schema change, no localStorage key rename, no Supabase read/write, no sync queue/cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload, no OCR, no notifications, and no personal-data collection.
+
+## M98 Mobile Preview Triage + Farmer Basic Flow QA
+
+M98 performs a focused mobile/basic-flow QA pass for the production-facing farmer journey.
+
+The in-app Browser connector was unavailable during verification, so M98 relied on static route/layout inspection, focused SSR render tests, HTTP route checks, and the existing automated test suite.
+
+Small fixes from the pass:
+
+- `/app/my-farm` keeps the first screen focused on the basic Farm Records entry and moves heavier counts, cost details, export/restore/sync status, and the Farm Cost Dashboard link behind `ข้อมูลฟาร์มเพิ่มเติม`.
+- `/app/farm-records` keeps Basic Farm Records Mode first and adds wrap protection to summary values.
+- Farm Records activity, finance, unit, crop-cycle, plot-status, and ledger direction labels are Thai-first in normal forms/lists.
+- Seeded local Farm Records display copy no longer shows `DEMO`-style labels in normal farmer views.
+- `/app/my-farm/settings` copy is calmer and production-facing while still saying account sync is off.
+
+M98 remains QA/polish-only: no new features, no route removal, no Farm Records storage/schema change, no Supabase read/write, no sync queue/cloud sync, no GPS/geolocation, no AI Farm Records processing, no receipt upload/OCR, no notifications, and no backend behavior change.
+
+## M98.1 Calculator Mobile UX + Crop Selection + Fertigation Tool Rework
+
+M98.1 responds to real mobile preview feedback in `/app/calculators`.
+
+The calculator crop selector now looks tappable with highlighted styling, `พืชที่เลือก`, `แตะเพื่อเปลี่ยนชนิดพืช`, and a chevron. The planting-distance calculator defaults to `ข้าวโพด` instead of rice and the crop option set now includes `ยูคาลิปตัส / ยูคา`, `พริก`, and `ปาล์มน้ำมัน` in addition to the existing crop profiles.
+
+Calculator form rows are more mobile-safe: area/unit rows stack below small widths, N/P/K inputs use a one-column mobile structure, result values break long text, and share/action button grids avoid fixed two-column pressure on narrow screens.
+
+The fertilizer tool is promoted to `คำนวณปุ๋ย/การให้ปุ๋ย` and adds a safe scaffold for crop stage and application method such as `หว่าน/โรย`, `ผ่านน้ำหยด`, and `ผสมน้ำรด`. The calculation still uses only the target rate the user enters. It does not invent official crop-stage rates.
+
+The old chemical mix surface is deprioritized and renamed `คำนวณตามฉลากยา/สาร`. It remains a label-arithmetic helper only: no pesticide recommendation, no dosage invention, and no override of product labels or local officer guidance.
+
+M98.1 remains calculator UX/polish-only: no backend writes, no Supabase read/write, no cloud sync, no GPS/geolocation, no AI execution, no official agronomy recommendation, no receipt upload/OCR, no notification, and no dangerous pesticide/chemical dosage advice.
 
 The future endpoint is still not deployed. Frontend code cannot call a provider directly, cannot accept provider/service-role keys, cannot bypass blocked actions, and cannot enable production AI text behavior.

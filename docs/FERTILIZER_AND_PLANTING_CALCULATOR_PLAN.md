@@ -69,7 +69,14 @@ Thai unit rules:
 
 M50 validation checks zero, negative, non-number, very small/large spacing, very small/large area, and unusually high plant counts.
 
-M51 adds crop profile spacing examples for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. These are labeled as starter form values, not final agronomy recommendations.
+M51 adds crop profile spacing examples for rice, cassava, sugarcane, maize, durian, longan, rubber, and mixed vegetables. M98.1 expands the calculator-facing list with eucalyptus, chili, and oil palm, and makes maize the planting-distance default. These are labeled as starter form values, not final agronomy recommendations.
+
+M98.1 reworks the fertilizer surface toward `คำนวณปุ๋ย/การให้ปุ๋ย`:
+
+- keep the math based on target rates entered by the user
+- add crop stage and application method fields, including `ผ่านน้ำหยด`
+- keep drip/fertigation copy as planning context, not a crop-specific recommendation
+- keep pesticide/chemical calculation separate and label-only under `คำนวณตามฉลากยา/สาร`
 
 ## Yield Estimate
 

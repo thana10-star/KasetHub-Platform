@@ -96,7 +96,7 @@ function SavedResultCard({
             ))}
           </div>
           <div className="mt-3 rounded-lg bg-emerald-50 p-3">
-            <p className="text-xs font-extrabold uppercase tracking-wide text-kaset-deep">LINE-friendly preview</p>
+            <p className="text-xs font-extrabold text-kaset-deep">ตัวอย่างข้อความสำหรับส่งต่อ</p>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{exportTemplate.shortLineText}</p>
           </div>
           {isExpanded ? (
@@ -112,7 +112,7 @@ function SavedResultCard({
                 </div>
               </div>
               <div className="rounded-lg bg-white p-3 ring-1 ring-kaset-deep/10">
-                <p className="text-xs font-extrabold text-slate-500">Long detail export</p>
+                <p className="text-xs font-extrabold text-slate-500">รายละเอียดแบบยาว</p>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{exportTemplate.longDetailText}</p>
               </div>
             </div>

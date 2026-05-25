@@ -25,13 +25,13 @@ export function CalculatorsPage() {
             <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10" />
             <div className="relative">
               <Badge className="bg-white/15 text-white" tone="green">
-                M49 local foundation
+                ใช้ได้ในเครื่องนี้
               </Badge>
               <h2 className="mt-3 text-2xl font-extrabold leading-8">เครื่องมือช่วยคิดเลขสำหรับงานเกษตร</h2>
               <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                ผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุน ใช้ได้ทันทีโดยไม่ส่งข้อมูลออกจากเครื่อง
+                ระยะปลูก ปุ๋ย/การให้ปุ๋ย ผลผลิต และต้นทุน ใช้ช่วยวางแผนจากข้อมูลที่กรอก
               </p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 <div className="rounded-lg bg-white/12 p-3">
                   <p className="text-2xl font-extrabold">{calculators.counts.recentCalculations}</p>
                   <p className="text-xs font-bold text-emerald-50/85">ประวัติล่าสุด</p>
@@ -45,7 +45,26 @@ export function CalculatorsPage() {
           </div>
         </Card>
 
-        <NoticeBox tone="warning" title="ยังไม่ใช่คำแนะนำจากผู้เชี่ยวชาญ">
+        <section className="grid gap-3">
+          <h2 className="text-lg font-extrabold text-kaset-ink">เครื่องมือหลัก</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {calculatorCards.slice(0, 4).map((card) => {
+              const Icon = calculatorIconMap[card.iconKey];
+
+              return (
+                <Link className="min-h-[132px] rounded-lg bg-white p-4 shadow-card ring-1 ring-kaset-deep/5" key={card.id} to={card.route}>
+                  <span className="grid h-12 w-12 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                    <Icon aria-hidden="true" className="h-6 w-6" />
+                  </span>
+                  <span className="mt-3 block break-words text-base font-extrabold leading-6 text-kaset-ink">{card.label}</span>
+                  <span className="mt-1 block text-sm leading-6 text-slate-600">{card.description}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <NoticeBox tone="warning" title="ตรวจสอบก่อนใช้งานจริง">
           {calculatorLocalOnlyDisclaimer} ผลลัพธ์เป็นการคำนวณเบื้องต้นและไม่รับประกันผลในแปลงจริง
         </NoticeBox>
 
@@ -60,7 +79,7 @@ export function CalculatorsPage() {
                 <StatusPill tone="warning">อ่านก่อนใช้จริง</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-amber-900">
-                ดูขอบเขตปุ๋ย สารเคมี AI และผู้สนับสนุน ก่อนนำตัวเลขไปใช้ในแปลงจริง
+                ดูขอบเขตปุ๋ย สารเคมี และผลคำนวณ ก่อนนำตัวเลขไปใช้ในแปลงจริง
               </p>
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-amber-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/safety">
                 เปิดขอบเขตความปลอดภัย
@@ -69,59 +88,72 @@ export function CalculatorsPage() {
           </div>
         </Card>
 
-        <Card className="border-sky-200 bg-sky-50 p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
-              <FlaskConical aria-hidden="true" className="h-6 w-6" />
+        <details className="group rounded-lg border border-slate-200 bg-slate-50/80">
+          <summary className="flex min-h-[68px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
+              <FlaskConical aria-hidden="true" className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-sky-950">QA เครื่องคำนวณ</h2>
-                <StatusPill tone="info">M50</StatusPill>
-              </div>
-              <p className="mt-1 text-sm leading-6 text-sky-900">ดู test case, expected vs actual และคำเตือนของสูตรหลักแบบ local-only</p>
-              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-sky-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
-                เปิด QA เครื่องคำนวณ
-              </Link>
+              <h2 className="font-extrabold leading-6 text-slate-800">ข้อมูลเพิ่มเติม / ขั้นสูง</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">เครื่องมือสำหรับทีมงานและการตรวจระบบ ไม่จำเป็นต้องใช้ตอนคำนวณทั่วไป</p>
             </div>
-          </div>
-        </Card>
+          </summary>
+          <div className="grid gap-3 border-t border-slate-200 p-3">
+            <Card className="border-sky-200 bg-sky-50 p-4 shadow-none">
+              <div className="flex gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <FlaskConical aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">QA เครื่องคำนวณ</h2>
+                    <StatusPill tone="info">M50</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">ดู test case, expected vs actual และคำเตือนของสูตรหลักแบบ local-only</p>
+                  <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-sky-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
+                    เปิด QA เครื่องคำนวณ
+                  </Link>
+                </div>
+              </div>
+            </Card>
 
-        <Card className="border-indigo-200 bg-indigo-50 p-4">
-          <div className="flex gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
-              <BrainCircuit aria-hidden="true" className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-extrabold text-indigo-950">แผน AI อธิบายผล</h2>
-                <Badge tone="sky">M55 preview</Badge>
-                <StatusPill tone="warning">ยังไม่เรียก AI จริง</StatusPill>
+            <Card className="border-indigo-200 bg-indigo-50 p-4 shadow-none">
+              <div className="flex gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+                  <BrainCircuit aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-indigo-950">แผน AI อธิบายผล</h2>
+                    <Badge tone="sky">M55 preview</Badge>
+                    <StatusPill tone="warning">ยังไม่เรียก AI จริง</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-indigo-900">
+                    ดูขอบเขต AI ในอนาคต: อธิบายสูตรได้ แต่ห้ามเปลี่ยนผลลัพธ์ แนะนำสินค้า หรือซ่อนความไม่แน่นอน
+                  </p>
+                  <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
+                    เปิดแผน AI อธิบายผล
+                  </Link>
+                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-architecture">
+                    AI backend architecture
+                  </Link>
+                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-adapter-status">
+                    AI adapter status
+                  </Link>
+                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-endpoint-plan">
+                    AI endpoint plan
+                  </Link>
+                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-contract">
+                    AI Edge contract
+                  </Link>
+                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-dry-run">
+                    AI Edge dry-run
+                  </Link>
+                </div>
               </div>
-              <p className="mt-1 text-sm leading-6 text-indigo-900">
-                ดูขอบเขต AI ในอนาคต: อธิบายสูตรได้ แต่ห้ามเปลี่ยนผลลัพธ์ แนะนำสินค้า หรือซ่อนความไม่แน่นอน
-              </p>
-              <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
-                เปิดแผน AI อธิบายผล
-              </Link>
-              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-architecture">
-                AI backend architecture
-              </Link>
-              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-adapter-status">
-                AI adapter status
-              </Link>
-              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-endpoint-plan">
-                AI endpoint plan
-              </Link>
-              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-contract">
-                AI Edge contract
-              </Link>
-              <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-dry-run">
-                AI Edge dry-run
-              </Link>
-            </div>
+            </Card>
           </div>
-        </Card>
+        </details>
 
         <Card className="border-emerald-200 bg-emerald-50 p-4">
           <div className="flex gap-3">
@@ -131,16 +163,16 @@ export function CalculatorsPage() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-extrabold text-kaset-ink">ผลคำนวณที่บันทึกไว้</h2>
-                <StatusPill tone="success">local-only</StatusPill>
+                <StatusPill tone="success">บันทึกในเครื่องนี้</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-700">
-                ดูสรุปที่กดบันทึกไว้ คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้ ไม่มี cloud sync
+                ดูสรุปที่กดบันทึกไว้ คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้
               </p>
               <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/calculators/saved-results">
                 เปิดผลคำนวณที่บันทึกไว้
               </Link>
               <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/export-preview">
-                ตัวอย่าง export
+                ดูตัวอย่างไฟล์
               </Link>
             </div>
           </div>
@@ -148,8 +180,8 @@ export function CalculatorsPage() {
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-extrabold text-kaset-ink">ตัวอย่างพืช M51</h2>
-            <StatusPill tone="info">{cropCalculatorProfiles.length} crops</StatusPill>
+            <h2 className="text-lg font-extrabold text-kaset-ink">พืชที่มีตัวช่วยกรอก</h2>
+            <StatusPill tone="info">{cropCalculatorProfiles.length} ชนิด</StatusPill>
           </div>
           <Card className="p-4">
             <div className="flex gap-3">
@@ -157,7 +189,7 @@ export function CalculatorsPage() {
                 <Sprout aria-hidden="true" className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-extrabold text-kaset-ink">ตัวอย่างช่วยกรอก ไม่ใช่คำแนะนำสุดท้าย</p>
+                <p className="font-extrabold text-kaset-ink">ข้อมูลช่วยกรอกเบื้องต้น ไม่ใช่คำแนะนำสุดท้าย</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {cropCalculatorProfiles.map((profile) => (
                     <Badge key={profile.cropKey} tone="neutral">
@@ -176,7 +208,7 @@ export function CalculatorsPage() {
               <h2 className="text-lg font-extrabold text-kaset-ink">รายการโปรด</h2>
               <StatusPill tone="success">แตะใช้ได้เร็ว</StatusPill>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {favoriteCards.map((card) => {
                 const Icon = calculatorIconMap[card.iconKey];
 
@@ -209,6 +241,7 @@ export function CalculatorsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-extrabold leading-6 text-kaset-ink">{card.label}</h3>
+                        {card.id === 'spray_mix' ? <Badge tone="neutral">เฉพาะตามฉลาก</Badge> : null}
                         {isFavorite ? (
                           <Badge tone="gold">
                             <span className="inline-flex items-center gap-1">
@@ -219,7 +252,7 @@ export function CalculatorsPage() {
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm leading-6 text-slate-600">{card.description}</p>
-                      <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                      <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                         <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to={card.route}>
                           เปิดใช้
                         </Link>

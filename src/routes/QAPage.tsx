@@ -99,14 +99,14 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ตัวอย่าง export เครื่องคำนวณ', route: '/app/calculators/export-preview' },
   { label: 'แผน AI อธิบายผลคำนวณ', route: '/app/calculators/ai-explanation-preview' },
   { label: 'สถาปัตยกรรม AI backend เครื่องคำนวณ', route: '/app/calculators/ai-architecture' },
-  { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
+  { label: 'คำนวณตามฉลากยา/สาร', route: '/app/calculators/spray-mix' },
   { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
   { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
   { label: 'คำนวณผลผลิต', route: '/app/calculators/yield-estimate' },
   { label: 'คำนวณต้นทุน', route: '/app/calculators/cost' },
   { label: 'คำนวณพื้นที่แปลง', route: '/app/farm-area' },
   { label: 'คู่มือวัดพื้นที่แปลง', route: '/app/farm-area-guide' },
-  { label: 'M92 Home-first Farm Hub and M91 Farm Records dashboard', route: '/app/farm-records' },
+  { label: 'M93 My Farm navigation and M91 Farm Records dashboard', route: '/app/farm-records' },
   { label: 'AI ผู้ช่วยเกษตร', route: '/app/ai' },
   { label: 'M81 real AI text proxy status', route: '/app/ai-text-status' },
   { label: 'M82 AI text endpoint dry-run', route: '/app/ai-text-endpoint-plan' },
@@ -376,7 +376,7 @@ export function QAPage() {
                 <StatusPill tone="success">local fixtures</StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                ตรวจสูตรผสมยา ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
+                ตรวจสูตรคำนวณตามฉลาก ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
               </p>
             </div>
           </div>

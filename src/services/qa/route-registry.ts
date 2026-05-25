@@ -22,10 +22,12 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
     routes: [
-      { route: '/app', label: 'App home', milestone: 'M01-M15/M92', notes: 'mobile-first home now surfaces a large My Farm/Farm Records entry point with elder-friendly Thai quick actions and local-only farm summary', manualCheckPath: '/app' },
-      { route: '/app/profile', label: 'Profile', milestone: 'M02-M29', notes: 'โปรไฟล์ตัวอย่างและจุดเข้า route สำคัญ', manualCheckPath: '/app/profile' },
+      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93-M96', notes: 'mobile-first home surfaces a compact My Farm launcher, small start-guide link, and bottom nav still includes My Farm; detailed Farm Records metrics stay in My Farm/Farm Records', manualCheckPath: '/app' },
+      { route: '/app/help', label: 'Farmer start guide', milestone: 'M95-M97.1', notes: 'คู่มือเริ่มใช้ KasetHub แบบสั้นสำหรับเกษตรกร พร้อม basic flow 3 ขั้นตอนและตัวอย่างชื่อแปลง/งานในฟาร์ม; no backend', manualCheckPath: '/app/help' },
+      { route: '/app/field-test-feedback', label: 'Field-test feedback checklist', milestone: 'M95-M97.1', notes: 'เช็กลิสต์ภาคสนามแบบ static/local สำหรับสังเกตผู้ใช้จริง เพิ่มคำถาม basic mode, first-use, and first add plot/activity ไม่มี backend submit และเตือนห้ามใส่ข้อมูลส่วนตัว', manualCheckPath: '/app/field-test-feedback' },
+      { route: '/app/profile', label: 'Profile / Settings', milestone: 'M02-M29/M93-M95', notes: 'โปรไฟล์และการตั้งค่าจัดกลุ่มบัญชี ข้อมูล/ความเป็นส่วนตัว ช่วยเหลือ ลิงก์วิธีใช้แอพไป /app/help แสดง cloud sync ปิดอยู่ และยุบ Advanced สำหรับทีมงาน/QA เป็นค่าเริ่มต้น', manualCheckPath: '/app/profile' },
       { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
-      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92', notes: 'My Farm local hub with Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, and a home-first entry point; no cloud sync', manualCheckPath: '/app/my-farm' },
+      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92-M97.1', notes: 'My Farm local hub with simplified basic Farm Records entry, Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, compact Home entry point, dedicated bottom-nav slot, and Profile settings data-control links; no cloud sync', manualCheckPath: '/app/my-farm' },
       { route: '/app/my-farm/settings', label: 'My Farm settings', milestone: 'M34', notes: 'สถานะข้อมูล local และแผน cloud sync ในอนาคต', manualCheckPath: '/app/my-farm/settings' },
       { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32/M75', notes: 'Open-Meteo public weather API is flag-gated; default local fixture remains, with no GPS/geolocation, no personal location storage, and no Supabase writes', manualCheckPath: '/app/weather' },
       { route: '/app/weather/qa', label: 'Weather QA Cache Coarse Location', milestone: 'M76', notes: 'cache freshness, coarse province/city-center locations, failure fixtures, stale examples, and no-GPS/no-precise-storage proof', manualCheckPath: '/app/weather/qa' },
@@ -37,7 +39,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/ai-text-endpoint-plan', label: 'AI Text Endpoint Contract Dry-run', milestone: 'M82', notes: 'backend-owned endpoint contract, masked URL gating, audit/rate-limit dry-run, timeout plan, and provider-call blocked proof', manualCheckPath: '/app/ai-text-endpoint-plan' },
       { route: '/app/farm-area', label: 'Farm area planner', milestone: 'M33', notes: 'คำนวณพื้นที่แปลงและแปลงหน่วยที่ดินไทยแบบ local-only', manualCheckPath: '/app/farm-area' },
       { route: '/app/farm-area-guide', label: 'Farm area guide', milestone: 'M33', notes: 'คู่มือวัดพื้นที่ด้วยสายวัด สูตรพื้นที่ และคำเตือนเรื่องรังวัด', manualCheckPath: '/app/farm-area-guide' },
-      { route: '/app/farm-records', label: 'Farm Records harvest yield + cost-per-kg dashboard', milestone: 'M91/M92', notes: 'farmer-facing local-first records UI with harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimate, export/restore/recovery, disabled sync consent prototype, and M92 home-first entry links; no cloud/GPS/AI/tax-accounting claims', manualCheckPath: '/app/farm-records' },
+      { route: '/app/farm-records', label: 'Farm Records basic mode', milestone: 'M91/M92.1/M96/M97/M97.1', notes: 'farmer-facing local-first records UI with Basic Farm Records Mode, 3 main actions, secondary activity recording, advanced grouping, harvest/yield records, local cost summaries, export/restore/recovery, disabled sync consent prototype; no cloud/GPS/AI/tax-accounting claims', manualCheckPath: '/app/farm-records' },
       { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery', manualCheckPath: '/app/notifications' },
       { route: '/app/notification-settings', label: 'Notification settings', milestone: 'M35', notes: 'ตั้งค่า preference แจ้งเตือนแบบ localStorage เท่านั้น', manualCheckPath: '/app/notification-settings' },
       { route: '/app/saved-articles', label: 'Saved articles', milestone: 'M02/M04', notes: 'รายการบันทึกในเครื่อง', manualCheckPath: '/app/saved-articles' },
@@ -47,7 +49,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
   {
     id: 'agriculture_calculators',
     label: 'Agriculture calculators',
-    description: 'เครื่องคำนวณเกษตร local-only สำหรับผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุน',
+    description: 'เครื่องคำนวณเกษตรในเครื่องนี้สำหรับระยะปลูก ปุ๋ย/การให้ปุ๋ย ผลผลิต ต้นทุน และคำนวณตามฉลาก',
     routes: [
       { route: '/app/calculators/ai-adapter-status', label: 'Calculator AI backend adapter status', milestone: 'M57', notes: 'contract adapter แบบ local_fixture/default no-network พร้อม feature flags สำหรับอนาคต', manualCheckPath: '/app/calculators/ai-adapter-status' },
       { route: '/app/calculators/ai-endpoint-plan', label: 'Calculator AI endpoint plan', milestone: 'M58', notes: 'QA checklist สำหรับ backend endpoint, network boundary, lock hash, policy, audit และ rate limit ก่อน live AI', manualCheckPath: '/app/calculators/ai-endpoint-plan' },

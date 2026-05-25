@@ -64,7 +64,7 @@ const nutrientLabels: Record<NutrientKey, string> = {
 };
 
 const costItemLabels: Record<CostEstimateResult['costItems'][number]['id'], string> = {
-  fertilizerCost: 'ค่าปุ๋ย/ยา',
+  fertilizerCost: 'ค่าปุ๋ย/วัสดุ',
   laborCost: 'ค่าแรง',
   waterCost: 'ค่าน้ำ',
   machineryCost: 'ค่าเครื่องจักร',
@@ -182,7 +182,7 @@ function createEmptyState(): AgriCalculatorState {
   return {
     version: currentVersion,
     recentCalculations: [],
-    favoriteCalculatorIds: ['plant_spacing', 'spray_mix'],
+    favoriteCalculatorIds: ['plant_spacing', 'fertilizer_mix'],
     lastInputs: {},
     updatedAt: now(),
   };
@@ -611,7 +611,7 @@ export function calculateYieldEstimate(input: YieldEstimateInput): YieldEstimate
 
 export function calculateCostEstimate(input: CostEstimateInput): CostEstimateResult {
   const area = normalizeArea(input.landSizeValue, input.landSizeUnit, 'พื้นที่');
-  const fertilizerCost = normalizeNonNegativeNumber(input.fertilizerCost, 'ค่าปุ๋ย/ยา', {
+  const fertilizerCost = normalizeNonNegativeNumber(input.fertilizerCost, 'ค่าปุ๋ย/วัสดุ', {
     id: 'cost-fertilizer',
     maxWarning: calculatorValidationLimits.highTotalCost,
   });

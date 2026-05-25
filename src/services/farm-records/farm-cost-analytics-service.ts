@@ -209,24 +209,24 @@ export function computeHarvestYieldSummary(state: FarmRecordsState, filters: Far
     0,
   );
   const warnings: string[] = [
-    'Harvest and cost-per-kg values are local estimates from records stored on this device.',
-    'This is not official accounting, tax, loan, or financial advice.',
+    'ข้อมูลผลผลิตและต้นทุนต่อกก. เป็นการประเมินจากข้อมูลที่บันทึกในเครื่องนี้เท่านั้น',
+    'ไม่ใช่คำแนะนำทางบัญชี ภาษี สินเชื่อ หรือกฎหมาย',
   ];
 
   if (harvestRecords.length === 0 || totalHarvestKg <= 0) {
-    warnings.push('à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸œà¸¥à¸œà¸¥à¸´à¸•à¸—à¸µà¹ˆà¸„à¸³à¸™à¸§à¸“à¹€à¸›à¹‡à¸™ kg à¹„à¸”à¹‰');
+    warnings.push('ยังไม่มีข้อมูลผลผลิตที่คำนวณเป็น kg ได้');
   }
 
   if (harvestRecords.some((record) => record.normalizedQuantityKg === undefined)) {
-    warnings.push('Some harvest records use units that cannot be normalized to kg, so they are excluded from cost-per-kg math.');
+    warnings.push('บางรายการใช้หน่วยที่ยังแปลงเป็น kg ไม่ได้ จึงไม่นำไปคำนวณต้นทุนต่อกก.');
   }
 
   if (areaRai <= 0) {
-    warnings.push('Area is missing or zero, so yield per rai cannot be calculated.');
+    warnings.push('ยังไม่มีพื้นที่หรือพื้นที่เป็นศูนย์ จึงคำนวณผลผลิตต่อไร่ไม่ได้');
   }
 
   if (incomeEntries.length === 0) {
-    warnings.push('No income entries are recorded for this view, so income/profit per kg may be incomplete.');
+    warnings.push('ยังไม่มีรายรับในมุมมองนี้ รายได้และกำไรต่อกก. อาจยังไม่ครบ');
   }
 
   return {
@@ -383,9 +383,9 @@ export function getFarmCostInsights(dashboard: FarmCostDashboard) {
   }
 
   if (dashboard.costPerKg !== undefined) {
-    insights.push(`Cost per kg is about ${dashboard.costPerKg.toLocaleString('th-TH', { maximumFractionDigits: 2 })} THB from local records.`);
+    insights.push(`ต้นทุนต่อกก. ประมาณ ${dashboard.costPerKg.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาทจากข้อมูลในเครื่องนี้`);
   } else {
-    insights.push('à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸œà¸¥à¸œà¸¥à¸´à¸•à¸žà¸­à¸„à¸³à¸™à¸§à¸“à¸•à¹‰à¸™à¸—à¸¸à¸™à¸•à¹ˆà¸­ kg');
+    insights.push('ยังไม่มีข้อมูลผลผลิตพอคำนวณต้นทุนต่อกก.');
   }
 
   if (dashboard.totalExpense <= 0) {

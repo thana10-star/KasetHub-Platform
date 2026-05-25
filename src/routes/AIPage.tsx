@@ -73,11 +73,11 @@ function ScenarioSelector({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">โหมดจำลองสำหรับทดสอบ</h2>
-            <Badge tone="neutral">M11 Mock Proxy</Badge>
+            <h2 className="font-extrabold text-kaset-ink">ตัวเลือกคำตอบสำหรับทีมงาน</h2>
+            <Badge tone="neutral">สำหรับทีมงาน</Badge>
           </div>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            ใช้ทดสอบ response แบบ backend โดยไม่มี network request หรือ provider key
+            ใช้ตรวจคำตอบหลายแบบในเครื่องนี้โดยไม่ส่งข้อมูลออกจากหน้าเว็บ
           </p>
         </div>
       </div>
@@ -115,11 +115,11 @@ function ProxyResponseCard({ onRetry, response }: { onRetry: () => void; respons
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-white/15 text-white" tone="green">
-                backend-shaped mock
+                คำตอบในเครื่องนี้
               </Badge>
               <Badge tone={statusTone[response.status]}>{statusCopy[response.status]}</Badge>
             </div>
-            <h2 className="mt-3 text-lg font-extrabold leading-7">ผลตอบกลับจาก AI Mock Proxy</h2>
+            <h2 className="mt-3 text-lg font-extrabold leading-7">ผลตอบกลับจากผู้ช่วย</h2>
             <p className="mt-1 break-all text-xs text-emerald-50/90">Request ID: {response.requestId}</p>
           </div>
         </div>
@@ -166,7 +166,7 @@ function ProxyResponseCard({ onRetry, response }: { onRetry: () => void; respons
           </div>
         ) : (
           <div className="rounded-lg bg-rose-50 p-3 text-sm leading-6 text-rose-900">
-            ระบบจำลองไม่ส่งคำตอบเพราะสถานะคือ {statusCopy[response.status]}
+            ตอนนี้ระบบไม่ส่งคำตอบเพราะสถานะคือ {statusCopy[response.status]}
           </div>
         )}
 
@@ -191,7 +191,7 @@ function ProxyResponseCard({ onRetry, response }: { onRetry: () => void; respons
         </div>
 
         <div className="rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-          <p className="font-extrabold text-slate-800">Logs preview</p>
+          <p className="font-extrabold text-slate-800">รายละเอียดระบบ</p>
           <p className="mt-1">Network: {response.logsPreview.networkCalls ? 'yes' : 'no'}</p>
           <p>Provider key: {response.logsPreview.providerKeyLocation}</p>
           <p>Would write: {response.logsPreview.wouldWriteTables.join(', ')}</p>
@@ -219,15 +219,15 @@ function AIProxyModeCard() {
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">AI Proxy Adapter</h2>
+            <h2 className="font-extrabold text-kaset-ink">สถานะผู้ช่วย AI</h2>
             <Badge tone={status.mode === 'local_fixture' ? 'green' : 'gold'}>{status.modeLabel}</Badge>
           </div>
           <p className="mt-1 text-sm leading-6 text-slate-600">{status.readinessLabel}</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Backend proxy: {status.backendProxyEnabled ? 'เปิด flag แล้ว แต่ M13 ยังไม่ fetch' : 'ปิดอยู่'} · Provider keys: ไม่มีใน frontend
+            การเชื่อมต่อบริการ AI: {status.backendProxyEnabled ? 'เปิดไว้สำหรับตรวจระบบ' : 'ปิดอยู่'} · ไม่เก็บ provider keys ในหน้าเว็บ
           </p>
           <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/ai-proxy-status">
-            ดูสถานะ proxy
+            ดูสถานะระบบ AI
           </Link>
         </div>
       </div>
@@ -294,7 +294,7 @@ export function AIPage() {
       title: cleanQuestion,
       summary: answerSummary,
       sourceRoute: '/app/ai',
-      tags: ['AI', 'ผู้ช่วยเกษตร', 'mock-proxy'],
+      tags: ['AI', 'ผู้ช่วยเกษตร'],
       metadata,
     });
     addUsageLog({
@@ -330,13 +330,13 @@ export function AIPage() {
 
     if (response.status === 'insufficient_credits') {
       setShowLimitReached(true);
-      setSavedMessage('Mock proxy ตรวจพบว่าเครดิตไม่พอ');
+      setSavedMessage('เครดิตถาม AI ไม่พอ');
       return;
     }
 
     if (response.status !== 'success') {
       setShowLimitReached(false);
-      setSavedMessage(response.retryable ? 'Mock proxy ล้มเหลวแบบลองใหม่ได้' : 'Mock proxy ไม่อนุญาตให้ตอบคำขอนี้');
+      setSavedMessage(response.retryable ? 'ส่งคำถามไม่สำเร็จ ลองใหม่ได้' : 'ระบบไม่อนุญาตให้ตอบคำขอนี้');
       return;
     }
 
@@ -345,7 +345,7 @@ export function AIPage() {
 
   return (
     <div>
-      <PageHeader title="AI ผู้ช่วยเกษตร" subtitle="ทดสอบ request/response ผ่าน AI Mock Proxy ยังไม่เรียก AI จริง" showBack />
+      <PageHeader title="AI ผู้ช่วยเกษตร" subtitle="ถามความรู้ทั่วไปด้านเกษตร ข้อมูลคำถามบันทึกไว้ในเครื่องนี้" showBack />
       <div className="grid gap-5 px-5 pb-6">
         <Card className="overflow-hidden bg-kaset-deep text-white">
           <div className="relative p-5">
@@ -360,7 +360,7 @@ export function AIPage() {
                 </Badge>
                 <h2 className="mt-3 text-xl font-extrabold">สวัสดีครับ วันนี้แปลงของคุณเจอปัญหาอะไร</h2>
                 <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  M11 จำลอง backend proxy เต็มรูปแบบ ทั้งเครดิต โมเดล คำเตือน และ logs preview โดยไม่ส่งข้อมูลออกจากเครื่อง
+                  ถามเรื่องพืช ดิน น้ำ ปุ๋ย หรือการวางแผนงานฟาร์มได้แบบสั้น ๆ
                 </p>
               </div>
             </div>
@@ -368,14 +368,10 @@ export function AIPage() {
         </Card>
 
         <NoticeBox tone="info" title="ถามสั้น ๆ เป็นภาษาพูดได้เลย">
-          ตัวอย่าง: ใบข้าวมีจุดหลังฝนตก หรือดินแข็งควรเริ่มแก้อย่างไร เวอร์ชันนี้ยังใช้คำตอบจำลองและไม่เรียก AI จริง
+          ตัวอย่าง: ใบข้าวมีจุดหลังฝนตก หรือดินแข็งควรเริ่มแก้อย่างไร คำตอบเป็นข้อมูลทั่วไป ควรตรวจสอบกับผู้เชี่ยวชาญก่อนใช้งานจริง
         </NoticeBox>
 
         <AICreditBalanceCard showLink summary={summary} />
-
-        <AIProxyModeCard />
-
-        <ScenarioSelector scenario={scenario} setScenario={setScenario} />
 
         <Card className="p-4">
           <label className="text-sm font-bold text-kaset-ink" htmlFor="ai-question">
@@ -402,7 +398,7 @@ export function AIPage() {
                   {provider.label} · {requestPlan.selectedModelTier} · {requestPlan.estimatedBackendEndpoint}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  พรีวิวเท่านั้น ยังไม่เรียก backend หรือ AI จริง
+                  รายละเอียดระบบจะบันทึกไว้ในเครื่องนี้
                 </p>
               </div>
             </div>
@@ -418,6 +414,22 @@ export function AIPage() {
           </div>
           {savedMessage ? <p className="mt-3 text-xs font-semibold text-kaset-deep">{savedMessage}</p> : null}
         </Card>
+
+        <details className="group rounded-lg border border-slate-200 bg-slate-50/80">
+          <summary className="flex min-h-[68px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
+              <Server aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-extrabold leading-6 text-slate-800">ข้อมูลเพิ่มเติม / สำหรับทีมงาน</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">สถานะระบบและตัวเลือกคำตอบ ไม่จำเป็นต้องใช้ตอนถามทั่วไป</p>
+            </div>
+          </summary>
+          <div className="grid gap-3 border-t border-slate-200 p-3">
+            <AIProxyModeCard />
+            <ScenarioSelector scenario={scenario} setScenario={setScenario} />
+          </div>
+        </details>
 
         {proxyResponse ? <ProxyResponseCard onRetry={() => askMockAI(question)} response={proxyResponse} /> : null}
 

@@ -1,4 +1,4 @@
-import { Calculator, ChevronRight, Copy, Gift, History, RotateCcw, Save, Send, Share2, ShieldCheck, Sprout, Star } from 'lucide-react';
+import { Calculator, ChevronDown, ChevronRight, Copy, Gift, History, RotateCcw, Save, Send, Share2, ShieldCheck, Sprout, Star } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
@@ -18,7 +18,6 @@ import {
   createExportSharePayload,
   shareCalculatorExportText,
 } from '@/services/agri-calculators/calculator-export-template-service';
-import { calculatorPlanningOnlyDisclaimer } from '@/services/agri-calculators/crop-calculator-boundaries';
 import {
   cropCalculatorProfileOptions,
   getCropCalculatorProfile,
@@ -45,9 +44,9 @@ type NumberFieldProps = {
 
 export function NumberField({ hint, label, min = 0, onChange, step = 0.01, suffix, value }: NumberFieldProps) {
   return (
-    <label className="grid gap-2">
+    <label className="grid min-w-0 gap-2">
       <span className="text-sm font-extrabold text-kaset-ink">{label}</span>
-      <span className="flex min-h-[56px] items-center rounded-lg bg-white ring-1 ring-kaset-deep/12 focus-within:ring-2 focus-within:ring-kaset-leaf">
+      <span className="flex min-h-[56px] min-w-0 items-center rounded-lg bg-white ring-1 ring-kaset-deep/12 focus-within:ring-2 focus-within:ring-kaset-leaf">
         <input
           className="min-w-0 flex-1 bg-transparent px-4 py-3 text-xl font-extrabold text-kaset-ink outline-none"
           inputMode="decimal"
@@ -57,7 +56,7 @@ export function NumberField({ hint, label, min = 0, onChange, step = 0.01, suffi
           type="number"
           value={Number.isFinite(value) ? value : 0}
         />
-        {suffix ? <span className="shrink-0 px-4 text-sm font-bold text-slate-500">{suffix}</span> : null}
+        {suffix ? <span className="max-w-[46%] shrink-0 break-words px-3 text-right text-sm font-bold leading-5 text-slate-500">{suffix}</span> : null}
       </span>
       {hint ? <span className="text-xs font-semibold leading-5 text-slate-500">{hint}</span> : null}
     </label>
@@ -73,10 +72,10 @@ type SelectFieldProps<T extends string | number> = {
 
 export function SelectField<T extends string | number>({ label, onChange, options, value }: SelectFieldProps<T>) {
   return (
-    <label className="grid gap-2">
+    <label className="grid min-w-0 gap-2">
       <span className="text-sm font-extrabold text-kaset-ink">{label}</span>
       <select
-        className="kh-form-control w-full border-0 bg-white px-4 font-extrabold text-kaset-ink ring-1 ring-kaset-deep/12 focus:outline-none focus:ring-2 focus:ring-kaset-leaf"
+        className="kh-form-control min-h-[56px] w-full min-w-0 border-0 bg-white px-4 font-extrabold text-kaset-ink ring-1 ring-kaset-deep/12 focus:outline-none focus:ring-2 focus:ring-kaset-leaf"
         onChange={(event) => {
           const selected = options.find((option) => String(option.value) === event.target.value);
           if (selected) onChange(selected.value);
@@ -114,7 +113,7 @@ export function ResultMetric({
   return (
     <div className={cx('rounded-lg', featured ? 'p-4' : 'p-3', toneClass[tone])}>
       <p className="text-xs font-bold leading-5 opacity-80">{label}</p>
-      <p className={cx('mt-1 font-extrabold', featured ? 'text-2xl leading-8' : 'text-xl leading-7')}>{value}</p>
+      <p className={cx('mt-1 break-words font-extrabold', featured ? 'text-2xl leading-8' : 'text-xl leading-7')}>{value}</p>
     </div>
   );
 }
@@ -144,7 +143,7 @@ export function CalculatorHero({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="bg-white/15 text-white" tone="green">
-                Local calculator
+                เครื่องมือช่วยคำนวณ
               </Badge>
               <button
                 aria-label={isFavorite ? 'เอาออกจากรายการโปรด' : 'เพิ่มเป็นรายการโปรด'}
@@ -156,8 +155,8 @@ export function CalculatorHero({
                 {isFavorite ? 'โปรด' : 'บันทึก'}
               </button>
             </div>
-            <h2 className="mt-3 text-2xl font-extrabold leading-8">{card.label}</h2>
-            <p className="mt-2 text-sm leading-6 text-emerald-50/90">{card.description}</p>
+            <h2 className="mt-3 break-words text-2xl font-extrabold leading-8">{card.label}</h2>
+            <p className="mt-2 break-words text-sm leading-6 text-emerald-50/90">{card.description}</p>
             {children}
           </div>
         </div>
@@ -182,29 +181,44 @@ export function CropProfilePicker({
   const profile = getCropCalculatorProfile(selectedCropKey);
 
   return (
-    <Card className="p-4">
+    <Card className="p-4" data-testid="crop-profile-picker">
       <div className="flex gap-3">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
           <Sprout aria-hidden="true" className="h-6 w-6" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">ตัวอย่างตามพืช</h2>
-            <Badge tone="gold">planning only</Badge>
+            <h2 className="font-extrabold text-kaset-ink">พืชที่เลือก</h2>
+            <Badge tone="gold">ค่าประมาณ</Badge>
           </div>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{calculatorPlanningOnlyDisclaimer}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">แตะเพื่อเปลี่ยนชนิดพืช และใช้ตัวอย่างเป็นจุดเริ่มต้นเท่านั้น</p>
         </div>
       </div>
       <div className="mt-4 grid gap-4">
-        <SelectField<CropCalculatorKey>
-          label="เลือกพืช"
-          onChange={onChange}
-          options={cropCalculatorProfileOptions}
-          value={selectedCropKey}
-        />
-        <div className="rounded-lg bg-kaset-mist p-3">
-          <p className="font-extrabold text-kaset-ink">{profile.thaiDisplayName}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{profile.fertilizerPlanningNote}</p>
+        <label className="grid min-w-0 gap-2">
+          <span className="text-sm font-extrabold text-kaset-ink">เลือกพืช</span>
+          <span className="relative block min-w-0">
+            <select
+              aria-label="เลือกพืช"
+              className="min-h-[64px] w-full min-w-0 appearance-none rounded-lg border-2 border-kaset-leaf/40 bg-kaset-mint/80 px-4 py-3 pr-12 text-lg font-extrabold text-kaset-deep shadow-sm outline-none ring-1 ring-kaset-deep/10 focus:border-kaset-leaf focus:bg-white focus:ring-2 focus:ring-kaset-leaf"
+              data-testid="crop-selector-control"
+              onChange={(event) => onChange(event.target.value as CropCalculatorKey)}
+              value={selectedCropKey}
+            >
+              {cropCalculatorProfileOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-kaset-deep" />
+          </span>
+          <span className="text-xs font-bold leading-5 text-kaset-deep">แตะเพื่อเปลี่ยนชนิดพืช</span>
+        </label>
+        <div className="rounded-lg bg-kaset-mist p-3" data-testid="crop-selector-current">
+          <p className="text-xs font-bold leading-5 text-slate-600">พืชที่เลือก</p>
+          <p className="break-words text-lg font-extrabold leading-7 text-kaset-ink">{profile.thaiDisplayName}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">ตัวเลขเป็นค่าประมาณ ควรตรวจสอบกับพื้นที่จริง</p>
         </div>
         {children}
         <Button className="min-h-[52px] w-full" onClick={onUseExample} variant="soft">
@@ -333,7 +347,7 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="font-extrabold text-kaset-ink">สรุปสำหรับแชร์</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">local-only ไม่มีไฟล์ PDF และไม่บันทึกขึ้นระบบ</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">บันทึกไว้ในเครื่องนี้ ไม่มีไฟล์ PDF และไม่ส่งข้อมูลขึ้นระบบ</p>
         </div>
       </div>
       <div className="mt-3 rounded-lg bg-kaset-mist p-3 text-sm font-bold leading-6 text-kaset-deep">
@@ -347,10 +361,10 @@ export function CalculatorShareActions<C extends CalculatorCategory>({
           </p>
         ))}
         <p className="rounded-lg bg-kaset-mist p-2 text-xs font-bold leading-5 text-kaset-deep">
-          LINE-friendly preview พร้อมคัดลอกเป็นข้อความอ่านง่าย
+          ตัวอย่างข้อความสำหรับส่งต่อ พร้อมคัดลอกเป็นข้อความอ่านง่าย
         </p>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <Button className="min-h-[52px] px-3 text-sm" onClick={copySummary} variant="secondary">
           <Copy aria-hidden="true" className="h-5 w-5" />
           คัดลอกสรุป

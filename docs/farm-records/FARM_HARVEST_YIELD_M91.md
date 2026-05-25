@@ -34,6 +34,12 @@ The local analytics layer computes:
 
 All division is guarded. Missing quantity, missing area, zero harvest kg, and non-normalized units produce warnings instead of crashes.
 
+## M93.1 UI Text And Mobile Layout Follow-up
+
+M93.1 fixes a mobile-preview issue where the Harvest create form showed garbled Thai/English fallback labels. Farmer-facing harvest form copy is now Thai-first, including `เพิ่มผลผลิต`, `วันที่เก็บเกี่ยว`, `ปริมาณผลผลิต`, `หน่วย`, and related validation messages.
+
+M93.1 also keeps Harvest & Yield metric cards to a mobile-safe one/two-column layout instead of narrow multi-column cards, so values such as `3,200 kg`, `283 kg/rai`, and `4.03 THB/kg` stay readable without horizontal overflow.
+
 ## Export And Restore
 
 M91 updates JSON backup, restore validation, restore preview, and pre-restore snapshot helpers to include `farmHarvestRecords`. Old backups without this slice still restore safely with an empty harvest array.

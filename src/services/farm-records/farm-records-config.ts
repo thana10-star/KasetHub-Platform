@@ -44,13 +44,13 @@ export type CropCycleStatusConfig = {
 export const farmActivityTypes: FarmActivityTypeConfig[] = [
   { id: 'planting', label: { en: 'Planting', th: 'ปลูก' } },
   { id: 'fertilizing', label: { en: 'Fertilizing', th: 'ใส่ปุ๋ย' } },
-  { id: 'spraying', label: { en: 'Spraying', th: 'พ่นสาร' } },
+  { id: 'spraying', label: { en: 'Spraying', th: 'พ่นยา' } },
   { id: 'watering', label: { en: 'Watering', th: 'ให้น้ำ' } },
   { id: 'harvesting', label: { en: 'Harvesting', th: 'เก็บเกี่ยว' } },
-  { id: 'labor', label: { en: 'Labor', th: 'แรงงาน' } },
-  { id: 'machinery', label: { en: 'Machinery', th: 'เครื่องจักร' } },
-  { id: 'pest_disease', label: { en: 'Pest or disease', th: 'ศัตรูพืช/โรคพืช' } },
-  { id: 'weather_note', label: { en: 'Weather note', th: 'บันทึกอากาศ' } },
+  { id: 'labor', label: { en: 'Labor', th: 'จ้างแรงงาน' } },
+  { id: 'machinery', label: { en: 'Machinery', th: 'ใช้เครื่องจักร' } },
+  { id: 'pest_disease', label: { en: 'Pest or disease', th: 'โรค/แมลง' } },
+  { id: 'weather_note', label: { en: 'Weather note', th: 'สภาพอากาศ' } },
   { id: 'soil_care', label: { en: 'Soil care', th: 'ดูแลดิน' } },
   { id: 'other', label: { en: 'Other', th: 'อื่น ๆ' } },
 ];
@@ -118,11 +118,11 @@ export const allowedFarmRecordUnits: FarmUnitConfig[] = [
 ];
 
 export const farmHarvestQuantityUnits: FarmHarvestQuantityUnitConfig[] = [
-  { id: 'kg', label: { en: 'Kilogram', th: 'Kilogram' }, normalizesToKg: true },
-  { id: 'ton', label: { en: 'Ton', th: 'Ton' }, normalizesToKg: true },
-  { id: 'sack', label: { en: 'Sack', th: 'Sack' }, normalizesToKg: false },
-  { id: 'basket', label: { en: 'Basket', th: 'Basket' }, normalizesToKg: false },
-  { id: 'other', label: { en: 'Other', th: 'Other' }, normalizesToKg: false },
+  { id: 'kg', label: { en: 'Kilogram', th: 'กิโลกรัม' }, normalizesToKg: true },
+  { id: 'ton', label: { en: 'Ton', th: 'ตัน' }, normalizesToKg: true },
+  { id: 'sack', label: { en: 'Sack', th: 'กระสอบ' }, normalizesToKg: false },
+  { id: 'basket', label: { en: 'Basket', th: 'ตะกร้า' }, normalizesToKg: false },
+  { id: 'other', label: { en: 'Other', th: 'อื่น ๆ' }, normalizesToKg: false },
 ];
 
 export const farmActivityTypeIds = farmActivityTypes.map((item) => item.id);

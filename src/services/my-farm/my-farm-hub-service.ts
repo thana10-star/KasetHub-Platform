@@ -1,6 +1,6 @@
 import type { CropWatch } from '@/services/crop-prices/crop-watch.types';
 import type { FarmPlotRecord } from '@/services/farm-area/farm-area.types';
-import { farmFinanceCategoryLabels } from '@/services/farm-records/farm-records-config';
+import { farmActivityTypes, farmFinanceCategoryLabels } from '@/services/farm-records/farm-records-config';
 import { computeFarmCostDashboard, computeHarvestYieldSummary } from '@/services/farm-records/farm-cost-analytics-service';
 import { createFarmRecordsService, createMemoryFarmRecordsStorage } from '@/services/farm-records/farm-records-service';
 import type { FarmFinanceCategory, FarmRecordsState } from '@/services/farm-records/farm-records.types';
@@ -26,7 +26,7 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   {
     id: 'analyze',
     label: 'วิเคราะห์โรคพืช',
-    description: 'ถ่าย/เลือกรูปและดูผลจำลอง',
+    description: 'ถ่าย/เลือกรูปและดูผลในเครื่องนี้',
     route: '/app/analyze',
     iconKey: 'scan',
     tone: 'primary',
@@ -50,7 +50,7 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   {
     id: 'calculators',
     label: 'เครื่องคำนวณเกษตร',
-    description: 'ผสมยา ปุ๋ย ระยะปลูก ต้นทุน',
+    description: 'ระยะปลูก ปุ๋ย ผลผลิต ต้นทุน',
     route: '/app/calculators',
     iconKey: 'calculator',
     tone: 'warning',
@@ -58,7 +58,7 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   {
     id: 'weather',
     label: 'ดูสภาพอากาศ',
-    description: 'ฝน แดด ลม ความชื้นตัวอย่าง',
+    description: 'ฝน แดด ลม ความชื้น',
     route: '/app/weather',
     iconKey: 'weather',
     tone: 'white',
@@ -66,7 +66,7 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   {
     id: 'crop-watch',
     label: 'ติดตามราคาพืช',
-    description: 'ดูพืชที่ติดตามและแจ้งเตือน mock',
+    description: 'ดูพืชที่ติดตามและราคาอ้างอิง',
     route: '/app/crop-watch',
     iconKey: 'price',
     tone: 'warning',
@@ -107,7 +107,25 @@ function formatCurrency(value: number) {
 function formatFarmFinanceCategory(category: FarmFinanceCategory | undefined) {
   if (!category) return undefined;
   const label = farmFinanceCategoryLabels[category];
-  return label ? `${label.th} / ${label.en}` : category;
+  return label ? label.th : category;
+}
+
+const farmActivityTypeLabelMap = farmActivityTypes.reduce(
+  (labels, item) => ({
+    ...labels,
+    [item.id]: item.label.th,
+  }),
+  {} as Record<string, string>,
+);
+
+function formatFarmActivityType(type: string) {
+  return farmActivityTypeLabelMap[type] ?? type;
+}
+
+function formatFinanceDirection(direction: string) {
+  if (direction === 'income') return 'รายรับ';
+  if (direction === 'expense') return 'รายจ่าย';
+  return direction;
 }
 
 function latestDate(values: string[]) {
@@ -143,40 +161,40 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: formatThaiDate(record.updatedAt || record.createdAt),
       ctaRoute: record.sourceRoute || '/app/analysis-history',
       ctaLabel: 'ดูประวัติ',
-      sourceLabel: 'Guest Memory',
+      sourceLabel: 'บันทึกไว้',
     })),
     ...input.farmRecords.farmActivityRecords.map((record) => ({
       id: `farm-activity-${record.id}`,
       type: 'farm_activity' as const,
       title: record.title,
-      subtitle: `${record.activityType} · local farm record`,
+      subtitle: `${formatFarmActivityType(record.activityType)} · สมุดฟาร์ม`,
       dateIso: record.activityDate,
       dateLabel: formatThaiDate(record.activityDate),
       ctaRoute: '/app/farm-records',
       ctaLabel: 'เปิดสมุดฟาร์ม',
-      sourceLabel: 'Farm Records local',
+      sourceLabel: 'สมุดฟาร์ม',
     })),
     ...input.farmRecords.farmFinanceEntries.map((entry) => ({
       id: `farm-finance-${entry.id}`,
       type: 'farm_finance' as const,
       title: entry.title,
-      subtitle: `${entry.direction} · ${formatCurrency(entry.amount)}`,
+      subtitle: `${formatFinanceDirection(entry.direction)} · ${formatCurrency(entry.amount)}`,
       dateIso: entry.entryDate,
       dateLabel: formatThaiDate(entry.entryDate),
       ctaRoute: '/app/farm-records',
       ctaLabel: 'เปิดบัญชีฟาร์ม',
-      sourceLabel: 'Farm Ledger local',
+      sourceLabel: 'รายรับรายจ่าย',
     })),
     ...input.farmRecords.farmHarvestRecords.map((record) => ({
       id: `farm-harvest-${record.id}`,
       type: 'farm_harvest' as const,
-      title: record.cropName || 'Harvest record',
-      subtitle: `${record.normalizedQuantityKg?.toLocaleString('th-TH', { maximumFractionDigits: 2 }) ?? record.quantity.toLocaleString('th-TH', { maximumFractionDigits: 2 })} ${record.normalizedQuantityKg === undefined ? record.quantityUnit : 'kg'} · local harvest`,
+      title: record.cropName || 'บันทึกผลผลิต',
+      subtitle: `${record.normalizedQuantityKg?.toLocaleString('th-TH', { maximumFractionDigits: 2 }) ?? record.quantity.toLocaleString('th-TH', { maximumFractionDigits: 2 })} ${record.normalizedQuantityKg === undefined ? record.quantityUnit : 'กก.'} · ผลผลิต`,
       dateIso: record.harvestDate,
       dateLabel: formatThaiDate(record.harvestDate),
       ctaRoute: '/app/farm-records',
       ctaLabel: 'เปิดผลผลิต',
-      sourceLabel: 'Farm Harvest local',
+      sourceLabel: 'ผลผลิต',
     })),
     ...analysisItems.map((item) => ({
       id: `analysis-${item.id}`,
@@ -198,7 +216,7 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: plot.createdAtLabel || formatThaiDate(plot.createdAt),
       ctaRoute: '/app/farm-area',
       ctaLabel: 'ดูพื้นที่',
-      sourceLabel: 'local plot',
+      sourceLabel: 'แปลงในเครื่องนี้',
     })),
     ...input.cropWatches.map((watch) => ({
       id: `watch-${watch.id}`,
@@ -209,7 +227,7 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: formatThaiDate(watch.updatedAt),
       ctaRoute: '/app/crop-watch',
       ctaLabel: 'ดูราคาที่ติดตาม',
-      sourceLabel: 'local crop watch',
+      sourceLabel: 'ราคาที่ติดตาม',
     })),
     ...input.guestMemory.recentAIQuestions.map((question) => ({
       id: `ai-${question.id}`,
@@ -220,7 +238,7 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: formatThaiDate(question.askedAt),
       ctaRoute: question.sourceRoute || '/app/ai',
       ctaLabel: 'ถามต่อ',
-      sourceLabel: 'AI history local',
+      sourceLabel: 'คำถาม AI',
     })),
     ...savedArticles.map((item) => ({
       id: `article-${item.id}`,
@@ -231,7 +249,7 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: formatThaiDate(item.savedAt),
       ctaRoute: routeForSavedItem(item),
       ctaLabel: 'อ่าน',
-      sourceLabel: 'saved article',
+      sourceLabel: 'บทความที่บันทึก',
     })),
     ...savedVideos.map((item) => ({
       id: `video-${item.id}`,
@@ -242,7 +260,7 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       dateLabel: formatThaiDate(item.savedAt),
       ctaRoute: routeForSavedItem(item),
       ctaLabel: 'ดูวิดีโอ',
-      sourceLabel: 'saved video',
+      sourceLabel: 'วิดีโอที่บันทึก',
     })),
   ];
 
@@ -274,7 +292,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
           : 'ยังไม่มีแปลงที่บันทึกไว้ เริ่มจากคำนวณพื้นที่แปลงได้เลย',
       valueLabel: `${input.farmPlots.length} แปลง`,
       route: '/app/farm-area',
-      badgeLabel: 'local',
+      badgeLabel: 'ในเครื่องนี้',
       tone: 'green',
     },
     {
@@ -283,11 +301,11 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       title: 'สมุดบันทึกฟาร์ม',
       detail:
         farmRecordItemCount > 0
-          ? `มี ${activeCropCycles.toLocaleString('th-TH')} รอบปลูก active และบัญชี local-only`
+          ? `มี ${activeCropCycles.toLocaleString('th-TH')} รอบปลูกที่ใช้งานอยู่ และรายรับรายจ่ายที่บันทึกไว้`
           : 'เริ่มบันทึกกิจกรรม รายรับ และรายจ่ายเพื่อเห็นต้นทุนกับกำไร',
-      valueLabel: harvestYieldSummary.costPerKg === undefined ? formatCurrency(farmLedgerSummary.netProfit) : `${formatCurrency(harvestYieldSummary.costPerKg)} / kg`,
+      valueLabel: harvestYieldSummary.costPerKg === undefined ? formatCurrency(farmLedgerSummary.netProfit) : `${formatCurrency(harvestYieldSummary.costPerKg)} / กก.`,
       route: '/app/farm-records',
-      badgeLabel: 'cost summary',
+      badgeLabel: 'ต้นทุน',
       tone: farmLedgerSummary.netProfit >= 0 ? 'green' : 'rose',
     },
     {
@@ -296,11 +314,11 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       title: 'ประวัติวิเคราะห์โรคพืช',
       detail:
         input.guestMemory.farmRecords.length + analysisItems.length > 0
-          ? 'มีผลวิเคราะห์/บันทึกพืชใน Guest Memory'
+          ? 'มีผลวิเคราะห์หรือบันทึกพืชที่เก็บไว้ในเครื่องนี้'
           : 'ยังไม่มีผลวิเคราะห์ที่บันทึกไว้',
       valueLabel: `${input.guestMemory.farmRecords.length + analysisItems.length} รายการ`,
       route: '/app/analysis-history',
-      badgeLabel: 'local',
+      badgeLabel: 'ในเครื่องนี้',
       tone: 'sky',
     },
     {
@@ -313,7 +331,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
           : 'ยังไม่ได้ติดตามราคาพืช',
       valueLabel: `${input.cropWatches.length} พืช`,
       route: '/app/crop-watch',
-      badgeLabel: 'demo price',
+      badgeLabel: 'ราคาอ้างอิง',
       tone: 'gold',
     },
     {
@@ -323,17 +341,17 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       detail: `${input.weatherForecast.today.conditionLabel} · ฝน ${input.weatherForecast.today.rainChancePercent}%`,
       valueLabel: input.weatherForecast.location.label,
       route: '/app/weather',
-      badgeLabel: input.weatherForecast.source.sourceType === 'open_meteo' ? 'Open-Meteo' : 'local weather',
+      badgeLabel: input.weatherForecast.source.sourceType === 'open_meteo' ? 'อากาศล่าสุด' : 'ข้อมูลในเครื่อง',
       tone: 'neutral',
     },
     {
       id: 'calculator',
       module: 'calculator',
       title: 'เครื่องคำนวณเกษตร',
-      detail: 'คำนวณผสมยา ปุ๋ย ระยะปลูก ผลผลิต และต้นทุนแบบ local-only',
+      detail: 'คำนวณระยะปลูก ปุ๋ย/การให้ปุ๋ย ผลผลิต และต้นทุนในเครื่องนี้',
       valueLabel: '5 เครื่องมือ',
       route: '/app/calculators',
-      badgeLabel: 'M49',
+      badgeLabel: 'เครื่องมือ',
       tone: 'gold',
     },
     {
@@ -346,7 +364,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
           : 'บันทึกบทความหรือวิดีโอไว้กลับมาอ่าน/ดูภายหลัง',
       valueLabel: `${savedArticles.length + savedVideos.length} รายการ`,
       route: '/app/memory',
-      badgeLabel: 'Guest Memory',
+      badgeLabel: 'บันทึกไว้',
       tone: 'green',
     },
     {
@@ -359,7 +377,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
           : 'ยังไม่มีคำถาม AI ที่บันทึกไว้',
       valueLabel: `${input.guestMemory.recentAIQuestions.length} คำถาม`,
       route: '/app/ai',
-      badgeLabel: 'local',
+      badgeLabel: 'บันทึกไว้',
       tone: 'sky',
     },
   ];
@@ -384,7 +402,7 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
     actions.push({
       id: 'add-farm-record',
       title: 'เริ่มสมุดบันทึกฟาร์ม',
-      detail: 'บันทึกกิจกรรม รายรับ และรายจ่ายแบบ local-first เพื่อดูต้นทุนและกำไร',
+      detail: 'บันทึกกิจกรรม รายรับ และรายจ่ายเพื่อดูต้นทุนและกำไร',
       route: '/app/farm-records',
       ctaLabel: 'เปิดสมุดบันทึกฟาร์ม',
       priority: actions.length === 0 ? 'primary' : 'secondary',
@@ -395,7 +413,7 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
     actions.push({
       id: 'analyze-plant',
       title: 'บันทึกสุขภาพพืชครั้งแรก',
-      detail: 'ใช้หน้าวิเคราะห์โรคพืชแบบ mock แล้วบันทึกผลไว้ใน My Farm',
+      detail: 'ใช้หน้าวิเคราะห์โรคพืช แล้วบันทึกผลไว้ในฟาร์มของฉัน',
       route: '/app/analyze',
       ctaLabel: 'วิเคราะห์โรคพืช',
       priority: actions.length === 0 ? 'primary' : 'secondary',
@@ -406,7 +424,7 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
     actions.push({
       id: 'watch-crop',
       title: 'ติดตามราคาพืชที่ปลูก',
-      detail: 'เลือกพืชที่สนใจและตั้งค่าการแจ้งเตือนราคาแบบ demo',
+      detail: 'เลือกพืชที่สนใจและดูราคาอ้างอิง',
       route: '/app/prices',
       ctaLabel: 'เปิดราคาพืช',
       priority: actions.length === 0 ? 'primary' : 'secondary',
@@ -417,7 +435,7 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
     actions.push({
       id: 'ask-ai',
       title: 'ถาม AI เรื่องแปลงของคุณ',
-      detail: 'ถามคำถามทั่วไปแบบ mock โดยยังไม่มี API จริง',
+      detail: 'ถามคำถามทั่วไปเรื่องแปลง พืช หรือปัญหาเกษตร',
       route: '/app/ai',
       ctaLabel: 'ถาม AI',
       priority: 'secondary',
@@ -489,14 +507,14 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
       {
         id: 'local-only',
         title: 'ข้อมูลอยู่ในเครื่องนี้เท่านั้น',
-        detail: 'My Farm รวมข้อมูลจาก Guest Memory และ localStorage ยังไม่มี cloud sync หรือบัญชีจริง',
+        detail: 'ฟาร์มของฉันรวมข้อมูลที่บันทึกไว้ในเครื่องนี้ การซิงก์บัญชีจะเพิ่มในเวอร์ชันถัดไป',
         severity: 'warning',
         route: '/app/my-farm/settings',
       },
       {
         id: 'no-backend',
-        title: 'ยังไม่เชื่อมต่อ backend',
-        detail: 'การดูหน้านี้ไม่เขียนข้อมูลไป Supabase และไม่เรียก AI/weather/map API จริง',
+        title: 'ยังไม่ส่งข้อมูลออกจากเครื่อง',
+        detail: 'หน้านี้ใช้ข้อมูลที่บันทึกไว้ในเครื่องนี้เท่านั้น',
         severity: 'info',
       },
     ],

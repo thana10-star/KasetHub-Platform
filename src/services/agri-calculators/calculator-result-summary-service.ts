@@ -184,7 +184,7 @@ function createSummaryRecaps<C extends CalculatorCategory>(
   return {
     inputRecap: [
       `พื้นที่ ${formatAreaInput(costInput.landSizeValue, costInput.landSizeUnit)}`,
-      `ค่าปุ๋ย/ยา ${formatAgriCurrency(costInput.fertilizerCost)}`,
+      `ค่าปุ๋ย/วัสดุ ${formatAgriCurrency(costInput.fertilizerCost)}`,
       `ค่าแรง ${formatAgriCurrency(costInput.laborCost)}`,
       `ค่าอื่นรวม ${formatAgriCurrency(costInput.waterCost + costInput.machineryCost + costInput.otherCost)}`,
     ],

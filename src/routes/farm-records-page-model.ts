@@ -133,6 +133,29 @@ export type FormValidationResult = {
 export const farmRecordsDeleteConfirmationMessage =
   'ลบรายการนี้หรือไม่? ข้อมูลนี้จะถูกลบจากเครื่องนี้เท่านั้น ยังไม่มีข้อมูลบนคลาวด์ให้ลบเพราะยังไม่เปิดซิงก์ และจะกู้คืนไม่ได้หากยังไม่มี export/backup ในอนาคต';
 
+export const farmRecordsFirstUseEmptyStates = {
+  plots: {
+    actionLabel: 'เพิ่มแปลง',
+    detail: 'เริ่มจากตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน',
+    title: 'ยังไม่มีแปลง',
+  },
+  activity: {
+    actionLabel: 'เพิ่มกิจกรรม',
+    detail: 'บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ',
+    title: 'ยังไม่มีบันทึกงานในฟาร์ม',
+  },
+  finance: {
+    actionLabel: 'เพิ่มเงิน',
+    detail: 'บันทึกค่าใช้จ่าย เช่น ค่าปุ๋ย ค่ายา ค่าแรง หรือรายได้จากขายผลผลิต',
+    title: 'ยังไม่มีรายรับรายจ่าย',
+  },
+  harvest: {
+    actionLabel: 'เพิ่มผลผลิต',
+    detail: 'เมื่อเก็บเกี่ยวแล้ว ให้บันทึกน้ำหนักผลผลิตเพื่อดูต้นทุนต่อกก.',
+    title: 'ยังไม่มีข้อมูลผลผลิต',
+  },
+} as const;
+
 export function createDefaultFarmRecordsFilters(): FarmRecordsPageFilters {
   return {
     farmPlotId: '',
@@ -400,23 +423,23 @@ export function validateActivityForm(values: ActivityFormValues, availablePlots:
   const errors: string[] = [];
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('เลือกแปลงปลูกก่อนบันทึกกิจกรรม');
+    errors.push('กรุณาเลือกแปลง');
   }
 
   if (!hasValidDate(values.activityDate)) {
-    errors.push('ใส่วันที่กิจกรรมให้ถูกต้อง');
+    errors.push('กรุณาเลือกวันที่ทำงาน');
   }
 
   if (!farmActivityTypeIds.includes(values.activityType)) {
-    errors.push('เลือกประเภทกิจกรรมให้ถูกต้อง');
+    errors.push('กรุณาเลือกประเภทงาน');
   }
 
   if (!values.title.trim()) {
-    errors.push('ใส่ชื่อกิจกรรม');
+    errors.push('กรุณากรอกหัวข้อสั้น ๆ');
   }
 
   if (values.inputQuantity.trim() && parseOptionalNonNegativeNumber(values.inputQuantity) === undefined) {
-    errors.push('ปริมาณปัจจัยการผลิตต้องเป็นตัวเลขไม่ติดลบ');
+    errors.push('ปริมาณที่ใช้ต้องเป็นตัวเลขไม่ติดลบ');
   }
 
   return { isValid: errors.length === 0, errors };
@@ -454,7 +477,7 @@ export function validateFarmPlotForm(values: FarmPlotFormValues): FormValidation
   const errors: string[] = [];
 
   if (!values.name.trim()) {
-    errors.push('ใส่ชื่อแปลงปลูก');
+    errors.push('กรุณากรอกชื่อแปลง');
   }
 
   if (values.areaRai.trim() && parseOptionalNonNegativeNumber(values.areaRai) === undefined) {
@@ -468,7 +491,7 @@ export function validateCropCycleForm(values: CropCycleFormValues, availablePlot
   const errors: string[] = [];
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('เลือกแปลงปลูกของรอบปลูก');
+    errors.push('เลือกแปลงของรอบปลูก');
   }
 
   if (!values.cropName.trim()) {
@@ -496,19 +519,19 @@ export function validateHarvestForm(values: HarvestFormValues, availablePlots: F
   const quantity = Number(trimmedQuantity);
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('à¹€à¸¥à¸·à¸­à¸à¹à¸›à¸¥à¸‡à¸›à¸¥à¸¹à¸à¸à¹ˆà¸­à¸™à¸šà¸±à¸™à¸—à¸¶à¸à¸œà¸¥à¸œà¸¥à¸´à¸•');
+    errors.push('กรุณาเลือกแปลง');
   }
 
   if (!hasValidDate(values.harvestDate)) {
-    errors.push('à¹ƒà¸ªà¹ˆà¸§à¸±à¸™à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¹€à¸à¸µà¹ˆà¸¢à¸§à¹ƒà¸«à¹‰à¸–à¸¹à¸à¸•à¹‰à¸­à¸‡');
+    errors.push('กรุณาเลือกวันที่เก็บเกี่ยว');
   }
 
   if (!trimmedQuantity || !Number.isFinite(quantity) || quantity < 0) {
-    errors.push('à¸›à¸£à¸´à¸¡à¸²à¸“à¸œà¸¥à¸œà¸¥à¸´à¸•à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
+    errors.push(trimmedQuantity ? 'ปริมาณผลผลิตต้องเป็นตัวเลข 0 หรือมากกว่า' : 'กรุณากรอกปริมาณผลผลิต');
   }
 
   if (values.salePricePerKg.trim() && parseOptionalNonNegativeNumber(values.salePricePerKg) === undefined) {
-    errors.push('à¸£à¸²à¸„à¸²à¸‚à¸²à¸¢à¸•à¹ˆà¸­ kg à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
+    errors.push('ราคาขายต่อกก. ต้องเป็นตัวเลข 0 หรือมากกว่า');
   }
 
   return { isValid: errors.length === 0, errors };
