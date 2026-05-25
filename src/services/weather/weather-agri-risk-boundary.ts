@@ -28,6 +28,27 @@ export const weatherAgriRiskLevelTone: Record<WeatherAgriRiskLevel, 'success' | 
   high: 'danger',
 };
 
+export const weatherAgriRiskLevelRank: Record<WeatherAgriRiskLevel, number> = {
+  low: 0,
+  watch: 1,
+  caution: 2,
+  high: 3,
+};
+
+export const weatherAgriRiskLevelCardClass: Record<WeatherAgriRiskLevel, string> = {
+  low: 'border-emerald-200 bg-emerald-50/80 ring-emerald-100',
+  watch: 'border-sky-200 bg-sky-50/80 ring-sky-100',
+  caution: 'border-orange-300 bg-orange-50 ring-orange-200',
+  high: 'border-rose-300 bg-rose-50 ring-rose-200',
+};
+
+export const weatherAgriRiskLevelNoteClass: Record<WeatherAgriRiskLevel, string> = {
+  low: 'bg-white/75 text-emerald-900',
+  watch: 'bg-white/75 text-sky-900',
+  caution: 'bg-orange-100 text-orange-950',
+  high: 'bg-rose-100 text-rose-900',
+};
+
 export const weatherAgriRiskDisclaimers: WeatherAgriRiskDisclaimer[] = [
   {
     id: 'general-only',

@@ -47,6 +47,14 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - Keeps the recommended V1 path focused on Cloudflare web/PWA-style preview first, with Android wrapper considered after early feedback and iOS deferred.
 - Keeps the scope freeze intact: no real AI provider enablement, Supabase writes, cloud sync, GPS/geolocation, OCR/image diagnosis, receipt upload, notifications, or Farm Records storage/schema changes.
 
+## M104.1 Weather UI Priority And Navigation Polish
+
+- Reorders `/app/weather` so farmers see coarse location, current weather, risk summary, and update actions before source/cache details.
+- Adds shared Weather risk visual classes so low is calm green, watch is blue, caution is orange/yellow, and high is red/pink.
+- Adds route scroll-to-top behavior in the app shell while preserving hash anchors.
+- Standardizes the shared header Home affordance with `กลับหน้าแรก` linking to `/app`.
+- Keeps Weather provider/API behavior unchanged and does not add GPS, Supabase writes, cloud sync, real AI, OCR, notifications, or Farm Records storage/schema changes.
+
 ## M53 Calculator Export/Share And Rewarded Ads Planning
 
 - Adds structured `CalculatorResultSummary` models for copy/share/save flows.

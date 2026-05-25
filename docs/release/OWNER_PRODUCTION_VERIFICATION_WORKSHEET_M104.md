@@ -58,6 +58,10 @@ Cloudflare Pages production env values:
 Weather route verification:
 
 - [ ] `/app/weather` shows live forecast.
+- [ ] `/app/weather` starts with location/weather content, not source/API status.
+- [ ] Weather source/API/cache details are lower under `ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล`.
+- [ ] Risk color `ระวัง` is orange/yellow.
+- [ ] High risk is red/pink and low risk is calm green/blue-green.
 - [ ] No GPS/geolocation permission prompt appears.
 - [ ] No console errors appear during page load.
 - [ ] No visible env/provider/debug labels appear in the primary farmer UI.
@@ -92,6 +96,8 @@ Extra checks:
 - [ ] Farm Records Basic Mode is clear.
 - [ ] Profile/support/privacy entries are understandable.
 - [ ] No unexpected GPS, camera, upload, notification, login, cloud sync, or payment prompt appears.
+- [ ] Navigating from a long page to a new route starts at the top.
+- [ ] Main pages show a clear Home affordance, such as `กลับหน้าแรก`.
 
 Mobile QA notes:
 
@@ -133,4 +139,3 @@ Store blocker notes:
 Decision notes:
 
 -
-

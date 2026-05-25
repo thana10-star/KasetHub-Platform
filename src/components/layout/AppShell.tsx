@@ -1,9 +1,13 @@
+import { useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sprout } from 'lucide-react';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { platformHighlights } from '@/data/mockData';
 
 export function AppShell() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(35,163,107,0.18),_transparent_34%),linear-gradient(180deg,_#f5fbf7,_#edf8f0)] text-kaset-ink lg:grid lg:grid-cols-[minmax(320px,440px)_minmax(390px,430px)] lg:justify-center lg:gap-12 lg:px-8 lg:py-8">
       <aside className="hidden self-center lg:block">
@@ -37,7 +41,8 @@ export function AppShell() {
       </aside>
 
       <main className="mx-auto flex h-screen w-full max-w-[430px] flex-col overflow-hidden bg-kaset-mist shadow-none lg:h-[860px] lg:rounded-[2rem] lg:border lg:border-white/80 lg:shadow-[0_30px_90px_rgba(15,90,61,0.2)]">
-        <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <ScrollToTop scrollElementRef={scrollContainerRef} />
+        <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto" data-testid="app-scroll-container" ref={scrollContainerRef}>
           <Outlet />
         </div>
         <BottomNav />

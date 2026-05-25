@@ -1,5 +1,5 @@
-import { Bell, ChevronLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Bell, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 type PageHeaderProps = {
   title: string;
@@ -8,20 +8,17 @@ type PageHeaderProps = {
 };
 
 export function PageHeader({ title, subtitle, showBack = false }: PageHeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <header className="flex items-start justify-between gap-3 px-5 pb-4 pt-5">
       <div className="flex min-w-0 items-start gap-3">
         {showBack ? (
-          <button
-            aria-label="กลับ"
+          <Link
+            aria-label="กลับหน้าแรก"
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-kaset-deep shadow-soft ring-1 ring-kaset-deep/8"
-            onClick={() => navigate(-1)}
-            type="button"
+            to="/app"
           >
-            <ChevronLeft aria-hidden="true" className="h-5 w-5" />
-          </button>
+            <Home aria-hidden="true" className="h-5 w-5" />
+          </Link>
         ) : null}
         <div className="min-w-0">
           <p className="text-xs font-bold text-kaset-leaf">KasetHub</p>

@@ -32,7 +32,7 @@ Status guide:
 
 | ID | Route / screen | Blocker type | Severity | Screenshot reference | Fix owner | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M104-B001 | `/app/weather` production | weather/env | blocker | TBD | Owner | open | Cloudflare Weather env not owner-verified yet. |
+| M104-B001 | `/app/weather` production | weather/env | blocker | Owner production screenshots | Owner | resolved | Owner confirmed Cloudflare Weather env is working with live Open-Meteo data after production env setup. |
 | M104-B002 | Core mobile routes | visual | blocker | TBD | Owner / dev | open | Real-device screenshot QA is pending. |
 | M104-B003 | Store icon | store asset | blocker | TBD | Owner / designer | open | Final app icon approval pending. |
 | M104-B004 | Privacy policy URL | privacy/support | blocker | TBD | Owner | open | Public privacy policy URL pending. |
@@ -44,10 +44,10 @@ Status guide:
 
 | ID | Route / screen | Blocker type | Severity | Screenshot reference | Fix owner | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M104-B008 | | | | | | | |
-| M104-B009 | | | | | | | |
-| M104-B010 | | | | | | | |
-| M104-B011 | | | | | | | |
+| M104-B008 | `/app/weather` | visual | blocker | Owner mobile screenshots | Codex | resolved | M104.1 moved current weather and location above source/API details. |
+| M104-B009 | `/app/weather` | visual | blocker | Owner mobile screenshots | Codex | resolved | M104.1 improved Weather risk colors: caution orange/yellow, high red/pink, low green. |
+| M104-B010 | App route changes | visual | important | Owner mobile feedback | Codex | resolved | M104.1 added route scroll-to-top while preserving hash anchors. |
+| M104-B011 | Main app pages | visual | important | Owner mobile feedback | Codex | resolved | M104.1 standardized shared header Home affordance with `กลับหน้าแรก`. |
 | M104-B012 | | | | | | | |
 
 ## Release Rule
@@ -62,4 +62,3 @@ Fix only release-blocking issues found during owner verification:
 - store-required privacy/support/asset gaps
 
 Do not use this log to start broad product expansion.
-

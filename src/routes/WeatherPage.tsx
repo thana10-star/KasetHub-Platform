@@ -12,6 +12,7 @@ import {
   ThermometerSun,
   Wind,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -23,10 +24,14 @@ import { cx } from '@/components/ui/classNames';
 import { useWeather } from '@/hooks/useWeather';
 import {
   weatherAgriRiskCategoryLabels,
+  weatherAgriRiskLevelCardClass,
   weatherAgriRiskLevelLabels,
+  weatherAgriRiskLevelNoteClass,
+  weatherAgriRiskLevelRank,
   weatherAgriRiskLevelTone,
 } from '@/services/weather/weather-agri-risk-boundary';
 import { assessWeatherAgriRisk } from '@/services/weather/weather-agri-risk-rules';
+import type { WeatherAgriRiskCard } from '@/services/weather/weather-agri-risk.types';
 import { computeWeatherStaleAgeLabel } from '@/services/weather/weather-cache-qa';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
@@ -52,6 +57,40 @@ function RiskBadges({ risks }: { risks: WeatherForecastDay['risks'] }) {
       ))}
     </div>
   );
+}
+
+function MetricCard({
+  children,
+  icon: Icon,
+  label,
+  tone = 'mist',
+  value,
+}: {
+  children?: ReactNode;
+  icon: typeof ThermometerSun;
+  label: string;
+  tone?: 'mist' | 'sky' | 'green';
+  value: string;
+}) {
+  const toneClass =
+    tone === 'sky'
+      ? 'bg-sky-50 text-sky-900'
+      : tone === 'green'
+        ? 'bg-emerald-50 text-emerald-900'
+        : 'bg-kaset-mist text-kaset-ink';
+
+  return (
+    <div className={cx('rounded-lg p-3', toneClass)}>
+      <Icon aria-hidden="true" className="h-5 w-5" />
+      <p className="mt-2 text-2xl font-extrabold">{value}</p>
+      <p className="text-xs font-bold leading-5 opacity-80">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function sortRiskCards(cards: WeatherAgriRiskCard[]) {
+  return [...cards].sort((a, b) => weatherAgriRiskLevelRank[b.level] - weatherAgriRiskLevelRank[a.level]);
 }
 
 export function WeatherPage() {
@@ -85,67 +124,151 @@ export function WeatherPage() {
   const staleAgeLabel = computeWeatherStaleAgeLabel(cacheStatus);
   const offlineState = sourceReadiness.offlineState;
   const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
-  const freshnessLabel = cacheStatus.isFresh ? 'ข้อมูลล่าสุด' : cacheStatus.isStale ? 'ข้อมูลอาจเก่า' : 'ข้อมูลสำรอง';
+  const sortedRiskCards = sortRiskCards(agriRiskAssessment.cards).slice(0, 6);
+  const freshnessLabel = cacheStatus.isFresh ? 'ข้อมูลพยากรณ์ล่าสุด' : cacheStatus.isStale ? 'ข้อมูลอาจเก่า' : 'ข้อมูลสำรอง';
   const connectionLabel =
     offlineState.status === 'live'
-      ? 'เชื่อมต่อแหล่งพยากรณ์'
+      ? 'ข้อมูลพยากรณ์ล่าสุด'
       : offlineState.status === 'stale_cache'
         ? 'ใช้ข้อมูลล่าสุดในเครื่อง'
-        : 'ใช้ข้อมูลสำรอง';
+        : 'ใช้ข้อมูลสำรองในเครื่อง';
+
   return (
     <div>
-      <PageHeader title="สภาพอากาศเกษตร" subtitle="ฝน ลม ความชื้น และพยากรณ์สำหรับวางแผนงานแปลง" showBack />
+      <PageHeader title="สภาพอากาศเกษตร" subtitle="ดูอากาศวันนี้และความเสี่ยงเบื้องต้นก่อนวางแผนงานแปลง" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        <Card className="overflow-hidden bg-kaset-deep text-white">
-          <div className="relative p-5">
-            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10" />
-            <div className="relative flex gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
-                <CloudSun aria-hidden="true" className="h-7 w-7" />
-              </span>
+        {locations.length > 1 ? (
+          <section className="grid gap-3" data-testid="weather-location-selector">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่แบบหยาบ</h2>
+              <StatusPill tone="info">ไม่ใช้ GPS</StatusPill>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {locations.map((location) => (
+                <button
+                  aria-pressed={selectedLocationId === location.id}
+                  className={cx(
+                    'min-h-11 rounded-full px-4 text-sm font-extrabold ring-1 ring-kaset-deep/10',
+                    selectedLocationId === location.id
+                      ? 'bg-kaset-deep text-white'
+                      : 'bg-white text-kaset-deep hover:bg-kaset-mint',
+                  )}
+                  key={location.id}
+                  onClick={() => selectLocation(location.id)}
+                  type="button"
+                >
+                  {location.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs font-bold leading-5 text-slate-500">
+              {locationPrivacyStatus.summary}
+            </p>
+          </section>
+        ) : null}
+
+        <Card className="overflow-hidden p-0" data-testid="weather-current-card">
+          <div className="bg-kaset-deep p-5 text-white">
+            <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <StatusPill className="bg-white/15 text-white ring-white/20" tone={isOpenMeteo ? 'success' : 'warning'}>
-                  {isOpenMeteo ? 'ข้อมูลอากาศล่าสุด' : 'ข้อมูลสำรองในเครื่อง'}
+                  {freshnessLabel}
                 </StatusPill>
-                <h2 className="mt-3 text-2xl font-extrabold leading-8">{forecast.location.label}</h2>
-                <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  {isOpenMeteo ? 'ข้อมูลอ้างอิงจากแหล่งพยากรณ์ภายนอก' : 'ใช้ข้อมูลล่าสุดที่มีในเครื่องเมื่อดึงข้อมูลใหม่ไม่ได้'}
-                </p>
+                <h2 className="mt-3 text-2xl font-extrabold leading-8">อากาศตอนนี้</h2>
+                <p className="mt-1 text-sm leading-6 text-emerald-50/90">{current?.conditionLabel ?? today.conditionLabel}</p>
+              </div>
+              <span className={cx('grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white', conditionIconClass[today.iconTone])}>
+                <CloudSun aria-hidden="true" className="h-7 w-7" />
+              </span>
+            </div>
+            <div className="mt-4 grid gap-1 text-sm font-bold leading-6 text-emerald-50/90">
+              <p>พื้นที่: {forecast.location.label}</p>
+              <p>อัปเดตล่าสุด: {sourceReadiness.fetchedTimeLabel}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <MetricCard icon={ThermometerSun} label="อุณหภูมิปัจจุบัน" value={`${Math.round(current?.temperatureC ?? today.maxTempC)}°C`} />
+              <MetricCard icon={CloudRain} label="โอกาสฝนสูงสุด" tone="sky" value={`${today.rainChancePercent}%`} />
+              <MetricCard icon={Droplets} label="ความชื้น" tone="green" value={`${current?.humidityPercent ?? today.humidityPercent}%`} />
+              <MetricCard icon={Wind} label="กม./ชม. ความเร็วลม" value={`${Math.round(current?.windKph ?? today.windKph)}`} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-sky-50 p-3 text-sky-900">
+                <CloudRain aria-hidden="true" className="h-5 w-5" />
+                <p className="mt-2 text-xl font-extrabold">{current?.precipitationMm ?? today.precipitationMm ?? 0} มม.</p>
+                <p className="text-xs font-bold leading-5 text-sky-800">ฝน/ปริมาณน้ำฝนล่าสุด</p>
+              </div>
+              <div className="rounded-lg bg-kaset-mist p-3 text-kaset-ink">
+                <MapPin aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+                <p className="mt-2 text-base font-extrabold leading-6">{forecast.location.label}</p>
+                <p className="text-xs font-bold leading-5 text-slate-500">พื้นที่กลาง ไม่ใช่หมุดแปลง</p>
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone={modeStatus.canFetchOpenMeteo ? 'success' : 'warning'}>
-              {isOpenMeteo ? 'ข้อมูลพยากรณ์ล่าสุด' : 'ข้อมูลสำรองในเครื่อง'}
+        {forecast.isStale || cacheStatus.isStale ? (
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลอาจเก่า">
+            ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
+          </NoticeBox>
+        ) : null}
+
+        {forecast.isFallback ? (
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ตอนนี้ใช้ข้อมูลสำรองในเครื่อง">
+            เมื่อเชื่อมต่อแหล่งพยากรณ์ออนไลน์แล้ว ระบบจะแสดงข้อมูลล่าสุด ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
+          </NoticeBox>
+        ) : null}
+
+        <section className="grid gap-3" data-testid="weather-risk-summary">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold text-kaset-ink">ความเสี่ยงอากาศเบื้องต้น</h2>
+            <StatusPill tone={weatherAgriRiskLevelTone[agriRiskAssessment.overallLevel]}>
+              {weatherAgriRiskLevelLabels[agriRiskAssessment.overallLevel]}
             </StatusPill>
-            <Badge tone="neutral">ไม่ใช้ GPS</Badge>
-            <Badge tone="neutral">ไม่บันทึกตำแหน่งส่วนตัว</Badge>
-            <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>{freshnessLabel}</Badge>
-            <Badge tone={offlineState.status === 'live' ? 'green' : offlineState.status === 'stale_cache' ? 'gold' : 'neutral'}>
-              {connectionLabel}
-            </Badge>
-            {isLoading ? <Badge tone="sky">กำลังโหลด</Badge> : null}
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            อัปเดต: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}
+          <p className="text-sm font-semibold leading-6 text-slate-600">
+            ใช้ดูความเสี่ยงทั่วไปก่อนวางแผนงานแปลง ไม่ใช่คำสั่งปฏิบัติหรือคำแนะนำสารเคมี
           </p>
-          <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
-            <p>{isOpenMeteo ? 'ข้อมูลอ้างอิงจาก Open-Meteo' : 'ตอนนี้แสดงข้อมูลสำรองในเครื่อง'}</p>
-            <p>
-              {isOpenMeteo
-                ? 'ใช้พื้นที่กลางจังหวัดหรือเมืองโดยประมาณ ไม่ขอ GPS'
-                : 'เมื่อเปิดแหล่งพยากรณ์ออนไลน์แล้ว ระบบจะดึงข้อมูลล่าสุดให้'}
-            </p>
-            <p>ข้อมูลอาจล่าช้าหรือคลาดเคลื่อนได้</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {sortedRiskCards.map((card) => (
+              <Card
+                className={cx('p-4', weatherAgriRiskLevelCardClass[card.level])}
+                data-risk-level={card.level}
+                key={card.id}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Badge tone="neutral">{weatherAgriRiskCategoryLabels[card.category]}</Badge>
+                    <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{card.title}</h3>
+                  </div>
+                  <StatusPill tone={weatherAgriRiskLevelTone[card.level]}>{weatherAgriRiskLevelLabels[card.level]}</StatusPill>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{card.summary}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {card.signals.slice(0, 3).map((signal) => (
+                    <Badge className="bg-white/80" key={signal.id} tone="sky">
+                      {signal.label}: {String(signal.value)}
+                      {signal.unit ?? ''}
+                    </Badge>
+                  ))}
+                </div>
+                <p className={cx('mt-3 rounded-lg p-3 text-xs font-bold leading-5', weatherAgriRiskLevelNoteClass[card.level])}>
+                  {card.boundaryNote}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <Card className="p-4" data-testid="weather-update-actions">
+          <div className="flex items-center gap-2">
+            <RefreshCw aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
+            <h2 className="font-extrabold text-kaset-ink">อัปเดตข้อมูล</h2>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
-              <Settings2 aria-hidden="true" className="h-4 w-4" />
-              ตั้งค่าพื้นที่
-            </Link>
             <button
               className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white disabled:bg-slate-200 disabled:text-slate-500"
               disabled={refreshPolicy.status === 'disabled' || isLoading}
@@ -155,186 +278,56 @@ export function WeatherPage() {
               <RefreshCw aria-hidden="true" className="h-4 w-4" />
               อัปเดตข้อมูล
             </button>
-            <button
-              className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10"
-              onClick={clearSelectedCache}
-              type="button"
-            >
-              ล้างข้อมูลพื้นที่นี้
-            </button>
+            <Link className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+              <Settings2 aria-hidden="true" className="h-4 w-4" />
+              ตั้งค่าพื้นที่
+            </Link>
           </div>
-          <p className="mt-3 flex items-center gap-2 text-xs font-bold leading-5 text-slate-500">
+          <p className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold leading-5 text-slate-500">
             <Clock3 aria-hidden="true" className="h-4 w-4" />
             {manualRefreshMessage || refreshPolicy.message}
             {refreshPolicy.remainingCooldownMs > 0 ? ` · ${formatWeatherRefreshCooldown(refreshPolicy.remainingCooldownMs)}` : ''}
             {lastSuccessfulRefresh ? ` · ล่าสุด ${new Date(lastSuccessfulRefresh).toLocaleString('th-TH')}` : ''}
           </p>
-          <p className="mt-2 text-xs font-bold leading-5 text-slate-500">
-            ตั้งค่าพื้นที่: {localPreferenceStatus.selectedLabel} · บันทึกไว้ในเครื่องนี้
-          </p>
         </Card>
 
-        {forecast.isStale || cacheStatus.isStale ? (
-          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลอาจเก่า">
-            ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบข้อมูลจากแหล่งทางการเพิ่มเติมและดูสภาพจริงก่อนตัดสินใจ
-          </NoticeBox>
-        ) : null}
-
-        {forecast.isFallback ? (
-          <NoticeBox tone="warning" icon={ShieldAlert} title="ใช้ข้อมูลสำรองในเครื่อง">
-            ตอนนี้ใช้ข้อมูลอากาศล่าสุดที่มีในเครื่องนี้ เมื่อเชื่อมต่อแหล่งข้อมูลล่าสุดไม่ได้ ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
-          </NoticeBox>
-        ) : (
-          <NoticeBox tone="info" title="ข้อมูลอ้างอิงจากแหล่งพยากรณ์ภายนอก">
-            ใช้พื้นที่เริ่มต้นแบบจังหวัดหรือเมืองกลาง ไม่ขอ GPS และไม่บันทึกตำแหน่งส่วนตัว
-          </NoticeBox>
-        )}
+        <details className="rounded-lg bg-white p-4 shadow-card ring-1 ring-kaset-deep/10" data-testid="weather-source-details">
+          <summary className="cursor-pointer text-sm font-extrabold text-kaset-deep">ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล</summary>
+          <div className="mt-3 grid gap-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone={isOpenMeteo ? 'green' : 'gold'}>{connectionLabel}</Badge>
+              <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>{freshnessLabel}</Badge>
+              <Badge tone="neutral">ไม่ใช้ GPS</Badge>
+              <Badge tone="neutral">ไม่บันทึกตำแหน่งส่วนตัว</Badge>
+            </div>
+            <div className="grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+              <p>แหล่งข้อมูล: {isOpenMeteo ? 'Open-Meteo' : 'ข้อมูลสำรองในเครื่อง'}</p>
+              <p>อัปเดต: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}</p>
+              <p>พื้นที่ที่เลือก: {localPreferenceStatus.selectedLabel} · บันทึกไว้ในเครื่องนี้</p>
+              <p>{sourceReadiness.privacyBoundary.summary}</p>
+              <p>สถานะระบบ: {modeStatus.mode} · cache {cacheStatus.freshness}</p>
+            </div>
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10"
+              onClick={clearSelectedCache}
+              type="button"
+            >
+              ล้างข้อมูลพื้นที่นี้
+            </button>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-rules">
+                ดูกฎความเสี่ยงเบื้องต้น
+              </Link>
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-review">
+                ตรวจสถานะคำแนะนำ
+              </Link>
+            </div>
+          </div>
+        </details>
 
         <NoticeBox tone="warning" title="ข้อควรระวังสำหรับงานเกษตร">
           ก่อนพ่นยาให้ดูฝนและลม ข้อมูลอากาศเป็นการพยากรณ์ อาจคลาดเคลื่อนได้ ควรตรวจสภาพจริงที่แปลงก่อนตัดสินใจ
         </NoticeBox>
-
-        <section className="grid gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-extrabold text-kaset-ink">ความเสี่ยงอากาศเบื้องต้น</h2>
-            <div className="flex flex-wrap gap-2">
-              <StatusPill tone={weatherAgriRiskLevelTone[agriRiskAssessment.overallLevel]}>
-                {weatherAgriRiskLevelLabels[agriRiskAssessment.overallLevel]}
-              </StatusPill>
-              <StatusPill tone="warning">คำแนะนำทั่วไป</StatusPill>
-            </div>
-          </div>
-          <NoticeBox tone="info" title="คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ">
-            ใช้ดูความเสี่ยงทั่วไปก่อนวางแผนงานแปลง ไม่แนะนำสินค้า อัตราสารเคมี หรือรับประกันผลลัพธ์
-          </NoticeBox>
-          <div className="grid gap-3 md:grid-cols-2">
-            {agriRiskAssessment.cards.slice(0, 6).map((card) => (
-              <Card className="p-4" key={card.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <Badge tone="neutral">{weatherAgriRiskCategoryLabels[card.category]}</Badge>
-                    <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{card.title}</h3>
-                  </div>
-                  <StatusPill tone={weatherAgriRiskLevelTone[card.level]}>{weatherAgriRiskLevelLabels[card.level]}</StatusPill>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{card.summary}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {card.signals.slice(0, 3).map((signal) => (
-                    <Badge key={signal.id} tone="sky">
-                      {signal.label}: {String(signal.value)}{signal.unit ?? ''}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs font-bold leading-5 text-amber-900">{card.boundaryNote}</p>
-              </Card>
-            ))}
-          </div>
-          <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-rules">
-            ดูกฎความเสี่ยงเบื้องต้น
-          </Link>
-          <details className="rounded-lg bg-white p-4 ring-1 ring-kaset-deep/10">
-            <summary className="cursor-pointer text-sm font-extrabold text-kaset-deep">
-              ข้อมูลเพิ่มเติมสำหรับทีมงาน
-            </summary>
-            <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
-              ข้อมูลพยากรณ์จริงพร้อมใช้งานเมื่อเปิดการตั้งค่าเซิร์ฟเวอร์
-            </p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
-                ตรวจสถานะคำแนะนำ
-              </Link>
-              <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/weather/risk-audit">
-                ตรวจรายการก่อนปล่อยใช้งาน
-              </Link>
-            </div>
-          </details>
-        </section>
-
-        {locations.length > 1 ? (
-          <section className="grid gap-3">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่แบบหยาบ</h2>
-              <StatusPill tone="info">พื้นที่กลางจังหวัด/เมือง</StatusPill>
-            </div>
-            <div className="-mx-5 overflow-x-auto px-5">
-              <div className="flex min-w-max gap-2">
-                {locations.map((location) => (
-                  <button
-                    aria-pressed={selectedLocationId === location.id}
-                    className={cx(
-                      'min-h-11 rounded-full px-4 text-sm font-extrabold ring-1 ring-kaset-deep/10',
-                      selectedLocationId === location.id
-                        ? 'bg-kaset-deep text-white'
-                        : 'bg-white text-kaset-deep hover:bg-kaset-mint',
-                    )}
-                    key={location.id}
-                    onClick={() => selectLocation(location.id)}
-                    type="button"
-                  >
-                    {location.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p className="text-xs font-bold leading-5 text-slate-500">
-              {locationPrivacyStatus.summary}
-            </p>
-          </section>
-        ) : null}
-
-        <Card className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex flex-wrap gap-2">
-                <Badge tone="sky">{forecast.location.region}</Badge>
-                <Badge tone="neutral">{current?.observedAtLabel ?? forecast.updatedAtLabel}</Badge>
-              </div>
-              <h2 className="mt-3 text-xl font-extrabold leading-7 text-kaset-ink">อากาศตอนนี้</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">{current?.conditionLabel ?? today.conditionLabel}</p>
-            </div>
-            <span className={cx('grid h-14 w-14 shrink-0 place-items-center rounded-lg', conditionIconClass[today.iconTone])}>
-              <CloudSun aria-hidden="true" className="h-7 w-7" />
-            </span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-kaset-mist p-3">
-              <ThermometerSun aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-              <p className="mt-2 text-2xl font-extrabold text-kaset-ink">{Math.round(current?.temperatureC ?? today.maxTempC)}°C</p>
-              <p className="text-xs font-bold leading-5 text-slate-500">อุณหภูมิปัจจุบัน</p>
-            </div>
-            <div className="rounded-lg bg-sky-50 p-3">
-              <CloudRain aria-hidden="true" className="h-5 w-5 text-sky-800" />
-              <p className="mt-2 text-2xl font-extrabold text-sky-900">{today.rainChancePercent}%</p>
-              <p className="text-xs font-bold leading-5 text-sky-800">โอกาสฝนสูงสุด</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-3">
-              <Droplets aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-              <p className="mt-2 text-2xl font-extrabold text-kaset-ink">
-                {current?.humidityPercent ?? today.humidityPercent}%
-              </p>
-              <p className="text-xs font-bold leading-5 text-slate-500">ความชื้น</p>
-            </div>
-            <div className="rounded-lg bg-kaset-mist p-3">
-              <Wind aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-              <p className="mt-2 text-2xl font-extrabold text-kaset-ink">{Math.round(current?.windKph ?? today.windKph)}</p>
-              <p className="text-xs font-bold leading-5 text-slate-500">กม./ชม. ความเร็วลม</p>
-            </div>
-          </div>
-        </Card>
-
-        <section className="grid grid-cols-2 gap-3">
-          <Card className="p-4">
-            <CloudRain aria-hidden="true" className="h-5 w-5 text-sky-800" />
-            <p className="mt-3 text-2xl font-extrabold text-sky-900">{current?.precipitationMm ?? today.precipitationMm ?? 0} มม.</p>
-            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">ฝน/ปริมาณน้ำฝนล่าสุด</p>
-          </Card>
-          <Card className="p-4">
-            <MapPin aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-            <p className="mt-3 text-lg font-extrabold leading-7 text-kaset-ink">{forecast.location.label}</p>
-            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">จังหวัด/เมืองกลางโดยประมาณ ไม่ใช่หมุดแปลง</p>
-          </Card>
-        </section>
 
         <Card className="p-4">
           <div className="flex items-center gap-2">

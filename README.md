@@ -75,6 +75,13 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Adds owner-side worksheets for production verification, screenshot capture, release blocker logging, and local commands/Cloudflare links.
 - Keeps M104 focused on owner verification: no feature expansion, wrapper implementation, store submission, real AI provider, Supabase writes, cloud sync, GPS/geolocation, OCR, receipt upload, notifications, or Farm Records schema changes.
 
+## M104.1 Weather UI Priority + App Navigation Polish
+
+- Moves `/app/weather` to a farmer-first order: location, current weather, risk summary, update actions, then source/cache details under `ข้อมูลเพิ่มเติม`.
+- Improves Weather risk colors so `ระวัง` is orange/yellow, high risk is red/pink, low risk is calm green, and watch/unknown states stay blue/neutral.
+- Adds route scroll-to-top behavior while preserving hash anchors, and standardizes the shared header Home action as `กลับหน้าแรก`.
+- Keeps Weather provider/API behavior unchanged and adds no GPS, Supabase writes, cloud sync, real AI provider, OCR, notifications, or Farm Records storage/schema changes.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.
