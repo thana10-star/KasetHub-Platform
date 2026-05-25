@@ -1026,11 +1026,11 @@ M91 keeps the same local-only boundary and adds no Supabase schema, Supabase rea
 
 ## M92 Home First Farm Hub + Elder-Friendly Navigation
 
-M92 moves Farm Records discovery onto the first app screen. `/app` now includes a large Home Farm Hub card with Thai-first copy, direct actions for `/app/my-farm` and `/app/farm-records`, and a short local Farm Records summary from the existing `kasethub.farmRecords.v1` state.
+M92 moves Farm Records discovery onto the first app screen. M92.1 compacts `/app` into a Home Farm Hub launcher with Thai-first copy and one primary action for `/app/my-farm`.
 
-The home card keeps the farmer-facing summary intentionally small: net profit/loss, cost per kg or rai when available, harvest kg when available, and latest farm record date. Large quick actions link to My Farm, farm work records, farm income/expense cost view, and weather.
+The home card no longer shows Farm Records metrics, cost dashboard links, harvest details, or a 2x2 Farm Records quick-action grid. Those details remain in `/app/my-farm`, `/app/farm-records`, `/app/farm-records#farm-cost-dashboard`, and `/app/farm-records#farm-harvest-yield`.
 
-`docs/ux/HOME_FIRST_NAVIGATION_M92.md` documents the current navigation problem, why Farm Records should not be hidden in Profile, what should remain in Profile, what should be on Home, and a future bottom navigation proposal. M92 does not remove routes or change Farm Records data behavior.
+`docs/ux/HOME_FIRST_NAVIGATION_M92.md` documents the current navigation problem, the M92.1 compact decision after mobile preview, why Farm Records should not be hidden in Profile, what should remain in Profile, what should be on Home, and a future bottom navigation proposal. M92.1 does not remove routes or change Farm Records data behavior.
 
 M92 remains UX/navigation only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation/map pins, no AI record processing, no receipt upload, no OCR, no notifications, no tax/bank/loan integration, and no backend feature changes.
 

@@ -97,3 +97,9 @@ M92 does not remove profile entries or routes.
 ## 12. Next Recommended Milestone
 
 M93 Elder-Friendly Navigation Cleanup: reduce profile/menu clutter, consider a dedicated My Farm bottom-nav slot, and separate farmer-facing navigation from internal/admin/QA surfaces while preserving all existing routes.
+
+## M92.1 Compact Fix Addendum
+
+After real mobile preview, the M92 Home Farm Hub was judged too tall for the first screen. M92.1 compacts it into a launcher-only card with one primary `/app/my-farm` action. Detailed Farm Records metrics, cost/yield views, and quick actions remain in `/app/my-farm` and `/app/farm-records`.
+
+See `reports/milestones/M92_1_HOME_FARM_HUB_COMPACT_FIX_REPORT.md`.

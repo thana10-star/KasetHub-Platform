@@ -10,24 +10,15 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { articles, communityPosts, cropPrices, videos } from '@/data/mockData';
-import { useFarmRecords } from '@/hooks/useFarmRecords';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
-import { Bell, ClipboardList, CloudSun, Sprout, Wallet } from 'lucide-react';
+import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
+import { Bell, Sprout } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { buildHomeFarmHubViewModel, type HomeFarmHubQuickAction } from '@/routes/home-farm-hub-model';
-
-const farmHubQuickActionIcons: Record<HomeFarmHubQuickAction['id'], typeof Sprout> = {
-  'my-farm': Sprout,
-  'farm-work': ClipboardList,
-  'farm-money': Wallet,
-  weather: CloudSun,
-};
 
 export function AppHomePage() {
   const featuredVideo = videos.find((video) => video.isFeatured) ?? videos[0];
   const notificationCenter = useNotificationCenter();
-  const farmRecords = useFarmRecords();
-  const farmHub = buildHomeFarmHubViewModel(farmRecords.state);
+  const farmHub = buildHomeFarmHubViewModel();
 
   return (
     <div>
@@ -35,82 +26,25 @@ export function AppHomePage() {
       <div className="grid gap-5 px-5 pb-6">
         <HeroCard />
 
-        <section aria-labelledby="home-farm-hub-title" className="grid gap-3">
-          <Card className="overflow-hidden border-kaset-deep/10">
-            <div className="bg-kaset-deep px-5 py-5 text-white">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
-                  <Sprout aria-hidden="true" className="h-7 w-7" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-kaset-mint">Home Farm Hub</p>
-                  <h2 id="home-farm-hub-title" className="text-2xl font-extrabold leading-tight">
-                    ฟาร์มของฉัน
-                  </h2>
-                  <p className="mt-1 text-base leading-7 text-emerald-50">
-                    บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน กำไร และผลผลิต
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <section aria-labelledby="home-farm-hub-title">
+          <Card className="p-4">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <Sprout aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold uppercase tracking-wide text-kaset-deep">{farmHub.eyebrow}</p>
+                <h2 id="home-farm-hub-title" className="mt-1 text-xl font-extrabold leading-7 text-kaset-ink">
+                  {farmHub.title}
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">{farmHub.subtitle}</p>
                 <Link
-                  className="inline-flex min-h-[56px] items-center justify-center rounded-lg bg-white px-4 py-3 text-center text-base font-extrabold leading-6 text-kaset-deep transition hover:bg-kaset-mint"
+                  className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-lg bg-kaset-deep px-4 text-base font-extrabold leading-6 text-white transition hover:bg-kaset-ink"
                   to={farmHub.primaryRoute}
                 >
-                  เปิดฟาร์มของฉัน
-                </Link>
-                <Link
-                  className="inline-flex min-h-[56px] items-center justify-center rounded-lg bg-kaset-mint px-4 py-3 text-center text-base font-extrabold leading-6 text-kaset-deep transition hover:bg-white"
-                  to={farmHub.recordsRoute}
-                >
-                  เปิดสมุดฟาร์ม
+                  {farmHub.primaryLabel}
                 </Link>
               </div>
-            </div>
-
-            <div className="grid gap-4 p-4">
-              {farmHub.hasFarmData ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {farmHub.facts.map((fact) => (
-                    <div className="rounded-lg bg-kaset-mist p-3" key={fact.id}>
-                      <p className="text-xs font-bold leading-5 text-slate-500">{fact.label}</p>
-                      <p className="mt-1 break-words text-lg font-extrabold leading-6 text-kaset-deep">{fact.value}</p>
-                      {fact.helper ? <p className="mt-1 text-xs leading-5 text-slate-600">{fact.helper}</p> : null}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="rounded-lg bg-kaset-mist p-4 text-base font-bold leading-7 text-kaset-ink">
-                  {farmHub.emptyStateCopy}
-                </p>
-              )}
-
-              <div className="grid grid-cols-2 gap-2">
-                {farmHub.quickActions.map((action) => {
-                  const Icon = farmHubQuickActionIcons[action.id];
-
-                  return (
-                    <Link
-                      className="flex min-h-[72px] items-center gap-3 rounded-lg border border-kaset-deep/10 bg-white px-3 py-3 text-left transition hover:bg-kaset-mint/70"
-                      key={action.id}
-                      to={action.route}
-                    >
-                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-                        <Icon aria-hidden="true" className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[15px] font-extrabold leading-5 text-kaset-ink">{action.label}</span>
-                        <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{action.helper}</span>
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              <p className="rounded-lg bg-white px-3 py-2 text-xs font-semibold leading-5 text-slate-600 ring-1 ring-kaset-deep/10">
-                ข้อมูลสรุปนี้อ่านจากข้อมูลในเครื่องนี้เท่านั้น ยังไม่มีการซิงก์ขึ้นคลาวด์
-              </p>
             </div>
           </Card>
         </section>

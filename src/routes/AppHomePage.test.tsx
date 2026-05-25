@@ -2,55 +2,68 @@ import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import { AppHomePage } from '@/routes/AppHomePage';
+import { FarmRecordsDebugPage } from '@/routes/FarmRecordsDebugPage';
+import { MyFarmPage } from '@/routes/MyFarmPage';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
-import { createDemoFarmRecordsState } from '@/services/farm-records/farm-records-fixtures';
-import { createEmptyFarmRecordsState } from '@/services/farm-records/farm-records-service';
 
-describe('M92 home-first Farm Hub navigation', () => {
-  test('renders a prominent My Farm card on the home page', () => {
+describe('M92.1 compact home Farm Hub launcher', () => {
+  test('renders a compact My Farm launcher on the home page', () => {
     const html = renderToString(
       <MemoryRouter>
         <AppHomePage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Home Farm Hub');
+    expect(html).toContain('My Farm');
     expect(html).toContain('ฟาร์มของฉัน');
     expect(html).toContain('เปิดฟาร์มของฉัน');
     expect(html).toContain('/app/my-farm');
-    expect(html).toContain('/app/farm-records');
-    expect(html).toContain('/app/farm-records#farm-cost-dashboard');
-    expect(html).toContain('บันทึกงานในฟาร์ม');
-    expect(html).toContain('รายรับรายจ่าย');
-    expect(html).toContain('เช็กอากาศวันนี้');
-    expect(html).toContain('/app/weather');
-    expect(html).toContain('ยังไม่มีการซิงก์ขึ้นคลาวด์');
+    expect(html).toContain('บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต');
   });
 
-  test('builds a short local Farm Records summary for home', () => {
-    const viewModel = buildHomeFarmHubViewModel(createDemoFarmRecordsState());
+  test('does not render detailed Farm Records metrics on the home card', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <AppHomePage />
+      </MemoryRouter>,
+    );
 
-    expect(viewModel.hasFarmData).toBe(true);
-    expect(viewModel.primaryRoute).toBe('/app/my-farm');
-    expect(viewModel.recordsRoute).toBe('/app/farm-records');
-    expect(viewModel.costRoute).toBe('/app/farm-records#farm-cost-dashboard');
-    expect(viewModel.facts.length).toBeLessThanOrEqual(4);
-    expect(viewModel.facts.some((fact) => fact.id === 'net-profit')).toBe(true);
-    expect(viewModel.facts.some((fact) => fact.id === 'cost-per-kg')).toBe(true);
-    expect(viewModel.quickActions.map((action) => action.label)).toEqual([
-      'ฟาร์มของฉัน',
-      'บันทึกงานในฟาร์ม',
-      'รายรับรายจ่าย',
-      'เช็กอากาศวันนี้',
-    ]);
+    expect(html).not.toContain('กำไร/ขาดทุน');
+    expect(html).not.toContain('ต้นทุนต่อกก.');
+    expect(html).not.toContain('ผลผลิตล่าสุด');
+    expect(html).not.toContain('รายการล่าสุด');
+    expect(html).not.toContain('/app/farm-records#farm-cost-dashboard');
+    expect(html).not.toContain('เช็กอากาศวันนี้');
   });
 
-  test('keeps the empty home summary friendly when no farm data exists', () => {
-    const viewModel = buildHomeFarmHubViewModel(createEmptyFarmRecordsState());
+  test('builds only the compact launcher model for home', () => {
+    const viewModel = buildHomeFarmHubViewModel();
 
-    expect(viewModel.hasFarmData).toBe(false);
-    expect(viewModel.facts).toEqual([]);
-    expect(viewModel.emptyStateCopy).toContain('ยังไม่มีข้อมูลฟาร์ม');
-    expect(viewModel.quickActions).toHaveLength(4);
+    expect(viewModel).toEqual({
+      eyebrow: 'My Farm',
+      title: 'ฟาร์มของฉัน',
+      subtitle: 'บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต',
+      primaryRoute: '/app/my-farm',
+      primaryLabel: 'เปิดฟาร์มของฉัน',
+    });
+  });
+
+  test('keeps My Farm and Farm Records detail routes renderable', () => {
+    const myFarmHtml = renderToString(
+      <MemoryRouter>
+        <MyFarmPage />
+      </MemoryRouter>,
+    );
+    const farmRecordsHtml = renderToString(
+      <MemoryRouter>
+        <FarmRecordsDebugPage />
+      </MemoryRouter>,
+    );
+
+    expect(myFarmHtml).toContain('/app/farm-records#farm-cost-dashboard');
+    expect(myFarmHtml).toContain('Backup/Restore ready locally');
+    expect(farmRecordsHtml).toContain('Farm Records /');
+    expect(farmRecordsHtml).toContain('Farm Cost Dashboard');
+    expect(farmRecordsHtml).toContain('Harvest &amp; Yield');
   });
 });

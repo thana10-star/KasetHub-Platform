@@ -22,7 +22,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
     routes: [
-      { route: '/app', label: 'App home', milestone: 'M01-M15/M92', notes: 'mobile-first home now surfaces a large My Farm/Farm Records entry point with elder-friendly Thai quick actions and local-only farm summary', manualCheckPath: '/app' },
+      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1', notes: 'mobile-first home now surfaces a compact My Farm launcher with one elder-friendly Thai primary action; detailed Farm Records metrics stay in My Farm/Farm Records', manualCheckPath: '/app' },
       { route: '/app/profile', label: 'Profile', milestone: 'M02-M29', notes: 'โปรไฟล์ตัวอย่างและจุดเข้า route สำคัญ', manualCheckPath: '/app/profile' },
       { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
       { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92', notes: 'My Farm local hub with Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, and a home-first entry point; no cloud sync', manualCheckPath: '/app/my-farm' },
@@ -37,7 +37,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/ai-text-endpoint-plan', label: 'AI Text Endpoint Contract Dry-run', milestone: 'M82', notes: 'backend-owned endpoint contract, masked URL gating, audit/rate-limit dry-run, timeout plan, and provider-call blocked proof', manualCheckPath: '/app/ai-text-endpoint-plan' },
       { route: '/app/farm-area', label: 'Farm area planner', milestone: 'M33', notes: 'คำนวณพื้นที่แปลงและแปลงหน่วยที่ดินไทยแบบ local-only', manualCheckPath: '/app/farm-area' },
       { route: '/app/farm-area-guide', label: 'Farm area guide', milestone: 'M33', notes: 'คู่มือวัดพื้นที่ด้วยสายวัด สูตรพื้นที่ และคำเตือนเรื่องรังวัด', manualCheckPath: '/app/farm-area-guide' },
-      { route: '/app/farm-records', label: 'Farm Records harvest yield + cost-per-kg dashboard', milestone: 'M91/M92', notes: 'farmer-facing local-first records UI with harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimate, export/restore/recovery, disabled sync consent prototype, and M92 home-first entry links; no cloud/GPS/AI/tax-accounting claims', manualCheckPath: '/app/farm-records' },
+      { route: '/app/farm-records', label: 'Farm Records harvest yield + cost-per-kg dashboard', milestone: 'M91/M92.1', notes: 'farmer-facing local-first records UI with harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimate, export/restore/recovery, disabled sync consent prototype, and compact Home launcher access; no cloud/GPS/AI/tax-accounting claims', manualCheckPath: '/app/farm-records' },
       { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery', manualCheckPath: '/app/notifications' },
       { route: '/app/notification-settings', label: 'Notification settings', milestone: 'M35', notes: 'ตั้งค่า preference แจ้งเตือนแบบ localStorage เท่านั้น', manualCheckPath: '/app/notification-settings' },
       { route: '/app/saved-articles', label: 'Saved articles', milestone: 'M02/M04', notes: 'รายการบันทึกในเครื่อง', manualCheckPath: '/app/saved-articles' },

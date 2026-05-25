@@ -147,7 +147,7 @@ export function buildAdminDashboardData(): AdminDashboardData {
     createModule({
       id: 'farm_records',
       title: adminModuleLabels.farm_records,
-      summary: 'Local-first farmer-facing farm records and finance ledger UI with M92 home-first discovery, harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimates, export/restore, and disabled sync consent prototype; no cloud sync, GPS, Supabase writes, AI processing, or official tax/accounting claims',
+      summary: 'Local-first farmer-facing farm records and finance ledger UI with M92.1 compact home discovery, harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimates, export/restore, and disabled sync consent prototype; no cloud sync, GPS, Supabase writes, AI processing, or official tax/accounting claims',
       status: 'mock_only',
       metricLabel: 'records',
       metricValue: farmRecordsState.farmActivityRecords.length + farmRecordsState.farmFinanceEntries.length + farmRecordsState.farmHarvestRecords.length,
