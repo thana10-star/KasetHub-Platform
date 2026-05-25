@@ -45,6 +45,19 @@ Deploy notes:
 
 -
 
+## M104.2 Owner Mobile Re-check Status
+
+Owner verified M104.1 on a real mobile device. Weather UI and navigation behavior are acceptable for V1.
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| Weather UI | passed | Current Weather content priority is acceptable on mobile. |
+| Weather live display | passed | Live Weather display is acceptable for V1. |
+| Risk colors | passed | Low, caution, and high risk colors are acceptable on mobile. |
+| Route scroll-to-top | passed | Route changes start at the top as expected. |
+| Home/back affordance | passed | Main pages have an acceptable Home affordance. |
+| Owner mobile check | passed | M104.1 passed owner real-mobile verification. |
+
 ## 3. Weather Live Env
 
 Cloudflare Pages production env values:
