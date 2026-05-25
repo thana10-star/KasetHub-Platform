@@ -7,6 +7,7 @@ export type AdminModuleId =
   | 'moderation'
   | 'crop_prices'
   | 'crop_watch'
+  | 'farm_records'
   | 'ai_safety'
   | 'plant_analysis'
   | 'guest_sync'
@@ -37,6 +38,7 @@ export type AdminDashboardSummary = {
   cropPriceSources: number;
   cropPriceItems: number;
   cropWatchItems: number;
+  farmRecordItems: number;
   aiSafetyItems: number;
   systemHealth: AdminHealthStatus;
 };

@@ -952,4 +952,66 @@ M81 adds `src/services/ai-text` for a controlled staging-only text proxy boundar
 
 M82 adds `src/services/ai-text/ai-text-endpoint-contract.ts` and `/app/ai-text-endpoint-plan` for a backend-owned `ai-text-proxy` endpoint contract. The endpoint URL is masked, dry-run/network flags default false, audit/rate-limit output remains preview-only, and timeout fallback cannot mutate calculator outputs.
 
+## M83 Farm Records + Farm Finance Ledger Foundation
+
+M83 adds `src/services/farm-records` with framework-first domain types for `FarmPlot`, `CropCycle`, `FarmActivityRecord`, `FarmFinanceEntry`, image metadata placeholders, and computed `FarmLedgerSummary`.
+
+The local storage service uses `kasethub.farmRecords.v1`, safe migration/defaulting, malformed-record normalization, demo seed data, and service-level Vitest coverage for creates, filters, and summary math. `/app/farm-records`, Admin Dashboard, QA, and the route registry expose development visibility.
+
+M83 stays foundation-only. It adds no Supabase writes, cloud sync, GPS/geolocation, precise map location, AI analysis of farm records, receipt upload, PDF/CSV export, notifications, or final PDPA legal copy. Future sync must require opt-in consent, owner-only RLS, export/delete tools, and a separate AI consent boundary.
+
+## M84 Farm Records Farmer-Facing UI
+
+M84 upgrades `/app/farm-records` into the first farmer-facing Farm Records / สมุดบันทึกฟาร์ม UI on top of the M83 local service.
+
+The page now shows local-only privacy copy, summary cards, filters, farm plots, crop cycles, activity records, finance ledger entries, and computed ledger summary. It adds lightweight local create flows for farm plots, crop cycles, activity records, and finance entries, plus confirmation-based local deletes for activity and finance entries.
+
+M84 keeps the same `kasethub.farmRecords.v1` local state key. It adds no Supabase schema, Supabase writes, cloud sync, sync queue, GPS/geolocation/map pins, AI farm-record reading, receipt upload, PDF/CSV export, notifications, OCR, or legal-final PDPA copy.
+
+## M85 Farm Records Edit + My Farm Integration
+
+M85 improves the local Farm Records farmer UI with safe edit flows for farm activity records and finance ledger entries. The edit forms reuse the M84 create form style, preserve local-created records through the existing M83 service path, validate required fields, block invalid finance amounts, and keep delete confirmation copy local-only.
+
+M85 adds a Recent Farm Timeline on `/app/farm-records` and integrates Farm Records into `/app/my-farm` with an entry point, local ledger net profit, active crop cycle count, latest activity date, latest finance date, and farm-record timeline items.
+
+M85 also adds `docs/privacy/FARM_RECORDS_EXPORT_DELETE_PLAN_M85.md` as planning only. It implements no real export, bulk delete, Supabase schema, Supabase writes, cloud sync, GPS/geolocation/map pins, AI record processing, OCR, receipt upload, notifications, PDF export, CSV export, or legal-final PDPA copy.
+
+## M86 Farm Records Export/Delete Readiness
+
+M86 adds local-device data control for Farm Records before any cloud sync. `src/services/farm-records/farm-records-export-service.ts` builds JSON backups, finance CSV strings, and export preview metadata from `kasethub.farmRecords.v1`.
+
+The `/app/farm-records` page adds an Export & Data Control section with local-only warnings, JSON preview/download, finance CSV preview/download, estimated sizes, latest record date, and safe delete/archive guidance. It also exposes farm plot archive and crop-cycle harvested/cancelled actions as safer alternatives to hard delete.
+
+M86 adds `docs/privacy/FARM_RECORDS_DATA_CONTROL_M86.md` and updates the M85 export/delete plan with implementation status. It adds no cloud export, cloud delete, Supabase schema, Supabase writes, sync queue, GPS/geolocation/map pins, AI record processing, OCR, receipt upload, notifications, bulk delete, bank/loan/tax integration, or legal-final PDPA copy.
+
+## M87 Farm Records Backup Restore + Sync Consent Gate
+
+M87 adds local JSON backup restore readiness before any future sync. `src/services/farm-records/farm-records-restore-service.ts` parses JSON backups without throwing, validates required Farm Records slices, normalizes through the existing local state path, strips raw `data:` image payloads, excludes GPS/geolocation-like fields, builds current-vs-backup previews, and applies local restore only with explicit confirmation and the `RESTORE FARM RECORDS` phrase.
+
+The `/app/farm-records` page adds Restore Backup and Cloud Sync Readiness sections. Restore is preview-first and replace-local-only for `kasethub.farmRecords.v1`; it does not affect unrelated local storage. The sync consent gate is disabled/future-facing and documents requirements for explicit user consent, authenticated ownership, owner-only RLS, export/delete tools, audit/idempotency, retention policy, separate AI consent, and separate GPS consent. `/app/my-farm` links into the local backup/restore controls.
+
+M87 adds `docs/privacy/FARM_RECORDS_RESTORE_SYNC_CONSENT_M87.md` and keeps all sync behavior blocked: no Supabase schema, read, write, sync queue, cloud backup, cloud delete, GPS/geolocation/map pins, AI record processing, OCR, receipt upload, notifications, bank/loan/tax integration, server-side restore, or legal-final PDPA copy.
+
+## M88 Farm Records Restore Recovery + Sync Architecture Review
+
+M88 adds a local restore recovery safety layer before any future sync. `src/services/farm-records/farm-records-restore-recovery-service.ts` builds sanitized pre-restore snapshots, stores only one latest local snapshot under `kasethub.farmRecords.restoreSnapshot.v1`, stringifies snapshots safely, and computes Restore Risk Review metadata comparing current local data with a validated backup.
+
+The `/app/farm-records` page now shows Restore recovery guidance, a "Download current local backup before restore" action, Restore Risk Review counts, estimated removed/added records, current-vs-backup net profit, latest current/backup dates, and risk warnings before the existing restore confirmation. The restore button still requires validation, risk review availability, checkbox confirmation, and the `RESTORE FARM RECORDS` phrase.
+
+M88 also creates `docs/sync/FARM_RECORDS_SYNC_ARCHITECTURE_REVIEW_M88.md` and `docs/sync/FARM_RECORDS_SYNC_READINESS_CHECKLIST_M88.md`. The disabled sync UI now shows local export/restore/recovery as ready and cloud consent, Supabase RLS, sync queue, conflict handling, cloud delete/export, and AI consent as not implemented or separate future gates. It still adds no Supabase schema, Supabase read/write, sync queue, cloud sync, cloud delete, server-side restore, GPS/geolocation/map pins, AI record processing, OCR, receipt upload, notifications, bank/loan/tax integration, or legal-final PDPA copy.
+
+## M89 Farm Records Sync Consent UX Prototype
+
+M89 adds a non-writing Cloud Sync Consent Prototype to `/app/farm-records#farm-records-sync`. The prototype explains what future sync would mean, what Farm Records data could be included, what is excluded by default, and why finance data needs careful consent. The Enable Cloud Sync action remains disabled.
+
+`src/services/farm-records/farm-records-sync-consent-prototype.ts` stores optional local prototype checkbox state under `kasethub.farmRecords.syncConsentPrototype.v1`. This state is not legal consent, cannot unlock sync, and makes no backend calls. M89 also creates `docs/sync/FARM_RECORDS_OWNER_RLS_TEST_PLAN_M89.md` and `docs/sync/FARM_RECORDS_SYNC_CONSENT_UX_M89.md`, and updates the M88 sync architecture/checklist docs with M89 status. It still adds no Supabase schema, Supabase read/write, sync queue, cloud sync, cloud delete, GPS/geolocation/map pins, AI record processing, receipt upload, OCR, notifications, or legal-final PDPA copy.
+
+## M90 Farm Cost Summary + Break-even Dashboard
+
+M90 adds local cost analytics on top of the existing Farm Records and Farm Finance Ledger state. `src/services/farm-records/farm-cost-analytics-service.ts` computes income, expense, net profit, profit/loss status, per-rai metrics, category breakdowns, top categories, latest record dates, break-even estimates, and deterministic local insights without calling AI or a backend.
+
+The `/app/farm-records#farm-cost-dashboard` section shows farmer-facing cost cards, expense/income category breakdowns, local-only status copy, and a lightweight break-even calculator for expected yield and selling price. `/app/my-farm` links to the cost dashboard and surfaces cost per rai plus the top expense category when available.
+
+M90 keeps the same local storage boundary and adds no Supabase schema, Supabase read/write, sync queue, cloud sync, cloud backup/delete, GPS/geolocation/map pins, AI record processing, receipt upload, OCR, notifications, bank/loan integration, tax filing, or official accounting/legal claims.
+
 The future endpoint is still not deployed. Frontend code cannot call a provider directly, cannot accept provider/service-role keys, cannot bypass blocked actions, and cannot enable production AI text behavior.

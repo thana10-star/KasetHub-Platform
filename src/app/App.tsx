@@ -40,6 +40,7 @@ import { GuestSyncDryRunPage } from '@/routes/GuestSyncDryRunPage';
 import { GuestSyncStatusPage } from '@/routes/GuestSyncStatusPage';
 import { FarmAreaGuidePage } from '@/routes/FarmAreaGuidePage';
 import { FarmAreaPage } from '@/routes/FarmAreaPage';
+import { FarmRecordsDebugPage } from '@/routes/FarmRecordsDebugPage';
 import { FertilizerCalculatorPage } from '@/routes/FertilizerCalculatorPage';
 import { ImagePrivacyPage } from '@/routes/ImagePrivacyPage';
 import { ImagePreflightPage } from '@/routes/ImagePreflightPage';
@@ -137,6 +138,7 @@ export default function App() {
         <Route path="calculators/cost" element={<CostCalculatorPage />} />
         <Route path="farm-area" element={<FarmAreaPage />} />
         <Route path="farm-area-guide" element={<FarmAreaGuidePage />} />
+        <Route path="farm-records" element={<FarmRecordsDebugPage />} />
         <Route path="analyze" element={<AnalyzePage />} />
         <Route path="analysis-history" element={<AnalysisHistoryPage />} />
         <Route path="image-privacy" element={<ImagePrivacyPage />} />

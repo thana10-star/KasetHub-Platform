@@ -23,6 +23,7 @@ M34 aggregates existing local sources only:
 - Guest Memory farm records.
 - Saved plant analysis result summaries.
 - Farm area saved plots from `kasethub.farmArea.v1`.
+- M83-M90 Farm Records and Farm Finance Ledger from `kasethub.farmRecords.v1` and `/app/farm-records`, including local edit/timeline/export/restore/recovery/data-control, sync consent prototype status, cost summary, category breakdowns, and break-even estimate status.
 - Crop Watch followed crops and alert preferences from `kasethub.cropWatch.v1`.
 - Agriculture calculator history and favorites from `kasethub.agriCalculators.v1`.
 - Weather fixture context from the selected/default mock weather location.
@@ -121,6 +122,21 @@ M49 adds calculator-related future records that can also feed My Farm after auth
 - `planting_profiles`
 - `farm_cost_records`
 
+M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, and M90 links My Farm to the local Farm Cost Dashboard while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
+
+- `farm_plots`
+- `crop_cycles`
+- `farm_activity_records`
+- `farm_finance_entries`
+- computed ledger summaries generated from owned records
+- latest activity/finance dates and recent local farm timeline events
+- local JSON backup and finance CSV readiness metadata
+- local JSON restore readiness metadata
+- pre-restore local snapshot/readiness metadata
+- disabled cloud sync consent gate status
+- local sync consent prototype status, which is not legal consent and does not enable sync
+- local cost summary fields such as cost per rai, net profit, top expense category, and break-even estimate readiness
+
 ## Safety Rules
 
 - Do not upload raw images from My Farm.
@@ -128,6 +144,8 @@ M49 adds calculator-related future records that can also feed My Farm after auth
 - Do not treat crop prices as production prices.
 - Do not treat farm area estimates as official land survey results.
 - Do not treat calculator output as an agronomist recommendation, product label, yield guarantee, or financial advice.
+- Do not treat Farm Records cost dashboard or break-even estimates as official accounting, tax, loan, or legal advice.
 - Do not delete local data from the hub without an explicit, reviewed recovery/confirmation flow.
 - Do not sync until real auth ownership and RLS are verified.
 - Do not treat local notification preferences as real push/LINE/SMS consent.
+- Do not process Farm Records or Farm Finance Ledger data with AI until a separate AI consent boundary exists.

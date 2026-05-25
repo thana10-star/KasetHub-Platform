@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Camera,
   ChevronRight,
+  ClipboardList,
   CloudSun,
   FileText,
   Leaf,
@@ -13,6 +14,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  WalletCards,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -28,6 +30,7 @@ import type { MyFarmQuickAction, MyFarmTimelineItemType } from '@/services/my-fa
 const quickActionIcons: Record<MyFarmQuickAction['iconKey'], LucideIcon> = {
   scan: Camera,
   area: Ruler,
+  records: ClipboardList,
   weather: CloudSun,
   price: Bell,
   ai: Bot,
@@ -37,12 +40,30 @@ const quickActionIcons: Record<MyFarmQuickAction['iconKey'], LucideIcon> = {
 const timelineIcons: Record<MyFarmTimelineItemType, LucideIcon> = {
   analysis_result: Camera,
   farm_record: Leaf,
+  farm_activity: ClipboardList,
+  farm_finance: WalletCards,
   farm_plot: Ruler,
   crop_watch: Bell,
   ai_question: Bot,
   saved_article: FileText,
   saved_video: Sparkles,
 };
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('th-TH', {
+    currency: 'THB',
+    maximumFractionDigits: 0,
+    style: 'currency',
+  }).format(value);
+}
+
+function formatOptionalDate(value: string | undefined) {
+  return value ?? 'ยังไม่มี';
+}
+
+function formatOptionalCurrency(value: number | undefined) {
+  return value === undefined ? 'ยังคำนวณไม่ได้' : formatCurrency(value);
+}
 
 function EmptyAction({
   cta,
@@ -142,6 +163,53 @@ export function MyFarmPage() {
             <p className="mt-1 text-xs font-bold leading-5 text-slate-500">รายการในไทม์ไลน์</p>
           </Card>
         </div>
+
+        <Link to="/app/farm-records#farm-cost-dashboard">
+          <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep shadow-soft">
+                <ClipboardList aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap gap-2">
+                  <Badge tone="green">local-only</Badge>
+                  <Badge tone="green">Backup/Restore ready locally</Badge>
+                  <Badge tone="neutral">Cloud Sync: Not enabled</Badge>
+                  <Badge tone="sky">Sync consent: Prototype only</Badge>
+                </div>
+                <h2 className="mt-2 font-extrabold leading-6 text-kaset-ink">สมุดบันทึกฟาร์ม</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">บันทึกกิจกรรมและรายรับรายจ่าย ดูต้นทุนและกำไรของแปลงจากข้อมูลในเครื่องนี้</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">กำไรสุทธิ</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatCurrency(hub.summary.farmLedgerNetProfit)}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">รอบปลูก active</p>
+                    <p className="mt-1 text-sm font-extrabold text-kaset-deep">{hub.summary.farmActiveCropCycleCount.toLocaleString('th-TH')}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">ต้นทุนต่อไร่</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalCurrency(hub.summary.farmCostPerRai)}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">หมวดรายจ่ายสูงสุด</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{hub.summary.farmTopExpenseCategory ?? 'ยังไม่มี'}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">กิจกรรมล่าสุด</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmActivityDate)}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">บัญชีล่าสุด</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmFinanceEntryDate)}</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm font-extrabold text-kaset-deep">ดูต้นทุนและจุดคุ้มทุน · Backup/Restore ready locally · Cloud Sync ยังไม่เปิดใช้</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">

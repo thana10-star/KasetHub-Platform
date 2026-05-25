@@ -2,6 +2,7 @@ import type { AppRoute } from '@/types/kaset';
 
 export type MyFarmHubModule =
   | 'plant_analysis'
+  | 'farm_records'
   | 'farm_area'
   | 'crop_watch'
   | 'weather'
@@ -13,6 +14,8 @@ export type MyFarmHubModule =
 export type MyFarmTimelineItemType =
   | 'analysis_result'
   | 'farm_record'
+  | 'farm_activity'
+  | 'farm_finance'
   | 'farm_plot'
   | 'crop_watch'
   | 'ai_question'
@@ -24,13 +27,22 @@ export type MyFarmQuickAction = {
   label: string;
   description: string;
   route: AppRoute;
-  iconKey: 'scan' | 'area' | 'weather' | 'price' | 'ai' | 'calculator';
+  iconKey: 'scan' | 'area' | 'records' | 'weather' | 'price' | 'ai' | 'calculator';
   tone: 'primary' | 'soft' | 'white' | 'warning';
 };
 
 export type MyFarmHubSummary = {
   totalLocalItems: number;
   farmRecordCount: number;
+  farmActivityRecordCount: number;
+  farmFinanceEntryCount: number;
+  farmActiveCropCycleCount: number;
+  farmLedgerNetProfit: number;
+  farmCostPerRai?: number;
+  farmTopExpenseCategory?: string;
+  farmTopExpenseCategoryAmount?: number;
+  latestFarmActivityDate?: string;
+  latestFarmFinanceEntryDate?: string;
   analysisResultCount: number;
   plotCount: number;
   cropWatchCount: number;

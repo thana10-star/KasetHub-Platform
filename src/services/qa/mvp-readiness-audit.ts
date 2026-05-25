@@ -161,6 +161,11 @@ export function runMvpReadinessAudit(): MvpReadinessAudit {
         detail: 'ประวัติ รายการโปรด และค่าล่าสุดอยู่ใน localStorage เท่านั้น ไม่มี Supabase write หรือ cloud sync',
       },
       {
+        label: 'Farm Records and ledger',
+        status: 'ready_mock',
+        detail: 'M90 farm records UI uses kasethub.farmRecords.v1 for local plots, cycles, activity/finance create/edit flows, cost summary, category breakdown, break-even estimates, JSON/CSV export, guarded JSON restore, restore risk review, sync consent prototype visibility, My Farm cost entry, and no GPS, cloud sync, Supabase writes, AI processing, or official tax/accounting claims',
+      },
+      {
         label: 'Supabase staging',
         status: 'documentation_only',
         detail: 'มี env/checklist/dry-run boundary แต่ยังไม่เชื่อมต่อและยังไม่รัน SQL',

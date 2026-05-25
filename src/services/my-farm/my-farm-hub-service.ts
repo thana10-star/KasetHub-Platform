@@ -1,5 +1,9 @@
 import type { CropWatch } from '@/services/crop-prices/crop-watch.types';
 import type { FarmPlotRecord } from '@/services/farm-area/farm-area.types';
+import { farmFinanceCategoryLabels } from '@/services/farm-records/farm-records-config';
+import { computeFarmCostDashboard } from '@/services/farm-records/farm-cost-analytics-service';
+import { createFarmRecordsService, createMemoryFarmRecordsStorage } from '@/services/farm-records/farm-records-service';
+import type { FarmFinanceCategory, FarmRecordsState } from '@/services/farm-records/farm-records.types';
 import type { GuestMemoryState, SavedItem } from '@/services/guest-memory/guest-memory.types';
 import type { WeatherLocationForecast } from '@/services/weather/weather.types';
 import type {
@@ -13,6 +17,7 @@ import type {
 export type BuildMyFarmHubInput = {
   guestMemory: GuestMemoryState;
   farmPlots: FarmPlotRecord[];
+  farmRecords: FarmRecordsState;
   cropWatches: CropWatch[];
   weatherForecast: WeatherLocationForecast;
 };
@@ -33,6 +38,14 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
     route: '/app/farm-area',
     iconKey: 'area',
     tone: 'soft',
+  },
+  {
+    id: 'farm-records',
+    label: 'สมุดบันทึกฟาร์ม',
+    description: 'บันทึกกิจกรรมและรายรับรายจ่าย',
+    route: '/app/farm-records',
+    iconKey: 'records',
+    tone: 'primary',
   },
   {
     id: 'calculators',
@@ -83,6 +96,26 @@ function formatThaiDate(value: string) {
   });
 }
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('th-TH', {
+    currency: 'THB',
+    maximumFractionDigits: 0,
+    style: 'currency',
+  }).format(value);
+}
+
+function formatFarmFinanceCategory(category: FarmFinanceCategory | undefined) {
+  if (!category) return undefined;
+  const label = farmFinanceCategoryLabels[category];
+  return label ? `${label.th} / ${label.en}` : category;
+}
+
+function latestDate(values: string[]) {
+  return values
+    .filter(Boolean)
+    .sort((a, b) => Date.parse(b) - Date.parse(a))[0];
+}
+
 function routeForSavedItem(item: SavedItem) {
   if (item.sourceRoute.startsWith('/app')) {
     return item.sourceRoute;
@@ -111,6 +144,28 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       ctaRoute: record.sourceRoute || '/app/analysis-history',
       ctaLabel: 'ดูประวัติ',
       sourceLabel: 'Guest Memory',
+    })),
+    ...input.farmRecords.farmActivityRecords.map((record) => ({
+      id: `farm-activity-${record.id}`,
+      type: 'farm_activity' as const,
+      title: record.title,
+      subtitle: `${record.activityType} · local farm record`,
+      dateIso: record.activityDate,
+      dateLabel: formatThaiDate(record.activityDate),
+      ctaRoute: '/app/farm-records',
+      ctaLabel: 'เปิดสมุดฟาร์ม',
+      sourceLabel: 'Farm Records local',
+    })),
+    ...input.farmRecords.farmFinanceEntries.map((entry) => ({
+      id: `farm-finance-${entry.id}`,
+      type: 'farm_finance' as const,
+      title: entry.title,
+      subtitle: `${entry.direction} · ${formatCurrency(entry.amount)}`,
+      dateIso: entry.entryDate,
+      dateLabel: formatThaiDate(entry.entryDate),
+      ctaRoute: '/app/farm-records',
+      ctaLabel: 'เปิดบัญชีฟาร์ม',
+      sourceLabel: 'Farm Ledger local',
     })),
     ...analysisItems.map((item) => ({
       id: `analysis-${item.id}`,
@@ -191,6 +246,10 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
   const analysisItems = input.guestMemory.savedItems.filter((item) => item.itemType === 'analysis_result');
   const totalSquareMeters = input.farmPlots.reduce((total, plot) => total + plot.areaSquareMeters, 0);
   const totalRai = totalSquareMeters / 1600;
+  const farmLedgerSummary = createFarmRecordsService(createMemoryFarmRecordsStorage(input.farmRecords)).computeFarmLedgerSummary();
+  const farmCostDashboard = computeFarmCostDashboard(input.farmRecords);
+  const activeCropCycles = input.farmRecords.cropCycles.filter((cycle) => cycle.status === 'active').length;
+  const farmRecordItemCount = input.farmRecords.farmActivityRecords.length + input.farmRecords.farmFinanceEntries.length;
 
   return [
     {
@@ -205,6 +264,19 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
       route: '/app/farm-area',
       badgeLabel: 'local',
       tone: 'green',
+    },
+    {
+      id: 'farm-records',
+      module: 'farm_records',
+      title: 'สมุดบันทึกฟาร์ม',
+      detail:
+        farmRecordItemCount > 0
+          ? `มี ${activeCropCycles.toLocaleString('th-TH')} รอบปลูก active และบัญชี local-only`
+          : 'เริ่มบันทึกกิจกรรม รายรับ และรายจ่ายเพื่อเห็นต้นทุนกับกำไร',
+      valueLabel: farmCostDashboard.costPerRai === undefined ? formatCurrency(farmLedgerSummary.netProfit) : `${formatCurrency(farmCostDashboard.costPerRai)} / rai`,
+      route: '/app/farm-records',
+      badgeLabel: 'cost summary',
+      tone: farmLedgerSummary.netProfit >= 0 ? 'green' : 'rose',
     },
     {
       id: 'analysis',
@@ -296,6 +368,17 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
     });
   }
 
+  if (input.farmRecords.farmActivityRecords.length + input.farmRecords.farmFinanceEntries.length === 0) {
+    actions.push({
+      id: 'add-farm-record',
+      title: 'เริ่มสมุดบันทึกฟาร์ม',
+      detail: 'บันทึกกิจกรรม รายรับ และรายจ่ายแบบ local-first เพื่อดูต้นทุนและกำไร',
+      route: '/app/farm-records',
+      ctaLabel: 'เปิดสมุดบันทึกฟาร์ม',
+      priority: actions.length === 0 ? 'primary' : 'secondary',
+    });
+  }
+
   if (input.guestMemory.farmRecords.length + analysisItems.length === 0) {
     actions.push({
       id: 'analyze-plant',
@@ -337,10 +420,20 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
   const savedVideos = input.guestMemory.savedItems.filter((item) => item.itemType === 'video');
   const analysisItems = input.guestMemory.savedItems.filter((item) => item.itemType === 'analysis_result');
   const timeline = buildTimeline(input);
+  const farmLedgerSummary = createFarmRecordsService(createMemoryFarmRecordsStorage(input.farmRecords)).computeFarmLedgerSummary();
+  const farmCostDashboard = computeFarmCostDashboard(input.farmRecords);
+  const latestFarmActivityDate = latestDate(input.farmRecords.farmActivityRecords.map((record) => record.activityDate));
+  const latestFarmFinanceEntryDate = latestDate(input.farmRecords.farmFinanceEntries.map((entry) => entry.entryDate));
+  const farmRecordsLocalItemCount =
+    input.farmRecords.farmPlots.length +
+    input.farmRecords.cropCycles.length +
+    input.farmRecords.farmActivityRecords.length +
+    input.farmRecords.farmFinanceEntries.length;
   const totalLocalItems =
     input.guestMemory.farmRecords.length +
     analysisItems.length +
     input.farmPlots.length +
+    farmRecordsLocalItemCount +
     input.cropWatches.length +
     savedArticles.length +
     savedVideos.length +
@@ -350,6 +443,15 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
     summary: {
       totalLocalItems,
       farmRecordCount: input.guestMemory.farmRecords.length,
+      farmActivityRecordCount: input.farmRecords.farmActivityRecords.length,
+      farmFinanceEntryCount: input.farmRecords.farmFinanceEntries.length,
+      farmActiveCropCycleCount: input.farmRecords.cropCycles.filter((cycle) => cycle.status === 'active').length,
+      farmLedgerNetProfit: farmLedgerSummary.netProfit,
+      farmCostPerRai: farmCostDashboard.costPerRai,
+      farmTopExpenseCategory: formatFarmFinanceCategory(farmCostDashboard.topExpenseCategory?.category),
+      farmTopExpenseCategoryAmount: farmCostDashboard.topExpenseCategory?.amount,
+      latestFarmActivityDate,
+      latestFarmFinanceEntryDate,
       analysisResultCount: analysisItems.length,
       plotCount: input.farmPlots.length,
       cropWatchCount: input.cropWatches.length,
@@ -360,7 +462,7 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
       weatherLocationLabel: input.weatherForecast.location.label,
       weatherConditionLabel: input.weatherForecast.today.conditionLabel,
       timelineCount: timeline.length,
-      localStorageLabels: ['Guest Memory', 'kasethub.farmArea.v1', 'kasethub.cropWatch.v1'],
+      localStorageLabels: ['Guest Memory', 'kasethub.farmArea.v1', 'kasethub.cropWatch.v1', 'kasethub.farmRecords.v1'],
     },
     quickActions: myFarmQuickActions,
     timeline,

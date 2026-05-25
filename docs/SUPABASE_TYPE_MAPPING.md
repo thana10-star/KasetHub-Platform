@@ -188,6 +188,19 @@ Type mapping:
 
 M33 state is localStorage-only under `kasethub.farmArea.v1`. Production persistence requires real auth, owner-scoped RLS, private boundary defaults, deletion controls, and clear copy that estimates are not official land surveys. Precise GPS/map geometry should never be public-read by default.
 
+## Farm Records And Farm Finance Ledger
+
+M83 farm records models are local-first only under `kasethub.farmRecords.v1`. They map conceptually into future owner-scoped tables only after consent, export/delete tooling, and RLS review:
+
+- `FarmPlot` -> future `farm_plots`
+- `CropCycle` -> future `crop_cycles`
+- `FarmActivityRecord` -> future `farm_activity_records`
+- `FarmFinanceEntry` -> future `farm_finance_entries`
+- `FarmImageRef` -> future image/receipt metadata records, not raw image storage
+- `FarmLedgerSummary` -> computed view/service output, not source-of-truth storage
+
+M83 does not create migrations, generated Supabase types, Edge Functions, writes, or sync payloads for these records. Future tables must be owner-only by RLS. Plot location must remain coarse unless a later opt-in precise-location milestone passes privacy review. Finance entries are business-sensitive because they expose income, cost, profit, vendor/buyer behavior, and farm operations; future cloud sync and future AI analysis must each require separate explicit consent boundaries.
+
 ## Agriculture Calculators
 
 M49 calculator models map conceptually into:
