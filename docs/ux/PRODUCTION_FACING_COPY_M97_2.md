@@ -52,6 +52,8 @@ Detailed warnings belong in:
 
 Normal Home, My Farm, Help, and Basic Farm Records no longer lead with sync/export/prototype language.
 
+M98 follow-up: the mobile/basic-flow triage keeps this production-facing copy and makes My Farm visually calmer by moving detailed counts, Farm Records metrics, and data-control status behind `ข้อมูลฟาร์มเพิ่มเติม`. It also keeps Farm Records form/list labels Thai-first and avoids `DEMO`-style display labels in normal farmer views.
+
 ## 5. Advanced/Admin/QA Preservation
 
 M97.2 does not remove routes or internal tools.

@@ -158,6 +158,7 @@ describe('M90 farm records farmer-facing page', () => {
 
     expect(pageHtml).toContain('data-testid="farm-records-basic-actions"');
     expect(pageHtml).toContain('สมุดฟาร์มแบบง่าย');
+    expect(pageHtml).toContain('break-words text-xl');
     expect(pageHtml).toContain('เริ่มจากบันทึกแปลง รายรับรายจ่าย และผลผลิตก่อน รายละเอียดอื่นค่อยเพิ่มทีหลังได้');
     expect(pageHtml).toContain('เพิ่มแปลง');
     expect(pageHtml).toContain('ตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน');
@@ -174,6 +175,9 @@ describe('M90 farm records farmer-facing page', () => {
     expect(firstAdvancedWordIndex).toBeGreaterThan(firstBasicActionIndex);
     expect(advancedSectionIndex).toBeGreaterThan(firstBasicActionIndex);
     expect(basicTopHtml.toLowerCase()).not.toContain('prototype');
+    expect(basicTopHtml.toLowerCase()).not.toContain('debug');
+    expect(basicTopHtml).not.toContain('QA');
+    expect(basicTopHtml.toLowerCase()).not.toContain('readiness');
     expect(basicTopHtml).not.toContain('Cloud Sync');
     expect(basicTopHtml).not.toContain('Export');
     expect(basicTopHtml).not.toContain('Restore');
@@ -316,6 +320,8 @@ describe('M90 farm records farmer-facing page', () => {
     expect(financeHtml).toContain('รายรับหรือรายจ่าย');
     expect(financeHtml).toContain('จำนวนเงิน (บาท)');
     expect(financeHtml).toContain('ผู้ซื้อ/ร้านค้า (ถ้ามี)');
+    expect(financeHtml).not.toContain('Expense');
+    expect(financeHtml).not.toContain('Income');
     expect(plotHtml).toContain('เพิ่มแปลง');
     expect(plotHtml).toContain('ตั้งชื่อแปลงก่อน เช่น แปลงข้าวหลังบ้าน หรือ สวนมะม่วง');
     expect(plotHtml).toContain('ชื่อแปลง (จำเป็น)');

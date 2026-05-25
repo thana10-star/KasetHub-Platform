@@ -162,6 +162,27 @@ Technical words such as QA, readiness, staging, prototype, export, restore, and 
 
 M97.2 does not change the My Farm source of truth, does not change `kasethub.farmRecords.v1`, and does not enable cloud sync, GPS, Supabase writes, receipt upload, OCR, notifications, or AI Farm Records processing.
 
+## M98 Mobile Basic Flow Triage
+
+M98 keeps the production-facing local-data copy from M97.2 and reduces mobile density in the farmer basic flow.
+
+`/app/my-farm` now keeps heavy details under a collapsed `ข้อมูลฟาร์มเพิ่มเติม` section:
+
+- total local item/timeline counts
+- detailed Farm Records metrics
+- backup/restore/sync status badges
+- the Farm Cost Dashboard deep link
+
+The first screen stays focused on:
+
+- `เปิดสมุดฟาร์ม`
+- `บันทึกรายรับ/รายจ่าย`
+- `บันทึกผลผลิต`
+- `กำไร/ขาดทุน`
+- `ผลผลิตรวม`
+
+M98 also tightens Thai-first labels in Farm Records forms/lists and keeps seed display copy from looking like test data. It does not change the My Farm source of truth, does not change `kasethub.farmRecords.v1`, and does not enable cloud sync, GPS, Supabase writes, receipt upload, OCR, notifications, or AI Farm Records processing.
+
 ## Timeline Rules
 
 The local timeline is built from:

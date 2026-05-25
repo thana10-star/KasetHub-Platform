@@ -14,6 +14,8 @@ Advanced records, analytics, backup/restore, and sync-planning surfaces remain a
 
 M97.2 follow-up: normal user-facing copy now treats Farm Records as real local user data. Test/prototype/debug wording is reduced on Home, My Farm, Farm Records basic mode, Help, Profile, Weather, AI, and Calculators. Detailed warnings and technical wording remain in data/privacy, advanced, Admin, QA, export, restore, and sync sections.
 
+M98 follow-up: mobile/basic-flow triage keeps the three basic actions first, collapses secondary My Farm details under `ข้อมูลฟาร์มเพิ่มเติม`, and tightens Farm Records labels so normal forms and lists read Thai-first.
+
 ## Basic Mode Behavior
 
 `/app/farm-records` now starts with `สมุดฟาร์มแบบง่าย`.

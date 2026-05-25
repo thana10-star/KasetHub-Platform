@@ -45,7 +45,7 @@ describe('M90 My Farm farm records integration', () => {
     expect(hub.summary.farmTotalHarvestKg).toBe(3200);
     expect(hub.summary.farmCostPerKg).toBeCloseTo(4.03, 2);
     expect(hub.summary.latestFarmHarvestDate).toBe('2026-09-02');
-    expect(hub.summary.farmTopExpenseCategory).toContain('Fertilizer');
+    expect(hub.summary.farmTopExpenseCategory).toContain('ปุ๋ย');
     expect(hub.summary.farmTopExpenseCategoryAmount).toBe(5200);
     expect(hub.summary.localStorageLabels).toContain('kasethub.farmRecords.v1');
     expect(hub.timeline.some((item) => item.type === 'farm_activity')).toBe(true);

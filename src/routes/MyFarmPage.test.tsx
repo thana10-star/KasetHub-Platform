@@ -19,23 +19,35 @@ describe('M90 My Farm cost summary entry', () => {
     expect(html).toContain('บันทึกผลผลิต');
     expect(html).toContain('/app/help');
     expect(html).toContain('data-testid="my-farm-primary-area"');
+    expect(html).toContain('data-testid="my-farm-secondary-data"');
+    expect(html).toContain('ข้อมูลฟาร์มเพิ่มเติม');
     expect(html).toContain('บันทึกในเครื่องนี้');
     expect(html).toContain('สำรอง/กู้คืนได้');
     expect(html).toContain('ซิงก์บัญชีปิดอยู่');
     expect(html).toContain('สมุดฟาร์มของฉัน');
     expect(html).toContain('ต้นทุนต่อไร่');
     expect(html).toContain('หมวดรายจ่ายสูงสุด');
-    expect(html).toContain('kg');
+    expect(html).toContain('กก.');
     expect(html).toContain('2026-09-02');
 
     const primaryAreaStart = html.indexOf('data-testid="my-farm-primary-area"');
     const primaryAreaEnd = html.indexOf('ข้อมูลฟาร์มยังอยู่ในเครื่องนี้');
     const primaryAreaHtml = html.slice(primaryAreaStart, primaryAreaEnd);
+    const secondaryDetails = html.match(/<details(?=[^>]*data-testid="my-farm-secondary-data")[^>]*>/);
 
     expect(primaryAreaStart).toBeGreaterThan(-1);
     expect(primaryAreaEnd).toBeGreaterThan(primaryAreaStart);
+    expect(secondaryDetails).not.toBeNull();
+    expect(secondaryDetails?.[0]).not.toContain('open');
+    expect(primaryAreaHtml).not.toContain('สำรอง/กู้คืนได้');
+    expect(primaryAreaHtml).not.toContain('ซิงก์บัญชีปิดอยู่');
     expect(primaryAreaHtml.toLowerCase()).not.toContain('prototype');
     expect(primaryAreaHtml.toLowerCase()).not.toContain('debug');
     expect(primaryAreaHtml.toLowerCase()).not.toContain('local-only');
+    expect(html).not.toContain('DEMO');
+    expect(html).not.toContain('ข้อมูลทดสอบ');
+    expect(html.toLowerCase()).not.toContain('mock');
+    expect(html).not.toContain('Guest Memory');
+    expect(html).not.toContain('Farm Records local');
   });
 });

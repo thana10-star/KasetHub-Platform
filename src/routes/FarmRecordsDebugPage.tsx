@@ -135,7 +135,7 @@ type BreakEvenFormValues = {
 const activityLabels = farmActivityTypes.reduce(
   (labels, activity) => ({
     ...labels,
-    [activity.id]: `${activity.label.th} / ${activity.label.en}`,
+    [activity.id]: activity.label.th,
   }),
   {} as Record<FarmActivityType, string>,
 );
@@ -143,7 +143,7 @@ const activityLabels = farmActivityTypes.reduce(
 const statusLabels = cropCycleStatuses.reduce(
   (labels, status) => ({
     ...labels,
-    [status.id]: `${status.label.th} / ${status.label.en}`,
+    [status.id]: status.label.th,
   }),
   {} as Record<CropCycleStatus, string>,
 );
@@ -275,12 +275,12 @@ function getCycleLabel(cycles: CropCycle[], cycleId?: string) {
 
 function getFinanceCategoryLabel(category: FarmFinanceCategory) {
   const label = farmFinanceCategoryLabels[category];
-  return label ? `${label.th} / ${label.en}` : category;
+  return label ? label.th : category;
 }
 
 function getHarvestUnitLabel(unitId: string) {
   const unit = farmHarvestQuantityUnits.find((item) => item.id === unitId);
-  return unit ? `${unit.label.th} / ${unit.label.en}` : unitId;
+  return unit ? unit.label.th : unitId;
 }
 
 function FormField({
@@ -361,7 +361,7 @@ function SummaryCard({
   return (
     <Card className="p-4">
       <Icon aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-      <p className="mt-3 text-xl font-extrabold leading-7 text-kaset-ink sm:text-2xl">{typeof value === 'number' ? value.toLocaleString('th-TH') : value}</p>
+      <p className="mt-3 break-words text-xl font-extrabold leading-7 text-kaset-ink sm:text-2xl">{typeof value === 'number' ? value.toLocaleString('th-TH') : value}</p>
       <p className="mt-1 text-xs font-bold leading-4 text-slate-500">{label}</p>
     </Card>
   );
@@ -482,9 +482,9 @@ function CostCategoryBreakdown({
 }
 
 function getTimelineKindLabel(kind: 'activity' | 'income' | 'expense') {
-  if (kind === 'income') return 'รายรับ / Income';
-  if (kind === 'expense') return 'รายจ่าย / Expense';
-  return 'กิจกรรม / Activity';
+  if (kind === 'income') return 'รายรับ';
+  if (kind === 'expense') return 'รายจ่าย';
+  return 'กิจกรรม';
 }
 
 export function ActivityForm({
@@ -661,8 +661,8 @@ export function FinanceForm({
               }}
               value={values.direction}
             >
-              <option value="expense">รายจ่าย / Expense</option>
-              <option value="income">รายรับ / Income</option>
+              <option value="expense">รายจ่าย</option>
+              <option value="income">รายรับ</option>
             </select>
           </FormField>
           <FormField label="หมวดหมู่">
@@ -673,7 +673,7 @@ export function FinanceForm({
             >
               {categoryOptions.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.label.th} / {category.label.en}
+                  {category.label.th}
                 </option>
               ))}
             </select>
@@ -729,7 +729,7 @@ export function FinanceForm({
               <option value="">ไม่ระบุ</option>
               {allowedFarmRecordUnits.map((unit) => (
                 <option key={unit.id} value={unit.id}>
-                  {unit.label.th} / {unit.label.en}
+                  {unit.label.th}
                 </option>
               ))}
             </select>
@@ -828,7 +828,7 @@ export function HarvestForm({
             <select className={inputClassName()} onChange={(event) => onChange({ ...values, quantityUnit: event.target.value as HarvestFormValues['quantityUnit'] })} value={values.quantityUnit}>
               {farmHarvestQuantityUnits.map((unit) => (
                 <option key={unit.id} value={unit.id}>
-                  {unit.label.th} / {unit.label.en}
+                  {unit.label.th}
                 </option>
               ))}
             </select>
@@ -973,7 +973,7 @@ export function CropCycleForm({
             <select className={inputClassName()} onChange={(event) => onChange({ ...values, status: event.target.value as CropCycleStatus })} value={values.status}>
               {cropCycleStatuses.map((status) => (
                 <option key={status.id} value={status.id}>
-                  {status.label.th} / {status.label.en}
+                  {status.label.th}
                 </option>
               ))}
             </select>
@@ -1569,7 +1569,7 @@ export function FarmRecordsDebugPage() {
 
         <section className="grid grid-cols-2 gap-3">
           <SummaryCard icon={Leaf} label="แปลงปลูก" value={viewModel.counts.plots} />
-          <SummaryCard icon={Sprout} label="รอบปลูก active" value={viewModel.counts.activeCropCycles} />
+          <SummaryCard icon={Sprout} label="รอบปลูกใช้งานอยู่" value={viewModel.counts.activeCropCycles} />
           <SummaryCard icon={ClipboardList} label="กิจกรรมฟาร์ม" value={viewModel.counts.activityRecords} />
           <SummaryCard icon={Wheat} label="รายการเก็บเกี่ยว" value={viewModel.counts.harvestRecords} />
           <SummaryCard icon={Banknote} label="รายรับรวม" value={formatCurrency(farmRecords.summary.totalIncome)} />
@@ -1619,7 +1619,7 @@ export function FarmRecordsDebugPage() {
                 <option value="">ทุกกิจกรรม</option>
                 {farmActivityTypes.map((activity) => (
                   <option key={activity.id} value={activity.id}>
-                    {activity.label.th} / {activity.label.en}
+                    {activity.label.th}
                   </option>
                 ))}
               </select>
@@ -1631,8 +1631,8 @@ export function FarmRecordsDebugPage() {
                 value={filters.financeDirection}
               >
                 <option value="">ทั้งหมด</option>
-                <option value="income">รายรับ / Income</option>
-                <option value="expense">รายจ่าย / Expense</option>
+                <option value="income">รายรับ</option>
+                <option value="expense">รายจ่าย</option>
               </select>
             </FormField>
             <FormField label="หมวดบัญชี">
@@ -1644,7 +1644,7 @@ export function FarmRecordsDebugPage() {
                 <option value="">ทุกหมวด</option>
                 {categoryFilterOptions.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.label.th} / {category.label.en}
+                    {category.label.th}
                   </option>
                 ))}
               </select>
@@ -2449,14 +2449,14 @@ export function FarmRecordsDebugPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap gap-2">
-                        <Badge tone={plot.isArchived ? 'neutral' : 'green'}>{plot.isArchived ? 'เก็บถาวร / Archived' : 'ใช้งานอยู่ / Active'}</Badge>
-                        <Badge tone="sky">{viewModel.activeCycleCountByPlot[plot.id] ?? 0} active cycle</Badge>
+                        <Badge tone={plot.isArchived ? 'neutral' : 'green'}>{plot.isArchived ? 'เก็บถาวร' : 'ใช้งานอยู่'}</Badge>
+                        <Badge tone="sky">{viewModel.activeCycleCountByPlot[plot.id] ?? 0} รอบใช้งานอยู่</Badge>
                       </div>
                       <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{plot.name}</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-600">{formatLocation(plot)}</p>
                       <p className="text-sm leading-6 text-slate-600">{formatArea(plot)}</p>
                       <p className="mt-2 text-sm font-bold leading-6 text-kaset-deep">
-                        {currentCycle ? `รอบปัจจุบัน: ${currentCycle.cropName}` : 'ยังไม่มีรอบปลูก active'}
+                        {currentCycle ? `รอบปัจจุบัน: ${currentCycle.cropName}` : 'ยังไม่มีรอบปลูกใช้งานอยู่'}
                       </p>
                       {!plot.isArchived ? (
                         <button
@@ -2629,7 +2629,7 @@ export function FarmRecordsDebugPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2">
-                      <Badge tone={entry.direction === 'income' ? 'green' : 'gold'}>{entry.direction === 'income' ? 'รายรับ / Income' : 'รายจ่าย / Expense'}</Badge>
+                      <Badge tone={entry.direction === 'income' ? 'green' : 'gold'}>{entry.direction === 'income' ? 'รายรับ' : 'รายจ่าย'}</Badge>
                       <Badge tone="neutral">{getFinanceCategoryLabel(entry.category)}</Badge>
                       <Badge tone="neutral">{entry.entryDate}</Badge>
                     </div>
