@@ -2,16 +2,30 @@ import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import { createDemoFarmRecordsState } from '@/services/farm-records/farm-records-fixtures';
-import { createEmptyFarmRecordsState, createFarmRecordsService, createMemoryFarmRecordsStorage } from '@/services/farm-records/farm-records-service';
-import { FarmRecordsDebugPage, HarvestForm } from '@/routes/FarmRecordsDebugPage';
+import {
+  createEmptyFarmRecordsState,
+  createFarmRecordsService,
+  createMemoryFarmRecordsStorage,
+} from '@/services/farm-records/farm-records-service';
+import {
+  ActivityForm,
+  EmptyState,
+  FarmRecordsDebugPage,
+  FinanceForm,
+  HarvestForm,
+  PlotForm,
+} from '@/routes/FarmRecordsDebugPage';
 import {
   activityFormFromRecord,
   buildFarmRecordsViewModel,
   changeFinanceFormDirection,
+  createInitialActivityForm,
   createDefaultFarmRecordsFilters,
   createInitialFinanceForm,
+  createInitialFarmPlotForm,
   createInitialHarvestForm,
   farmRecordsDeleteConfirmationMessage,
+  farmRecordsFirstUseEmptyStates,
   financeFormFromEntry,
   validateFinanceForm,
   validateHarvestForm,
@@ -25,11 +39,10 @@ describe('M90 farm records farmer-facing page', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Farm Records /');
     expect(html).toContain('สมุดบันทึกฟาร์ม');
-    expect(html).toContain('Local-first');
-    expect(html).toContain('บัญชีฟาร์ม');
-    expect(html).toContain('Farm Cost Dashboard');
+    expect(html).toContain('บันทึกงานในฟาร์ม รายรับรายจ่าย และผลผลิตในเครื่องนี้');
+    expect(html).toContain('ข้อมูลในเครื่องนี้');
+    expect(html).toContain('รายรับรายจ่าย');
     expect(html).toContain('สรุปต้นทุนและกำไรฟาร์ม');
     expect(html).toContain('Expense by category');
     expect(html).toContain('Income by category');
@@ -53,7 +66,7 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).not.toContain('à¹');
     expect(html).not.toContain('Â');
     expect(html).not.toContain('�');
-    expect(html).toContain('Recent Farm Timeline');
+    expect(html).toContain('ไทม์ไลน์ฟาร์มล่าสุด');
     expect(html).toContain('Export &amp; Data Control');
     expect(html).toContain('Download JSON Backup');
     expect(html).toContain('Download Finance CSV');
@@ -129,6 +142,39 @@ describe('M90 farm records farmer-facing page', () => {
     expect(viewModel.summary.totalExpense).toBe(0);
   });
 
+  test('renders M96 first-use guide and empty-state copy with the shared empty-state component', () => {
+    const pageHtml = renderToString(
+      <MemoryRouter>
+        <FarmRecordsDebugPage />
+      </MemoryRouter>,
+    );
+    const emptyStateHtml = renderToString(
+      <>
+        {Object.values(farmRecordsFirstUseEmptyStates).map((copy) => (
+          <EmptyState actionLabel={copy.actionLabel} detail={copy.detail} key={copy.title} onAction={() => undefined} title={copy.title} />
+        ))}
+      </>,
+    );
+
+    expect(pageHtml).toContain('เริ่มใช้สมุดฟาร์ม');
+    expect(pageHtml).toContain('เริ่มจากเพิ่มแปลง แล้วค่อยบันทึกงาน รายรับรายจ่าย และผลผลิต');
+    expect(pageHtml).toContain('ขั้นตอน');
+    expect(pageHtml).toContain('เพิ่มแปลง');
+    expect(pageHtml).toContain('บันทึกงานในฟาร์ม');
+    expect(pageHtml).toContain('บันทึกรายรับรายจ่าย');
+    expect(pageHtml).toContain('บันทึกผลผลิต');
+    expect(emptyStateHtml).toContain('ยังไม่มีแปลง');
+    expect(emptyStateHtml).toContain('เริ่มจากเพิ่มแปลงของคุณก่อน');
+    expect(emptyStateHtml).toContain('ยังไม่มีบันทึกงานในฟาร์ม');
+    expect(emptyStateHtml).toContain('บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา ให้น้ำ หรือเก็บเกี่ยว');
+    expect(emptyStateHtml).toContain('ยังไม่มีรายรับรายจ่าย');
+    expect(emptyStateHtml).toContain('บันทึกค่าใช้จ่าย เช่น ค่าปุ๋ย ค่ายา ค่าแรง หรือรายได้จากขายผลผลิต');
+    expect(emptyStateHtml).toContain('ยังไม่มีข้อมูลผลผลิต');
+    expect(emptyStateHtml).toContain('เมื่อเก็บเกี่ยวแล้ว ให้บันทึกน้ำหนักผลผลิตเพื่อดูต้นทุนต่อกก.');
+    expect(emptyStateHtml).toContain('เพิ่มเงิน');
+    expect(emptyStateHtml).toContain('เพิ่มผลผลิต');
+  });
+
   test('blocks invalid negative harvest quantity before local create', () => {
     const form = createInitialHarvestForm('2026-09-01');
     form.farmPlotId = 'farm-plot-demo-rice-a';
@@ -155,11 +201,13 @@ describe('M90 farm records farmer-facing page', () => {
       />,
     );
 
-    expect(html).toContain('เพิ่มข้อมูลผลผลิต');
-    expect(html).toContain('บันทึกผลผลิตที่เก็บเกี่ยวได้จากแปลงหรือรอบปลูกนี้');
+    expect(html).toContain('เพิ่มผลผลิต');
+    expect(html).toContain('บันทึกผลผลิตช่วยคำนวณต้นทุนต่อกก.');
+    expect(html).toContain('แปลง (จำเป็น)');
+    expect(html).toContain('รอบปลูก (ถ้ามี)');
     expect(html).toContain('วันที่เก็บเกี่ยว');
     expect(html).toContain('ชื่อพืช (ถ้ามี)');
-    expect(html).toContain('ปริมาณผลผลิต');
+    expect(html).toContain('ปริมาณผลผลิต (จำเป็น)');
     expect(html).toContain('หน่วย');
     expect(html).toContain('เกรด/คุณภาพ (ถ้ามี)');
     expect(html).toContain('ผู้ซื้อ (ถ้ามี)');
@@ -176,6 +224,58 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).not.toContain('à¹');
     expect(html).not.toContain('Â');
     expect(html).not.toContain('�');
+  });
+
+  test('renders activity, finance, and plot forms with clearer Thai-first first-use labels', () => {
+    const state = createDemoFarmRecordsState();
+    const activityHtml = renderToString(
+      <ActivityForm
+        cycles={state.cropCycles}
+        errors={[]}
+        onCancel={() => undefined}
+        onChange={() => undefined}
+        onSubmit={(event) => event.preventDefault()}
+        plots={state.farmPlots}
+        submitLabel="บันทึก"
+        title="เพิ่มกิจกรรม"
+        values={createInitialActivityForm('2026-05-25')}
+      />,
+    );
+    const financeHtml = renderToString(
+      <FinanceForm
+        cycles={state.cropCycles}
+        errors={[]}
+        onCancel={() => undefined}
+        onChange={() => undefined}
+        onSubmit={(event) => event.preventDefault()}
+        plots={state.farmPlots}
+        submitLabel="บันทึก"
+        title="เพิ่มเงิน"
+        values={createInitialFinanceForm('2026-05-25')}
+      />,
+    );
+    const plotHtml = renderToString(
+      <PlotForm
+        errors={[]}
+        onCancel={() => undefined}
+        onChange={() => undefined}
+        onSubmit={(event) => event.preventDefault()}
+        values={createInitialFarmPlotForm()}
+      />,
+    );
+
+    expect(activityHtml).toContain('บันทึกงานช่วยให้จำได้ว่าใส่ปุ๋ย พ่นยา หรือเก็บเกี่ยววันไหน');
+    expect(activityHtml).toContain('ประเภทงานในฟาร์ม');
+    expect(activityHtml).toContain('ชื่องานในฟาร์ม (จำเป็น)');
+    expect(activityHtml).toContain('สิ่งที่ใช้ เช่น ปุ๋ย ยา เมล็ดพันธุ์ (ถ้ามี)');
+    expect(activityHtml).toContain('ปริมาณที่ใช้ (ถ้ามี)');
+    expect(financeHtml).toContain('บันทึกรายรับรายจ่ายช่วยดูต้นทุนและกำไร');
+    expect(financeHtml).toContain('รายรับหรือรายจ่าย');
+    expect(financeHtml).toContain('จำนวนเงิน (บาท)');
+    expect(financeHtml).toContain('ผู้ซื้อ/ร้านค้า (ถ้ามี)');
+    expect(plotHtml).toContain('เพิ่มแปลง');
+    expect(plotHtml).toContain('ชื่อแปลง (จำเป็น)');
+    expect(plotHtml).toContain('พื้นที่ (ไร่) ถ้ามี');
   });
 
   test('blocks invalid finance amounts before local create', () => {

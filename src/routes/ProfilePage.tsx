@@ -1,17 +1,25 @@
+import type { LucideIcon } from 'lucide-react';
 import {
   Bell,
   BookOpenCheck,
   Bot,
   Calculator,
+  ChevronDown,
   ChevronRight,
   ClipboardCheck,
+  CloudOff,
   CloudSun,
   CloudUpload,
+  DatabaseBackup,
   FileLock2,
   FileText,
   GitBranch,
+  HelpCircle,
   History,
+  Languages,
+  LifeBuoy,
   Link2,
+  LockKeyhole,
   LogOut,
   Ruler,
   Server,
@@ -27,7 +35,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
-import { demoUser, profileStats } from '@/data/mockData';
+import { cx } from '@/components/ui/classNames';
+import { demoUser } from '@/data/mockData';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
@@ -35,37 +44,52 @@ import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
 import type { AppRoute } from '@/types/kaset';
 
+type ProfileMenuHref = AppRoute | `${AppRoute}#${string}`;
+type ProfileMenuTone = 'primary' | 'privacy' | 'help' | 'advanced';
+type ProfileStatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+
 type ProfileMenuItem = {
   label: string;
   description: string;
-  icon: typeof UserRound;
-  href?: AppRoute;
+  icon: LucideIcon;
+  href?: ProfileMenuHref;
+  status?: string;
+  statusTone?: ProfileStatusTone;
 };
 
 type ProfileMenuGroup = {
   title: string;
   subtitle: string;
-  tone: 'primary' | 'privacy' | 'help' | 'advanced';
+  tone: ProfileMenuTone;
   items: ProfileMenuItem[];
 };
 
 const profileMenuGroups: ProfileMenuGroup[] = [
   {
     title: 'บัญชีของฉัน',
-    subtitle: 'สถานะผู้ใช้และสิ่งที่บันทึกไว้',
+    subtitle: 'เรื่องบัญชี ภาษา และสิ่งที่บันทึกไว้',
     tone: 'primary',
     items: [
       {
         label: 'สถานะบัญชี',
-        description: 'ดูโหมด guest และการสมัครตัวอย่าง',
+        description: 'ดูสถานะการใช้งานบนเครื่องนี้',
         icon: ShieldCheck,
         href: '/app/auth/status',
       },
       {
-        label: 'สมัคร/สำรองข้อมูล',
-        description: 'ตัวอย่างการสมัครในอนาคต ยังไม่เปิด sync จริง',
+        label: 'สมัครหรือสำรองข้อมูลภายหลัง',
+        description: 'ตัวอย่างการสมัครในอนาคต ยังไม่เปิดสำรองขึ้นคลาวด์จริง',
         icon: UserRound,
         href: '/app/auth',
+        status: 'ตัวอย่าง',
+        statusTone: 'neutral',
+      },
+      {
+        label: 'ภาษา',
+        description: 'เลือกภาษาไทยหรืออังกฤษในอนาคต',
+        icon: Languages,
+        status: 'เร็ว ๆ นี้',
+        statusTone: 'info',
       },
       {
         label: 'วิดีโอที่บันทึกไว้',
@@ -81,7 +105,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'ตั้งค่าการแจ้งเตือน',
-        description: 'จัดการแจ้งเตือน local/mock',
+        description: 'จัดการการแจ้งเตือนตัวอย่างในเครื่องนี้',
         icon: Bell,
         href: '/app/notification-settings',
       },
@@ -89,7 +113,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
   },
   {
     title: 'ข้อมูลและความเป็นส่วนตัว',
-    subtitle: 'ข้อมูลในเครื่องนี้ สำรอง/กู้คืน และความปลอดภัย',
+    subtitle: 'ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้',
     tone: 'privacy',
     items: [
       {
@@ -99,16 +123,30 @@ const profileMenuGroups: ProfileMenuGroup[] = [
         href: '/app/my-farm',
       },
       {
-        label: 'ตั้งค่า My Farm',
-        description: 'สถานะ local-only และแผน sync ในอนาคต',
+        label: 'ตั้งค่าฟาร์มของฉัน',
+        description: 'ดูสถานะข้อมูลในเครื่องและแผนสำรองในอนาคต',
         icon: Settings,
         href: '/app/my-farm/settings',
       },
       {
-        label: 'สมุดฟาร์มและสำรองข้อมูล',
-        description: 'เปิด export, restore, cost dashboard และ harvest/yield',
-        icon: FileLock2,
-        href: '/app/farm-records',
+        label: 'ข้อมูลและความเป็นส่วนตัว',
+        description: 'สำรอง กู้คืน และตรวจสอบสถานะการซิงก์',
+        icon: LockKeyhole,
+        href: '/app/farm-records#farm-records-export',
+      },
+      {
+        label: 'กู้คืนข้อมูลฟาร์ม',
+        description: 'กู้คืนจากไฟล์สำรองในเครื่องนี้เมื่อพร้อม',
+        icon: DatabaseBackup,
+        href: '/app/farm-records#farm-records-restore',
+      },
+      {
+        label: 'การซิงก์ข้อมูล',
+        description: 'ยังไม่เปิดใช้งาน ข้อมูลยังอยู่ในเครื่องนี้',
+        icon: CloudOff,
+        href: '/app/farm-records#farm-records-sync',
+        status: 'ปิดอยู่',
+        statusTone: 'warning',
       },
       {
         label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้',
@@ -124,7 +162,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'สำรองข้อมูลในอนาคต',
-        description: 'บัญชีและ backup preview แบบไม่เชื่อม cloud จริง',
+        description: 'ตัวอย่างบัญชีและการสำรองข้อมูล ยังไม่เชื่อมคลาวด์จริง',
         icon: CloudUpload,
         href: '/app/account-preview',
       },
@@ -132,9 +170,22 @@ const profileMenuGroups: ProfileMenuGroup[] = [
   },
   {
     title: 'ช่วยเหลือ',
-    subtitle: 'เครื่องมือและคำแนะนำที่ใช้บ่อย',
+    subtitle: 'คำแนะนำและทางลัดที่ใช้บ่อย',
     tone: 'help',
     items: [
+      {
+        label: 'วิธีใช้แอพ',
+        description: 'คู่มือเริ่มต้นสำหรับเกษตรกร',
+        icon: HelpCircle,
+        href: '/app/help',
+      },
+      {
+        label: 'ติดต่อทีมงาน',
+        description: 'ช่องทางช่วยเหลือจะเพิ่มในเวอร์ชันถัดไป',
+        icon: LifeBuoy,
+        status: 'เร็ว ๆ นี้',
+        statusTone: 'info',
+      },
       {
         label: 'เครื่องคำนวณเกษตร',
         description: 'ปุ๋ย ระยะปลูก ต้นทุน และผลผลิต',
@@ -169,47 +220,53 @@ const profileMenuGroups: ProfileMenuGroup[] = [
   },
   {
     title: 'สำหรับทีมงานหรือทดสอบ',
-    subtitle: 'เครื่องมือภายใน แอดมิน QA และ readiness',
+    subtitle: 'เครื่องมือภายใน สถานะความพร้อม และหน้าทดสอบ',
     tone: 'advanced',
     items: [
       {
-        label: 'Admin Dashboard',
-        description: 'ตัวอย่างระบบผู้ดูแลแบบ local/mock',
+        label: 'Admin',
+        description: 'ภาพรวมผู้ดูแลแบบ local/mock',
         icon: ShieldCheck,
         href: '/app/admin',
       },
       {
-        label: 'ตรวจความพร้อม UX',
+        label: 'ตรวจสอบระบบ',
         description: 'QA และ route review สำหรับทีมงาน',
         icon: ClipboardCheck,
         href: '/app/qa',
       },
       {
-        label: 'Internal MVP Snapshot',
-        description: 'ภาพรวม route coverage และ readiness',
+        label: 'บันทึกทดสอบผู้ใช้',
+        description: 'เช็กลิสต์ภาคสนามแบบ static/local ไม่มีการส่งข้อมูล',
+        icon: ClipboardCheck,
+        href: '/app/field-test-feedback',
+      },
+      {
+        label: 'ภาพรวม MVP ภายใน',
+        description: 'ภาพรวม route coverage และสถานะความพร้อม',
         icon: ClipboardCheck,
         href: '/app/mvp-snapshot',
       },
       {
-        label: 'Next Phase Decision',
+        label: 'แผนขั้นต่อไป',
         description: 'แผนขั้นต่อไปแบบไม่เปิด backend จริง',
         icon: GitBranch,
         href: '/app/next-phase',
       },
       {
-        label: 'Supabase staging readiness',
+        label: 'สถานะความพร้อม Supabase staging',
         description: 'เช็กลิสต์ staging เท่านั้น ยังไม่เชื่อม production',
         icon: Server,
         href: '/app/supabase-readiness',
       },
       {
-        label: 'Supabase staging setup guide',
+        label: 'คู่มือ Supabase staging',
         description: 'คู่มือ setup แบบ manual review',
         icon: ClipboardCheck,
         href: '/app/supabase-setup-guide',
       },
       {
-        label: 'Phone OTP staging checklist',
+        label: 'เช็กลิสต์ Phone OTP staging',
         description: 'แผนทดสอบ phone auth ยังไม่ส่ง OTP จริง',
         icon: ShieldCheck,
         href: '/app/auth/phone-staging',
@@ -227,7 +284,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
         href: '/app/ai-credits',
       },
       {
-        label: 'เตรียมรูปก่อนวิเคราะห์',
+        label: 'ทดสอบระบบรูปภาพก่อนวิเคราะห์',
         description: 'image preflight readiness แบบ local',
         icon: FileLock2,
         href: '/app/image-preflight',
@@ -245,7 +302,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
         href: '/app/content-admin-preview',
       },
       {
-        label: 'Guest Sync readiness',
+        label: 'สถานะความพร้อม Guest Sync',
         description: 'สถานะและ Edge Function plan แบบไม่ sync จริง',
         icon: CloudUpload,
         href: '/app/guest-sync-status',
@@ -266,44 +323,51 @@ const profileMenuGroups: ProfileMenuGroup[] = [
   },
 ];
 
-const groupToneClass: Record<ProfileMenuGroup['tone'], string> = {
+const groupToneClass: Record<ProfileMenuTone, string> = {
   primary: 'bg-kaset-mint text-kaset-deep',
   privacy: 'bg-emerald-100 text-emerald-800',
   help: 'bg-sky-100 text-sky-800',
   advanced: 'bg-slate-100 text-slate-700',
 };
 
-function ProfileMenuRow({ item }: { item: ProfileMenuItem }) {
+const rowIconToneClass: Record<ProfileMenuTone, string> = {
+  primary: 'bg-kaset-mint text-kaset-deep',
+  privacy: 'bg-emerald-100 text-emerald-800',
+  help: 'bg-sky-100 text-sky-800',
+  advanced: 'bg-slate-100 text-slate-600',
+};
+
+function ProfileMenuRow({ item, tone }: { item: ProfileMenuItem; tone: ProfileMenuTone }) {
   const Icon = item.icon;
+  const rowClassName = cx(
+    'flex min-h-[76px] w-full items-center gap-3 border-t border-kaset-deep/8 px-4 py-4 text-left first:border-t-0',
+    item.href && 'transition hover:bg-kaset-mint/45',
+    tone === 'advanced' && 'min-h-[68px] bg-white/70',
+  );
   const content = (
     <>
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+      <span className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-lg', rowIconToneClass[tone])}>
         <Icon aria-hidden="true" className="h-5 w-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-extrabold leading-6 text-kaset-ink">{item.label}</span>
         <span className="mt-0.5 block text-sm leading-5 text-slate-600">{item.description}</span>
       </span>
-      <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-400" />
+      {item.status ? (
+        <StatusPill className="shrink-0" tone={item.statusTone ?? 'neutral'}>
+          {item.status}
+        </StatusPill>
+      ) : null}
+      {item.href ? <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-400" /> : null}
     </>
   );
 
   if (!item.href) {
-    return (
-      <button
-        className="flex min-h-[70px] w-full items-center gap-3 border-t border-kaset-deep/8 px-4 py-4 text-left first:border-t-0"
-        type="button"
-      >
-        {content}
-      </button>
-    );
+    return <div className={rowClassName}>{content}</div>;
   }
 
   return (
-    <Link
-      className="flex min-h-[70px] w-full items-center gap-3 border-t border-kaset-deep/8 px-4 py-4 text-left first:border-t-0"
-      to={item.href}
-    >
+    <Link className={rowClassName} to={item.href}>
       {content}
     </Link>
   );
@@ -331,9 +395,36 @@ function ProfileMenuGroupCard({ group }: { group: ProfileMenuGroup }) {
       </div>
       <div>
         {group.items.map((item) => (
-          <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} />
+          <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} tone={group.tone} />
         ))}
       </div>
+    </Card>
+  );
+}
+
+function ProfileAdvancedGroupCard({ group }: { group: ProfileMenuGroup }) {
+  return (
+    <Card className="overflow-hidden border-slate-200 bg-slate-50/80 shadow-none">
+      <details className="group" data-testid="profile-advanced-section">
+        <summary className="flex min-h-[76px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+          <span className={`mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg ${groupToneClass[group.tone]}`}>
+            <ClipboardCheck aria-hidden="true" className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-extrabold leading-7 text-slate-800">{group.title}</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{group.subtitle}</p>
+          </div>
+          <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" />
+        </summary>
+        <div className="border-t border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-sm leading-6 text-slate-600">ส่วนนี้สำหรับทีมพัฒนา ไม่จำเป็นต้องใช้ในการใช้งานทั่วไป</p>
+        </div>
+        <div className="bg-white/80">
+          {group.items.map((item) => (
+            <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} tone={group.tone} />
+          ))}
+        </div>
+      </details>
     </Card>
   );
 }
@@ -345,32 +436,33 @@ export function ProfilePage() {
   const notificationCenter = useNotificationCenter();
   const accountStatus = getAccountStatus(state);
 
+  const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
+  const advancedMenuGroup = profileMenuGroups.find((group) => group.tone === 'advanced');
+
   return (
     <div>
-      <PageHeader title="โปรไฟล์" subtitle="บัญชี การตั้งค่า และข้อมูลส่วนตัว" showBack />
+      <PageHeader title="โปรไฟล์และการตั้งค่า" subtitle="บัญชี ข้อมูลในเครื่อง และความช่วยเหลือ" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        <Card className="overflow-hidden">
-          <div className="bg-kaset-deep px-5 pb-14 pt-5 text-white">
-            <Badge className="bg-white/15 text-white" tone="green">
-              {demoUser.badge}
-            </Badge>
-          </div>
-          <div className="-mt-10 px-5 pb-5">
-            <div className="grid h-20 w-20 place-items-center rounded-full border-4 border-white bg-kaset-mint text-kaset-deep shadow-soft">
-              <UserRound aria-hidden="true" className="h-9 w-9" />
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-kaset-mint text-kaset-deep shadow-soft">
+              <UserRound aria-hidden="true" className="h-8 w-8" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <Badge tone="green">{demoUser.badge}</Badge>
+              <h2 className="mt-2 text-xl font-extrabold leading-7 text-kaset-ink">{demoUser.name}</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {demoUser.province} · {demoUser.plan}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">สนใจ: {demoUser.cropFocus}</p>
             </div>
-            <h2 className="mt-4 text-2xl font-extrabold text-kaset-ink">{demoUser.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {demoUser.province} · {demoUser.plan}
-            </p>
-            <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700">
-              สนใจ: {demoUser.cropFocus}
-            </p>
           </div>
         </Card>
 
-        <NoticeBox tone="success" title="โปรไฟล์ไม่ใช่เมนูหลักของฟาร์ม">
-          ฟาร์มของฉันอยู่ที่หน้าแรกและแถบเมนูด้านล่างแล้ว หน้านี้เก็บเรื่องบัญชี ข้อมูลในเครื่อง ความเป็นส่วนตัว และเครื่องมือทดสอบไว้เป็นหมวดหมู่
+        <NoticeBox tone="info" title="สิ่งที่ควรรู้ตอนนี้">
+          <p>ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้</p>
+          <p>การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน</p>
+          <p>การตั้งค่าบางอย่างเป็นตัวอย่างสำหรับเวอร์ชันถัดไป</p>
         </NoticeBox>
 
         <Card className="p-4">
@@ -395,6 +487,10 @@ export function ProfilePage() {
         </Card>
 
         <Card className="p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="font-extrabold text-kaset-ink">ข้อมูลในเครื่องนี้</h2>
+            <StatusPill tone="warning">คลาวด์ปิดอยู่</StatusPill>
+          </div>
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-lg bg-kaset-mist p-3 text-center">
               <p className="text-xl font-extrabold text-kaset-deep">{notificationCenter.digest.unreadCount}</p>
@@ -411,28 +507,21 @@ export function ProfilePage() {
           </div>
         </Card>
 
-        {profileMenuGroups.map((group) => (
+        {primaryMenuGroups.map((group) => (
           <ProfileMenuGroupCard group={group} key={group.title} />
         ))}
 
-        <div className="grid grid-cols-3 gap-3">
-          {profileStats.map((stat) => (
-            <Card className="p-3 text-center" key={stat.label}>
-              <p className="text-xl font-extrabold text-kaset-deep">{stat.value}</p>
-              <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{stat.label}</p>
-            </Card>
-          ))}
-        </div>
+        {advancedMenuGroup ? <ProfileAdvancedGroupCard group={advancedMenuGroup} /> : null}
 
         <Card className="p-4">
           <div className="flex gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Sprout aria-hidden="true" className="h-5 w-5" />
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
+              <CloudOff aria-hidden="true" className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="font-extrabold text-kaset-ink">KasetHub prototype</h2>
+              <h2 className="font-extrabold text-kaset-ink">สถานะระบบตอนนี้</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                หน้านี้จัดหมวดหมู่เพื่อลดความสับสนสำหรับผู้ใช้สูงวัย โดยยังคงลิงก์ทีมงานและ route ทดสอบไว้ครบ
+                ใช้งานได้จากข้อมูลในเครื่องนี้ก่อน การสำรองขึ้นคลาวด์และช่องทางช่วยเหลือจริงยังเป็นแผนสำหรับเวอร์ชันถัดไป
               </p>
             </div>
           </div>

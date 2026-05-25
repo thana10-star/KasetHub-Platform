@@ -60,12 +60,17 @@ M93 also renames calculator access in bottom nav to `เครื่องมื
 - Home compact Farm Hub remains compact and still links only to `/app/my-farm`.
 - `/app/my-farm`, `/app/farm-records`, Admin, QA, readiness, video, community, weather, calculators, and all existing deep links remain available.
 
+## 6.1 M94 Follow-up
+
+M94 builds on this structure by polishing `/app/profile` into `โปรไฟล์และการตั้งค่า`, adding placeholders for `ภาษา`, `วิธีใช้แอพ`, and `ติดต่อทีมงาน`, clarifying Farm Records export/restore/sync status links, and collapsing `สำหรับทีมงานหรือทดสอบ` by default.
+
+M94 still preserves every route and keeps Admin, QA, readiness, Supabase staging, AI proxy, content admin, moderation, and Guest Sync planning links accessible.
+
 ## 7. What Remains Future
 
 - Field testing with older farmers and family users.
-- A production-ready settings page with language and support contact flows.
+- Production-ready language switching and support contact flows.
 - A final decision on whether Weather or Knowledge should become a bottom-nav slot after usage data.
-- Collapsible advanced sections if the design system adds a disclosure component.
 - Separating internal/Admin surfaces from production builds when real auth/RBAC exists.
 
 ## 8. Non-goals

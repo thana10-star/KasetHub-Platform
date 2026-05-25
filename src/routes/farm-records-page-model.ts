@@ -133,6 +133,29 @@ export type FormValidationResult = {
 export const farmRecordsDeleteConfirmationMessage =
   'ลบรายการนี้หรือไม่? ข้อมูลนี้จะถูกลบจากเครื่องนี้เท่านั้น ยังไม่มีข้อมูลบนคลาวด์ให้ลบเพราะยังไม่เปิดซิงก์ และจะกู้คืนไม่ได้หากยังไม่มี export/backup ในอนาคต';
 
+export const farmRecordsFirstUseEmptyStates = {
+  plots: {
+    actionLabel: 'เพิ่มแปลง',
+    detail: 'เริ่มจากเพิ่มแปลงของคุณก่อน',
+    title: 'ยังไม่มีแปลง',
+  },
+  activity: {
+    actionLabel: 'เพิ่มกิจกรรม',
+    detail: 'บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา ให้น้ำ หรือเก็บเกี่ยว',
+    title: 'ยังไม่มีบันทึกงานในฟาร์ม',
+  },
+  finance: {
+    actionLabel: 'เพิ่มเงิน',
+    detail: 'บันทึกค่าใช้จ่าย เช่น ค่าปุ๋ย ค่ายา ค่าแรง หรือรายได้จากขายผลผลิต',
+    title: 'ยังไม่มีรายรับรายจ่าย',
+  },
+  harvest: {
+    actionLabel: 'เพิ่มผลผลิต',
+    detail: 'เมื่อเก็บเกี่ยวแล้ว ให้บันทึกน้ำหนักผลผลิตเพื่อดูต้นทุนต่อกก.',
+    title: 'ยังไม่มีข้อมูลผลผลิต',
+  },
+} as const;
+
 export function createDefaultFarmRecordsFilters(): FarmRecordsPageFilters {
   return {
     farmPlotId: '',
@@ -400,7 +423,7 @@ export function validateActivityForm(values: ActivityFormValues, availablePlots:
   const errors: string[] = [];
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('เลือกแปลงปลูกก่อนบันทึกกิจกรรม');
+    errors.push('เลือกแปลงก่อนบันทึกกิจกรรม');
   }
 
   if (!hasValidDate(values.activityDate)) {
@@ -412,11 +435,11 @@ export function validateActivityForm(values: ActivityFormValues, availablePlots:
   }
 
   if (!values.title.trim()) {
-    errors.push('ใส่ชื่อกิจกรรม');
+    errors.push('ใส่ชื่องานในฟาร์ม');
   }
 
   if (values.inputQuantity.trim() && parseOptionalNonNegativeNumber(values.inputQuantity) === undefined) {
-    errors.push('ปริมาณปัจจัยการผลิตต้องเป็นตัวเลขไม่ติดลบ');
+    errors.push('ปริมาณที่ใช้ต้องเป็นตัวเลขไม่ติดลบ');
   }
 
   return { isValid: errors.length === 0, errors };
@@ -454,7 +477,7 @@ export function validateFarmPlotForm(values: FarmPlotFormValues): FormValidation
   const errors: string[] = [];
 
   if (!values.name.trim()) {
-    errors.push('ใส่ชื่อแปลงปลูก');
+    errors.push('ใส่ชื่อแปลง');
   }
 
   if (values.areaRai.trim() && parseOptionalNonNegativeNumber(values.areaRai) === undefined) {
@@ -468,7 +491,7 @@ export function validateCropCycleForm(values: CropCycleFormValues, availablePlot
   const errors: string[] = [];
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('เลือกแปลงปลูกของรอบปลูก');
+    errors.push('เลือกแปลงของรอบปลูก');
   }
 
   if (!values.cropName.trim()) {

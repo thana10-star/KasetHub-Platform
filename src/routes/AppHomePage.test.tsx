@@ -62,8 +62,8 @@ describe('M92.1 compact home Farm Hub launcher', () => {
 
     expect(myFarmHtml).toContain('/app/farm-records#farm-cost-dashboard');
     expect(myFarmHtml).toContain('Backup/Restore ready locally');
-    expect(farmRecordsHtml).toContain('Farm Records /');
-    expect(farmRecordsHtml).toContain('Farm Cost Dashboard');
+    expect(farmRecordsHtml).toContain('สมุดบันทึกฟาร์ม');
+    expect(farmRecordsHtml).toContain('สรุปต้นทุนและกำไรฟาร์ม');
     expect(farmRecordsHtml).toContain('ผลผลิตและการเก็บเกี่ยว');
   });
 });

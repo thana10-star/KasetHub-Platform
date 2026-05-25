@@ -9,6 +9,7 @@ import {
   ClipboardList,
   CloudSun,
   FileText,
+  HelpCircle,
   Leaf,
   Ruler,
   Settings,
@@ -49,6 +50,8 @@ const timelineIcons: Record<MyFarmTimelineItemType, LucideIcon> = {
   saved_article: FileText,
   saved_video: Sparkles,
 };
+
+const firstUseFarmSteps = ['เพิ่มแปลง', 'บันทึกงานในฟาร์ม', 'บันทึกรายรับรายจ่าย', 'บันทึกผลผลิต'];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('th-TH', {
@@ -136,6 +139,37 @@ export function MyFarmPage() {
         <NoticeBox tone="warning" title="ข้อมูลอยู่ในเครื่องนี้เท่านั้น" icon={ShieldCheck}>
           My Farm ยังไม่เชื่อมต่อ backend, Supabase, cloud sync, AI จริง, อากาศจริง, แผนที่ หรือ GPS
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="grid gap-3">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <ClipboardList aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-extrabold leading-6 text-kaset-ink">เริ่มใช้ฟาร์มของฉัน</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">เริ่มจากเพิ่มแปลง แล้วค่อยบันทึกงาน รายรับรายจ่าย และผลผลิต</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {firstUseFarmSteps.map((step, index) => (
+                <div className="rounded-lg bg-kaset-mist p-3" key={step}>
+                  <p className="text-xs font-bold text-slate-500">ขั้นตอน {index + 1}</p>
+                  <p className="mt-1 text-sm font-extrabold leading-5 text-kaset-ink">{step}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/farm-records">
+                เปิดสมุดฟาร์ม
+              </Link>
+              <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/help">
+                <HelpCircle aria-hidden="true" className="h-4 w-4" />
+                ดูวิธีใช้
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Link to="/app/notifications">
           <Card className="p-4">

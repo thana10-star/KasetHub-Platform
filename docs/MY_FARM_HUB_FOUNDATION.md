@@ -23,7 +23,7 @@ M34 aggregates existing local sources only:
 - Guest Memory farm records.
 - Saved plant analysis result summaries.
 - Farm area saved plots from `kasethub.farmArea.v1`.
-- M83-M92 Farm Records and Farm Finance Ledger from `kasethub.farmRecords.v1` and `/app/farm-records`, including local edit/timeline/export/restore/recovery/data-control, sync consent prototype status, cost summary, category breakdowns, harvest/yield records, cost-per-kg metrics, break-even estimate status, and a Home-first My Farm entry point.
+- M83-M96 Farm Records and Farm Finance Ledger from `kasethub.farmRecords.v1` and `/app/farm-records`, including local edit/timeline/export/restore/recovery/data-control, sync consent prototype status, cost summary, category breakdowns, harvest/yield records, cost-per-kg metrics, break-even estimate status, a Home-first My Farm entry point, Profile settings data-control links, a farmer start guide link, a first-use 4-step helper, and cloud sync shown as off.
 - Crop Watch followed crops and alert preferences from `kasethub.cropWatch.v1`.
 - Agriculture calculator history and favorites from `kasethub.agriCalculators.v1`.
 - Weather fixture context from the selected/default mock weather location.
@@ -89,6 +89,35 @@ Profile is grouped into account, data/privacy, help, and advanced/internal testi
 
 M93 does not change My Farm data aggregation, Farm Records local storage, sync consent state, export/restore behavior, or any backend boundary.
 
+## M94 Elder-friendly Settings
+
+M94 polishes `/app/profile` into `โปรไฟล์และการตั้งค่า` for elderly and non-technical farmers. The first three settings groups stay primary, while `สำหรับทีมงานหรือทดสอบ` is collapsed by default.
+
+The Profile data/privacy group now links directly to `/app/farm-records#farm-records-export`, `/app/farm-records#farm-records-restore`, and `/app/farm-records#farm-records-sync`. It shows `การซิงก์ข้อมูล` as `ปิดอยู่` and explains that farm data remains on this device.
+
+M94 adds no new My Farm source of truth, no Farm Records local storage change, no sync queue, no cloud sync, no Supabase read/write, no GPS, and no AI Farm Records processing.
+
+## M95 Farmer Start Guide
+
+M95 adds `/app/help` as a short guide for first-time farmers and elderly users. Home links to it with a compact `เริ่มใช้แอพ` card, Profile `วิธีใช้แอพ` links to it, and My Farm shows a compact helper for starting farm records.
+
+The My Farm helper points to `/app/farm-records` and `/app/help` so users can move from reading the guide into recording plots, activities, income/expense, and harvest data.
+
+M95 also adds `/app/field-test-feedback` as a static/local checklist for observing real users. It does not submit feedback, does not write Supabase data, and warns not to enter personal data.
+
+## M96 First-use Farm Records Flow
+
+M96 refines the My Farm helper into `เริ่มใช้ฟาร์มของฉัน` and makes the first path explicit:
+
+1. เพิ่มแปลง
+2. บันทึกงานในฟาร์ม
+3. บันทึกรายรับรายจ่าย
+4. บันทึกผลผลิต
+
+`/app/farm-records` now uses the same path, starts quick actions with `เพิ่มแปลง`, improves empty states for plots, farm work, income/expense, and harvest, and simplifies create-form labels with required markers plus `ถ้ามี` for optional fields.
+
+M96 does not add a new My Farm source of truth, does not change `kasethub.farmRecords.v1`, does not add backend feedback, and does not enable cloud sync, GPS, Supabase writes, receipt upload, OCR, notifications, or AI Farm Records processing.
+
 ## Timeline Rules
 
 The local timeline is built from:
@@ -136,7 +165,7 @@ M49 adds calculator-related future records that can also feed My Farm after auth
 - `planting_profiles`
 - `farm_cost_records`
 
-M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, M90 links My Farm to the local Farm Cost Dashboard, M91 adds harvest/yield and cost-per-kg summary visibility, M92/M92.1 make My Farm visible from Home with a compact Thai launcher, and M93 adds a dedicated bottom-nav entry plus grouped Profile navigation while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
+M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, M90 links My Farm to the local Farm Cost Dashboard, M91 adds harvest/yield and cost-per-kg summary visibility, M92/M92.1 make My Farm visible from Home with a compact Thai launcher, M93 adds a dedicated bottom-nav entry plus grouped Profile navigation, M94 clarifies Profile settings/data-control placeholders, M95 adds start-guide/field-test readiness, and M96 simplifies the first-use Farm Records path while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
 
 - `farm_plots`
 - `crop_cycles`

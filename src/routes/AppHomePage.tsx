@@ -12,7 +12,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { articles, communityPosts, cropPrices, videos } from '@/data/mockData';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
-import { Bell, Sprout } from 'lucide-react';
+import { Bell, HelpCircle, Sprout } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AppHomePage() {
@@ -52,6 +52,20 @@ export function AppHomePage() {
         <NoticeBox tone="success" title="ใช้งานได้ทันที ไม่ต้องสมัคร">
           บันทึกบทความ วิดีโอ คำถาม AI และประวัติฟาร์มไว้ในเครื่องนี้ได้ก่อน สมัครภายหลังเมื่ออยากสำรองข้อมูล
         </NoticeBox>
+
+        <Link to="/app/help">
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+                <HelpCircle aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-extrabold leading-6 text-kaset-ink">เริ่มใช้แอพ</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">ดูวิธีเริ่มจากฟาร์มของฉันและสมุดฟาร์ม</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
 
         <Link to="/app/notifications">
           <Card className="p-4">

@@ -12,6 +12,10 @@ describe('M90 My Farm cost summary entry', () => {
     );
 
     expect(html).toContain('/app/farm-records#farm-cost-dashboard');
+    expect(html).toContain('เริ่มใช้ฟาร์มของฉัน');
+    expect(html).toContain('เพิ่มแปลง');
+    expect(html).toContain('บันทึกงานในฟาร์ม');
+    expect(html).toContain('/app/help');
     expect(html).toContain('local-only');
     expect(html).toContain('Backup/Restore ready locally');
     expect(html).toContain('Cloud Sync: Not enabled');
