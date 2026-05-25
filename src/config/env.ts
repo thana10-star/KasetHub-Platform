@@ -11,6 +11,19 @@ export type PublicRuntimeEnv = {
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
   enableLocalAIProxyHandler: boolean;
+  enableRealAIText: boolean;
+  aiTextMode: string;
+  aiTextProxyMode: string;
+  enableAITextNetwork: boolean;
+  aiTextEndpointUrl: string;
+  enableAITextEndpointDryRun: boolean;
+  enableAITextEndpointNetwork: boolean;
+  calculatorAIMode: string;
+  enableCalculatorAIBackend: boolean;
+  enableCalculatorAINetwork: boolean;
+  calculatorAIEdgeUrl: string;
+  enableCalculatorAIEdgeDryRun: boolean;
+  enableCalculatorAIEdgeNetwork: boolean;
   guestSyncMode: string;
   enableGuestSyncBackend: boolean;
   enableGuestSyncEdge: boolean;
@@ -24,6 +37,11 @@ export type PublicRuntimeEnv = {
   lineAuthMode: string;
   enableLineAuth: boolean;
   enableLineAuthLocalMock: boolean;
+  weatherMode: string;
+  enableRealWeatherApi: boolean;
+  weatherDefaultLat: number;
+  weatherDefaultLon: number;
+  weatherDefaultLabel: string;
 };
 
 function readStringEnv(key: keyof ImportMetaEnv): string {
@@ -45,6 +63,11 @@ function readBooleanEnv(key: keyof ImportMetaEnv, fallback = false): boolean {
   return fallback;
 }
 
+function readNumberEnv(key: keyof ImportMetaEnv, fallback: number): number {
+  const value = Number(readStringEnv(key));
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export const publicEnv: PublicRuntimeEnv = Object.freeze({
   mode: import.meta.env.MODE,
   isDev: import.meta.env.DEV,
@@ -58,6 +81,19 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),
   enableLocalAIProxyHandler: readBooleanEnv('VITE_ENABLE_LOCAL_AI_PROXY_HANDLER', false),
+  enableRealAIText: readBooleanEnv('VITE_ENABLE_REAL_AI_TEXT', false),
+  aiTextMode: readStringEnv('VITE_AI_TEXT_MODE') || 'local_fixture',
+  aiTextProxyMode: readStringEnv('VITE_AI_TEXT_PROXY_MODE') || 'staging_proxy',
+  enableAITextNetwork: readBooleanEnv('VITE_ENABLE_AI_TEXT_NETWORK', false),
+  aiTextEndpointUrl: readStringEnv('VITE_AI_TEXT_ENDPOINT_URL'),
+  enableAITextEndpointDryRun: readBooleanEnv('VITE_ENABLE_AI_TEXT_ENDPOINT_DRY_RUN', false),
+  enableAITextEndpointNetwork: readBooleanEnv('VITE_ENABLE_AI_TEXT_ENDPOINT_NETWORK', false),
+  calculatorAIMode: readStringEnv('VITE_CALCULATOR_AI_MODE') || 'local_fixture',
+  enableCalculatorAIBackend: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_BACKEND', false),
+  enableCalculatorAINetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_NETWORK', false),
+  calculatorAIEdgeUrl: readStringEnv('VITE_CALCULATOR_AI_EDGE_URL'),
+  enableCalculatorAIEdgeDryRun: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN', false),
+  enableCalculatorAIEdgeNetwork: readBooleanEnv('VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK', false),
   guestSyncMode: readStringEnv('VITE_GUEST_SYNC_MODE') || 'local_fixture',
   enableGuestSyncBackend: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_BACKEND', false),
   enableGuestSyncEdge: readBooleanEnv('VITE_ENABLE_GUEST_SYNC_EDGE', false),
@@ -71,6 +107,11 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   lineAuthMode: readStringEnv('VITE_LINE_AUTH_MODE') || 'local_mock',
   enableLineAuth: readBooleanEnv('VITE_ENABLE_LINE_AUTH', false),
   enableLineAuthLocalMock: readBooleanEnv('VITE_ENABLE_LINE_AUTH_LOCAL_MOCK', true),
+  weatherMode: readStringEnv('VITE_WEATHER_MODE') || 'local_fixture',
+  enableRealWeatherApi: readBooleanEnv('VITE_ENABLE_REAL_WEATHER_API', false),
+  weatherDefaultLat: readNumberEnv('VITE_WEATHER_DEFAULT_LAT', 13.7563),
+  weatherDefaultLon: readNumberEnv('VITE_WEATHER_DEFAULT_LON', 100.5018),
+  weatherDefaultLabel: readStringEnv('VITE_WEATHER_DEFAULT_LABEL') || 'กรุงเทพฯ',
 });
 
 export function hasSupabaseEnv(env: Pick<PublicRuntimeEnv, 'supabaseUrl' | 'supabaseAnonKey'> = publicEnv) {

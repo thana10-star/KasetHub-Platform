@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   CloudUpload,
+  ClipboardList,
   Database,
   KeyRound,
   ListChecks,
@@ -20,10 +21,14 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import {
   runSupabaseConnectionDryRun,
   runSupabasePublicReadProbe,
 } from '@/services/supabase/supabase-connection-dry-run';
+import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
+import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import type {
   SupabaseConnectionHealth,
   SupabasePublicReadProbeResult,
@@ -102,6 +107,10 @@ function ProbeStatusCard({ probe }: { probe: SupabasePublicReadProbeResult | nul
 
 export function SupabaseConnectionPage() {
   const dryRun = useMemo(() => runSupabaseConnectionDryRun(), []);
+  const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
+  const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
   const [probeResult, setProbeResult] = useState<SupabasePublicReadProbeResult | null>(null);
@@ -159,6 +168,74 @@ export function SupabaseConnectionPage() {
         <NoticeBox tone="warning" title="ทดสอบแบบไม่เขียนข้อมูล">
           หน้านี้ใช้เฉพาะ anon-key/client-safe checks ไม่มี service-role key ไม่มี auth ไม่มี cloud sync ไม่มี upload และไม่มี insert/update/delete
         </NoticeBox>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M39 Env Safety</h2>
+                <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                  {envSafety.statusLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ตรวจค่า `.env.local` แบบไม่แสดง secret เต็ม network check ยังปิดโดยค่าเริ่มต้น และห้ามใส่ service-role key ใน frontend
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                เปิด Env Safety
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M40 SQL run prep</h2>
+                <StatusPill tone="warning">ยังไม่เชื่อมต่อจริง</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                สร้าง project {m40Checklist.recommendedProjectName} ด้วยมือก่อน แล้วรัน schema SQL ก่อน RLS SQL เฉพาะ staging เท่านั้น
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                Schema: {m40Checklist.schemaSqlPath} · RLS: {m40Checklist.rlsSqlPath}
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                เปิด SQL run prep checklist
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+              <ClipboardList aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M41 staging setup progress</h2>
+                <StatusPill tone={setupProgress.nextStep ? 'warning' : 'success'}>
+                  {setupProgress.completedCount}/{setupProgress.totalCount}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Next safe step: {setupProgress.nextSafeStep}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-kaset-deep">
+                blockers: {setupProgress.blockers.slice(0, 2).join(' · ') || 'ไม่มี blocker ใน local checklist'} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+                เปิด M41 setup guide
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">
@@ -256,6 +333,29 @@ export function SupabaseConnectionPage() {
           </div>
         </Card>
 
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M43 read-only public table probe</h2>
+                <StatusPill tone={readonlyProbe.statusTone}>{readonlyProbe.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                {readonlyProbe.connectionStatus} Tables: {readonlyProbe.tables.map((table) => table.name).join(' / ')}
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                no writes · empty table is OK · ยังไม่เปิด auth/cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
+                Open M43 read-only probe
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         <ProbeStatusCard probe={probeResult} />
 
         <section className="grid gap-3">
@@ -304,6 +404,9 @@ export function SupabaseConnectionPage() {
             </Link>
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/supabase-sql-checklist">
               เปิด SQL staging checklist
+            </Link>
+            <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/supabase-readonly-probe">
+              Open M43 read-only probe
             </Link>
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/auth/phone-staging">
               เปิด Phone OTP staging checklist

@@ -98,3 +98,24 @@ Execution order for staging:
 5. Capture dashboard screenshots for the staging execution record.
 
 Stop if project identity, SQL file version, service-role handling, or rollback approach is unclear.
+
+## M40 Staging Project Creation And SQL Prep
+
+Before first SQL execution, complete the M40 pack:
+
+- [ ] Create a new staging-only Supabase project named `kasethub-staging` or similarly clear.
+- [ ] Choose a region close to Thailand/Singapore if available.
+- [ ] Save Project URL and anon key locally only.
+- [ ] Confirm service-role key is not copied into frontend env.
+- [ ] Open SQL Editor on staging only.
+- [ ] Run schema SQL first: `supabase/migrations/0001_kasethub_core_schema.sql`.
+- [ ] Run RLS SQL second: `supabase/policies/0001_kasethub_rls_policies.sql`.
+- [ ] Stop on SQL error and save screenshots/logs.
+- [ ] Verify table list, RLS enabled, expected policies, indexes, and triggers.
+- [ ] Confirm auth/cloud sync/uploads/Edge Functions/AI remain disabled.
+
+Related docs:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`

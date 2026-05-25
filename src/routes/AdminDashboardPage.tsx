@@ -4,6 +4,8 @@ import {
   Bell,
   BookOpenCheck,
   Bot,
+  BrainCircuit,
+  Calculator,
   CloudUpload,
   CloudSun,
   ClipboardList,
@@ -13,8 +15,10 @@ import {
   GitBranch,
   HeartPulse,
   Leaf,
+  LockKeyhole,
   Phone,
   Ruler,
+  ServerOff,
   ShieldCheck,
   UsersRound,
   Video,
@@ -30,7 +34,10 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { adminModuleLabels, adminRoleLabels } from '@/services/admin/admin-fixtures';
 import { buildAdminDashboardData } from '@/services/admin/admin-dashboard-service';
 import { runPhoneAuthStagingReadinessAudit } from '@/services/auth/phone-auth-staging-readiness';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
 import type {
   AdminHealthStatus,
   AdminModuleId,
@@ -38,23 +45,50 @@ import type {
   AdminRiskItem,
   AdminTask,
 } from '@/services/admin/admin.types';
+import { getOfflineAgriArticleReadinessSummary } from '@/services/content/offline-agri-article-service';
+import { runOfflineAgriArticleQa } from '@/services/content/offline-agri-article-qa';
+import { runFullArticlePublishReadiness } from '@/services/content/offline-agri-full-article-readiness';
+import { runPilotArticleDraftWorkflowReview } from '@/services/content/offline-agri-pilot-article-drafts';
+import { getArticleEditorialReviewSummary } from '@/services/content/offline-agri-editorial-review';
+import { getArticleEvidencePacketSummary } from '@/services/content/offline-agri-editorial-evidence';
+import { getArticleReleaseAuditSummary } from '@/services/content/offline-agri-release-audit';
+import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
+import { getCmsMigrationReviewSummary } from '@/services/content/offline-agri-cms-migration-review';
+import { getArticleCmsSqlDraftSummary } from '@/services/content/offline-agri-cms-sql-draft';
 import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planner';
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources, cropPriceSourceStatusLabels } from '@/services/crop-prices/crop-price-sources';
+import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-calculator-test-fixtures';
 import { cropWatchAlertLabels } from '@/services/crop-prices/crop-watch-service';
 import { communityReportReasonLabels } from '@/services/community-moderation/community-moderation-fixtures';
 import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
 import { runSupabaseConnectionDryRun } from '@/services/supabase/supabase-connection-dry-run';
+import { buildSupabaseManualExecutionReview } from '@/services/supabase/supabase-manual-execution-review';
+import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
+import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
 import { runSupabaseReadinessAudit } from '@/services/supabase/supabase-readiness-audit';
+import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
+import { buildSupabaseStagingProjectChecklist } from '@/services/supabase/supabase-staging-project-checklist';
 import { validateSupabaseSqlDraft } from '@/services/supabase/supabase-sql-draft-validator';
-import { weatherAlertMocks, weatherLocations } from '@/services/weather/weather-fixtures';
+import { weatherAlertMocks } from '@/services/weather/weather-fixtures';
+import { weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
+import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
+import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
+import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
+import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { getAITextEndpointDryRunStatus } from '@/services/ai-text/ai-text-endpoint-contract';
 import { useAICredits } from '@/hooks/useAICredits';
 import { useCommunityModeration } from '@/hooks/useCommunityModeration';
 import { useCropWatch } from '@/hooks/useCropWatch';
 import { useFarmArea } from '@/hooks/useFarmArea';
+import { useFarmRecords } from '@/hooks/useFarmRecords';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
+import { useAgriCalculators } from '@/hooks/useAgriCalculators';
+import { CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 
 type AdminTab = 'overview' | 'content' | 'moderation' | 'crop_prices' | 'ai_safety' | 'system';
 
@@ -74,6 +108,7 @@ const moduleIcons: Record<AdminModuleId, typeof Activity> = {
   moderation: Gavel,
   crop_prices: Leaf,
   crop_watch: HeartPulse,
+  farm_records: ClipboardList,
   ai_safety: Bot,
   plant_analysis: Leaf,
   guest_sync: Database,
@@ -189,19 +224,64 @@ function RiskCard({ risk }: { risk: AdminRiskItem }) {
 export function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const moderation = useCommunityModeration();
+  const agriCalculators = useAgriCalculators();
   const cropWatch = useCropWatch();
   const farmArea = useFarmArea();
+  const farmRecords = useFarmRecords();
   const aiCredits = useAICredits();
   const guestMemory = useGuestMemory();
   const notificationCenter = useNotificationCenter();
   const importPlan = useMemo(() => buildYouTubeImportPlan(), []);
   const supabaseReadiness = useMemo(() => runSupabaseReadinessAudit(), []);
   const supabaseConnection = useMemo(() => runSupabaseConnectionDryRun(), []);
+  const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
+  const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const m40Checklist = useMemo(() => buildSupabaseStagingProjectChecklist(), []);
+  const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
+  const executionReview = useMemo(() => buildSupabaseManualExecutionReview(), []);
   const supabaseSqlDraft = useMemo(() => validateSupabaseSqlDraft(), []);
   const phoneAuthStaging = useMemo(() => runPhoneAuthStagingReadinessAudit(), []);
+  const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
   const guestSyncEdge = useMemo(() => runGuestSyncStagingReadiness(), []);
+  const ownershipGate = useMemo(
+    () =>
+      buildOwnershipRlsGateStatus({
+        guestMemoryRecordCount:
+          guestMemory.counts.savedItems +
+          guestMemory.counts.likedPosts +
+          guestMemory.counts.followedTopics +
+          guestMemory.counts.farmRecords +
+          guestMemory.counts.recentAIQuestions,
+      }),
+    [
+      guestMemory.counts.farmRecords,
+      guestMemory.counts.followedTopics,
+      guestMemory.counts.likedPosts,
+      guestMemory.counts.recentAIQuestions,
+      guestMemory.counts.savedItems,
+    ],
+  );
   const mvpReadiness = useMemo(() => runMvpReadinessAudit(), []);
   const phaseDecision = useMemo(() => runPhaseDecisionPlan(), []);
+  const calculatorQa = useMemo(() => runAgriCalculatorTestSuite(), []);
+  const offlineArticleLibrary = useMemo(() => getOfflineAgriArticleReadinessSummary(), []);
+  const offlineArticleQa = useMemo(() => runOfflineAgriArticleQa(), []);
+  const fullArticleReadiness = useMemo(() => runFullArticlePublishReadiness(), []);
+  const pilotArticleDraft = useMemo(() => runPilotArticleDraftWorkflowReview(), []);
+  const articleEditorialReview = useMemo(() => getArticleEditorialReviewSummary(), []);
+  const articleEvidencePacket = useMemo(() => getArticleEvidencePacketSummary(), []);
+  const articleReleaseAudit = useMemo(() => getArticleReleaseAuditSummary(), []);
+  const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
+  const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
+  const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
+  const weatherMode = useMemo(() => getWeatherModeStatus(), []);
+  const weatherPreference = useMemo(() => getWeatherLocalPreferenceStatus(), []);
+  const weatherRiskRules = useMemo(() => getWeatherAgriRiskRuleSummary(), []);
+  const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
+  const weatherRiskAudit = useMemo(() => getWeatherRiskReleaseAuditSummary(), []);
+  const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
+  const aiTextEndpointStatus = useMemo(() => getAITextEndpointDryRunStatus(), []);
   const dashboard = buildAdminDashboardData();
   const moderationQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'moderation');
   const priceQueue = dashboard.reviewQueues.find((queue) => queue.moduleId === 'crop_prices');
@@ -257,18 +337,66 @@ export function AdminDashboardPage() {
           <>
             <section className="grid grid-cols-2 gap-3">
               <SummaryCard icon={FileText} label="content items" value={dashboard.summary.contentItems} />
+              <SummaryCard icon={BookOpenCheck} label="offline articles" value={offlineArticleLibrary.total} />
+              <SummaryCard icon={ShieldCheck} label="M66 article QA" value={`${offlineArticleQa.averageScore}%`} />
+              <SummaryCard icon={FileText} label="M67 full drafts" value={`${fullArticleReadiness.blockedCount}/${fullArticleReadiness.pilotCount}`} />
+              <SummaryCard icon={BookOpenCheck} label="M68 pilot draft" value={`${pilotArticleDraft.blockedCount}/${pilotArticleDraft.pilotCount}`} />
+              <SummaryCard icon={UsersRound} label="M69 editorial QA" value={`${articleEditorialReview.pendingSignoffCount} pending`} />
+              <SummaryCard icon={ShieldCheck} label="M70 release gate" value={`${articleEvidencePacket.finalPublishAllowedCount} final`} />
               <SummaryCard icon={ClipboardList} label="community reports" value={dashboard.summary.pendingCommunityReports} />
               <SummaryCard icon={Leaf} label="crop price sources" value={dashboard.summary.cropPriceSources} />
-              <SummaryCard icon={CloudSun} label="weather locations" value={weatherLocations.length} />
+              <SummaryCard icon={CloudSun} label="weather locations" value={weatherCoarseLocations.length} />
+              <SummaryCard icon={CloudSun} label="M75 weather API" value={weatherMode.mode} />
+              <SummaryCard icon={CloudSun} label="M77 weather pref" value={weatherPreference.hasPreference ? weatherPreference.selectedLabel : 'local-only'} />
+              <SummaryCard icon={CloudSun} label="M78 risk rules" value={`${weatherRiskRules.rules.length} rules`} />
+              <SummaryCard icon={ShieldCheck} label="M79 risk review" value={`${weatherRiskReview.pendingSignoffCount} pending`} />
+              <SummaryCard icon={ClipboardList} label="M80 risk audit" value={`${weatherRiskAudit.auditEventCount} events`} />
+              <SummaryCard icon={BrainCircuit} label="M81 AI text" value={aiTextStatus.mode} />
+              <SummaryCard icon={ServerOff} label="M82 endpoint" value={`fetch ${String(aiTextEndpointStatus.fetchWouldRun)}`} />
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
+              <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
+              <SummaryCard icon={ClipboardList} label="farm records" value={farmRecords.counts.activityRecords + farmRecords.counts.harvestRecords} />
+              <SummaryCard icon={Calculator} label="farm ledger net" value={`${farmRecords.summary.netProfit.toLocaleString('th-TH')} THB`} />
               <SummaryCard icon={Bot} label="AI safety items" value={dashboard.summary.aiSafetyItems} />
               <SummaryCard icon={Video} label="YouTube candidates" value={dashboard.summary.youtubeImportCandidates} />
               <SummaryCard icon={Database} label="Supabase readiness" value={`${supabaseReadiness.score}%`} />
+              <SummaryCard icon={LockKeyhole} label="env safety" value={envSafety.blockers.length > 0 ? 'blocked' : envSafety.warnings.length > 0 ? 'review' : 'safe'} />
+              <SummaryCard icon={ClipboardList} label="M40 SQL prep" value={m40Checklist.sqlExecutionChecklist.length} />
+              <SummaryCard icon={ClipboardList} label="M41 setup" value={`${setupProgress.completedCount}/${setupProgress.totalCount}`} />
+              <SummaryCard icon={ClipboardList} label="M42 review" value={executionReview.statusLabel} />
+              <SummaryCard icon={Database} label="M43 probe" value={readonlyProbe.statusLabel} />
+              <SummaryCard icon={ShieldCheck} label="M44 RLS review" value={m44Review.statusLabel} />
+              <SummaryCard icon={LockKeyhole} label="M63 owner gate" value={ownershipGate.blockers.length > 0 ? 'blocked' : 'review'} />
+              <SummaryCard icon={CloudUpload} label="M64 dry-run payload" value="blocked" />
+              <SummaryCard icon={Gavel} label="M71 release audit" value={`${articleReleaseAudit.blockedAttemptCount} blocked`} />
+              <SummaryCard icon={Database} label="M72 CMS contract" value={`${articleCmsPersistence.tableCount} tables`} />
+              <SummaryCard icon={ClipboardList} label="M73 CMS migration" value={`${articleCmsMigration.tableCount} planned`} />
+              <SummaryCard icon={FileText} label="M74 SQL drafts" value={`${articleCmsSqlDrafts.sqlDraftCount} drafts`} />
               <SummaryCard icon={ClipboardList} label="MVP routes" value={mvpReadiness.routeCount} />
               <SummaryCard icon={GitBranch} label="next phase score" value={`${phaseDecision.overallReadiness.score}%`} />
               <SummaryCard icon={Activity} label="system health" value={healthLabels[dashboard.summary.systemHealth]} />
             </section>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M92 Farm Records Home Entry</h2>
+                    <StatusPill tone="info">local-first</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Home now links clearly to My Farm and Farm Records - {farmRecords.counts.plots} plots - {farmRecords.counts.activeCropCycles} active cycles - {farmRecords.counts.activityRecords} activities - {farmRecords.counts.harvestRecords} harvest records - net {farmRecords.summary.netProfit.toLocaleString('th-TH')} THB
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/farm-records">
+                    Open Farm Records
+                  </Link>
+                </div>
+              </div>
+            </Card>
 
             <Card className="p-4">
               <div className="flex gap-3">
@@ -285,6 +413,270 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/next-phase">
                     เปิดแผน next phase
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <BookOpenCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M65 Offline Agriculture Library</h2>
+                    <StatusPill tone="success">{offlineArticleLibrary.total} offline topics</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    Bundled evergreen article outlines with planned image assets, Thai safety notes, and future Supabase CMS compatibility. No CMS writes or network calls.
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
+                    เปิด M66 offline article QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/full-content-readiness">
+                    เปิด M67 full-content readiness
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/pilot-draft-review">
+                    เปิด M68 pilot draft
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-review">
+                    เปิด M69 editorial QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-review">
+                    เปิด M69 editorial QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/editorial-evidence">
+                    เปิด M70 evidence gate
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/release-audit">
+                    เปิด M71 release audit
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/cms-persistence-plan">
+                    เปิด M72 CMS persistence
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/cms-migration-review">
+                    เปิด M73 CMS migration review
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/cms-sql-drafts">
+                    เปิด M74 CMS SQL drafts
+                  </Link>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
+                    เปิดคลังความรู้เกษตรออฟไลน์
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                  <Calculator aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M53 Agriculture calculators</h2>
+                    <StatusPill tone={calculatorQa.failCount > 0 ? 'danger' : calculatorQa.warnCount > 0 ? 'warning' : 'success'}>
+                      {calculatorQa.failCount > 0 ? 'QA fail' : calculatorQa.warnCount > 0 ? 'QA warn' : 'QA pass'}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {agriCalculators.counts.recentCalculations} recent calculations · favorites {agriCalculators.counts.favorites} · QA {calculatorQa.passCount}/{calculatorQa.totalCount} passed · no Supabase writes
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators">
+                    เปิดเครื่องคำนวณเกษตร
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/qa">
+                    เปิด QA เครื่องคำนวณ
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/calculators/saved-results">
+                    เปิดสรุปที่บันทึกไว้
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-explanation-preview">
+                    <BrainCircuit aria-hidden="true" className="h-4 w-4" />
+                    เปิดแผน AI อธิบายผล
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-kaset-deep" to="/app/calculators/ai-architecture">
+                    <ShieldCheck aria-hidden="true" className="h-4 w-4" />
+                    เปิด AI backend architecture
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-adapter-status">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+              calculator AI adapter status
+            </Link>
+
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-endpoint-plan">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+              calculator AI endpoint plan
+            </Link>
+
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-edge-contract">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+              calculator AI Edge contract
+            </Link>
+
+            <Link className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/calculators/ai-edge-dry-run">
+              <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+              calculator AI Edge dry-run
+            </Link>
+
+            <CalculatorRewardedAdsPlanningCard compact />
+
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <GitBranch aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M38 Supabase staging branch</h2>
+                    <Badge tone="sky">staging/supabase</Badge>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">
+                    Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    Current milestone: M40 Supabase project creation + SQL run prep. ยังไม่เชื่อม Supabase ไม่เปิด auth/cloud sync และไม่เขียน backend
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-amber-950">M40 Supabase project creation + SQL prep</h2>
+                    <StatusPill tone="warning">manual only</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-amber-900">
+                    ขั้นตอนนี้ยังเป็นคู่มือ ยังไม่ได้เชื่อมต่อจริง · สร้าง project {m40Checklist.recommendedProjectName} ด้วยมือ · รัน SQL เฉพาะ staging เท่านั้น
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-amber-950">
+                    อ่าน {m40Checklist.docLinks[0].path}, {m40Checklist.docLinks[1].path}, และ {m40Checklist.docLinks[2].path}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/supabase-sql-checklist">
+                    เปิด SQL run prep checklist
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M41 real staging setup walkthrough</h2>
+                    <StatusPill tone={setupProgress.nextStep ? 'warning' : 'success'}>
+                      {setupProgress.completedCount}/{setupProgress.totalCount} local steps
+                    </StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">Next safe step: {setupProgress.nextSafeStep}</p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-kaset-deep">
+                    blockers: {setupProgress.blockers.slice(0, 2).join(' · ') || 'ไม่มี blocker ใน local checklist'} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+                    เปิด M41 setup guide
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <ClipboardList aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M42 Supabase manual execution review</h2>
+                    <StatusPill tone={executionReview.statusTone}>{executionReview.statusLabel}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">{executionReview.statusDetail}</p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    {executionReview.nextSafeStep} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                    Verified: {executionReview.verifiedResults.slice(0, 6).join(' / ')}
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white/70 p-3 text-xs font-bold leading-5 text-sky-950">
+                    Status choices: {executionReview.statusOptions.map((option) => option.label).join(' / ')}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <Database aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M43 read-only public table probe</h2>
+                    <StatusPill tone={readonlyProbe.statusTone}>{readonlyProbe.statusLabel}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">
+                    {readonlyProbe.connectionStatus} Tables: {readonlyProbe.tables.map((table) => table.name).join(' / ')}
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    no writes · empty table is OK · ยังไม่เปิด auth/cloud sync
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
+                    Open M43 read-only probe
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-sky-200 bg-sky-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+                  <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-sky-950">M44 public read verification + RLS review</h2>
+                    <StatusPill tone={m44Review.statusTone}>{m44Review.statusLabel}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-sky-900">{m44Review.summary}</p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    public read: {m44Review.publicReadVerificationStatus} · RLS: {m44Review.rlsReviewStatus}
+                  </p>
+                  <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                    blockers: {m44Review.blockers.slice(0, 3).join(' · ') || 'none'}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                  <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-kaset-ink">M39 Env Safety</h2>
+                    <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                      {envSafety.statusLabel}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Local `.env.local` setup guardrail: placeholder detection, anon-key format-ish check, service-role warning, and auth/cloud sync flag blockers.
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                    เปิด Env Safety
                   </Link>
                 </div>
               </div>
@@ -318,13 +710,28 @@ export function AdminDashboardPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-extrabold text-kaset-ink">Agriculture weather preview</h2>
-                    <StatusPill tone="info">demo/local</StatusPill>
+                    <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'info'}>{weatherMode.mode}</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {weatherLocations.length} พื้นที่ตัวอย่าง · {weatherAlertMocks.length} mock alerts · ไม่มี weather API, geolocation, backend หรือ push จริง
+                    {weatherCoarseLocations.length} พื้นที่แบบหยาบ · {weatherAlertMocks.length} mock alerts · M78 risk rules {weatherRiskRules.rules.length} · M79 pending signoffs {weatherRiskReview.pendingSignoffCount} · M80 audit events {weatherRiskAudit.auditEventCount} · preference {weatherPreference.selectedLabel} · Open-Meteo ต้องเปิด flag ก่อน ไม่มี GPS, backend write หรือ push จริง
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather">
                     เปิดหน้าสภาพอากาศเกษตร
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
+                    M76 weather QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
+                    M77 weather preferences
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-rules">
+                    M78 weather risk rules
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-review">
+                    M79 weather risk review
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/weather/risk-audit">
+                    M80 weather risk audit
                   </Link>
                 </div>
               </div>
@@ -454,6 +861,71 @@ export function AdminDashboardPage() {
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
                     เปิด Phone OTP staging checklist
                   </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging-test">
+                    เปิด M61 staging test plan
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+                  <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-amber-950">M61 Phone Auth staging test review</h2>
+                    <StatusPill tone={phoneAuthM61.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                      {phoneAuthM61.levelLabel}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-amber-950">
+                    blockers {phoneAuthM61.blockerItems.length} · no real OTP/SMS · no cloud sync · ownership required before Guest Memory sync
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/auth/phone-staging-test">
+                    เปิด Phone Auth staging test plan
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-rose-200 bg-rose-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-rose-800">
+                  <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-rose-950">M63 ownership/RLS sync gate</h2>
+                    <StatusPill tone="danger">{ownershipGate.statusCode}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-rose-950">
+                    blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · no Guest Memory upload · no Supabase app table writes
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-rose-950" to="/app/ownership-rls-gate">
+                    เปิด Ownership/RLS gate review
+                  </Link>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+                  <CloudUpload aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-amber-950">M64 Guest Sync dry-run payload</h2>
+                    <StatusPill tone="warning">upload blocked</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-amber-950">
+                    local-only payload preview พร้อม consent, idempotency, audit, conflict และ privacy filters แต่ยังไม่มี cloud sync หรือ Supabase app-table write
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/guest-sync-dry-run">
+                    เปิด Guest Sync dry-run payload
+                  </Link>
                 </div>
               </div>
             </Card>
@@ -575,6 +1047,35 @@ export function AdminDashboardPage() {
                 <p className="text-[11px] font-bold text-slate-500">published</p>
               </Card>
             </section>
+
+            <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                  <BookOpenCheck aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold text-kaset-ink">Offline Agriculture Library</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    QA {offlineArticleQa.averageScore}% · warnings {offlineArticleQa.warnCount} · failures {offlineArticleQa.failCount}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline-qa">
+                    เปิด M66 offline article QA
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/full-content-readiness">
+                    เปิด M67 full-content readiness
+                  </Link>
+                  <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/pilot-draft-review">
+                    เปิด M68 pilot draft
+                  </Link>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {offlineArticleLibrary.total} bundled article outlines · {offlineArticleLibrary.starterContent} starter content · future CMS override ready
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/articles/offline">
+                    เปิดคลังความรู้เกษตรออฟไลน์
+                  </Link>
+                </div>
+              </div>
+            </Card>
 
             <ModuleCard module={dashboard.modules.find((module) => module.id === 'youtube_import') ?? dashboard.modules[0]} />
 
@@ -721,6 +1222,28 @@ export function AdminDashboardPage() {
             <Link className="inline-flex min-h-11 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/ai-proxy-status">
               เปิด AI proxy status
             </Link>
+            <Card className="border-indigo-200 bg-indigo-50 p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+                  <BrainCircuit aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-extrabold text-indigo-950">M81 Real AI text proxy</h2>
+                    <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>{aiTextStatus.mode}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-indigo-900">
+                    staging-only · network {String(aiTextStatus.networkEnabled)} · fallback {String(aiTextStatus.fallbackToFixture)} · no frontend provider key
+                  </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
+                เปิด M81 AI text status
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
           </>
         ) : null}
 
@@ -742,6 +1265,23 @@ export function AdminDashboardPage() {
                 <Badge tone="neutral">{guestMemory.counts.followedTopics} follows</Badge>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Guest Memory ยังเป็น active local storage และยังไม่มี cloud/admin sync จริง</p>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-rose-100 text-rose-800">
+                  <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold text-kaset-ink">M63 ownership/RLS gate</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)}
+                  </p>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/ownership-rls-gate">
+                    เปิด Ownership/RLS gate review
+                  </Link>
+                </div>
+              </div>
             </Card>
 
             <Card className="p-4">
@@ -812,6 +1352,9 @@ export function AdminDashboardPage() {
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-sql-checklist">
                     เปิด SQL verification pack
+                  </Link>
+                  <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+                    เปิด M41 setup guide
                   </Link>
                 </div>
               </div>

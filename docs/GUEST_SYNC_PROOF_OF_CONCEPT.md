@@ -143,3 +143,29 @@ M29 keeps the M16 dry run unchanged and adds the future Edge Function contract f
 - No Edge Function is deployed or called in M29.
 
 Real sync must still wait for staging auth, SQL/RLS verification, idempotent merge tests, audit logging, and rollback checks.
+
+## M61 Phone Auth Staging Test Dependency
+
+M61 does not change the M16 dry-run sync. It adds a stricter Phone Auth staging review before any real OTP test.
+
+The dry run should continue to show:
+
+- local data is preserved
+- no backend write occurs
+- no Supabase write occurs
+- phone mock ownership is only a placeholder
+- real sync must wait for real Supabase session ownership
+
+`/app/auth/phone-staging-test` is the new review surface for redirect URLs, SMS provider setup, test phone numbers, ownership, and rollback.
+
+## M63 Ownership/RLS Gate Review
+
+M63 adds `/app/ownership-rls-gate` as the next review surface after the controlled Phone Auth staging boundary.
+
+The M16 dry run still remains local only. M63 adds proof that sync cannot proceed without real Supabase Auth ownership, consent, idempotency, audit logging, and owner-scoped RLS expectations.
+
+No Guest Memory upload, cloud sync, Supabase app table write, or Edge Function call is added.
+
+## M64 Guest Sync Dry-run Payload
+
+M64 keeps the M16 proof-of-concept local and adds a stricter payload builder at `/app/guest-sync-dry-run`. The new route previews local data groups, consent, idempotency, audit, conflict handling, blockers, and privacy filters. It still does not upload, write Supabase app tables, call an Edge Function, or enable cloud sync.

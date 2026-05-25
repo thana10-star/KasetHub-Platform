@@ -10,13 +10,17 @@ import {
   getGuestSyncAdapterStatus,
   runGuestMemorySyncDryRun,
 } from '@/services/backend/guest-sync-adapter';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import {
   createGuestSyncIdempotencyKeyPreview,
   runGuestSyncStagingReadiness,
 } from '@/services/backend/guest-sync-staging-readiness';
 import { createAccountLinkingPlan } from '@/services/auth/account-linking-planner';
+import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
 import { getLineAuthAdapterStatus } from '@/services/auth/line-auth-adapter';
 import { getPhoneAuthAdapterStatus } from '@/services/auth/phone-auth-adapter';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import type {
   GuestSyncAuthProviderCandidate,
   GuestSyncConsentOptions,
@@ -174,6 +178,17 @@ export function AuthSyncPreviewPage() {
 
   const syncStatus = getGuestSyncAdapterStatus();
   const phoneAuthStatus = getPhoneAuthAdapterStatus();
+  const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
+  const ownershipStatus = getAuthOwnershipStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
+  });
+  const m61Review = useMemo(() => runPhoneAuthStagingReview(), []);
   const lineAuthStatus = getLineAuthAdapterStatus();
   const linkingPlan = createAccountLinkingPlan({
     phoneSession: phoneAuthStatus.session,
@@ -240,6 +255,33 @@ export function AuthSyncPreviewPage() {
           ตอนนี้ phone auth ยังเป็น local mock และยังไม่เปิด Supabase Auth จริง การ sync cloud ต้องรอ phone OTP staging ผ่าน, auth.uid() ตรงกับ owner, และผู้ใช้ยินยอมก่อน
           <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging">
             เปิด Phone OTP staging checklist
+          </Link>
+          <Link className="ml-4 mt-3 inline-flex font-bold text-kaset-deep" to="/app/auth/phone-staging-test">
+            เปิด M61 staging test plan
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" title="M61 ownership boundary">
+          {m61Review.levelLabel} · cloud sync stays blocked until a real Supabase Phone Auth session proves `auth.uid()` ownership and the user consents to Guest Memory sync.
+        </NoticeBox>
+
+        <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 session ownership review">
+          real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
+          {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation} Next: {ownershipStatus.nextRequiredMilestone}.
+        </NoticeBox>
+
+        <NoticeBox tone="danger" title="M63 ownership/RLS gate">
+          {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · next safe step:{' '}
+          {ownershipGate.nextSafeStep}
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" icon={ListChecks} title="M64 dry-run payload status">
+          สร้าง payload preview แบบ local-only ได้แล้ว แต่ sync ยังถูกบล็อกจนกว่าจะมี ownership, consent, idempotency, audit และ RLS gate ครบ
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
           </Link>
         </NoticeBox>
 

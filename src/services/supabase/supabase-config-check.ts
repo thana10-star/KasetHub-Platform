@@ -30,8 +30,33 @@ function looksLikeSupabaseUrl(value: string) {
   }
 }
 
+function decodeJwtPayload(value: string) {
+  const [, payload] = value.split('.');
+
+  if (!payload) {
+    return '';
+  }
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return atob(padded);
+  } catch {
+    return '';
+  }
+}
+
 function looksLikeServiceRoleKey(value: string) {
-  return value.toLowerCase().includes('service_role');
+  const lower = value.toLowerCase();
+  const decodedPayload = decodeJwtPayload(value).toLowerCase();
+
+  return (
+    lower.includes('service_role') ||
+    lower.includes('service-role') ||
+    lower.includes('service role') ||
+    decodedPayload.includes('"role":"service_role"') ||
+    decodedPayload.includes('service_role')
+  );
 }
 
 function looksLikePlaceholder(value: string) {

@@ -6,6 +6,7 @@ M25 adds a local-only readiness audit for the first Supabase staging connection.
 
 - `/app/supabase-readiness`
 - `/app/supabase-connection`
+- `/app/supabase-readonly-probe`
 - `/app/supabase-sql-checklist`
 - `/app/auth/phone-staging`
 
@@ -17,6 +18,8 @@ The routes are linked from:
 - `/app/profile`
 
 M26 adds `/app/supabase-connection` for anon-key/client-safe connection dry-run checks. It does not write data or require network by default.
+
+M43 adds `/app/supabase-readonly-probe` for explicit-flag read-only checks against public/read-safe tables only.
 
 M27 adds `/app/supabase-sql-checklist` for the manual SQL/RLS staging execution checklist. It is static/local only and does not connect to Supabase, run SQL, read database schema, or write data.
 
@@ -90,8 +93,9 @@ Required notices:
 - No auth session is required.
 - No private/user-owned tables are queried.
 - No insert/update/delete/upsert is allowed.
-- Optional future probe may read only `public_readiness_checks` or another reviewed public/read-only target.
-- If that target does not exist, show `schema_not_applied_yet` and continue safely.
+- M43 probe may read only `articles`, `videos`, and `crop_price_snapshots`.
+- Empty tables are OK for fresh staging.
+- If a target does not exist, show `table missing` or `schema_not_applied_yet` and continue safely.
 
 ## M27 SQL/RLS Execution Checklist
 

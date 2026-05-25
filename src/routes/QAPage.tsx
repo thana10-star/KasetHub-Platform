@@ -1,13 +1,19 @@
 import {
   BookOpenCheck,
+  BrainCircuit,
+  Calculator,
   CheckCircle2,
   ClipboardCheck,
+  Database,
   Eye,
+  FileText,
   GitBranch,
   Hand,
+  History,
   ImageUp,
   ListChecks,
   MessageCircle,
+  Phone,
   ShieldCheck,
   Sparkles,
   UserRoundCheck,
@@ -19,6 +25,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
 import { runMvpReadinessAudit } from '@/services/qa/mvp-readiness-audit';
+import { CalculatorRewardedAdsPlanningCard } from '@/routes/calculators/CalculatorUi';
 import type { AppRoute } from '@/types/kaset';
 
 const checklist = [
@@ -55,23 +62,54 @@ const checklist = [
 ];
 
 const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
+  { label: 'Calculator AI adapter status', route: '/app/calculators/ai-adapter-status' },
+  { label: 'Calculator AI endpoint plan', route: '/app/calculators/ai-endpoint-plan' },
+  { label: 'Calculator AI Edge contract', route: '/app/calculators/ai-edge-contract' },
+  { label: 'Calculator AI Edge dry run', route: '/app/calculators/ai-edge-dry-run' },
   { label: 'หน้าแรก', route: '/app' },
   { label: 'Admin Dashboard', route: '/app/admin' },
   { label: 'Internal MVP snapshot', route: '/app/mvp-snapshot' },
   { label: 'Next Phase Decision', route: '/app/next-phase' },
   { label: 'Supabase readiness', route: '/app/supabase-readiness' },
   { label: 'Supabase connection dry run', route: '/app/supabase-connection' },
+  { label: 'Supabase setup guide', route: '/app/supabase-setup-guide' },
   { label: 'Supabase SQL checklist', route: '/app/supabase-sql-checklist' },
+  { label: 'Env safety', route: '/app/env-safety' },
   { label: 'Phone OTP staging checklist', route: '/app/auth/phone-staging' },
+  { label: 'Phone Auth staging test review', route: '/app/auth/phone-staging-test' },
+  { label: 'Ownership/RLS sync gate review', route: '/app/ownership-rls-gate' },
+  { label: 'Guest Sync dry-run payload', route: '/app/guest-sync-dry-run' },
   { label: 'Guest Sync Edge plan', route: '/app/guest-sync-edge' },
   { label: 'My Farm Hub', route: '/app/my-farm' },
   { label: 'My Farm settings', route: '/app/my-farm/settings' },
   { label: 'Notification Center', route: '/app/notifications' },
   { label: 'Notification settings', route: '/app/notification-settings' },
-  { label: 'สภาพอากาศเกษตร', route: '/app/weather' },
+  { label: 'M75 real weather API / local fallback', route: '/app/weather' },
+  { label: 'M76 weather QA / cache / coarse location', route: '/app/weather/qa' },
+  { label: 'M77 weather local preferences', route: '/app/weather/preferences' },
+  { label: 'M78 weather risk readiness', route: '/app/weather/risk-rules' },
+  { label: 'M79 weather risk expert review', route: '/app/weather/risk-review' },
+  { label: 'M80 weather risk release audit', route: '/app/weather/risk-audit' },
+  { label: 'M81 real AI text proxy controlled staging', route: '/app/ai-text-status' },
+  { label: 'M82 AI text endpoint contract dry-run', route: '/app/ai-text-endpoint-plan' },
+  { label: 'เครื่องคำนวณเกษตร', route: '/app/calculators' },
+  { label: 'ความปลอดภัยเครื่องคำนวณ', route: '/app/calculators/safety' },
+  { label: 'QA เครื่องคำนวณเกษตร', route: '/app/calculators/qa' },
+  { label: 'ผลคำนวณที่บันทึกไว้', route: '/app/calculators/saved-results' },
+  { label: 'ตัวอย่าง export เครื่องคำนวณ', route: '/app/calculators/export-preview' },
+  { label: 'แผน AI อธิบายผลคำนวณ', route: '/app/calculators/ai-explanation-preview' },
+  { label: 'สถาปัตยกรรม AI backend เครื่องคำนวณ', route: '/app/calculators/ai-architecture' },
+  { label: 'คำนวณผสมยา', route: '/app/calculators/spray-mix' },
+  { label: 'คำนวณระยะปลูก', route: '/app/calculators/plant-spacing' },
+  { label: 'คำนวณปุ๋ย', route: '/app/calculators/fertilizer' },
+  { label: 'คำนวณผลผลิต', route: '/app/calculators/yield-estimate' },
+  { label: 'คำนวณต้นทุน', route: '/app/calculators/cost' },
   { label: 'คำนวณพื้นที่แปลง', route: '/app/farm-area' },
   { label: 'คู่มือวัดพื้นที่แปลง', route: '/app/farm-area-guide' },
+  { label: 'M92 Home-first Farm Hub and M91 Farm Records dashboard', route: '/app/farm-records' },
   { label: 'AI ผู้ช่วยเกษตร', route: '/app/ai' },
+  { label: 'M81 real AI text proxy status', route: '/app/ai-text-status' },
+  { label: 'M82 AI text endpoint dry-run', route: '/app/ai-text-endpoint-plan' },
   { label: 'วิเคราะห์โรคพืช', route: '/app/analyze' },
   { label: 'Image preflight', route: '/app/image-preflight' },
   { label: 'YouTube Hub', route: '/app/youtube' },
@@ -80,6 +118,16 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ศูนย์รายงานชุมชน', route: '/app/moderation-center' },
   { label: 'ราคาพืชผล', route: '/app/prices' },
   { label: 'บทความ', route: '/app/articles' },
+  { label: 'คลังความรู้เกษตรออฟไลน์', route: '/app/articles/offline' },
+  { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },
+  { label: 'M67 เตรียมบทความเต็มออฟไลน์', route: '/app/articles/full-content-readiness' },
+  { label: 'M68 pilot article draft review', route: '/app/articles/pilot-draft-review' },
+  { label: 'M69 pilot article editorial review', route: '/app/articles/editorial-review' },
+  { label: 'M70 editorial evidence and human release gate', route: '/app/articles/editorial-evidence' },
+  { label: 'M71 offline article release audit', route: '/app/articles/release-audit' },
+  { label: 'M72 offline article CMS persistence plan', route: '/app/articles/cms-persistence-plan' },
+  { label: 'M73 offline article CMS migration review', route: '/app/articles/cms-migration-review' },
+  { label: 'M74 offline article CMS SQL drafts', route: '/app/articles/cms-sql-drafts' },
   { label: 'ตัวอย่างผู้ดูแลเนื้อหา', route: '/app/content-admin-preview' },
   { label: 'โปรไฟล์', route: '/app/profile' },
   { label: 'ข้อมูลในเครื่องนี้', route: '/app/memory' },
@@ -170,6 +218,126 @@ export function QAPage() {
             to="/app/mvp-snapshot"
             variant="soft"
           />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge contract"
+            description="ดู contract calculator-ai-explain, server-only provider key, audit, rate-limit hook และ timeout behavior"
+            to="/app/calculators/ai-edge-contract"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge dry-run"
+            description="ดู endpoint URL gate, validation fixtures, secret checklist, audit/rate-limit preview และ no-fetch proof"
+            to="/app/calculators/ai-edge-dry-run"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Phone}
+            label="เปิด Phone Auth staging test"
+            description="ดู M61 checklist ก่อนทดสอบ Supabase Phone OTP staging จริง โดยยังไม่ส่ง OTP จากแอป"
+            to="/app/auth/phone-staging-test"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด Ownership/RLS sync gate"
+            description="ดู M63 owner, consent, idempotency, audit และ RLS gate ก่อนอัปโหลด Guest Memory จริง"
+            to="/app/ownership-rls-gate"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ClipboardCheck}
+            label="เปิด Guest Sync dry-run payload"
+            description="ดู M64 payload preview, consent preview, idempotency key, audit preview และ privacy filter โดยยังไม่อัปโหลดข้อมูลจริง"
+            to="/app/guest-sync-dry-run"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BookOpenCheck}
+            label="เปิดคลังความรู้เกษตรออฟไลน์"
+            description="ตรวจ M65 offline article library, image placeholders, safety notes และ CMS fallback plan"
+            to="/app/articles/offline"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด QA คลังบทความออฟไลน์"
+            description="ตรวจ M66 editorial checklist, version fixtures, image warnings และกติกา CMS override"
+            to="/app/articles/offline-qa"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={FileText}
+            label="เปิด M67 full-content readiness"
+            description="ดู pilot templates, source placeholders, publish gate และ expert escalation ก่อนเพิ่มบทความเต็ม"
+            to="/app/articles/full-content-readiness"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BookOpenCheck}
+            label="เปิด M68 pilot article draft"
+            description="ดูร่างบทความ ดิน 6 ชนิด รู้จักก่อนปลูก พร้อม checklist และ publish blockers"
+            to="/app/articles/pilot-draft-review"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={UserRoundCheck}
+            label="เปิด M69 pilot editorial review"
+            description="ตรวจ reviewer sign-off, source metadata, image review และ second pilot draft โดยยังไม่ publish final"
+            to="/app/articles/editorial-review"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด M70 editorial evidence"
+            description="ดู evidence packet, completion simulation และ human release gate ที่ยัง block final publish"
+            to="/app/articles/editorial-evidence"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={History}
+            label="เปิด M71 release audit"
+            description="ดู blocked release attempts, reviewer history, diff preview และ automation bypass policy"
+            to="/app/articles/release-audit"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M72 CMS persistence plan"
+            description="ดู future tables, role rules, release audit write contract, fallback policy และ migration checklist"
+            to="/app/articles/cms-persistence-plan"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M73 CMS migration review"
+            description="ดู table DDL review plan, RLS expectations, rollback plan และ seed fixtures โดยยังไม่ run migration"
+            to="/app/articles/cms-migration-review"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={Database}
+            label="เปิด M74 CMS SQL drafts"
+            description="ดู schema/RLS/seed/rollback draft artifacts ที่ยังไม่ run SQL และไม่ได้อยู่ใน migrations"
+            to="/app/articles/cms-sql-drafts"
+            variant="white"
+          />
         </Card>
 
         <Card className="p-4">
@@ -196,6 +364,89 @@ export function QAPage() {
             variant="soft"
           />
         </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <Calculator aria-hidden="true" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M50 Calculator QA</h2>
+                <StatusPill tone="success">local fixtures</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ตรวจสูตรผสมยา ระยะปลูก ปุ๋ย ผลผลิต และต้นทุนด้วย expected vs actual พร้อมคำเตือน validation
+              </p>
+            </div>
+          </div>
+          <LargeActionButton
+            className="mt-4"
+            icon={Calculator}
+            label="เปิด QA เครื่องคำนวณ"
+            description="ดู test case deterministic, pass/warn/fail และขอบเขตความปลอดภัย"
+            to="/app/calculators/qa"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิดความปลอดภัยเครื่องคำนวณ"
+            description="ดูขอบเขตปุ๋ย สารเคมี AI และ sponsor ก่อนใช้ตัวเลขจริง"
+            to="/app/calculators/safety"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={History}
+            label="เปิดผลคำนวณที่บันทึกไว้"
+            description="ดูสรุป local-only ที่คัดลอก แชร์ซ้ำ หรือลบออกจากเครื่องนี้ได้"
+            to="/app/calculators/saved-results"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิดแผน AI อธิบายผล"
+            description="ดูขอบเขต prompt/policy ที่ยังไม่เรียก AI จริง และไม่เปลี่ยนผลคำนวณ"
+            to="/app/calculators/ai-explanation-preview"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={ShieldCheck}
+            label="เปิด AI backend architecture"
+            description="ดู snapshot lock, policy version, audit log และ rate limit ก่อนเปิด AI จริง"
+            to="/app/calculators/ai-architecture"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="à¹€à¸›à¸´à¸” calculator AI adapter status"
+            description="à¸”à¸¹ mode, backend flag, network flag à¹à¸¥à¸° local fixture response à¹à¸šà¸šà¹„à¸¡à¹ˆà¹€à¸£à¸µà¸¢à¸ AI à¸ˆà¸£à¸´à¸‡"
+            to="/app/calculators/ai-adapter-status"
+            variant="white"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI endpoint plan"
+            description="ดู checklist backend-only prompt execution, lock hash, policy, audit, rate limit และ no-network boundary"
+            to="/app/calculators/ai-endpoint-plan"
+            variant="soft"
+          />
+          <LargeActionButton
+            className="mt-3"
+            icon={BrainCircuit}
+            label="เปิด calculator AI Edge contract"
+            description="ดู contract calculator-ai-explain, server-only provider key, audit, rate-limit hook และ timeout behavior"
+            to="/app/calculators/ai-edge-contract"
+            variant="white"
+          />
+        </Card>
+
+        <CalculatorRewardedAdsPlanningCard compact />
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">

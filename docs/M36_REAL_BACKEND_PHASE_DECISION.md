@@ -54,3 +54,15 @@ Stop real implementation work if any of these happens:
 - no production privacy/security review
 - no monitoring, rate limits, backup, rollback, or incident process
 
+## M38 Branch Setup Update
+
+M38 starts the recommended Supabase path by creating/using `staging/supabase`. This is a safe experiment branch only. It adds branch/safety docs and static UI reminders, while keeping all real Supabase work disabled:
+
+- no Supabase connection
+- no real keys
+- no `.env.local`
+- no SQL execution
+- no auth/cloud sync
+- no backend writes
+
+M39 should prepare local-only staging env setup from `.env.example` without committing secrets.

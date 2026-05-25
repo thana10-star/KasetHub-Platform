@@ -1,0 +1,40 @@
+{
+  "planningOnly": true,
+  "doNotRun": true,
+  "doNotDeploy": true,
+  "reviewRequired": true,
+  "endpointName": "ai-text-proxy",
+  "allowedRequestTypes": [
+    "calculator_explanation",
+    "weather_caution_explanation",
+    "educational_explanation"
+  ],
+  "request": {
+    "id": "example-request-id",
+    "requestType": "calculator_explanation",
+    "prompt": "Explain the locked calculator output without changing values.",
+    "contextSummary": "Locked calculator snapshot summary.",
+    "requestedActions": ["explain_locked_values"],
+    "lockedOutputSnapshot": {
+      "kind": "calculator_result",
+      "lockedHash": "example-locked-hash",
+      "valueLines": ["locked result line"]
+    },
+    "policyVersion": "ai-text-policy-v2026-05-m81"
+  },
+  "response": {
+    "status": "dry_run_blocked",
+    "providerCalled": false,
+    "networkAttempted": false,
+    "noSupabaseWrite": true,
+    "immutableOutputPreserved": true,
+    "safeFallbackText": "M82 is dry-run only."
+  },
+  "securityBoundary": {
+    "providerKeyBackendOnly": true,
+    "serviceRoleBackendOnly": true,
+    "frontendProviderKeyAllowed": false,
+    "frontendServiceRoleAllowed": false,
+    "directProviderCallFromFrontend": false
+  }
+}

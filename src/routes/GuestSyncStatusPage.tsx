@@ -1,4 +1,4 @@
-import { CloudUpload, Database, KeyRound, Phone, PlayCircle, ShieldCheck, Smartphone, UsersRound } from 'lucide-react';
+import { ClipboardCheck, CloudUpload, Database, KeyRound, Phone, PlayCircle, ShieldCheck, Smartphone, UsersRound } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -10,8 +10,10 @@ import {
   getGuestSyncAdapterStatus,
   runGuestMemorySyncDryRun,
 } from '@/services/backend/guest-sync-adapter';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { buildGuestSyncPayloadPreview } from '@/services/backend/guest-sync-payload-builder';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import type {
   GuestSyncMockScenario,
@@ -52,9 +54,15 @@ function ResponsePreview({ response }: { response: MockGuestSyncResponse }) {
 }
 
 export function GuestSyncStatusPage() {
-  const { state } = useGuestMemory();
+  const { state, counts } = useGuestMemory();
   const [response, setResponse] = useState<MockGuestSyncResponse | null>(null);
   const syncStatus = getGuestSyncAdapterStatus();
+  const phoneStaging = getPhoneAuthStagingAdapterStatus();
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStaging.localMockSession,
+    supabaseSessionPreview: phoneStaging.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
+  });
   const edgeReadiness = useMemo(() => runGuestSyncStagingReadiness(), []);
   const payloadPreview = useMemo(
     () =>
@@ -142,6 +150,20 @@ export function GuestSyncStatusPage() {
 
         <NoticeBox tone="success" title="กฎความปลอดภัยของข้อมูล">
           Local Guest Memory จะไม่ถูกลบหลัง sync failure และในระบบจริงควร mark ว่าซิงก์แล้วหลัง backend ยืนยัน success เท่านั้น
+        </NoticeBox>
+
+        <NoticeBox tone="danger" icon={ShieldCheck} title="M63 ownership/RLS gate">
+          {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · ยังไม่อัปโหลดข้อมูลจริง
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" icon={ClipboardCheck} title="M64 Guest Sync dry-run payload">
+          Payload builder ใหม่จะแสดงกลุ่มข้อมูล, consent preview, idempotency key, audit preview และ privacy filter โดยยังไม่อัปโหลดข้อมูลจริง
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
+          </Link>
         </NoticeBox>
 
         <Card className="p-4">

@@ -538,6 +538,342 @@ RLS notes: Users can CRUD their own notes. Backend-generated notes should be lab
 
 Admin/moderation notes: Future support/admin views should avoid broad access to private plot notes unless explicit support consent and audit logging exist.
 
+## `calculator_history` Future
+
+Purpose: Optional cloud version of M49 local agriculture calculator history after real auth and sync consent exist.
+
+Key columns: `id uuid`, `user_id`, `local_id`, `calculator_category`, `input_payload jsonb`, `result_payload jsonb`, `result_summary`, `disclaimers text[]`, `created_at`, `synced_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `created_at desc`, `(user_id, local_id)`.
+
+RLS notes: Users can read/delete their own calculator history. Inserts should require authenticated ownership and explicit sync consent.
+
+Admin/moderation notes: Calculator history can reveal farm economics, chemical use, and production planning. Support/admin access should be rare, audited, and purpose-limited.
+
+## `fertilizer_profiles` Future
+
+Purpose: User-owned or admin-reviewed fertilizer formula profiles used by future calculator defaults and recommendation workflows.
+
+Key columns: `id uuid`, `owner_user_id nullable`, `profile_type`, `label`, `n_percent`, `p_percent`, `k_percent`, `source_label`, `review_status`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `owner_user_id`, `profile_type`, `review_status`, `(n_percent, p_percent, k_percent)`.
+
+RLS notes: Public can read only approved generic profiles. Users can manage their own private profiles. Admin-reviewed profiles require backend/admin policies.
+
+Admin/moderation notes: Product-specific fertilizer profiles must not become hidden ads. Sponsored or affiliate profiles need clear labeling and audit logs.
+
+## `planting_profiles` Future
+
+Purpose: Saved crop/spacing presets and planting density assumptions for future user-owned farm planning.
+
+Key columns: `id uuid`, `user_id`, `crop_name`, `row_spacing_cm`, `plant_spacing_cm`, `seedling_buffer_percent`, `usable_area_percent`, `source_label`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `crop_name`, `created_at desc`.
+
+RLS notes: Users can CRUD their own planting profiles. Public/default presets should be backend-reviewed and clearly labeled as examples.
+
+Admin/moderation notes: Presets should not imply guaranteed yield. AI or sponsor-generated presets must be labeled separately from farmer-entered profiles.
+
+## `farm_cost_records` Future
+
+Purpose: User-owned farm cost estimates and actual cost records derived from future cost calculator and My Farm workflows.
+
+Key columns: `id uuid`, `user_id`, `farm_plot_id nullable`, `season_label nullable`, `record_type`, `area_rai`, `fertilizer_cost`, `labor_cost`, `water_cost`, `machinery_cost`, `other_cost`, `total_cost`, `expected_yield_kg nullable`, `break_even_payload jsonb`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `farm_plot_id`, `record_type`, `season_label`, `created_at desc`.
+
+RLS notes: Users can CRUD their own cost records. Public read is disabled by default.
+
+Admin/moderation notes: Cost records are sensitive financial planning data. They must not be used for credit, ads, affiliate targeting, or pricing offers without explicit consent and policy review.
+
+## `crop_calculator_profiles` Future
+
+Purpose: Admin-reviewed crop example profiles for calculator form defaults such as spacing examples, area examples, yield input examples, and cost category labels.
+
+Key columns: `id uuid`, `crop_key`, `thai_display_name`, `profile_status`, `fertilizer_planning_status`, `spacing_examples jsonb`, `unit_examples jsonb`, `yield_examples jsonb`, `cost_categories text[]`, `safety_notes text[]`, `source_label`, `review_status`, `rule_version_id nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `crop_key`, `profile_status`, `fertilizer_planning_status`, `review_status`.
+
+RLS notes: Public can read only approved planning profiles. Admin/editor/expert roles manage drafts through backend-controlled policies.
+
+Admin/moderation notes: Profiles must not contain exact fertilizer doses or pesticide/product recommendations until reviewed rule versions exist. Sponsored profiles must be clearly labeled and separated from base examples.
+
+## `calculator_safety_notes` Future
+
+Purpose: Versioned safety copy for calculator boundaries, fertilizer/chemical warnings, AI explanation boundaries, and sponsor/affiliate separation.
+
+Key columns: `id uuid`, `note_key`, `title`, `body`, `locale`, `risk_area`, `status`, `effective_from`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `note_key + locale + effective_from`, `risk_area`, `status`.
+
+RLS notes: Public can read active notes. Admin/editor/expert roles manage drafts and retired notes.
+
+Admin/moderation notes: Safety copy should be versioned so exported summaries and AI explanations can cite the boundary text active at the time.
+
+## `calculator_result_reviews` Future
+
+Purpose: Expert or admin review records for user-submitted calculator results, risky fertilizer/chemical questions, disputed output, or future AI explanation quality checks.
+
+Key columns: `id uuid`, `calculator_history_id nullable`, `user_id nullable`, `calculator_category`, `risk_area`, `review_status`, `reviewer_id nullable`, `review_summary`, `recommended_action`, `created_at`, `reviewed_at nullable`, `metadata jsonb`.
+
+Indexes: `calculator_history_id`, `user_id`, `calculator_category`, `risk_area`, `review_status`, `created_at desc`.
+
+RLS notes: Users may read safe summaries of their own review requests. Moderator/admin/expert reads and writes must be role-gated and audited.
+
+Admin/moderation notes: Use for high-risk fertilizer, chemical, and AI explanation escalation. Review records must not expose private calculator payloads broadly.
+
+## `crop_rule_versions` Future
+
+Purpose: Version registry for future crop-specific recommendation rules after expert review, source citation, and safety policy approval.
+
+Key columns: `id uuid`, `crop_key`, `rule_area`, `version_label`, `status`, `source_refs jsonb`, `approved_by nullable`, `approved_at nullable`, `effective_from nullable`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: `crop_key`, `rule_area`, `status`, `effective_from`, unique `crop_key + rule_area + version_label`.
+
+RLS notes: Public can read only approved, active rule metadata. Rule authoring and approval are backend/admin/expert only.
+
+Admin/moderation notes: Future AI recommendations must cite rule versions and must not mix sponsor influence into deterministic calculator output or expert-reviewed rule logic.
+
+## `calculator_saved_results` Future
+
+Purpose: Optional cloud sync target for M53 saved calculator summaries after real auth, consent, and owner-scoped RLS exist.
+
+Key columns: `id uuid`, `user_id`, `local_id`, `calculator_category`, `summary_title`, `input_recap text[]`, `result_recap text[]`, `warning_recap text[]`, `safety_disclaimer`, `calculator_route`, `share_text`, `created_at`, `synced_at`, `deleted_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `created_at desc`, `(user_id, local_id)`, `deleted_at`.
+
+RLS notes: Users can read/delete their own saved summaries. Inserts require explicit sync consent and must never trust client payloads as official recommendations.
+
+Admin/moderation notes: Saved summaries may reveal chemical use, costs, yield expectations, and farm planning. Support/admin access must be audited and purpose-limited.
+
+## `calculator_share_events` Future
+
+Purpose: Optional analytics/audit events for calculator summary shares after consent and privacy review.
+
+Key columns: `id uuid`, `user_id nullable`, `saved_result_id nullable`, `calculator_category`, `share_channel`, `share_status`, `shared_at`, `consent_version nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `saved_result_id`, `calculator_category`, `share_channel`, `shared_at desc`.
+
+RLS notes: If stored, users should see their own share history. Event inserts should be backend-owned or consent-gated, not automatic local tracking.
+
+Admin/moderation notes: Do not store raw share text unless necessary. Avoid sponsor targeting without explicit consent.
+
+## `calculator_rewarded_ad_unlocks` Future
+
+Purpose: Future rewarded-ad unlock records for calculator convenience or advanced modes, never for essential safety information.
+
+Key columns: `id uuid`, `user_id`, `unlock_type`, `calculator_category nullable`, `ad_provider`, `provider_reward_id nullable`, `status`, `granted_at`, `expires_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `unlock_type`, `calculator_category`, `status`, `granted_at desc`.
+
+RLS notes: Users can read their own unlock history. Grant validation should be backend-owned and rate limited.
+
+Admin/moderation notes: Basic calculator results and safety copy must stay free. Unlocks must not insert hidden sponsor/product recommendations into deterministic results.
+
+## `calculator_export_events` Future
+
+Purpose: Optional consent-gated audit/analytics events for text exports, copy actions, native share fallback, and future file exports.
+
+Key columns: `id uuid`, `user_id nullable`, `saved_result_id nullable`, `calculator_category`, `export_version`, `export_channel`, `export_status`, `template_key nullable`, `created_at`, `consent_version nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `saved_result_id`, `calculator_category`, `export_channel`, `created_at desc`.
+
+RLS notes: Users may read their own export history if surfaced. Inserts should be backend-owned or explicitly consent-gated.
+
+Admin/moderation notes: Do not store raw export text by default. Export analytics must not become hidden sponsor targeting.
+
+## `calculator_share_templates` Future
+
+Purpose: Versioned templates for short LINE-friendly and long detail calculator export text after product/legal review.
+
+Key columns: `id uuid`, `template_key`, `calculator_category`, `template_version`, `locale`, `template_type`, `body_template`, `status`, `effective_from`, `retired_at nullable`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Indexes: unique `template_key + template_version + locale`, `calculator_category`, `template_type`, `status`, `effective_from`.
+
+RLS notes: Public can read active approved templates. Drafts and retired versions are admin/editor only.
+
+Admin/moderation notes: Template changes must keep safety copy visible and must not add AI or sponsor recommendations to deterministic results.
+
+## `calculator_usage_stats` Future
+
+Purpose: Aggregated calculator usage metrics for product QA and capacity planning without exposing raw user inputs.
+
+Key columns: `id uuid`, `period_start`, `period_granularity`, `calculator_category`, `event_type`, `count`, `source_surface`, `created_at`, `metadata jsonb`.
+
+Indexes: `period_start`, `period_granularity`, `calculator_category`, `event_type`, `source_surface`.
+
+RLS notes: Aggregate stats are admin/product only unless a public transparency dashboard is reviewed.
+
+Admin/moderation notes: Stats should be aggregated and privacy-preserving. Do not infer chemical, cost, or yield behavior for individual users.
+
+## `calculator_ai_audit_logs` Future
+
+Purpose: Backend-owned audit records for future calculator AI explanation requests, policy decisions, snapshot lock hashes, and safety outcomes.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `snapshot_id`, `snapshot_lock_hash`, `policy_version_id`, `prompt_template_version_id`, `safety_decision`, `risk_level`, `blocked_action_ids text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `policy_version_id`, `safety_decision`, `created_at desc`.
+
+RLS notes: Users may read their own high-level explanation history only after privacy review. Raw audit logs are admin/security only.
+
+Admin/moderation notes: Never store provider keys, service-role keys, hidden sponsor payloads, or precise location data. Raw user questions should be redacted or separately retained with strict policy.
+
+## `calculator_ai_policy_versions` Future
+
+Purpose: Reviewed policy and prompt-template version records for calculator AI explanations.
+
+Key columns: `id uuid`, `policy_version_id`, `prompt_template_version_id`, `status`, `locale`, `allowed_action_ids text[]`, `blocked_action_ids text[]`, `escalation_trigger_ids text[]`, `banned_response_categories text[]`, `sponsor_separation_rules text[]`, `effective_from`, `retired_at nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: unique `policy_version_id`, `prompt_template_version_id`, `status`, `locale`, `effective_from`.
+
+RLS notes: Active policy metadata can be public read for transparency. Drafts and retired policy details are admin/editor only.
+
+Admin/moderation notes: Sponsor systems must not choose or modify policy versions. Policy changes need review and test coverage before activation.
+
+## `calculator_ai_rate_limits` Future
+
+Purpose: Rate-limit counters and unlock state for future calculator AI explanations.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `period_start`, `period_granularity`, `explanation_count`, `rewarded_unlock_count`, `blocked_count`, `last_summary_id nullable`, `updated_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `period_start`, `period_granularity`, `updated_at`.
+
+RLS notes: Backend-owned writes only. Users may see a friendly remaining-limit summary, not raw abuse metadata.
+
+Admin/moderation notes: Basic calculator results and safety copy must not be rate-limited. Limits apply only to AI explanation convenience.
+
+## `calculator_ai_explanations` Future
+
+Purpose: Optional stored AI explanation outputs after backend execution, safety filtering, auth, consent, and retention review.
+
+Key columns: `id uuid`, `user_id`, `calculator_category`, `snapshot_id`, `policy_version_id`, `prompt_template_version_id`, `explanation_text`, `safety_status`, `created_at`, `deleted_at nullable`, `metadata jsonb`.
+
+Indexes: `user_id`, `calculator_category`, `snapshot_id`, `policy_version_id`, `created_at desc`, `deleted_at`.
+
+RLS notes: Users can read/delete their own explanations. Backend inserts only after passing safety filter.
+
+Admin/moderation notes: Explanations must not replace deterministic calculator results. Store snapshot references and policy versions for review.
+
+## `calculator_ai_safety_events` Future
+
+Purpose: Safety events for blocked actions, sponsor insertion attempts, chemical recommendation attempts, oversized payload rejection, and label override attempts.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `event_type`, `severity`, `policy_version_id`, `snapshot_id nullable`, `reason_codes text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `event_type`, `severity`, `created_at desc`.
+
+RLS notes: Safety events are backend/admin only by default. User-facing copy should be friendly and avoid exposing abuse heuristics.
+
+Admin/moderation notes: Use for safety review and model QA, not sponsor targeting or hidden product routing.
+
+## `calculator_ai_request_logs` Future
+
+Purpose: Backend-owned request envelope logs for future calculator AI explanation attempts after real auth, consent, retention policy, and endpoint ownership are reviewed.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `adapter_mode`, `request_status`, `snapshot_lock_hash`, `expected_policy_version_id nullable`, `payload_size_bytes`, `created_at`, `metadata jsonb`.
+
+Indexes: `user_id`, `session_hash`, `calculator_category`, `adapter_mode`, `request_status`, `created_at desc`.
+
+RLS notes: Backend inserts only. User-facing history should expose friendly explanation status only after privacy review.
+
+Admin/moderation notes: Store metadata, not provider secrets or raw hidden sponsor payloads. Redact user text when possible.
+
+## `calculator_ai_policy_checks` Future
+
+Purpose: Backend policy validation records for policy-version selection, mismatches, banned category checks, and escalation decisions.
+
+Key columns: `id uuid`, `request_log_id`, `policy_version_id`, `prompt_template_version_id`, `check_status`, `reason_codes text[]`, `blocked_action_ids text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `policy_version_id`, `check_status`, `created_at desc`.
+
+RLS notes: Admin/security read by default. Public policy metadata belongs in `calculator_ai_policy_versions`, not this operational table.
+
+Admin/moderation notes: Use for QA and safety review. Sponsor systems must not write or select policy check outcomes.
+
+## `calculator_ai_snapshot_locks` Future
+
+Purpose: Immutable snapshot-lock records for deterministic calculator values before any future AI explanation.
+
+Key columns: `id uuid`, `user_id nullable`, `session_hash nullable`, `calculator_category`, `snapshot_lock_hash`, `result_value_snapshot jsonb`, `input_recap jsonb`, `result_recap jsonb`, `created_at`, `metadata jsonb`.
+
+Indexes: unique `snapshot_lock_hash`, `user_id`, `session_hash`, `calculator_category`, `created_at desc`.
+
+RLS notes: Users may read their own snapshot references only after sync consent. Backend owns writes.
+
+Admin/moderation notes: Snapshots must be immutable. AI explanations can echo these values but must not recompute or mutate them.
+
+## `calculator_ai_backend_events` Future
+
+Purpose: Operational backend events for adapter execution, endpoint readiness checks, network-disabled blocks, timeout handling, and safety-filter outcomes.
+
+Key columns: `id uuid`, `request_log_id nullable`, `event_type`, `event_status`, `adapter_mode`, `backend_enabled`, `network_enabled`, `reason_codes text[]`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `event_type`, `event_status`, `adapter_mode`, `created_at desc`.
+
+RLS notes: Backend/admin only by default. Users should see simple disabled/safety messages, not internal heuristics.
+
+Admin/moderation notes: Events must prove no network path is active by default and must not become analytics for sponsor targeting without consent and policy review.
+
+## `calculator_ai_edge_invocations` Future
+
+Purpose: Backend-owned invocation records for the future `calculator-ai-explain` Supabase Edge Function after deployment, auth, RLS, audit, and retention review.
+
+Key columns: `id uuid`, `request_log_id`, `user_id nullable`, `session_hash nullable`, `edge_function_name`, `edge_status`, `snapshot_lock_hash`, `policy_version_id`, `timeout_status nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `request_log_id`, `user_id`, `session_hash`, `edge_function_name`, `edge_status`, `policy_version_id`, `created_at desc`.
+
+RLS notes: Backend inserts only. Users may see friendly explanation status after privacy review, not raw provider/audit details.
+
+Admin/moderation notes: Must not store provider keys, service-role keys, hidden sponsor payloads, or full raw prompts.
+
+## `calculator_ai_provider_attempts` Future
+
+Purpose: Provider-call attempt metadata for future backend-only calculator explanations after a provider integration milestone exists.
+
+Key columns: `id uuid`, `edge_invocation_id`, `provider_name`, `provider_status`, `provider_latency_ms`, `timeout_ms`, `safety_filter_status`, `created_at`, `metadata jsonb`.
+
+Indexes: `edge_invocation_id`, `provider_name`, `provider_status`, `safety_filter_status`, `created_at desc`.
+
+RLS notes: Admin/security only by default. User-facing surfaces should not expose provider internals.
+
+Admin/moderation notes: Provider attempts must prove deterministic result values were immutable and must not include provider secrets or sponsor targeting data.
+
+## `calculator_ai_dry_run_events` Future
+
+Purpose: Staging-only dry-run event records for future `calculator-ai-explain` endpoint validation before provider integration.
+
+Key columns: `id uuid`, `session_hash nullable`, `edge_function_name`, `dry_run_mode`, `readiness`, `endpoint_url_hash nullable`, `can_call_endpoint`, `fetch_would_run`, `created_at`, `metadata jsonb`.
+
+Indexes: `session_hash`, `edge_function_name`, `dry_run_mode`, `readiness`, `created_at desc`.
+
+RLS notes: Backend/admin only by default. If exposed to users, show only friendly readiness copy.
+
+Admin/moderation notes: Never store full endpoint URLs, provider keys, service-role keys, or raw prompts.
+
+## `calculator_ai_validation_failures` Future
+
+Purpose: Validation failure records for dry-run and future backend checks such as missing snapshot, lock-hash mismatch, policy mismatch, oversized payload, sponsor injection, chemical request, auth missing, and timeout fallback.
+
+Key columns: `id uuid`, `dry_run_event_id nullable`, `request_log_id nullable`, `failure_code`, `severity`, `calculator_category nullable`, `snapshot_lock_hash nullable`, `policy_version_id nullable`, `created_at`, `metadata jsonb`.
+
+Indexes: `dry_run_event_id`, `request_log_id`, `failure_code`, `severity`, `created_at desc`.
+
+RLS notes: Admin/security only by default.
+
+Admin/moderation notes: Use for safety QA and regression review, not sponsor targeting.
+
+## `calculator_ai_endpoint_health_checks` Future
+
+Purpose: Staging endpoint health check metadata for future backend-owned `calculator-ai-explain` dry runs.
+
+Key columns: `id uuid`, `edge_function_name`, `environment_label`, `status`, `latency_ms nullable`, `checked_at`, `metadata jsonb`.
+
+Indexes: `edge_function_name`, `environment_label`, `status`, `checked_at desc`.
+
+RLS notes: Admin/operator only. Public app surfaces should not expose infrastructure details.
+
+Admin/moderation notes: M60 does not run health checks. Future checks must be explicit staging-only and must not call providers.
+
 ## `farm_profiles` Future
 
 Purpose: User-owned My Farm workspace profile that can group farms, plots, crop focus, preferred province, and dashboard defaults.
@@ -724,3 +1060,357 @@ Before staging:
 - Keep auth, phone OTP, LINE Login, and cloud sync disabled for the first staging pass.
 - Verify public read tables, user-owned tables, backend-only tables, admin review tables, crop price review tables, and community moderation tables separately.
 - Keep service-role keys out of frontend ENV and reserve them for future Edge Functions/backend jobs.
+
+## M63 Ownership/RLS Sync Gate Future Tables
+
+M63 does not run migrations. Future owner-scoped sync may require:
+
+- `guest_sync_consent_records`
+- `guest_sync_idempotency_keys`
+- `guest_sync_audit_logs`
+- `guest_sync_rls_dry_run_results`
+
+## M64 Guest Sync Dry-run Payload Future Tables
+
+M64 does not run migrations. Future backend-owned sync may also require:
+
+- `guest_sync_payload_previews`
+- `guest_sync_conflict_previews`
+- `guest_sync_privacy_filter_events`
+
+These tables, if added later, must be user-owned or backend-only, must avoid raw photo/base64 payload storage, and must not store OTP/session tokens or service-role/provider keys.
+
+These tables must be owner-scoped where user-visible and backend-owned where operational. RLS must prove authenticated users can read own rows only, cannot read other users rows, anon cannot read user-owned rows, and inserts require `owner_id = auth.uid()`.
+
+## M65 Offline Agriculture Article CMS Future Tables
+
+M65 does not run migrations. Future hybrid offline/CMS content may require:
+
+- `agri_articles`
+- `agri_article_versions`
+- `agri_article_image_assets`
+- `agri_article_safety_notes`
+- `agri_article_cms_overrides`
+
+Recommended columns for `agri_articles`: `id uuid`, `future_cms_key`, `slug`, `category`, `title_th`, `summary_th`, `difficulty`, `estimated_reading_minutes`, `body_readiness`, `source_status`, `offline_fallback_key`, `published_status`, `review_status`, `last_reviewed_at`, `created_at`, `updated_at`, `metadata jsonb`.
+
+Recommended columns for image assets: `article_id`, `asset_role`, `storage_path`, `alt_text_th`, `aspect_ratio`, `byte_size`, `review_status`, `created_at`.
+
+RLS notes: Public users may read published, reviewed articles only. Draft/review content must be editor/admin-only. Sponsor or affiliate metadata must not be injected into educational article results without explicit labeling and review.
+
+CMS notes: Seasonal, loan, rate, government scheme, disease alert, and market-timing articles should be CMS-managed, not hardcoded forever. Bundled offline articles remain fallback content when CMS is unavailable.
+
+## M66 Offline Article QA / CMS Contract Future Tables
+
+M66 does not run migrations. Future CMS readiness may add these exact planning tables:
+
+- `article_versions`
+- `article_editorial_reviews`
+- `article_cms_overrides`
+- `article_image_assets`
+- `article_safety_requirements`
+
+`article_versions` should store version id, `future_cms_key`, content status, editorial owner, last reviewed date, and fallback priority.
+
+`article_editorial_reviews` should track reviewer, checklist status, notes, and review timestamps.
+
+`article_cms_overrides` should track online CMS body/title/summary override attempts, accepted/blocked status, freshness date, and fallback decision.
+
+`article_image_assets` should track local/offline asset path, storage path, size, aspect ratio, alt text, and offline suitability.
+
+`article_safety_requirements` should define required disclaimers by category and risk tag. CMS overrides must not remove these requirements.
+
+No table should allow hidden sponsor injection into educational article content. Public reads must expose only reviewed/published rows.
+
+## M67 Offline Article Full Body Future Tables
+
+M67 does not run migrations. Future full-content publishing may require:
+
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_publish_gates`
+- `article_image_requirements`
+
+`article_full_body_versions` should store reviewed body sections, template version, source article slug, CMS key, content status, and publish status.
+
+`article_source_reviews` should store source type, source label, reviewer, review timestamp, and freshness date where needed.
+
+`article_expert_reviews` should store agronomist, finance reviewer, local expert, or editorial review outcomes.
+
+`article_publish_gates` should record blockers and pass/fail state for required safety, source, review, image, and freshness checks.
+
+`article_image_requirements` should track required image role, local/offline asset path, storage path, aspect ratio, byte limit, alt text, and review status.
+
+No future table should allow CMS content to remove required disclaimers or hide sponsor/affiliate content inside education articles.
+
+## M70 Editorial Evidence / Human Release Future Tables
+
+M70 does not run migrations. Future article release workflows may require:
+
+- `article_evidence_packets`
+- `article_release_reviews`
+- `article_release_gates`
+- `article_release_audit_logs`
+
+`article_evidence_packets` should store source, reviewer, image, safety, freshness, and escalation evidence snapshots.
+
+`article_release_reviews` should store the explicit human approval flag, release reviewer, release timestamp, and release note.
+
+`article_release_gates` should store release blockers and prove automatic publish is forbidden.
+
+`article_release_audit_logs` should record all release attempts, blocked states, reviewer changes, and final publish decisions.
+
+No table should allow metadata completion alone to publish an article.
+
+## M71 Offline Article Release Audit Future Tables
+
+M71 does not run migrations. Future release audit readiness may require:
+
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_release_diff_previews`
+- `article_automation_bypass_events`
+
+`article_release_audit_events` should store the timeline of attempted publish, blocked publish, reviewer/source/disclaimer/image changes, release gate changes, and automation bypass attempts.
+
+`article_release_attempts` should store attempted actor, attempted route, status, blocked reasons, release gate id, and final publish decision.
+
+`article_reviewer_history` should store reviewer role changes, before/after state, reviewer placeholder or user id, and audit notes.
+
+`article_release_diff_previews` should store reviewed before/after summaries and disclaimer/source/reviewer/image change previews.
+
+`article_automation_bypass_events` should record blocked CMS or automation attempts. No automation event should grant final publish.
+
+## M72 Offline Article CMS Persistence Contract Tables
+
+M72 does not run migrations. Future backend-owned CMS persistence should review these tables together:
+
+- `articles`
+- `article_versions`
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_image_assets`
+- `article_release_gates`
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_cms_overrides`
+
+RLS and role planning:
+
+- public read should expose reviewed/published content only
+- draft, review, source, image, release gate, and audit rows should be editor/reviewer/admin scoped
+- release audit writes should be backend-owned
+- service-role credentials must stay out of frontend code
+- release managers may request final release but cannot bypass blockers
+- admins cannot silently bypass the human release gate
+- automation cannot final publish
+
+Migration planning must include rollback before any staging migration is run.
+
+## M73 CMS Migration Dry-run Review Pack
+
+M73 does not run migrations. It adds a dry-run review pack for the M72 table list.
+
+Each future table must have:
+
+- owner
+- write source
+- read scope
+- RLS expectation
+- rollback note
+- seed strategy
+- audit requirement
+
+RLS expectations:
+
+- viewer/public cannot write
+- editors cannot bypass release gates
+- release managers cannot bypass audit requirements
+- automation/service accounts cannot final publish directly
+- public reads only approved published content
+- unpublished drafts are blocked from anon/public
+
+Seed planning covers starter offline article import, article categories, review fixtures, release gate fixtures, and fallback article fixtures. No seed inserts occur in M73.
+
+## M74 CMS SQL Draft Artifacts
+
+M74 checks in planning-only SQL draft files under `supabase/drafts/cms/`, not `supabase/migrations`.
+
+Draft artifacts:
+
+- `0002_cms_articles_schema_draft.sql`
+- `0002_cms_articles_rls_draft.sql`
+- `0002_cms_articles_seed_draft.sql`
+- `0002_cms_articles_rollback_draft.sql`
+- `README.md`
+
+The schema draft covers:
+
+- `article_versions`
+- `article_full_body_versions`
+- `article_source_reviews`
+- `article_expert_reviews`
+- `article_image_assets`
+- `article_release_gates`
+- `article_release_audit_events`
+- `article_release_attempts`
+- `article_reviewer_history`
+- `article_cms_overrides`
+
+Every draft includes `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED` warnings. M74 does not execute SQL, run migrations, write Supabase data, or enable frontend CMS publishing.
+
+## M75 Weather API Future Tables
+
+M75 does not run migrations or write weather data. Future weather persistence may require:
+
+- `weather_cache`
+- `weather_api_events`
+- `farm_weather_preferences`
+
+`weather_cache` should store source label, coarse location label or reviewed preference id, forecast payload snapshot, fetched timestamp, expiry timestamp, stale status, and provider status.
+
+`weather_api_events` should store provider name, mode, status, fallback reason, timeout status, and no sensitive user location values.
+
+`farm_weather_preferences` should store user-selected coarse location preferences only after explicit consent and ownership/RLS review.
+
+No future weather table should store GPS or precise personal location by default. M75 keeps local fixture fallback available and performs no Supabase writes.
+
+## M76 Weather Cache / Location Future Notes
+
+M76 does not run migrations or write weather data. Future weather persistence should review:
+
+- `weather_cache`
+- `weather_location_preferences`
+- `weather_fetch_events`
+- `weather_risk_notes`
+
+`weather_location_preferences` should store coarse location ids only unless a later privacy review allows more detail.
+
+`weather_fetch_events` should log provider status, fallback reason, stale-cache use, and timeout status without storing exact farm coordinates.
+
+`weather_risk_notes` should store reviewed general note templates and must not contain hidden chemical, fertilizer, sponsor, or guaranteed-outcome advice.
+## Future Weather Tables From M77
+
+Planning only. No migrations were run.
+
+- `weather_user_preferences`: future coarse weather preference records after explicit consent and RLS owner review.
+- `weather_refresh_events`: future backend-owned refresh/audit events if weather refresh becomes server-mediated.
+- `weather_cache_health`: future cache health summaries, not raw precise user locations.
+- `weather_source_audit`: future source attribution and fallback event audit.
+
+## Future Weather Risk Tables From M78
+
+Planning only. No migrations were run.
+
+- `weather_risk_assessments`: future reviewed/stored weather risk output snapshots if backend-owned risk assessment is introduced.
+- `weather_risk_rule_versions`: future expert-reviewed rule versions, source metadata, threshold notes, and rollback status.
+- `weather_risk_notifications`: future notification planning records only after separate push/consent review.
+- `weather_risk_user_acknowledgements`: future acknowledgement records for user-facing safety copy if weather risk advice becomes more personalized.
+
+No M78 table may store GPS, precise farm coordinates, product recommendations, chemical doses, sponsor payloads, or guaranteed-outcome claims.
+
+## Future Weather Risk Review Tables From M79
+
+Planning only. No migrations were run.
+
+- `weather_risk_rule_versions`: future version records for each reviewed risk rule.
+- `weather_risk_source_reviews`: future source metadata, citation, freshness, and applicability records.
+- `weather_risk_expert_signoffs`: future reviewer approvals scoped by role.
+- `weather_risk_release_gates`: future release approval records before any prescriptive behavior.
+- `weather_risk_audit_events`: future audit trail for rule changes, blocked release attempts, and safety decisions.
+
+M79 keeps every future table local-planning only. No Supabase writes, RLS policies, migrations, or app table rows were created.
+
+## Future Weather Risk Governance Tables From M80
+
+Planning only. No migrations were run.
+
+- `weather_risk_release_audit_events`: future backend-owned audit timeline for release attempts and blocked bypasses.
+- `weather_risk_reviewer_history`: future reviewer assignment/change/revert/stale-review history.
+- `weather_risk_rule_diff_previews`: future reviewed diff previews before activation.
+- `weather_risk_release_reviews`: future human release approvals, timestamps, notes, and rollback references.
+
+M80 keeps all governance data local-only and keeps final prescriptive release blocked.
+## `ai_text_requests` Future
+
+Purpose: Backend-owned request envelope records for future controlled AI text proxy calls.
+
+Key columns: `id uuid`, `user_id nullable`, `request_type`, `source_route`, `locked_output_hash nullable`, `mode`, `created_at`, `metadata jsonb`.
+
+RLS notes: Frontend must not write directly. Backend/Edge Function-owned insert only after auth, audit, and rate-limit review.
+
+## `ai_text_audit_logs` Future
+
+Purpose: Safety, policy, and provider-attempt audit events for future AI text proxy calls.
+
+Key columns: `id uuid`, `request_id`, `event_type`, `policy_version`, `blocked_actions text[]`, `created_at`, `metadata jsonb`.
+
+RLS notes: Backend-owned writes only. Public reads disabled.
+
+## `ai_text_rate_limits` Future
+
+Purpose: Track backend-enforced per-user/device AI text request limits.
+
+Key columns: `id uuid`, `scope`, `scope_hash`, `window_start`, `request_count`, `cooldown_until`, `created_at`, `updated_at`.
+
+RLS notes: Backend-owned writes only.
+
+## `ai_text_release_gates` Future
+
+Purpose: Store review/release status for AI text proxy rollout scope.
+
+Key columns: `id uuid`, `release_scope`, `status`, `reviewer_id`, `approved_at nullable`, `notes`, `metadata jsonb`.
+
+RLS notes: Admin/reviewer scoped; no silent automation publish.
+
+## `ai_text_blocked_actions` Future
+
+Purpose: Version blocked action policy for AI text requests.
+
+Key columns: `id uuid`, `policy_version`, `action_id`, `label`, `reason`, `active`, `created_at`.
+
+RLS notes: Public read may be allowed for active policy metadata only after review; writes backend/admin only.
+
+## `ai_text_endpoint_requests` Future
+
+Purpose: Store backend-owned AI text endpoint request envelopes after review.
+
+Key columns: `id uuid`, `request_type`, `source_route`, `policy_version`, `locked_snapshot_hash`, `status`, `created_at`.
+
+RLS notes: Backend writes only; frontend must not insert request rows directly.
+
+## `ai_text_endpoint_responses` Future
+
+Purpose: Store provider response metadata after safety filtering, without exposing sensitive prompts unnecessarily.
+
+Key columns: `id uuid`, `request_id`, `status`, `safety_status`, `provider_latency_ms`, `created_at`.
+
+RLS notes: Backend writes only; public reads are not planned.
+
+## `ai_text_endpoint_failures` Future
+
+Purpose: Track endpoint disabled, timeout, provider unavailable, unsafe request, audit unavailable, and rate-limit unavailable failures.
+
+Key columns: `id uuid`, `request_id`, `failure_mode`, `safe_fallback_used`, `created_at`.
+
+RLS notes: Backend writes only.
+
+## `ai_text_provider_usage` Future
+
+Purpose: Track provider usage for cost and abuse controls from backend only.
+
+Key columns: `id uuid`, `request_id`, `provider_name`, `token_count_preview`, `cost_bucket`, `created_at`.
+
+RLS notes: Service-side only; never frontend writable.
+
+## `ai_text_timeout_events` Future
+
+Purpose: Track provider/request timeout events and fallback behavior.
+
+Key columns: `id uuid`, `request_id`, `timeout_ms`, `fallback_status`, `created_at`.
+
+RLS notes: Backend writes only.

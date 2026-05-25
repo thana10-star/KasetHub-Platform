@@ -188,6 +188,102 @@ Type mapping:
 
 M33 state is localStorage-only under `kasethub.farmArea.v1`. Production persistence requires real auth, owner-scoped RLS, private boundary defaults, deletion controls, and clear copy that estimates are not official land surveys. Precise GPS/map geometry should never be public-read by default.
 
+## Farm Records And Farm Finance Ledger
+
+M83 farm records models are local-first only under `kasethub.farmRecords.v1`. They map conceptually into future owner-scoped tables only after consent, export/delete tooling, and RLS review:
+
+- `FarmPlot` -> future `farm_plots`
+- `CropCycle` -> future `crop_cycles`
+- `FarmActivityRecord` -> future `farm_activity_records`
+- `FarmFinanceEntry` -> future `farm_finance_entries`
+- `FarmImageRef` -> future image/receipt metadata records, not raw image storage
+- `FarmLedgerSummary` -> computed view/service output, not source-of-truth storage
+
+M83 does not create migrations, generated Supabase types, Edge Functions, writes, or sync payloads for these records. Future tables must be owner-only by RLS. Plot location must remain coarse unless a later opt-in precise-location milestone passes privacy review. Finance entries are business-sensitive because they expose income, cost, profit, vendor/buyer behavior, and farm operations; future cloud sync and future AI analysis must each require separate explicit consent boundaries.
+
+## Agriculture Calculators
+
+M49 calculator models map conceptually into:
+
+- `calculator_history`
+- `fertilizer_profiles`
+- `planting_profiles`
+- `farm_cost_records`
+- `crop_calculator_profiles`
+- `calculator_safety_notes`
+- `calculator_result_reviews`
+- `crop_rule_versions`
+- `calculator_saved_results`
+- `calculator_share_events`
+- `calculator_rewarded_ad_unlocks`
+- `calculator_export_events`
+- `calculator_share_templates`
+- `calculator_usage_stats`
+- `calculator_ai_audit_logs`
+- `calculator_ai_policy_versions`
+- `calculator_ai_rate_limits`
+- `calculator_ai_explanations`
+- `calculator_ai_safety_events`
+- `calculator_ai_request_logs`
+- `calculator_ai_policy_checks`
+- `calculator_ai_snapshot_locks`
+- `calculator_ai_backend_events`
+- `calculator_ai_edge_invocations`
+- `calculator_ai_provider_attempts`
+- `calculator_ai_dry_run_events`
+- `calculator_ai_validation_failures`
+- `calculator_ai_endpoint_health_checks`
+
+Type mapping:
+
+- `CalculatorCategory` -> `calculator_history.calculator_category`
+- `CalculatorHistoryRecord` -> `calculator_history`
+- `SprayMixInput` / `SprayMixResult` -> `calculator_history.input_payload/result_payload` with category `spray_mix`
+- `FertilizerMixInput` / `FertilizerMixResult` -> `calculator_history` and future `fertilizer_profiles`
+- `PlantSpacingInput` / `PlantSpacingResult` -> `calculator_history` and future `planting_profiles`
+- `YieldEstimateInput` / `YieldEstimateResult` -> `calculator_history` until a future harvest record table exists
+- `CostEstimateInput` / `CostEstimateResult` -> `farm_cost_records` plus optional `calculator_history`
+- `CropCalculatorProfile` -> future `crop_calculator_profiles`
+- `CropCalculatorKey` -> `crop_calculator_profiles.crop_key` and future `crop_rule_versions.crop_key`
+- `CalculatorSafetyBoundarySection` -> future `calculator_safety_notes`
+- `CalculatorResultSummary` -> future `calculator_saved_results`
+- `CalculatorResultShareMetadata` -> future `calculator_share_events.share_channel/share_status` payload metadata
+- `CalculatorExportTemplate` -> future `calculator_share_templates` for approved short/long text format versions
+- `CalculatorExportTemplateVersion` -> `calculator_share_templates.template_type`
+- copy/share/export fallback result -> future `calculator_export_events.export_status`
+- future reviewed crop rule metadata -> `crop_rule_versions`
+- future expert review or dispute workflow -> `calculator_result_reviews`
+- future rewarded calculator convenience unlock -> `calculator_rewarded_ad_unlocks`
+- aggregate calculator usage counts -> future `calculator_usage_stats`
+- `CalculatorAIExecutionRequest` -> future backend request payload, not a frontend-write table
+- `CalculatorAIExecutionSnapshot` -> `calculator_ai_audit_logs.snapshot_id/snapshot_lock_hash` and `calculator_ai_explanations.snapshot_id`
+- `CalculatorAIPolicyVersion` -> `calculator_ai_policy_versions`
+- `CalculatorAISafetyDecision` -> `calculator_ai_audit_logs.safety_decision/risk_level` and `calculator_ai_safety_events`
+- `CalculatorAIRateLimitPlan` -> `calculator_ai_rate_limits`
+- `CalculatorAIAuditLogPlan` -> `calculator_ai_audit_logs`
+- `CalculatorAIEscalationRule` -> `calculator_ai_policy_versions.escalation_trigger_ids` plus `calculator_ai_safety_events.reason_codes`
+- `CalculatorAIAdapterRequest` -> future `calculator_ai_request_logs` request envelope metadata, not a frontend-write table
+- `CalculatorAIAdapterResponse` -> future `calculator_ai_backend_events` status/error metadata and `calculator_ai_explanations` only after backend safety filtering
+- `CalculatorAIAdapterModeStatus` -> future `calculator_ai_backend_events.adapter_mode/backend_enabled/network_enabled`
+- `CalculatorAIAdapterQAFixture` -> local QA fixture only; no production table unless converted into reviewed backend test cases
+- `CalculatorAIEndpointPlan` -> planning-only service; future checklist evidence may inform `calculator_ai_policy_checks` and backend readiness docs
+- locked result hash verification -> `calculator_ai_snapshot_locks.snapshot_lock_hash` plus `calculator_ai_policy_checks.check_status`
+- `CalculatorAIEdgeRequest` -> future `calculator_ai_edge_invocations` request envelope metadata after deployment
+- `CalculatorAIEdgeResponse` -> future `calculator_ai_edge_invocations.edge_status`, `calculator_ai_backend_events`, and `calculator_ai_explanations` after safety filtering
+- `CalculatorAIEdgePolicyCheck` -> future `calculator_ai_policy_checks`
+- `CalculatorAIEdgeAuditEvent` -> future `calculator_ai_audit_logs` and `calculator_ai_backend_events`
+- `CalculatorAIEdgeRateLimitCheck` -> future `calculator_ai_rate_limits`
+- `CalculatorAIEdgeTimeoutPlan` / `CalculatorAIEdgeFailureMode` -> future `calculator_ai_backend_events` and `calculator_ai_provider_attempts`
+- `CalculatorAIEdgeDryRunPlan` -> future `calculator_ai_dry_run_events` only after staging review
+- `CalculatorAIEdgeDryRunValidationCase` -> future `calculator_ai_validation_failures`
+- `CalculatorAIEdgeDryRunAuditPreview` -> planning-only preview for future `calculator_ai_audit_logs`
+- `CalculatorAIEdgeDryRunRateLimitPreview` -> planning-only preview for future `calculator_ai_rate_limits`
+- endpoint URL status/health check -> future `calculator_ai_endpoint_health_checks`
+
+M49-M60 state is localStorage-only under `kasethub.agriCalculators.v1` and `kasethub.calculatorResultSummaries.v1` plus static crop calculator fixtures, local AI architecture review fixtures, local adapter QA fixtures, endpoint planning services, Edge Function contract previews, and Edge dry-run plans. It stores recent calculations, favorite calculators, last inputs, and saved result summaries only on the current device. Production sync must require real auth, explicit consent, owner-scoped RLS, and clear disclaimers because calculator data can expose chemical use, fertilizer planning, plant density, yield expectations, and farm costs.
+
+Future AI recommendations should not overwrite deterministic calculator output. Future crop rules must cite approved `crop_rule_versions`. Future calculator AI explanations must lock snapshots, select policy versions, reject blocked requests before provider calls, validate endpoint/network boundaries, keep provider/service-role keys server-only, and log safety decisions without storing secrets or hidden sponsor payloads. Future rewarded ads should unlock convenience or advanced modes only and must not block basic calculations, text export, or safety copy. Future sponsor or affiliate integrations must be labeled and must not use calculator history, saved summaries, export events, crop profiles, safety notes, rule versions, AI audit logs, policy versions, adapter events, request logs, snapshot locks, Edge invocation logs, provider attempts, or safety events for targeting without explicit consent and policy review.
+
 ## My Farm Hub
 
 M34 My Farm hub models map conceptually into generated dashboard views and user-owned preferences:
@@ -281,3 +377,310 @@ M29 adds Edge Function contract types only:
 - `GuestSyncStagingReadiness` -> frontend planning output only, not a database table
 
 Future persistence should map sync attempts into `guest_sync_events` or a backend-owned audit table with `user_id`, `guest_id`, `idempotency_key`, request hash, consent snapshot, status, counts, error code, and timestamps. The frontend must not persist service-role credentials, trusted owner claims, or admin-only audit decisions.
+
+## M63 Ownership/RLS Gate Mapping Notes
+
+M63 adds frontend-only review models:
+
+- `OwnershipGateStatus`
+- `OwnershipGateCheck`
+- `OwnershipGateBlocker`
+- `OwnershipGateConsentRequirement`
+- `OwnershipGateIdempotencyRequirement`
+- `OwnershipGateAuditRequirement`
+- `OwnershipGateRlsExpectation`
+
+Future persistence may map to `guest_sync_consent_records`, `guest_sync_idempotency_keys`, `guest_sync_audit_logs`, and `guest_sync_rls_dry_run_results`. M63 keeps these as plans only and does not write Supabase data.
+
+## M64 Guest Sync Dry-run Payload Mapping Notes
+
+M64 adds frontend-only types:
+
+- `GuestSyncDryRunPayload`
+- `GuestSyncDryRunRecordGroup`
+- `GuestSyncDryRunConsentPreview`
+- `GuestSyncDryRunIdempotencyPreview`
+- `GuestSyncDryRunAuditPreview`
+- `GuestSyncDryRunConflictPreview`
+- `GuestSyncDryRunOwnerScope`
+- `GuestSyncDryRunBlocker`
+
+The future backend mapping should treat these as preview models only. Safe groups may map to saved items, farm records, recent AI questions, crop watches, calculator saved results, followed topics, and likes after real ownership, consent, idempotency, audit, and owner-scoped RLS pass. M64 keeps `uploadAllowed=false` and performs no writes.
+
+## M65 Offline Agriculture Article Mapping Notes
+
+M65 adds frontend-only offline article models:
+
+- `OfflineAgriArticleCategory`
+- `OfflineAgriArticle`
+- `OfflineAgriArticleDifficulty`
+- `OfflineAgriArticleReadiness`
+- `OfflineAgriArticleSection`
+- `OfflineAgriArticleImageAsset`
+- `OfflineAgriArticleSafetyNote`
+- `OfflineAgriArticleCmsCompatibility`
+
+Future CMS mapping:
+
+- `OfflineAgriArticle` -> `agri_articles` plus versioned body tables
+- `OfflineAgriArticleSection` -> article body sections or rich content blocks
+- `OfflineAgriArticleImageAsset` -> `agri_article_image_assets`
+- `OfflineAgriArticleSafetyNote` -> `agri_article_safety_notes`
+- `futureCmsKey` -> stable CMS override key
+
+M65 keeps all articles bundled in the frontend and offline available. No CMS rows, Supabase writes, image uploads, or external image URLs are added.
+
+## M66 Offline Article QA / CMS Contract Mapping Notes
+
+M66 adds frontend-only QA and override models:
+
+- `ArticleQaStatus`
+- `ArticleEditorialChecklist`
+- `ArticleSafetyChecklist`
+- `ArticleImageChecklist`
+- `ArticleCmsOverrideRule`
+- `ArticleVersionInfo`
+- `ArticleContentReadinessScore`
+- `OfflineAgriCmsOverridePayload`
+- `OfflineAgriCmsOverrideDecision`
+
+Future persistence may map:
+
+- `ArticleVersionInfo` -> `article_versions`
+- editorial checklist results -> `article_editorial_reviews`
+- CMS override attempts -> `article_cms_overrides`
+- image checklist metadata -> `article_image_assets`
+- required disclaimer rules -> `article_safety_requirements`
+
+M66 keeps every mapping as planning only and performs no Supabase writes or CMS fetches.
+
+## M67 Offline Article Full Content Mapping Notes
+
+M67 adds frontend-only full-content readiness models:
+
+- `FullArticleBodyTemplate`
+- `FullArticleSectionTemplate`
+- `FullArticleReviewRequirement`
+- `FullArticleSourcePlaceholder`
+- `FullArticleExpertEscalationNote`
+- `FullArticlePublishReadinessGate`
+- `FullArticleDraftStatus`
+
+Future persistence may map:
+
+- `FullArticleBodyTemplate` -> `article_full_body_versions`
+- source placeholders -> `article_source_reviews`
+- review requirements and escalation notes -> `article_expert_reviews`
+- publish gate output -> `article_publish_gates`
+- image requirements -> `article_image_requirements`
+
+M67 keeps all mappings as local planning only and performs no Supabase writes, CMS writes, or content fetches.
+
+## M70 Editorial Evidence / Human Release Mapping Notes
+
+M70 adds frontend-only evidence and release gate models:
+
+- `ArticleEvidencePacket`
+- `ArticleEvidenceItem`
+- `ArticleSourceEvidence`
+- `ArticleImageEvidence`
+- `ArticleReviewerEvidence`
+- `ArticleReleaseGate`
+- `ArticleHumanApprovalRequirement`
+
+Future persistence may map:
+
+- evidence packets -> `article_evidence_packets`
+- human release approval -> `article_release_reviews`
+- gate blockers -> `article_release_gates`
+- release attempts and decisions -> `article_release_audit_logs`
+
+M70 keeps `finalPublishAllowed=false` and performs no Supabase writes, CMS writes, or production publishing.
+
+## M71 Offline Article Release Audit Mapping Notes
+
+M71 adds frontend-only release audit models:
+
+- `ArticleReleaseAuditEvent`
+- `ArticleReleaseAttempt`
+- `ArticleReleaseBlockedReason`
+- `ArticleReviewerChangeHistory`
+- `ArticleReleaseDiffPreview`
+- `ArticleReleaseAuditStatus`
+- `ArticleAutomationBypassAttempt`
+
+Future persistence may map:
+
+- audit timeline -> `article_release_audit_events`
+- blocked release attempts -> `article_release_attempts`
+- reviewer state changes -> `article_reviewer_history`
+- release diff previews -> `article_release_diff_previews`
+- automation or CMS bypass attempts -> `article_automation_bypass_events`
+
+M71 keeps every model local-only, keeps `finalPublishAllowed=false`, and performs no Supabase writes, CMS writes, or production publishing.
+
+## M72 Offline Article CMS Persistence Mapping Notes
+
+M72 adds frontend-only CMS persistence planning models:
+
+- `ArticleCmsPersistencePlan`
+- `ArticleCmsRole`
+- `ArticleCmsWriteContract`
+- `ArticleCmsReadContract`
+- `ArticleCmsReleaseAuditWriteContract`
+- `ArticleCmsMigrationChecklist`
+- `ArticleCmsFallbackPolicy`
+- `ArticleCmsPublishBlocker`
+
+Future persistence may map:
+
+- `ArticleCmsPersistencePlan.tables` -> reviewed migration checklist for article CMS tables
+- role contracts -> backend/editor RBAC policy docs
+- read contract -> public reviewed-only article reads and editor-only draft reads
+- release audit write contract -> `article_release_audit_events` and `article_release_attempts`
+- fallback policy -> bundled offline fallback behavior when CMS override is invalid
+
+M72 performs no Supabase writes, CMS writes, migrations, CMS fetches, or production publishing.
+
+## M73 CMS Migration Dry-run Mapping Notes
+
+M73 adds frontend-only migration review models:
+
+- `CmsMigrationReviewStatus`
+- `CmsMigrationTableReview`
+- `CmsMigrationRlsReview`
+- `CmsMigrationRollbackPlan`
+- `CmsMigrationSeedFixturePlan`
+- `CmsMigrationPublishSafetyGate`
+- `CmsMigrationBlocker`
+
+Future persistence may map:
+
+- table reviews -> migration review checklist entries
+- RLS reviews -> policy review checklist entries
+- rollback plan -> rollback script review
+- seed fixture plan -> staging seed plan
+- publish safety gate -> release gate and audit preconditions
+
+M73 keeps `noMigrationRun=true`, `noSupabaseWrite=true`, and `frontendCanWriteCmsRows=false`.
+
+## M74 CMS SQL Draft Artifact Mapping Notes
+
+M74 adds frontend-only SQL draft registry models:
+
+- `ArticleCmsSqlDraftExecutionStatus`
+- `ArticleCmsSqlDraftReviewStatus`
+- `ArticleCmsSqlDraftKind`
+- `ArticleCmsSqlDraftArtifact`
+- `ArticleCmsSqlDraftRegistry`
+
+The registry maps checked-in files under `supabase/drafts/cms/` to planning metadata:
+
+- execution status: `not_executed`
+- review status: `needs_review`
+- migration blocked: `true`
+- in migrations folder: `false`
+- frontend CMS write allowed: `false`
+- final publish allowed: `false`
+
+M74 performs no Supabase writes, migrations, CMS writes, CMS fetches, or production publishing.
+
+## M75 Weather API Mapping Notes
+
+M75 adds frontend weather adapter models:
+
+- `WeatherMode`
+- `WeatherModeStatus`
+- `WeatherCurrentConditions`
+- `WeatherLocationForecast`
+- `WeatherAdapterResult`
+
+Future persistence may map:
+
+- forecast snapshots -> `weather_cache`
+- provider status/fallback events -> `weather_api_events`
+- reviewed coarse user preferences -> `farm_weather_preferences`
+
+M75 performs no Supabase writes, backend writes, cloud sync, GPS request, or personal precise location storage. The default mode remains `local_fixture`.
+
+## M76 Weather Cache / Coarse Location Mapping Notes
+
+M76 adds frontend-only weather QA and cache models:
+
+- `WeatherCacheEntry`
+- `WeatherCacheStatus`
+- `WeatherCoarseLocation`
+- `WeatherLocationPrivacyStatus`
+- `WeatherQaFixture`
+- `WeatherRiskNote`
+
+Future persistence may map:
+
+- local weather cache status -> `weather_cache`
+- coarse location selection -> `weather_location_preferences`
+- fetch/fallback/stale events -> `weather_fetch_events`
+- reviewed general risk note templates -> `weather_risk_notes`
+
+M76 keeps all cache state local-only and performs no Supabase writes.
+## Future Weather Type Mapping From M77
+
+Planning only. No generated Supabase types were added.
+
+- `weather_user_preferences` maps to local `WeatherLocalPreference` only after consent/RLS review.
+- `weather_refresh_events` maps to future refresh audit records.
+- `weather_cache_health` maps to coarse cache freshness summaries.
+- `weather_source_audit` maps to source attribution and fallback status events.
+
+## Future Weather Risk Type Mapping From M78
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherAgriRiskAssessment` may map to `weather_risk_assessments` only after backend ownership, consent, and RLS review.
+- `WeatherAgriRiskRule` may map to `weather_risk_rule_versions` only after expert review and source metadata exist.
+- `WeatherAgriRiskBlockedAction` maps to policy checks that block product recommendation, label override, exact dose generation, and guaranteed outcomes.
+- Future `weather_risk_notifications` and `weather_risk_user_acknowledgements` require separate push/consent review.
+
+M78 keeps all weather risk output local-only and planning-only.
+
+## Future Weather Risk Review Mapping From M79
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherRiskRuleVersion` may map to `weather_risk_rule_versions`.
+- `WeatherRiskSourceMetadata` may map to `weather_risk_source_reviews`.
+- `WeatherRiskReviewerSignoff` may map to `weather_risk_expert_signoffs`.
+- `WeatherRiskExpertApprovalGate` may map to `weather_risk_release_gates`.
+- `WeatherRiskPrescriptiveBlocker` may map to `weather_risk_audit_events` for blocked attempts.
+
+All M79 mappings keep `prescriptiveAllowed: false`.
+
+## Future Weather Risk Governance Mapping From M80
+
+Planning only. No generated Supabase types were added.
+
+- `WeatherRiskReleaseAuditEvent` may map to `weather_risk_release_audit_events`.
+- `WeatherRiskReviewerHistory` may map to `weather_risk_reviewer_history`.
+- `WeatherRiskRuleDiffPreview` may map to `weather_risk_rule_diff_previews`.
+- `WeatherRiskHumanApprovalGate` may map to `weather_risk_release_reviews`.
+
+M80 keeps automation/CMS bypass blocked and keeps `finalPrescriptiveAllowed: false`.
+## M81 AI Text Proxy Future Mapping
+
+- `AITextRequest` -> future `ai_text_requests` backend-owned request envelope.
+- `AITextResponse` -> future backend response log metadata after safety filtering.
+- `AITextAuditPreview` -> future `ai_text_audit_logs`.
+- `AITextRateLimitPreview` -> future `ai_text_rate_limits`.
+- `AITextSafetyBoundary` / `AITextBlockedAction` -> future `ai_text_blocked_actions`.
+- release gate requirements -> future `ai_text_release_gates`.
+
+M81 is frontend planning/staging UI only. No Supabase writes, migrations, provider calls, or direct frontend CMS/AI publish paths are added.
+
+## M82 AI Text Endpoint Future Mapping
+
+- `AITextEndpointRequest` -> future `ai_text_endpoint_requests`.
+- `AITextEndpointResponse` -> future `ai_text_endpoint_responses`.
+- `AITextEndpointFailureMode` -> future `ai_text_endpoint_failures`.
+- `AITextEndpointTimeoutPlan` -> future `ai_text_timeout_events`.
+- Future backend provider usage metadata -> `ai_text_provider_usage`.
+
+M82 remains contract/dry-run only. No generated Supabase types, migrations, writes, provider calls, or Edge deployments are added.

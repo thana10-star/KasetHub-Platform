@@ -1,4 +1,10 @@
-export type PhoneAuthMode = 'local_mock' | 'supabase_disabled' | 'supabase_ready_mock' | 'production_disabled';
+export type PhoneAuthMode =
+  | 'local_mock'
+  | 'supabase_disabled'
+  | 'supabase_ready_mock'
+  | 'supabase_staging_disabled'
+  | 'supabase_staging_ready'
+  | 'production_disabled';
 
 export type PhoneAuthProvider = 'phone';
 

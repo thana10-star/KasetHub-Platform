@@ -1,6 +1,10 @@
 # KasetHub Platform
 
-KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, M20 added the content management and publishing foundation, M21 added crop price data source foundations, M22 added local crop watch plus price alert UX, M22.5 added the real owner YouTube channel link config, M23 added local/mock community moderation UX, M24 added a local/mock Admin Dashboard foundation, M25 added a Supabase staging setup checklist plus readiness audit, M26 added a Supabase staging connection dry-run boundary, M27 added the manual SQL staging execution guide plus verification pack, M28 added a Supabase Auth phone OTP staging plan, M29 added a Guest Sync Edge Function staging contract, M30 added an Internal MVP QA plus prototype snapshot, M31 added local-only image compression plus preflight quality checks, M32 added local/mock agriculture weather forecast UX, M33 added a local/mock farm area measurement planner, and M34 upgrades My Farm into a local-first farmer workspace without deploying endpoints, enabling cloud sync/auth, writing data, adding keys, uploading images, calling AI/weather/map APIs, requesting geolocation, using GPS, or making network calls by default.
+KasetHub Platform is a premium agriculture knowledge, community, and AI assistant prototype for Thailand. M01 established the scalable React foundation, M02 added mobile retention plus organic sharing foundations, M02.5 expanded social sharing, M03 turned YouTube into an API-ready agriculture channel hub, M04 added guest memory, M05 defined Supabase/auth-ready data models, M06 added a disabled-by-default Supabase environment/client scaffold, M07 prototyped farmer-friendly auth UX, M08 added local AI credits, M09 defined the AI backend proxy contract, M10 added plant image upload UX, M11 added a backend-shaped AI mock proxy fixture layer, M12 designed the Supabase Storage plus image-analysis schema foundation, M13 added a test-only AI proxy adapter, M14 added a local backend boundary prototype, M15 improved farmer accessibility plus visual QA polish, M16 added a Guest Memory sync proof of concept, M17 added a phone OTP auth boundary, M18 drafted Supabase SQL/RLS, M19 added LINE Login/account linking boundaries, M20 added the content management and publishing foundation, M21 added crop price data source foundations, M22 added local crop watch plus price alert UX, M22.5 added the real owner YouTube channel link config, M23 added local/mock community moderation UX, M24 added a local/mock Admin Dashboard foundation, M25 added a Supabase staging setup checklist plus readiness audit, M26 added a Supabase staging connection dry-run boundary, M27 added the manual SQL staging execution guide plus verification pack, M28 added a Supabase Auth phone OTP staging plan, M29 added a Guest Sync Edge Function staging contract, M30 added an Internal MVP QA plus prototype snapshot, M31 added local-only image compression plus preflight quality checks, M32 added local/mock agriculture weather forecast UX, M33 added local/mock farm area measurement planner, M34 upgrades My Farm into a local-first farmer workspace, M49 adds local agriculture calculators for spray mixing, fertilizer math, planting density, yield estimates, and cost estimates, M50 hardens those calculators with validation, deterministic QA fixtures, and local share summaries, M51 adds crop-specific planning profiles plus safety boundaries, M52 adds formal Vitest service coverage plus edge-case fixtures, M53 polishes calculator copy/share/save summaries plus future rewarded-ads strategy, M54 hardens calculator export/share QA with text templates and fallback coverage, M55 defines a local-only AI explanation boundary for calculator results, M56 reviews the future backend AI explanation architecture, M57 adds a disabled-by-default calculator AI backend adapter contract, M58 hardens adapter QA plus staging endpoint planning, M59 drafts the disabled-by-default `calculator-ai-explain` Edge Function contract, M60 adds a staging-only dry-run implementation plan, M61 prepares the first Supabase Phone Auth staging test plan, M62 adds a controlled staging Phone Auth boundary, M63 adds the ownership/RLS sync gate review, and M64 adds a local-only Guest Memory sync dry-run payload builder without deploying endpoints, enabling cloud sync/auth in production, writing data, adding keys, sending real SMS by default, uploading images, calling AI/weather/map APIs, requesting geolocation, using GPS, running real ads, or making network calls by default. M83 adds the local-first Farm Records and Farm Finance Ledger foundation, M84 upgrades `/app/farm-records` into a farmer-facing local UI with summary, filters, create forms, and safe local deletes, M85 adds local edit flows, a recent farm timeline, My Farm integration, and export/delete planning, M86 adds local JSON/CSV export readiness plus archive/close data-control guardrails, M87 adds guarded local JSON restore readiness plus a disabled sync consent gate, M88 adds restore recovery UX plus sync architecture review artifacts, M89 adds a non-writing sync consent UX prototype plus owner/RLS test plan, M90 adds local farm cost and break-even analytics, M91 adds local harvest/yield records plus cost-per-kg readiness, and M92 makes My Farm/Farm Records visible from Home with elder-friendly Thai quick actions while keeping no cloud sync, GPS, receipt upload, Supabase writes, or AI processing.
+
+M35-M44 continue the safe staging path with local notifications, real backend phase planning, the `staging/supabase` branch workflow, local env safety checks, manual Supabase project/SQL prep, the M41 real staging setup walkthrough, the successful M42 manual execution review, the M43 read-only public table probe, and the M44 public read/RLS review checkpoint. M49-M60 return to farmer utility by adding, hardening, planning, testing, polishing, QA-hardening, AI-boundary planning, backend architecture review, a no-network adapter contract, staging endpoint checklists, an Edge Function contract draft, and a no-fetch dry-run plan for crop-aware calculator foundations while keeping all storage and summaries local. M61-M64 return to the production-readiness roadmap with Phone Auth staging planning, a controlled staging auth boundary, an ownership/RLS sync gate, and a local-only Guest Memory sync dry-run payload builder. M65-M74 build offline article/CMS readiness, M75 adds the first flag-gated real Open-Meteo weather API integration, M76-M77 harden weather cache/source UX, M78 adds planning-only agriculture weather risk readiness, M79 adds expert-review readiness for those weather risk rules, M80 adds release audit/governance readiness, M81-M82 add controlled AI text proxy readiness without provider calls by default, M83 adds local farm records and ledger storage, M84 adds the local farmer-facing records UI, M85 adds local edit/timeline/My Farm integration, M86 adds local export/data-control readiness, M87 adds validated local restore plus sync consent gating, M88 adds restore recovery plus sync architecture review, M89 adds the non-writing sync consent UX prototype, M90 adds the local Farm Cost Dashboard, M91 adds local harvest/yield and cost-per-kg readiness, and M92 adds a Home-first Farm Hub entry. The project still must not commit real keys, expose service-role keys, enable production auth/cloud sync, run SQL automatically, write Supabase data, run real ads, call AI APIs, request GPS/geolocation, store personal precise location, or change production behavior.
+
+M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Records finance data. M91 adds local harvest records, yield summaries, cost per kg, income per kg, profit per kg, and recorded-harvest break-even metrics. M92 brings those retention features onto Home through a large My Farm card, simple local summary facts, and four Thai quick actions. These remain local estimates/navigation surfaces without AI, Supabase reads/writes, cloud sync, GPS, receipt upload, tax filing, or official accounting/loan claims.
 
 ## Tech Stack
 
@@ -9,8 +13,130 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - React Router
 - lucide-react icons
 - `@supabase/supabase-js` client scaffold behind feature flags
+- Vitest for pure service-level calculator tests
 - Typed mock data only
 - Frontend-safe sharing and localStorage saved article foundation
+
+## M75 Real Weather API Integration
+
+- Adds Open-Meteo forecast support in `src/services/weather/weather-adapter.ts`.
+- Adds `src/services/weather/weather-open-meteo-client.ts` with a timeout-safe public forecast client.
+- Keeps defaults offline-safe: `VITE_WEATHER_MODE=local_fixture` and `VITE_ENABLE_REAL_WEATHER_API=false`.
+- Uses configured default coordinates only; no GPS or browser geolocation.
+- Updates `/app/weather` with current weather, precipitation, wind, humidity, 5-7 day forecast, source/fetched time, API mode, and fallback state.
+- Adds docs: `docs/REAL_WEATHER_API_OPEN_METEO.md`, `docs/WEATHER_API_PRIVACY_AND_LOCATION_POLICY.md`, and `docs/WEATHER_API_FALLBACK_AND_CACHE_PLAN.md`.
+
+## M76 Weather QA Cache And Coarse Location
+
+- Adds local-only weather cache services and stale/fresh status.
+- Adds predefined province/city-center coarse locations for weather lookup.
+- Adds `/app/weather/qa` with mode, cache, fallback, location privacy, and failure fixture checks.
+- Updates `/app/weather` with coarse location selector, cache status, clear cache action, stale warning, and farmer risk notes.
+- Keeps no GPS, no browser geolocation, no exact farm coordinates, no Supabase writes, and no required network calls by default.
+
+## M78 Agriculture Weather Risk Readiness
+
+- Adds planning-only agriculture weather risk categories and deterministic local assessments.
+- Adds `/app/weather/risk-rules` with risk categories, threshold previews, blocked actions, disclaimers, and example assessments.
+- Updates `/app/weather` and `/app/weather/qa` with general weather risk cards and no-product/no-prescription proof.
+- Keeps risk guidance broad: no crop-specific prescription, no exact chemical/fertilizer dose, no sponsor/product recommendation, no GPS, and no Supabase writes.
+
+## M79 Weather Risk Expert Review Readiness
+
+- Adds local rule version metadata, source placeholders, pending reviewer sign-offs, and false-positive/false-negative examples.
+- Adds `/app/weather/risk-review` to show expert review gates and prescriptive blockers.
+- Keeps `prescriptiveAllowed=false` for every weather risk rule version.
+- Still no AI, GPS, Supabase writes, product/sponsor recommendation, or exact chemical/fertilizer prescription.
+
+## M80 Weather Risk Governance And Audit Readiness
+
+- Adds local release audit fixtures, reviewer change history, reviewed-source simulations, and diff previews.
+- Adds `/app/weather/risk-audit` to show blocked release attempts, stale review warnings, and human approval gate requirements.
+- Proves automation/CMS cannot make weather risk rules prescriptive without a distinct human release step.
+- Still no AI, GPS, Supabase writes, push notifications, product/sponsor recommendation, or exact chemical/fertilizer prescription.
+
+## M61 Phone Auth Staging Test Plan
+
+- Adds `src/services/auth/phone-auth-staging-review.ts` and typed review output for the first Supabase Phone Auth staging test.
+- Adds `/app/auth/phone-staging-test` with Thai checklist copy for Supabase dashboard setup, redirect URLs, SMS provider readiness, test phone numbers, cost/rate limits, ownership before sync, and rollback steps.
+- Updates Phone Auth, Auth Status, Sync Preview, Account Preview, Supabase Readiness, Admin, Next Phase, and QA screens with M61 staging status and no-real-OTP reminders.
+- Adds env placeholders only: `VITE_PHONE_AUTH_MODE=local_mock`, `VITE_ENABLE_PHONE_AUTH=false`, `VITE_SUPABASE_AUTH_REDIRECT_URL=`, and `VITE_AUTH_STAGING_LABEL=local`.
+- Vitest proves the default status is blocked, auth flags are off by default, cloud sync remains blocked until ownership exists, frontend service-role keys are rejected, and rollback steps exist.
+- Keeps M61 planning-only: no real OTP, no real SMS by default, no cloud sync, no Supabase writes, no service-role key, no Edge Function deployment, and no production auth behavior.
+
+## M62 Controlled Phone Auth Staging Test
+
+- Adds a controlled staging adapter in `src/services/auth/phone-auth-staging-adapter.ts`.
+- Adds ownership status in `src/services/auth/auth-ownership-status.ts`.
+- Allows Supabase Phone OTP only when local staging flags are explicit: `VITE_PHONE_AUTH_MODE=supabase_staging_ready`, `VITE_ENABLE_SUPABASE=true`, `VITE_ENABLE_AUTH=true`, `VITE_ENABLE_PHONE_AUTH=true`, valid staging anon config, and `VITE_ENABLE_CLOUD_SYNC=false`.
+- Updates `/app/auth/phone`, `/app/auth/phone-staging-test`, `/app/auth/status`, `/app/auth/sync-preview`, and `/app/account-preview` with staging status, redirect preview, SMS cost warnings, rollback reminders, and ownership status.
+- Keeps Guest Memory sync blocked: no profile/app table writes and no cloud upload in M62.
+
+## M53 Calculator Export/Share Polish
+
+- Structured calculator result summaries in `src/services/agri-calculators/calculator-result-summary-service.ts`
+- Local saved summaries route at `/app/calculators/saved-results`
+- Calculator pages support copy summary, share summary, save local summary, and LINE share via the existing share service
+- Rewarded ads strategy is planning-only: basic calculations remain free and no real AdMob, payment, sponsor, affiliate, backend write, Supabase write, AI call, PDF generation, or network call is added
+- Docs: `docs/CALCULATOR_EXPORT_SHARE_FOUNDATION.md` and `docs/CALCULATOR_REWARDED_ADS_STRATEGY.md`
+
+## M54 Calculator Export/Share QA
+
+- Text export templates in `src/services/agri-calculators/calculator-export-template-service.ts`
+- Export preview route at `/app/calculators/export-preview`
+- Saved results now support filtering, compact/expanded view, LINE-friendly preview, quick copy, and delete confirmation
+- Vitest covers template formatting, empty summary protection, clipboard fallback, unsupported native share, truncation, and LINE-friendly output
+- Docs: `docs/CALCULATOR_EXPORT_TEMPLATE_GUIDE.md` and `docs/CALCULATOR_SHARE_QA_NOTES.md`
+
+## M55 Calculator AI Explanation Boundary
+
+- Adds AI explanation boundary types, policy, fixtures, and a planner in `src/services/agri-calculators`
+- Adds `/app/calculators/ai-explanation-preview` for local-only explanation plan preview
+- Saved results, calculator hub, QA, Admin, and safety routes link to the preview
+- Vitest covers formula explanation allowance, sponsor/chemical/result-mutation blocking, result preservation, spray/fertilizer disclaimers, and `noRealAICall`
+- Docs: `docs/CALCULATOR_AI_EXPLANATION_BOUNDARY.md` and `docs/CALCULATOR_AI_PROMPT_SAFETY_POLICY.md`
+
+## M56 Real Backend AI Explanation Architecture Review
+
+- Adds backend AI execution, snapshot, policy version, safety decision, rate-limit, abuse, audit, and escalation planning types
+- Adds `/app/calculators/ai-architecture` for the no-real-AI backend review route
+- Defines the future flow: Calculator -> Snapshot Lock -> Backend Policy Check -> Prompt Builder -> AI Explanation -> Safety Filter -> Final Display
+- Vitest covers snapshot immutability, mutation blocking, sponsor rejection, invalid request rejection, policy selection, oversized payload, and invalid crop profile handling
+- Docs: `docs/CALCULATOR_AI_BACKEND_ARCHITECTURE.md`, `docs/CALCULATOR_AI_POLICY_VERSIONING_PLAN.md`, and `docs/CALCULATOR_AI_AUDIT_AND_RATE_LIMIT_PLAN.md`
+
+## M57 Calculator AI Backend Adapter Contract
+
+- Adds disabled-by-default calculator AI adapter types and service contract
+- Adds local fixture explanations from locked snapshots with `noRealAICall: true`
+- Adds `/app/calculators/ai-adapter-status`
+- Adds feature flags: `VITE_CALCULATOR_AI_MODE=local_fixture`, `VITE_ENABLE_CALCULATOR_AI_BACKEND=false`, and `VITE_ENABLE_CALCULATOR_AI_NETWORK=false`
+- Vitest proves local fixture mode has no real AI call, disabled modes do not call a backend client, and `backend_test_ready` refuses client execution unless both explicit flags are true
+- Docs: `docs/CALCULATOR_AI_BACKEND_ADAPTER_CONTRACT.md` and `docs/CALCULATOR_AI_STAGING_FLAGS_PLAN.md`
+
+## M58 Calculator AI Adapter QA And Endpoint Planning
+
+- Adds deterministic adapter QA fixtures for local fixture, disabled, network-disabled, blocked backend-test, invalid, oversized, sponsor, lock-hash mismatch, policy mismatch, and invalid-crop states
+- Adds `/app/calculators/ai-endpoint-plan` for staging endpoint readiness, production blockers, backend-only prompt execution, lock-hash validation, policy checks, audit, rate limits, and abuse prevention
+- Upgrades `/app/calculators/ai-adapter-status` and `/app/calculators/qa` with adapter state matrix, fixture-vs-disabled comparison, blocked reasons, no-network guarantee, and locked hash preservation
+- Vitest proves disabled modes stay disabled, invalid and oversized requests are rejected, policy/hash mismatches block, sponsor insertion blocks, and no network path is active by default
+- Docs: `docs/CALCULATOR_AI_STAGING_ENDPOINT_CHECKLIST.md` and `docs/CALCULATOR_AI_NETWORK_BOUNDARY_RULES.md`
+
+## M59 Calculator AI Edge Function Contract Draft
+
+- Adds typed `calculator-ai-explain` Edge Function request/response contract services
+- Adds `/app/calculators/ai-edge-contract`
+- Defines server-only provider key and service-role boundaries, lock-hash verification, policy checks, audit events, rate-limit hooks, timeout behavior, and failure modes
+- Vitest proves the contract excludes frontend keys, does not call provider/network/Supabase, blocks lock-hash and policy mismatches, and keeps deterministic results immutable
+- Docs: `docs/CALCULATOR_AI_EDGE_FUNCTION_CONTRACT.md` and `docs/CALCULATOR_AI_EDGE_FUNCTION_SECURITY_PLAN.md`
+
+## M60 Calculator AI Edge Dry-run Plan
+
+- Adds local dry-run readiness types and planner for the future `calculator-ai-explain` Edge Function
+- Adds `/app/calculators/ai-edge-dry-run`
+- Adds env placeholders: `VITE_CALCULATOR_AI_EDGE_URL`, `VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN`, and `VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK`
+- Shows masked endpoint status, secret checklist, validation fixtures, audit/rate-limit dry-run preview, production blockers, and no-fetch proof
+- Vitest proves default builds cannot call the endpoint, URL alone is not enough, network flag alone is not enough, dry-run+network still does not fetch in M60, secrets are not accepted in frontend config, and validation fixtures classify expected failures
+- Docs: `docs/CALCULATOR_AI_EDGE_DRY_RUN_PLAN.md`, `docs/CALCULATOR_AI_EDGE_SECRET_CHECKLIST.md`, and `docs/CALCULATOR_AI_EDGE_DRY_RUN_VALIDATION_CASES.md`
 
 ## M02 Features
 
@@ -241,7 +367,7 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - Adds `/app/supabase-connection` with current flags, env detection, anon-key checks, no-write guarantees, warnings, and manual staging checklist
 - Updates `/app/supabase-readiness`, `/app/admin`, `/app/account-preview`, and `/app/qa` with connection dry-run access
 - Adds `docs/SUPABASE_STAGING_CONNECTION_DRY_RUN.md`
-- Keeps network off by default; the optional future public-read probe is guarded by Supabase flag, network-check flag, valid URL, and valid anon key
+- Keeps network off by default; the optional public-read probe is guarded by Supabase flag, network-check flag, valid URL, and valid anon key
 
 ## M27 Supabase SQL Staging Execution Guide
 
@@ -310,16 +436,54 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - Links My Farm from Analyze, Farm Area, Weather, Crop Watch, Profile, and QA
 - Keeps My Farm local-only: no real backend, Supabase writes, auth requirement, AI/weather API, GPS/map, sync, destructive clear action, or network calls
 
+## M49 Agriculture Calculator Core Foundation
+
+- Adds typed agriculture calculator utilities in `src/services/agri-calculators`
+- Adds `useAgriCalculators()` for local recent calculations, favorite calculators, and last inputs
+- Adds `/app/calculators` plus spray mix, fertilizer, plant spacing, yield estimate, and cost estimate routes
+- Links calculator access from Home, My Farm, Profile, QA, and Admin
+- Uses Thai land unit rules: 1 ไร่ = 1,600 ตร.ม., 1 งาน = 400 ตร.ม., 1 ตารางวา = 4 ตร.ม.
+- Keeps safety copy visible: preliminary calculation only, no guarantee, no agronomist replacement, read real labels before spray use
+- Keeps calculators local-only: no backend writes, Supabase writes, AI calls, geolocation/map, cloud sync, payment, sponsor routing, or network calls
+
+## M50 Agriculture Calculator QA Hardening
+
+- Adds deterministic calculator fixtures and validation helpers in `src/services/agri-calculators`
+- Adds `/app/calculators/qa` for expected vs actual, pass/warn/fail status, and calculator limitations
+- Hardens empty, zero, negative, non-number, missing unit, high-value, unsafe concentration, area warning, and divide-by-zero handling
+- Adds local-only copy/share result summaries with `สรุปผลคำนวณเบื้องต้น` and `ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญก่อนใช้งานจริง`
+- Adds clearer warning states, larger result cards, and `คำนวณใหม่` reset actions on calculator pages
+- Keeps share/export foundation local-only: no files/PDFs, backend saves, Supabase writes, AI calls, sponsor routing, or network calls
+
+## M51 Crop-specific Calculator Expansion Planning
+
+- Adds crop profile fixtures for ข้าว, มันสำปะหลัง, อ้อย, ข้าวโพด, ทุเรียน, ลำไย, ยางพารา, and ผักผสม
+- Adds crop selectors and `ใช้ตัวอย่างของพืชนี้` on fertilizer, plant spacing, yield estimate, and cost calculators
+- Adds `/app/calculators/safety` for fertilizer/chemical, AI, sponsor, and recommendation boundaries
+- Adds a static formal unit-test readiness plan for calculator services and crop profile loading
+- Keeps crop examples as starter form values only: no exact crop fertilizer dose, pesticide/chemical recommendation, OCR, AI calls, sponsor routing, or backend writes
+
+## M52 Formal Calculator Service Tests
+
+- Adds Vitest and `npm run test` for pure calculator service tests
+- Adds `src/services/agri-calculators/agri-calculator-service.test.ts` covering spray mix, Thai land conversion, plant spacing, fertilizer helper math, yield, cost, crop profile loading, and validation boundaries
+- Adds `src/services/agri-calculators/agri-calculator-edge-fixtures.ts` for extreme concentration, tiny/huge land, invalid crop key, impossible spacing, unrealistic yield, negative cost, invalid units, and overflow-ish costs
+- Updates `/app/calculators/qa` with formal coverage summary, edge-case examples, validation pass/warn/fail, and regression-safe notes
+- Keeps formulas deterministic and keeps AI/recommendation layers separate from core calculator output
+
 ## Routes
 
 - `/` - public landing and app preview
-- `/app` - main mobile app home
+- `/app` - main mobile app home with M92 Home-first Farm Hub entry, local Farm Records summary, and elder-friendly Thai quick actions
 - `/app/admin` - local/mock admin dashboard preview
 - `/app/mvp-snapshot` - internal MVP route coverage and readiness snapshot
 - `/app/next-phase` - M36 real backend phase decision and staging branch plan
 - `/app/supabase-readiness` - local Supabase staging readiness checklist
 - `/app/supabase-connection` - local Supabase staging connection dry-run boundary
+- `/app/supabase-readonly-probe` - M43 read-only public table probe for staging
+- `/app/supabase-setup-guide` - M41 real Supabase staging setup walkthrough and local progress
 - `/app/supabase-sql-checklist` - manual Supabase SQL/RLS staging execution checklist
+- `/app/env-safety` - local staging env safety check
 - `/app/youtube` - YouTube agriculture video hub
 - `/app/youtube/:videoId` - YouTube video detail foundation
 - `/app/ai` - AI agriculture assistant mock screen
@@ -327,8 +491,25 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - `/app/ai-credits` - AI credit and rewarded unlock dashboard
 - `/app/qa` - farmer accessibility, visual QA, and M30 route coverage checklist
 - `/app/weather` - agriculture weather forecast mock and crop-work recommendations
+- `/app/calculators` - agriculture calculator hub
+- `/app/calculators/safety` - calculator safety and recommendation boundaries
+- `/app/calculators/qa` - M50 agriculture calculator QA fixture checks
+- `/app/calculators/saved-results` - local-only saved calculator result summaries
+- `/app/calculators/export-preview` - text export template preview
+- `/app/calculators/ai-explanation-preview` - local-only AI explanation boundary preview
+- `/app/calculators/ai-architecture` - backend AI explanation architecture review
+- `/app/calculators/ai-adapter-status` - disabled-by-default calculator AI adapter status
+- `/app/calculators/ai-endpoint-plan` - calculator AI staging endpoint readiness checklist
+- `/app/calculators/ai-edge-contract` - calculator AI Edge Function contract draft
+- `/app/calculators/ai-edge-dry-run` - calculator AI Edge dry-run plan
+- `/app/calculators/spray-mix` - spray/chemical mixing calculator
+- `/app/calculators/plant-spacing` - plant spacing and seedling count calculator
+- `/app/calculators/fertilizer` - fertilizer NPK helper foundation
+- `/app/calculators/yield-estimate` - yield estimate foundation
+- `/app/calculators/cost` - farm cost estimate foundation
 - `/app/farm-area` - local farm area calculator and saved plot estimates
 - `/app/farm-area-guide` - manual farm area measurement guide
+- `/app/farm-records` - M91/M92 local farm records, activity/ledger/harvest flow, JSON/CSV export, guarded JSON restore, restore risk review, disabled sync consent prototype, farm cost dashboard, cost-per-kg/yield metrics, break-even estimate, archive/close guardrails, recent timeline UI, and Home-first entry links
 - `/app/analyze` - plant image upload and disease analysis mock workflow
 - `/app/analysis-history` - local plant image analysis history
 - `/app/image-privacy` - image privacy and future upload consent explanation
@@ -345,6 +526,7 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - `/app/notifications` - notifications
 - `/app/profile` - user profile
 - `/app/account-preview` - future account backup and sync preview
+- `/app/guest-sync-dry-run` - M64 local-only Guest Memory payload preview
 - `/app/guest-sync-edge` - Guest Sync Edge Function staging contract and checklist
 - `/app/guest-sync-status` - Guest Memory sync adapter and backend readiness status
 - `/app/auth` - farmer-friendly account creation prototype
@@ -352,6 +534,7 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 - `/app/auth/linking` - Phone + LINE account linking rules preview
 - `/app/auth/phone` - phone OTP mock flow
 - `/app/auth/phone-staging` - Supabase Auth phone OTP staging setup checklist
+- `/app/auth/phone-staging-test` - M61 first Phone Auth staging test review and rollback checklist
 - `/app/auth/line` - LINE Login local mock boundary
 - `/app/auth/google` - Google Login mock explanation
 - `/app/auth/sync-preview` - Guest Memory sync consent and dry-run payload preview
@@ -382,6 +565,12 @@ VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false
 VITE_AI_PROXY_MODE=local_fixture
 VITE_ENABLE_AI_BACKEND_PROXY=false
 VITE_ENABLE_LOCAL_AI_PROXY_HANDLER=false
+VITE_CALCULATOR_AI_MODE=local_fixture
+VITE_ENABLE_CALCULATOR_AI_BACKEND=false
+VITE_ENABLE_CALCULATOR_AI_NETWORK=false
+VITE_CALCULATOR_AI_EDGE_URL=
+VITE_ENABLE_CALCULATOR_AI_EDGE_DRY_RUN=false
+VITE_ENABLE_CALCULATOR_AI_EDGE_NETWORK=false
 VITE_GUEST_SYNC_MODE=local_fixture
 VITE_ENABLE_GUEST_SYNC_BACKEND=false
 VITE_ENABLE_GUEST_SYNC_EDGE=false
@@ -401,6 +590,7 @@ VITE_ENABLE_LINE_AUTH_LOCAL_MOCK=true
 
 ```bash
 npm run lint
+npm run test
 npm run build
 ```
 
@@ -433,9 +623,25 @@ M21-M22 price and watch features are local-only. They do not call OAE, DIT, ต�
 
 M33 farm area features are local/mock only. Saved plot estimates stay in `kasethub.farmArea.v1`. The app does not request GPS, geolocation, map tiles, map APIs, backend writes, Supabase writes, or network calls. Every area result must keep the disclaimer: “เป็นการคำนวณประมาณการ ไม่ใช่การรังวัดที่ดินอย่างเป็นทางการ”.
 
+## Agriculture Calculator Boundary
+
+M49-M60 calculator features are local-only. Recent calculations, favorites, and last inputs stay in `kasethub.agriCalculators.v1`; saved result summaries stay in `kasethub.calculatorResultSummaries.v1`. Crop profiles are static planning fixtures. Local share summaries, AI explanation plans, backend AI architecture reviews, adapter QA fixtures, endpoint readiness plans, Edge Function contract previews, and Edge dry-run plans are generated on device and are not uploaded. The app does not write backend data, write Supabase data, call AI APIs, request geolocation, load maps, sync to cloud, take payments, route sponsor/affiliate offers, generate files/PDFs, or make network calls by default. Calculator results and crop examples are preliminary arithmetic/planning aids, not guarantees and not replacements for product labels, soil tests, agronomists, official surveys, or financial advice. Formal tests protect deterministic math, snapshot locks, adapter disabled states, no-network boundaries, Edge contract/dry-run boundaries, and AI boundaries from accidental drift before any future recommendation layer is introduced.
+
+M61 Phone Auth staging planning is review-only. `/app/auth/phone-staging-test` shows the checklist for Supabase dashboard setup, redirect URLs, SMS provider readiness, test phone numbers, OTP cost/rate limits, ownership before Guest Memory sync, and rollback steps. The app still does not send OTP, trigger SMS, enable production auth, enable cloud sync, write Supabase data, deploy Edge Functions, add service-role keys, or commit real staging secrets.
+
 ## My Farm Hub Boundary
 
 M34 My Farm aggregates existing local data only. It reads Guest Memory, `kasethub.farmArea.v1`, `kasethub.cropWatch.v1`, and weather fixtures, then displays a dashboard and timeline. It does not create real accounts, sync to cloud, call AI/weather/map APIs, upload images, write Supabase data, or add destructive data clearing.
+
+## Farm Records And Ledger Boundary
+
+M83 farm records and finance ledger data stay local under `kasethub.farmRecords.v1`. M84 reads and writes that same local state through farmer-facing forms for plots, crop cycles, activities, and finance entries. M85 adds local edit flows for activity and finance entries, recent timeline visibility, My Farm entry/status integration, and planning-only export/delete documentation. M86 adds local-device JSON backup preview/download, finance CSV preview/download, export warnings, farm plot archive UX, and crop-cycle close/cancel UX. M87 adds JSON backup parse/validate/preview/restore helpers, a strong local restore confirmation phrase, and a disabled sync consent gate checklist. M88 adds restore risk review, pre-restore local snapshot/download, a single latest restore snapshot key `kasethub.farmRecords.restoreSnapshot.v1`, and sync architecture/checklist documentation. M89 adds local-only sync consent prototype state under `kasethub.farmRecords.syncConsentPrototype.v1`; it is not legal consent and cannot enable cloud sync. M91 adds local `farmHarvestRecords` for harvested quantity/yield and cost-per-kg readiness while preserving the same Farm Records local storage key. Farm plots use coarse text location only; no GPS coordinates, map pins, precise location, geolocation request, or map API is added. Activity and receipt images are metadata placeholders only, not uploads or raw image/base64 storage, and `data:` image payloads are stripped from JSON backup, restore state, and pre-restore snapshots. Farm finance and harvest/yield entries can reveal income, costs, profit, production volume, and business behavior, so future cloud sync requires explicit opt-in consent, owner-only RLS, export/delete tools, audit/idempotency, retention policy, and a separate AI consent boundary before any AI analysis.
+
+M90 adds local deterministic cost analytics, category breakdowns, My Farm cost summary fields, and break-even estimates derived only from local Farm Finance Ledger entries. These outputs are planning aids only, not official accounting, tax, loan, or legal advice, and they do not call AI, Supabase, cloud sync, GPS/geolocation, or receipt upload services.
+
+M91 adds local harvest/yield modeling, demo harvest data, Harvest & Yield UI, cost-per-kg/profit-per-kg/yield-per-rai analytics, and export/restore/snapshot compatibility for the new slice. These outputs are still local estimates from user-entered records and are not official accounting, tax, loan, legal, yield guarantee, or financial advice.
+
+M92 adds Home-first discovery for My Farm and Farm Records. The Home Farm Hub card reads local Farm Records summaries only, links to My Farm, Farm Records, cost/yield views, and weather, and does not add backend calls, sync, GPS, or AI processing.
 
 ## Notification Center Boundary
 
@@ -447,6 +653,144 @@ M36 adds `/app/next-phase` and static phase-planning services for deciding the s
 
 M36 is planning only. It does not connect Supabase, enable auth, run migrations, call AI APIs, add API keys, add network calls, write backend data, or add production behavior. `main` remains the stable prototype; real integration experiments should use `staging/supabase`, `staging/ai-proxy`, and `staging/mobile`.
 
+## M38 Supabase Staging Branch Setup
+
+M38 creates the safe branch workflow for Supabase staging experiments on `staging/supabase`. `main` remains the stable prototype. The branch setup adds `docs/STAGING_SUPABASE_BRANCH_GUIDE.md`, `docs/STAGING_SUPABASE_SAFETY_CHECKLIST.md`, and static branch-status copy on `/app/next-phase`, `/app/supabase-readiness`, and `/app/admin`.
+
+M38 does not connect Supabase, add real keys, create `.env.local`, run SQL migrations, enable auth, enable cloud sync, write backend data, or change production behavior. The next recommended milestone is M39 Supabase Staging Env Local Setup.
+
+## M39 Supabase Staging Env Local Setup
+
+M39 adds `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`, a local env safety checker, and `/app/env-safety`. The route checks staging env presence, placeholder values, anon-key format-ish shape, service-role-like key risk, and dangerous feature flags without displaying full secret values and without making network calls.
+
+Safe M39 staging readiness uses only local `.env.local` values:
+
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false
+VITE_ENABLE_AUTH=false
+VITE_ENABLE_CLOUD_SYNC=false
+```
+
+`.env.local`, `.env.production`, and `.env.staging` remain ignored. Do not commit real keys. Do not use service-role keys in frontend env. The app must still run with no `.env.local`.
+
+## M40 Supabase Project Creation And SQL Run Prep
+
+M40 adds manual setup docs for creating the real staging project and preparing SQL/RLS execution:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+The recommended staging project name is `kasethub-staging`. Create it manually in Supabase, choose a region close to Thailand/Singapore if available, and save only the Project URL plus anon key locally. Never copy the service-role key into frontend env.
+
+The app surfaces M40 guidance on `/app/supabase-sql-checklist`, `/app/supabase-readiness`, `/app/supabase-connection`, `/app/env-safety`, and `/app/admin`. M40 still does not connect Supabase, run SQL, add real keys, commit `.env.local`, enable auth, enable cloud sync, or write backend data.
+
+## M41 Real Supabase Staging Setup Walkthrough
+
+M41 adds the first full walkthrough for manually creating the real staging project and running existing SQL/RLS drafts safely:
+
+- `docs/M41_REAL_SUPABASE_STAGING_SETUP_WALKTHROUGH.md`
+- `docs/M41_SQL_EXECUTION_SCREENSHOT_CHECKLIST.md`
+- `/app/supabase-setup-guide`
+- `src/services/supabase/supabase-setup-progress.ts`
+
+The local setup progress tracks project creation, env setup, schema SQL, RLS SQL, table verification, and staging safety verification in `localStorage` only. M41 still does not commit `.env.local`, expose service-role keys, run SQL automatically, enable auth, enable cloud sync, enable uploads, enable AI proxy, or write backend data.
+
+## M63 Ownership/RLS Sync Gate
+
+M63 adds `/app/ownership-rls-gate`, a review gate before any Guest Memory upload. It checks real Supabase Auth session evidence, rejects mock-only ownership, lists consent/idempotency/audit requirements, documents owner-scoped RLS expectations, and keeps `syncAllowed=false`.
+
+M63 still does not upload Guest Memory, enable cloud sync, write Supabase app tables, deploy Edge Functions, add service-role keys to frontend, enable production auth, or execute SQL automatically.
+
+## M64 Guest Memory Sync Dry-run Payload Builder
+
+M64 adds `/app/guest-sync-dry-run`, a local-only payload preview before any Guest Memory upload. It groups saved items, farm records, recent AI questions, crop watches, calculator saved result summaries, followed topics, and likes.
+
+The route and service preview consent, idempotency, audit events, conflicts, owner scope, blockers, and privacy filters. It excludes raw photos, base64 image blobs, OTP/session tokens, service-role keys, provider keys, and private env-like values. `uploadAllowed` remains false, and there are still no Supabase app-table writes or cloud sync.
+
+## M65 Offline Agriculture Article Library
+
+M65 adds an offline-first agriculture article library at `/app/articles/offline` with detail routes such as `/app/articles/offline/soil-types-before-planting`.
+
+The library bundles Thai starter outlines for soil, water, fertilizer, rice, sugarcane, cassava, and farm finance. It includes planned local image paths, Thai alt text, safety notes, related calculator/app routes, and future CMS keys for Supabase compatibility.
+
+M65 does not add CMS writes, Supabase writes, AI article generation, YouTube import, sponsor/affiliate injection, external image URLs, or network calls.
+
+## M66 Offline Article Content QA And CMS Contract
+
+M66 adds `/app/articles/offline-qa` plus local QA and CMS override services for the offline agriculture article library.
+
+The QA layer checks article metadata, disclaimers, image plans, version fixtures, and CMS compatibility. CMS overrides are blocked if they remove required disclaimers, use external image URLs in offline mode, miss required freshness dates for finance/government/seasonal content, or fail the future CMS key/version checks.
+
+M66 remains local-only: no Supabase writes, CMS writes, AI article generation, real image generation, external image loading, sponsor injection, or network calls.
+
+## M67 Offline Article Full-content Readiness
+
+M67 adds `/app/articles/full-content-readiness` as a local review route for future full offline agriculture articles.
+
+It adds pilot full-content templates, source placeholders, review metadata placeholders, image requirements, expert escalation notes, and a publish gate that keeps all pilot articles blocked from `ready_for_full_publish`.
+
+M67 does not add official full article bodies, Supabase writes, CMS writes, AI article generation, real image generation, external images, sponsor/affiliate injection, or hardcoded official finance/loan/government facts.
+
+## M68 Offline Article Pilot Draft Workflow
+
+M68 adds `/app/articles/pilot-draft-review` and richer local-only draft content for `soil-types-before-planting` (`ดิน 6 ชนิด รู้จักก่อนปลูก`).
+
+The draft includes review/source placeholders, image needs, safety disclaimers, and publish blockers. It is still not a final official article, and no Supabase/CMS writes, AI article generation, external images, or sponsor/affiliate injection are added.
+
+## M69 Pilot Article Editorial QA
+
+M69 adds `/app/articles/editorial-review` for local-only editorial sign-off QA.
+
+It defines pending reviewer sign-offs, source metadata placeholders, image review fixtures, final publish blockers, and a second low-risk `draft_template` pilot for `soil-ph-reading-yourself`. No article is marked final publish.
+
+## M70 Editorial Evidence And Human Release Gate
+
+M70 adds `/app/articles/editorial-evidence` for local-only evidence packet review.
+
+It proves that even simulated-complete source, reviewer, and image metadata cannot publish an article automatically. A separate human release approval, reviewer, timestamp, and note remain required. No final article publish is enabled.
+
+## M71 Offline Article Release Audit Readiness
+
+M71 adds `/app/articles/release-audit` for local-only release audit review.
+
+It shows blocked release attempts, reviewer change history, release diff previews, disclaimer/source/image change tracking, and automation bypass blocks. CMS override or automation alone still cannot publish an article. No final article publish, Supabase write, CMS write, AI generation, external image loading, or sponsor injection is enabled.
+
+## M72 Offline Article CMS Persistence Contract
+
+M72 adds `/app/articles/cms-persistence-plan` for local-only future CMS persistence planning.
+
+It defines future article CMS tables, editor/reviewer/release roles, read/write contracts, release audit write requirements, offline fallback policy, and migration rollback checklist. Viewer cannot edit, automation cannot publish, admin cannot silently bypass the human release gate, and no database writes or migrations are run.
+
+## M73 CMS Migration Dry-run Review Pack
+
+M73 adds `/app/articles/cms-migration-review` for local-only CMS migration dry-run review.
+
+It plans table DDL review, RLS expectations, rollback steps, seed fixtures, and publish safety gates for the future article CMS migration. Frontend CMS writes, public writes, automation final publish, and incomplete content publish remain blocked. No migrations, Supabase writes, CMS writes, image uploads, or production article publishing are enabled.
+
+## M74 CMS SQL Draft Artifacts
+
+M74 adds `/app/articles/cms-sql-drafts` plus planning-only SQL artifacts under `supabase/drafts/cms/`.
+
+The draft files cover future article CMS schema, RLS policy planning, seed fixture planning, and rollback planning. They are marked `PLANNING ONLY`, `DO NOT RUN`, `DO NOT DEPLOY`, and `REVIEW REQUIRED`, are not in `supabase/migrations`, and are not executed by the app.
+
+Frontend CMS writes and final article publish remain blocked. No SQL execution, migrations, Supabase writes, backend CMS writes, image uploads, AI article generation, sponsor injection, or production publishing are enabled.
+
+## M43 Supabase Read-only Probe
+
+M43 adds `/app/supabase-readonly-probe` and `src/services/supabase/supabase-readonly-probe.ts` for a guarded public table check against `kasethub-staging`.
+
+The probe runs only when local staging env has `VITE_ENABLE_SUPABASE=true` and `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=true`. It checks only `articles`, `videos`, and `crop_price_snapshots` with read-only count probes. Empty tables are treated as OK. Auth and cloud sync must remain false, no service-role key is allowed, and no insert/update/delete/upsert/upload/AI/API/backend write is added.
+
+## M44 Supabase Public Read And RLS Review
+
+M44 adds a pending review checkpoint for the real M43 probe results and RLS/no-public-write evidence. It asks the operator to run `/app/supabase-readonly-probe` locally against `kasethub-staging`, record the results for `articles`, `videos`, and `crop_price_snapshots`, and confirm that user-owned/private tables remain protected.
+
+M44 is review-only until evidence is supplied. It does not commit `.env.local`, add real keys, use service-role credentials, enable auth, enable cloud sync, write Supabase data, run SQL automatically, upload files, call Edge Functions, call AI APIs, or change production behavior.
+
 ## Community Moderation Boundary
 
 M23 moderation features are local/mock only. Reports and hidden posts stay on the current device. There is no real admin queue, no Supabase write, no moderation API, no AI moderation provider, and no network request. User-facing copy must keep “รายงานนี้ยังเป็นข้อมูลในเครื่องเท่านั้น”, “ยังไม่มีผู้ดูแลระบบจริงในเวอร์ชันนี้”, and “คำแนะนำเรื่องสารเคมี/โรคพืชควรตรวจสอบกับผู้เชี่ยวชาญ” visible near risky actions.
@@ -457,6 +801,111 @@ M24 admin features are local/mock only. “หน้านี้เป็นต�
 
 ## Supabase Staging Readiness Boundary
 
-M25 readiness features are audit/checklist only. `/app/supabase-readiness` must keep “ยังไม่ได้เชื่อมต่อ Supabase จริง”, “ห้ามใส่ service-role key ใน frontend”, and “ต้องทดสอบบน staging ก่อน production” visible. M26 adds `/app/supabase-connection` for anon-key/client-safe dry-run checks. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging setup planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Edge Function contract. Network probing remains disabled by default through `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`. The app must not connect to Supabase by default, run migrations, deploy/call Edge Functions, add real ENV keys, enable auth, send phone OTP, enable cloud sync, write backend data, or upload files.
+M61 adds `/app/auth/phone-staging-test` for the first real Phone Auth staging test review. It keeps OTP/SMS/cloud sync off until staging flags, redirect URLs, SMS provider setup, test phone numbers, ownership/RLS, and rollback steps are explicitly checked.
 
-All videos, posts, crop prices, crop watches, price alerts, weather forecasts, weather alerts, farm area calculations, saved farm plot estimates, My Farm hub summaries, My Farm timeline items, notification center items, notification preferences, community moderation reports, hidden post records, moderator queue previews, admin dashboard summaries, admin tasks, admin risk previews, audit log previews, Supabase readiness scores, Supabase connection dry-run status, Supabase SQL checklist output, phone OTP staging checklist output, Guest Sync Edge readiness output, staging checklist items, phase decision plans, articles, article bodies, content admin previews, YouTube import plans, offline cache previews, notifications, AI credit state, AI routing plans, AI proxy adapter status, AI mock proxy responses, local backend boundary responses, Guest Sync dry-run responses, phone auth mock sessions, LINE auth mock sessions, account-linking recommendations, local image previews, image compression previews, image preflight readiness scores, storage plans, image-analysis job previews, farm history, saved article state, saved video state, guest memory state, sync planning output, share state, auth screens, QA checks, SQL drafts, RLS drafts, and disease analysis outputs are demo/sample or planning data. The app does not connect to YouTube Data API, AI providers, real auth, Supabase writes or storage, Supabase Edge Functions, real SMS OTP, LINE Login, LINE Messaging API, Google Login, Facebook SDK, analytics backend, real ads, payment, PWA service worker, Cache API, production CMS, real price APIs, real weather APIs, real GPS, map APIs, geolocation, official land survey services, push notifications, LINE Messaging API delivery, moderation APIs, AI moderation providers, real admin auth, upload services, or marketplace services in M36.
+M25 readiness features are audit/checklist only. `/app/supabase-readiness` must keep “ยังไม่ได้เชื่อมต่อ Supabase จริง”, “ห้ามใส่ service-role key ใน frontend”, and “ต้องทดสอบบน staging ก่อน production” visible. M26 adds `/app/supabase-connection` for anon-key/client-safe dry-run checks. M27 adds `/app/supabase-sql-checklist` for manual SQL/RLS execution planning. M28 adds `/app/auth/phone-staging` for Supabase Auth phone OTP staging setup planning. M29 adds `/app/guest-sync-edge` for the future `guest-memory-sync` Edge Function contract. M41 adds `/app/supabase-setup-guide` for local-only manual setup progress. M43 adds `/app/supabase-readonly-probe` for explicit-flag public table reads only. M44 adds pending public read/RLS review status surfaces before auth or sync. Network probing remains disabled by default through `VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK=false`. The app must not connect to Supabase by default, run migrations automatically, deploy/call Edge Functions, add real ENV keys to the repo, enable auth, send phone OTP, enable cloud sync, write backend data, or upload files.
+
+All videos, posts, crop prices, crop watches, price alerts, weather forecasts, weather alerts, farm area calculations, saved farm plot estimates, farm records, farm finance ledger entries, My Farm hub summaries, My Farm timeline items, notification center items, notification preferences, community moderation reports, hidden post records, moderator queue previews, admin dashboard summaries, admin tasks, admin risk previews, audit log previews, Supabase readiness scores, Supabase connection dry-run status, Supabase setup progress, Supabase SQL checklist output, phone OTP staging checklist output, Guest Sync Edge readiness output, staging checklist items, phase decision plans, articles, article bodies, content admin previews, YouTube import plans, offline cache previews, notifications, AI credit state, AI routing plans, AI proxy adapter status, AI mock proxy responses, local backend boundary responses, Guest Sync dry-run responses, phone auth mock sessions, LINE auth mock sessions, account-linking recommendations, local image previews, image compression previews, image preflight readiness scores, storage plans, image-analysis job previews, farm history, saved article state, saved video state, guest memory state, sync planning output, share state, auth screens, QA checks, SQL drafts, RLS drafts, and disease analysis outputs are demo/sample or planning data. The app does not connect to YouTube Data API, AI providers, real auth, Supabase writes or storage, Supabase Edge Functions, real SMS OTP, LINE Login, LINE Messaging API, Google Login, Facebook SDK, analytics backend, real ads, payment, PWA service worker, Cache API, production CMS, real price APIs, real weather APIs, real GPS, map APIs, geolocation, official land survey services, push notifications, LINE Messaging API delivery, moderation APIs, AI moderation providers, real admin auth, upload services, or marketplace services in M41.
+## M77 Weather UX Polish
+
+Weather remains offline-safe by default. M77 adds source attribution, manual refresh with cooldown, local-only coarse-location preference storage, stale cache messaging, `/app/weather/preferences`, and expanded `/app/weather/qa`.
+
+Open-Meteo is still disabled unless explicit local flags enable it. No GPS, precise personal location storage, Supabase writes, or cloud sync were added.
+## M81 Real AI Text Proxy Controlled Staging
+
+- Adds `/app/ai-text-status` for a staging-only text proxy boundary.
+- Keeps default behavior local fixture/no network.
+- Blocks prescriptions, sponsor/product injection, diagnosis, guarantees, and unrestricted chat.
+- Keeps provider keys and service-role keys out of frontend config.
+- Adds audit and rate-limit previews without Supabase writes.
+
+## M82 AI Text Endpoint Contract Dry-run
+
+- Adds `/app/ai-text-endpoint-plan` for a backend-owned `ai-text-proxy` endpoint contract.
+- Adds endpoint env placeholders with empty/false defaults.
+- Adds planning-only draft artifacts under `supabase/drafts/ai-text-proxy/`.
+- Keeps provider calls blocked, provider keys backend-only, service-role keys out of frontend, and calculator outputs immutable.
+- No endpoint is deployed and no Supabase write occurs.
+
+## M83 Farm Records + Farm Finance Ledger Foundation
+
+- Adds typed farm plot, crop cycle, activity record, image metadata placeholder, finance entry, and computed ledger summary models in `src/services/farm-records`.
+- Adds config-first activity types, crop cycle statuses, finance categories, labels, and allowed units.
+- Adds versioned local-first storage under `kasethub.farmRecords.v1` with demo seed data and malformed-record normalization.
+- Adds `/app/farm-records` and Admin/QA visibility for plot count, active cycle count, activity count, finance entry count, total income, total expense, and net profit.
+- Adds `docs/privacy/FARM_RECORDS_PRIVACY_BOUNDARY_M83.md`.
+- Keeps M83 foundation-only: no Supabase writes, no cloud sync, no precise GPS/location, no AI processing of records, no receipt upload, no PDF/CSV export, and no final PDPA legal copy.
+
+## M84 Farm Records Farmer-Facing UI
+
+- Upgrades `/app/farm-records` from debug preview into a farmer-facing local Farm Records / สมุดบันทึกฟาร์ม page.
+- Adds summary cards, filters, plot list, crop cycle list, activity records, finance ledger entries, and computed ledger summary.
+- Adds lightweight local create flows for farm plots, crop cycles, activity records, and finance entries, plus delete confirmations for activity and finance entries.
+- Adds route/model tests for rendering, filtering, empty local data, invalid finance amounts, and service delete behavior.
+- Keeps M84 local-only: no Supabase schema/write, no cloud sync, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no PDF/CSV export, and no final PDPA legal copy.
+
+## M85 Farm Records Edit + My Farm Integration
+
+- Adds safe local edit flows for farm activity records and finance ledger entries through the existing `kasethub.farmRecords.v1` service layer.
+- Adds a Recent Farm Timeline that combines recent activity, income, and expense records.
+- Adds My Farm entry/status integration with active cycle count, latest local activity/finance dates, and net profit.
+- Adds `docs/privacy/FARM_RECORDS_EXPORT_DELETE_PLAN_M85.md` as planning only.
+- Keeps M85 local-only: no Supabase schema/write, no cloud sync, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no actual PDF/CSV export, no bulk delete, and no final PDPA legal copy.
+
+## M86 Farm Records Export/Delete Readiness
+
+- Adds `src/services/farm-records/farm-records-export-service.ts` for local JSON backup, finance CSV, and export preview helpers.
+- Adds `/app/farm-records#farm-records-export` UI for previewing/downloading JSON backup and finance CSV from this device.
+- Strips raw `data:` image payloads from JSON backup output and exports image metadata only.
+- Adds farm plot archive and crop-cycle harvested/cancelled guardrails instead of hard delete.
+- Adds `docs/privacy/FARM_RECORDS_DATA_CONTROL_M86.md` and updates the M85 export/delete plan with implementation status.
+- Keeps M86 local-only: no Supabase schema/write, no cloud sync, no cloud delete, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no bulk delete, no OCR, and no legal-final PDPA copy.
+
+## M87 Farm Records Backup Restore + Sync Consent Gate
+
+- Adds `src/services/farm-records/farm-records-restore-service.ts` for JSON backup parsing, validation, restore preview, and confirmed local restore.
+- Adds `src/services/farm-records/farm-records-sync-consent-gate.ts` as a disabled/future checklist for cloud sync readiness.
+- Adds `/app/farm-records#farm-records-restore` and `/app/farm-records#farm-records-sync` UI for restore preview/confirmation and local-only sync status.
+- Adds My Farm backup/restore entry visibility and `docs/privacy/FARM_RECORDS_RESTORE_SYNC_CONSENT_M87.md`.
+- Keeps M87 local-only: no Supabase schema/write/read, no sync queue, no cloud backup/delete, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no OCR, no notifications, and no legal-final PDPA copy.
+
+## M88 Farm Records Restore Recovery + Sync Architecture Review
+
+- Adds `src/services/farm-records/farm-records-restore-recovery-service.ts` for pre-restore local snapshots and restore risk review.
+- Adds Restore Risk Review and Restore recovery guidance to `/app/farm-records#farm-records-restore`.
+- Adds a current local backup/snapshot download action before restore and stores only one latest local pre-restore snapshot under `kasethub.farmRecords.restoreSnapshot.v1`.
+- Updates the disabled Cloud Sync Readiness UI with clear ready/not-implemented checklist statuses.
+- Adds `docs/sync/FARM_RECORDS_SYNC_ARCHITECTURE_REVIEW_M88.md` and `docs/sync/FARM_RECORDS_SYNC_READINESS_CHECKLIST_M88.md`.
+- Keeps M88 local-only: no Supabase schema/read/write, no sync queue, no cloud sync, no cloud delete, no server-side restore, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no OCR, and no legal-final PDPA copy.
+
+## M89 Farm Records Sync Consent UX Prototype
+
+- Adds `src/services/farm-records/farm-records-sync-consent-prototype.ts` for local prototype-only consent preview state.
+- Adds a Cloud Sync Consent Prototype to `/app/farm-records#farm-records-sync` with included/excluded data lists and separate consent categories for cloud sync, AI, GPS, and image/receipt upload.
+- Keeps Enable Cloud Sync disabled and clearly explains that Supabase RLS, ownership tests, cloud export/delete, and privacy review are still required.
+- Adds `docs/sync/FARM_RECORDS_OWNER_RLS_TEST_PLAN_M89.md` and `docs/sync/FARM_RECORDS_SYNC_CONSENT_UX_M89.md`.
+- Keeps M89 local-only: no Supabase schema/read/write, no sync queue, no cloud sync, no cloud delete, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no OCR, and no legal-final PDPA copy.
+
+## M90 Farm Cost Summary + Break-even Dashboard
+
+- Adds `src/services/farm-records/farm-cost-analytics-service.ts` for local cost dashboard totals, profit/loss status, per-rai metrics, category breakdowns, top categories, break-even estimates, and deterministic local insights.
+- Adds `/app/farm-records#farm-cost-dashboard` with total income, total expense, net profit/loss, cost per rai, profit per rai, top expense category, category rows, and a lightweight break-even calculator.
+- Updates My Farm with local cost summary visibility for net profit, cost per rai, and top expense category.
+- Adds `docs/farm-records/FARM_COST_DASHBOARD_M90.md`.
+- Keeps M90 local-only: no Supabase schema/read/write, no sync queue, no cloud sync, no cloud backup/delete, no AI processing, no GPS/geolocation/map pin, no receipt upload, no OCR, no notifications, no bank/loan integration, and no official accounting/tax/legal claims.
+
+## M91 Farm Records Harvest Yield + Cost-per-Kg Readiness
+
+- Adds a local `farmHarvestRecords` slice for harvested quantity, unit, normalized kg, grade, buyer, optional sale price, and local notes.
+- Adds local harvest CRUD helpers, demo harvest data, migration-safe defaults for old state, and JSON export/restore/pre-restore snapshot compatibility.
+- Adds Harvest & Yield UI on `/app/farm-records#farm-harvest-yield` with total harvest kg, yield per rai, cost per kg, income per kg, profit per kg, latest harvest date, and local-only warnings.
+- Updates the Farm Cost Dashboard and My Farm card with recorded harvest metrics where available.
+- Keeps M91 local-only: no Supabase schema/read/write, no sync queue, no cloud sync, no cloud backup/delete, no AI processing, no GPS/geolocation/map pin, no receipt upload, no OCR, no notifications, no bank/loan integration, and no official accounting/tax/legal/yield guarantee claims.
+
+## M92 Home First Farm Hub + Elder-Friendly Navigation
+
+- Adds a large Home Farm Hub card on `/app` so My Farm / Farm Records is visible without opening Profile or developer-heavy route lists.
+- Shows no more than four local Farm Records summary facts on Home, including net profit, cost per kg or rai, harvest kg, and latest record date when available.
+- Adds four elder-friendly Thai quick actions: `ฟาร์มของฉัน`, `บันทึกงานในฟาร์ม`, `รายรับรายจ่าย`, and `เช็กอากาศวันนี้`.
+- Adds `docs/ux/HOME_FIRST_NAVIGATION_M92.md` with the profile/menu simplification plan and future bottom navigation proposal.
+- Keeps M92 navigation-only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation, no AI record processing, no receipt upload, and no route removal.

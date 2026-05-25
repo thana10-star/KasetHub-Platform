@@ -157,3 +157,20 @@ Only after staging passes:
 - Keep auth disabled until a dedicated auth/RLS user-session milestone.
 - Keep cloud sync disabled until backend-owned consent, merge, idempotency, and audit logging exist.
 - Keep admin actions mock-only until RBAC and audit logs exist.
+
+## M40 Manual Project Creation Gate
+
+Before running this guide in Supabase SQL Editor, complete:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `/app/supabase-sql-checklist`
+
+Recommended project name: `kasethub-staging`.
+
+Run order remains:
+
+1. `supabase/migrations/0001_kasethub_core_schema.sql`
+2. `supabase/policies/0001_kasethub_rls_policies.sql`
+
+Stop on any SQL error and save screenshots/logs. Do not continue into auth, cloud sync, uploads, Edge Functions, or AI during M40.

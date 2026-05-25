@@ -51,6 +51,12 @@ M06 introduces Supabase ENV and feature flags but does not upload Guest Memory. 
 
 If any flag or ENV value is missing, Guest Memory remains the active source of truth on the device.
 
+## M64 Dry-run Payload Builder
+
+M64 adds `buildGuestSyncDryRunPayload()` and `/app/guest-sync-dry-run` as a safer local-only preview before any upload. It groups saved items, farm records, recent AI questions, crop watches, calculator saved summaries, followed topics, and likes. It previews consent, idempotency, audit, conflicts, and blockers while keeping `uploadAllowed=false`.
+
+The builder filters raw photos, base64 image blobs, OTP codes, session tokens, service-role keys, provider keys, API keys, and private env-like values. Future upload still requires real ownership, explicit consent, backend idempotency, audit logging, and owner-scoped RLS.
+
 ## M07 Sync Contract
 
 M07 defines `POST /api/guest-memory/sync` or Supabase Edge Function `guest-memory-sync` as the future backend-owned sync boundary. The current frontend only builds dry-run payload previews through `buildGuestSyncPayloadPreview()`.
@@ -181,3 +187,46 @@ Before enabling it:
 - Keep local Guest Memory preserved after success, partial success, or rejection until a later synced-marker policy is implemented.
 
 M29 adds the contract and test plan only. It does not deploy or call the endpoint.
+
+## M61 Phone Auth Staging Gate
+
+M61 adds `/app/auth/phone-staging-test` to prepare the first real Supabase Phone Auth staging test.
+
+Guest Memory sync remains blocked until:
+
+- Supabase Phone Auth creates a real staging session.
+- `auth.uid()` is proven as the owner for RLS checks.
+- the user gives explicit consent.
+- rollback steps are ready.
+- cloud sync remains off outside a controlled staging sync milestone.
+
+A phone mock session is still not enough for real cloud sync.
+## M62 Phone Auth Ownership Gate
+
+M62 can represent a real Supabase Phone Auth staging session, but `syncAllowed` remains `false`.
+
+Guest Memory upload still requires a later milestone that verifies:
+
+- `auth.uid()` belongs to the user
+- RLS owner checks pass
+- consent is explicit
+- idempotency and audit logging exist
+- rollback is rehearsed
+
+Phone mock sessions and M62 staging session previews must not upload Guest Memory.
+
+## M63 Ownership/RLS Sync Gate
+
+M63 adds `/app/ownership-rls-gate` and keeps Guest Memory upload blocked while checking:
+
+- real Supabase Auth session evidence
+- mock session rejection
+- expected `auth.uid()` owner mapping
+- local Guest Memory data presence
+- explicit consent before upload
+- idempotency key requirement
+- audit log requirement
+- owner-scoped RLS expectations
+- backend-only service-role handling
+
+Even if every review input is marked ready, M63 returns `syncAllowed: false`. Upload waits for a future owner-scoped RLS dry-run and backend-owned sync implementation.

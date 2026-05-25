@@ -189,3 +189,47 @@ Phone auth staging must prove:
 - Guest Sync consent is explicit.
 - Cloud sync remains off until the Edge Function idempotency, merge, audit, and rollback tests pass.
 - service-role remains server-side only.
+
+## M61 First Staging Test Review
+
+M61 adds `/app/auth/phone-staging-test` and `src/services/auth/phone-auth-staging-review.ts`.
+
+The review checks:
+
+- M42 staging project and SQL/RLS success.
+- M44 public read/RLS review success.
+- auth and phone flags are still off by default.
+- redirect URL readiness.
+- SMS provider readiness.
+- private test phone number plan.
+- OTP cost and rate-limit warnings.
+- ownership requirements before Guest Memory sync.
+- rollback readiness.
+- production blockers.
+
+M61 still does not enable real phone auth, send SMS, write Supabase data, deploy Edge Functions, or enable cloud sync.
+## M62 Controlled Staging Boundary
+
+M62 adds `src/services/auth/phone-auth-staging-adapter.ts` and `src/services/auth/auth-ownership-status.ts`.
+
+Allowed only in local staging:
+
+```env
+VITE_PHONE_AUTH_MODE=supabase_staging_ready
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_AUTH=true
+VITE_ENABLE_PHONE_AUTH=true
+VITE_ENABLE_CLOUD_SYNC=false
+```
+
+The adapter may request and verify Supabase Phone OTP only when all staging gates pass. It blocks if cloud sync is enabled, Supabase config is invalid, a service-role-like key is detected, or production mode is requested.
+
+M62 stores only a local masked session preview after successful verification. It does not write profiles, app tables, Guest Memory, or cloud sync records.
+
+## M63 Ownership/RLS Gate
+
+M63 treats a real Supabase Phone Auth staging session as evidence only. It is not enough to upload Guest Memory.
+
+Before sync, KasetHub must also verify `auth.uid()` owner mapping, collect user consent, require idempotency, prepare audit logging, and prove owner-scoped RLS behavior. The new route is `/app/ownership-rls-gate`.
+
+Phone mock sessions still never count as ownership.

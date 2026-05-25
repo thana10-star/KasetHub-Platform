@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAICredits } from '@/hooks/useAICredits';
 import { getAIProxyAdapterStatus, getAIProxyMode } from '@/services/ai-proxy/ai-proxy-adapter';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
 import {
   analyzePlantImageViaBackendTest,
   askTextQuestionViaBackendTest,
@@ -24,6 +25,7 @@ const requestTypeLabels: Record<string, string> = {
 
 export function AIProxyStatusPage() {
   const status = getAIProxyAdapterStatus();
+  const aiTextStatus = getAITextProxyStatus();
   const { summary } = useAICredits();
   const [testResponse, setTestResponse] = useState<AITextProxyResponse | AIPlantImageProxyResponse | null>(null);
   const mode = getAIProxyMode();
@@ -152,6 +154,26 @@ export function AIProxyStatusPage() {
               <p className="mt-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold text-kaset-deep">
                 Adapter path: {status.currentAdapterPath}
               </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <Server aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M81 controlled text proxy</h2>
+                <Badge tone={aiTextStatus.canCallNetwork ? 'green' : 'gold'}>{aiTextStatus.mode}</Badge>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                New text proxy staging path is limited to calculator explanations, weather cautions, and general education. Fixture fallback remains active by default.
+              </p>
+              <a className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" href="/app/ai-text-status">
+                เปิด M81 AI text status
+              </a>
             </div>
           </div>
         </Card>

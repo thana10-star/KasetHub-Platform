@@ -156,3 +156,79 @@ Required behavior:
 - Treat readiness score as a UX estimate only.
 
 Future AI Vision must still run backend-side safety checks, moderation, consent, provider-key protection, and expert escalation for risky pesticide, disease, fertilizer, or chemical advice.
+
+## M55 Calculator AI Explanation Boundary
+
+Agriculture calculator AI explanations are explanation-only until a reviewed recommendation system exists. The current M55 implementation only creates local explanation plans and prompt scaffold previews.
+
+Required behavior for future calculator AI:
+
+- Preserve deterministic calculator result values exactly.
+- Explain formulas and inputs in simple Thai.
+- Keep `ผลคำนวณเบื้องต้น` and no-guarantee copy visible.
+- Remind users to check real labels, soil tests, field measurements, prices, and experts.
+- Block sponsor products, chemical product recommendations, label overrides, and guaranteed yield/profit claims.
+- Keep AI text visually separate from formula-owned result cards.
+
+M55 does not call AI providers, add network calls, write backend data, write Supabase data, or create a recommendation engine.
+
+## M56 Calculator AI Backend Review
+
+Before enabling real calculator explanations, the backend must:
+
+- lock deterministic calculator result snapshots
+- run policy version checks before prompt building
+- reject sponsor, chemical product, label override, and result mutation requests
+- apply rate limits and repeated-request controls
+- log audit metadata without raw secrets or hidden sponsor payloads
+- safety-filter generated explanations before display
+
+M56 only reviews this architecture locally. It still does not call AI, write backend data, write Supabase data, sync to cloud, or enable sponsor behavior.
+
+## M57-M58 Calculator AI Adapter And Network Boundary
+
+Calculator AI explanations remain disabled by default for real backend execution. The frontend adapter may use local fixtures, but it must not call a provider or backend endpoint unless a future reviewed staging milestone explicitly enables backend ownership and network flags.
+
+Required future network boundary:
+
+- prompt execution must be backend-owned
+- provider keys must never appear in frontend code or frontend env
+- request validation must happen before prompt building
+- locked result hashes and policy versions must be verified server-side
+- audit logs, rate limits, abuse prevention, and timeout handling must exist before live AI
+- sponsor or affiliate payloads must stay separate from explanation prompts and outputs
+- AI must explain locked calculator values only and must not mutate formulas or inject hidden recommendations
+
+M58 adds local adapter QA fixtures and an endpoint checklist route only. It still does not call AI, create a backend endpoint, write backend/Supabase data, sync to cloud, or enable sponsor behavior.
+
+## M59 Calculator AI Edge Function Contract
+
+The future calculator AI endpoint is named `calculator-ai-explain`. It must be backend-owned and explanation-only.
+
+Before any live provider call, the Edge Function must:
+
+- keep provider and service-role keys in server-side secret stores only
+- verify auth/session context where user history is involved
+- verify the locked calculator result hash
+- verify the policy and prompt template version
+- run rate-limit and abuse checks
+- handle timeout with safe disabled copy
+- safety-filter the output before display
+- prevent sponsor, affiliate, product, chemical, fertilizer-dose invention, formula mutation, label override, and guaranteed outcome content
+
+M59 is a contract draft only. It does not deploy an Edge Function, call a provider, write Supabase data, or enable a frontend network path.
+
+## M60 Calculator AI Edge Dry-run Plan
+
+M60 prepares a staging-only dry-run plan for the future `calculator-ai-explain` endpoint, but still does not call an endpoint or provider.
+
+Safety requirements:
+
+- endpoint URL is empty by default and masked if configured locally
+- dry-run and network flags are off by default
+- dry-run plus network flags still must not run `fetch` in M60
+- provider keys and service-role keys are not accepted in frontend config
+- validation fixtures block missing snapshots, lock-hash mismatch, policy mismatch, oversized payload, sponsor insertion, chemical recommendations, missing auth, and timeout fallback cases
+- production remains blocked until auth, audit logs, rate limits, RLS, and backend safety filters are implemented
+
+M60 adds no real AI call, backend write, Supabase write, cloud sync, sponsor behavior, payment, AdMob, or production behavior.

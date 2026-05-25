@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
 import { publicEnv } from '@/config/env';
 import { checkSupabaseConfig } from '@/services/supabase/supabase-config-check';
+import { runSupabaseReadonlyProbe } from '@/services/supabase/supabase-readonly-probe';
 import type {
   SupabaseConnectionDryRunCode,
   SupabaseConnectionDryRunResult,
@@ -8,10 +8,33 @@ import type {
   SupabasePublicReadProbeResult,
 } from '@/services/supabase/supabase-connection.types';
 
-const publicProbeTable = 'public_readiness_checks';
+function decodeJwtPayload(value: string) {
+  const [, payload] = value.split('.');
+
+  if (!payload) {
+    return '';
+  }
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return atob(padded);
+  } catch {
+    return '';
+  }
+}
 
 function looksLikeServiceRoleKey(value: string) {
-  return value.toLowerCase().includes('service_role');
+  const lower = value.toLowerCase();
+  const decodedPayload = decodeJwtPayload(value).toLowerCase();
+
+  return (
+    lower.includes('service_role') ||
+    lower.includes('service-role') ||
+    lower.includes('service role') ||
+    decodedPayload.includes('"role":"service_role"') ||
+    decodedPayload.includes('service_role')
+  );
 }
 
 function looksLikePlaceholder(value: string) {
@@ -179,7 +202,7 @@ export function runSupabaseConnectionDryRun(): SupabaseConnectionDryRunResult {
       enabled: publicEnv.enableSupabaseDryRunNetworkCheck,
       allowedByGuards,
       attempted: false,
-      targetLabel: `${publicProbeTable} public/read-only table`,
+      targetLabel: 'articles / videos / crop_price_snapshots public/read-only tables',
       schemaStatus: 'not_checked',
       message: allowedByGuards
         ? 'network probe เปิดอยู่และผ่าน guard แล้ว แต่จะอ่านเฉพาะ public/read-only target'
@@ -199,9 +222,9 @@ export function runSupabaseConnectionDryRun(): SupabaseConnectionDryRunResult {
 }
 
 export async function runSupabasePublicReadProbe(): Promise<SupabasePublicReadProbeResult> {
-  const dryRun = runSupabaseConnectionDryRun();
+  const readonlyProbe = await runSupabaseReadonlyProbe();
 
-  if (!dryRun.networkProbe.allowedByGuards) {
+  if (!readonlyProbe.attempted) {
     return {
       attempted: false,
       schemaStatus: 'not_checked',
@@ -209,17 +232,7 @@ export async function runSupabasePublicReadProbe(): Promise<SupabasePublicReadPr
     };
   }
 
-  const client = createClient(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      persistSession: false,
-    },
-  });
-
-  const { error } = await client.from(publicProbeTable).select('id').limit(1);
-
-  if (!error) {
+  if (readonlyProbe.status === 'success') {
     return {
       attempted: true,
       schemaStatus: 'public_probe_ok',
@@ -227,13 +240,8 @@ export async function runSupabasePublicReadProbe(): Promise<SupabasePublicReadPr
     };
   }
 
-  const lowerMessage = error.message.toLowerCase();
-  const schemaMissing =
-    error.code === '42P01' ||
-    error.code === 'PGRST205' ||
-    lowerMessage.includes('could not find') ||
-    lowerMessage.includes('does not exist') ||
-    lowerMessage.includes('schema cache');
+  const firstError = readonlyProbe.tableResults.find((result) => result.errorCode || result.safeErrorMessage);
+  const schemaMissing = readonlyProbe.tableResults.some((result) => result.status === 'table_missing');
 
   return {
     attempted: true,
@@ -241,6 +249,6 @@ export async function runSupabasePublicReadProbe(): Promise<SupabasePublicReadPr
     message: schemaMissing
       ? 'ยังไม่พบ public/read-only probe table: ถือว่า schema ยังไม่ applied ไม่ใช่ app failure'
       : 'network probe ล้มเหลวแบบไม่คาดคิด แต่ไม่มีการเขียนข้อมูล',
-    errorCode: error.code,
+    errorCode: firstError?.errorCode,
   };
 }

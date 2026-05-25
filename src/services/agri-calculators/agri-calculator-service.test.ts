@@ -1,0 +1,1230 @@
+import { describe, expect, test } from 'vitest';
+import {
+  calculateAgriCalculator,
+  calculateCostEstimate,
+  calculateFertilizerMix,
+  calculatePlantSpacing,
+  calculateSprayMix,
+  calculateYieldEstimate,
+  convertThaiArea,
+} from '@/services/agri-calculators/agri-calculator-service';
+import {
+  agriCalculatorEdgeFixtures,
+  cropProfileEdgeFixtures,
+  runAgriCalculatorEdgeFixture,
+  runCropProfileEdgeFixture,
+} from '@/services/agri-calculators/agri-calculator-edge-fixtures';
+import { runAgriCalculatorTestSuite } from '@/services/agri-calculators/agri-calculator-test-fixtures';
+import { agriCalculatorUnitTestPlan } from '@/services/agri-calculators/agri-calculator-unit-test-plan';
+import {
+  buildCalculatorResultSummary,
+  getSavedCalculatorResultSummaries,
+} from '@/services/agri-calculators/calculator-result-summary-service';
+import {
+  buildCalculatorExportTemplate,
+  clampCalculatorExportText,
+  copyCalculatorExportText,
+  prepareCalculatorShareText,
+  shareCalculatorExportText,
+} from '@/services/agri-calculators/calculator-export-template-service';
+import {
+  createFertilizerAIExplanationFixture,
+  createSprayMixAIExplanationFixture,
+} from '@/services/agri-calculators/calculator-ai-explanation-fixtures';
+import { buildCalculatorAIExplanationPlan } from '@/services/agri-calculators/calculator-ai-explanation-planner';
+import {
+  buildCalculatorAIBackendArchitectureReview,
+  createCalculatorAIExecutionRequestFixture,
+} from '@/services/agri-calculators/calculator-ai-backend-review';
+import {
+  explainCalculatorResult,
+  getCalculatorAIAdapterStatus,
+} from '@/services/agri-calculators/calculator-ai-adapter';
+import type { CalculatorAIBackendClient } from '@/services/agri-calculators/calculator-ai-adapter.types';
+import { runCalculatorAIAdapterQASuite } from '@/services/agri-calculators/calculator-ai-adapter-qa-fixtures';
+import { buildCalculatorAIEndpointPlan } from '@/services/agri-calculators/calculator-ai-endpoint-plan';
+import {
+  CALCULATOR_AI_EDGE_FUNCTION_NAME,
+  buildCalculatorAIEdgeRequest,
+  buildCalculatorAIEdgeResponseContract,
+  getCalculatorAIEdgeFunctionContractSummary,
+} from '@/services/agri-calculators/calculator-ai-edge-contract';
+import {
+  buildCalculatorAIEdgeDryRunPlan,
+  buildCalculatorAIEdgeDryRunValidationCases,
+} from '@/services/agri-calculators/calculator-ai-edge-dry-run-plan';
+import { cropCalculatorProfiles, getCropCalculatorProfile, isCropCalculatorKey } from '@/services/agri-calculators/crop-calculator-profiles';
+import type { CalculatorCategory, MixAmountUnit, TankSizeOption, ThaiAreaUnit } from '@/services/agri-calculators/agri-calculator.types';
+
+describe('agriculture calculator deterministic fixtures', () => {
+  test('M50 deterministic QA fixtures still pass without drift', () => {
+    const suite = runAgriCalculatorTestSuite();
+
+    expect(suite.totalCount).toBe(8);
+    expect(suite.failCount).toBe(0);
+    expect(suite.warnCount).toBe(0);
+    expect(suite.passCount).toBe(suite.totalCount);
+  });
+
+  test('M51 formal unit-test plan is implemented by service-level tests', () => {
+    expect(agriCalculatorUnitTestPlan.length).toBeGreaterThanOrEqual(7);
+    expect(agriCalculatorUnitTestPlan.every((item) => item.status === 'implemented')).toBe(true);
+    expect(agriCalculatorUnitTestPlan.every((item) => item.testFile === 'agri-calculator-service.test.ts')).toBe(true);
+  });
+});
+
+describe('spray mix calculator', () => {
+  test('scales label ratio by tank liters', () => {
+    expect(
+      calculateSprayMix({
+        tankLiters: 20,
+        tankSizeOption: 20,
+        dosageAmount: 20,
+        dosageUnit: 'cc',
+        dosageWaterLiters: 20,
+      }).requiredAmount,
+    ).toBeCloseTo(20);
+
+    expect(
+      calculateSprayMix({
+        tankLiters: 10,
+        tankSizeOption: 10,
+        dosageAmount: 20,
+        dosageUnit: 'cc',
+        dosageWaterLiters: 20,
+      }).requiredAmount,
+    ).toBeCloseTo(10);
+
+    expect(
+      calculateSprayMix({
+        tankLiters: 200,
+        tankSizeOption: 200,
+        dosageAmount: 20,
+        dosageUnit: 'cc',
+        dosageWaterLiters: 20,
+      }).requiredAmount,
+    ).toBeCloseTo(200);
+  });
+
+  test('rejects zero, negative, NaN, empty, and invalid unit inputs', () => {
+    const zero = calculateSprayMix({
+      tankLiters: 0,
+      tankSizeOption: 20,
+      dosageAmount: 20,
+      dosageUnit: 'cc',
+      dosageWaterLiters: 20,
+    });
+    expect(zero.isValid).toBe(false);
+    expect(zero.requiredAmount).toBe(0);
+
+    const negative = calculateSprayMix({
+      tankLiters: 20,
+      tankSizeOption: 20,
+      dosageAmount: -1,
+      dosageUnit: 'cc',
+      dosageWaterLiters: 20,
+    });
+    expect(negative.isValid).toBe(false);
+
+    const notNumber = calculateSprayMix({
+      tankLiters: Number.NaN,
+      tankSizeOption: 20,
+      dosageAmount: 20,
+      dosageUnit: 'cc',
+      dosageWaterLiters: 20,
+    });
+    expect(notNumber.isValid).toBe(false);
+
+    const emptyAndInvalidUnit = calculateSprayMix({
+      tankLiters: '' as unknown as number,
+      tankSizeOption: 'broken' as unknown as TankSizeOption,
+      dosageAmount: 20,
+      dosageUnit: 'bad_unit' as MixAmountUnit,
+      dosageWaterLiters: 20,
+    });
+    expect(emptyAndInvalidUnit.isValid).toBe(false);
+    expect(emptyAndInvalidUnit.warnings.join(' ')).toContain('เลือกหน่วยยา/สาร');
+  });
+
+  test('warns on extreme spray concentration and huge tanks', () => {
+    const result = calculateSprayMix({
+      tankLiters: 2500,
+      tankSizeOption: 'custom',
+      dosageAmount: 500,
+      dosageUnit: 'cc',
+      dosageWaterLiters: 20,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.isConcentrationHigh).toBe(true);
+    expect(result.warnings.join(' ')).toContain('อัตราผสมต่อ 1 ลิตรสูง');
+    expect(result.warnings.join(' ')).toContain('ขนาดถังสูงผิดปกติ');
+  });
+});
+
+describe('Thai land conversion', () => {
+  test('converts stable Thai land units', () => {
+    expect(convertThaiArea(1, 'rai', 'square_meter')).toBe(1600);
+    expect(convertThaiArea(1, 'ngan', 'square_meter')).toBe(400);
+    expect(convertThaiArea(1, 'square_wa', 'square_meter')).toBe(4);
+    expect(convertThaiArea(1600, 'square_meter', 'rai')).toBe(1);
+  });
+});
+
+describe('plant spacing calculator', () => {
+  test('calculates known plant density cases', () => {
+    const oneRai = calculatePlantSpacing({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      rowSpacingCm: 100,
+      plantSpacingCm: 100,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(oneRai.estimatedPlantCount).toBe(1600);
+    expect(oneRai.plantsPerRai).toBe(1600);
+
+    const fiveRai = calculatePlantSpacing({
+      landSizeValue: 5,
+      landSizeUnit: 'rai',
+      rowSpacingCm: 100,
+      plantSpacingCm: 80,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(fiveRai.estimatedPlantCount).toBe(10000);
+  });
+
+  test('handles impossible, tiny, huge, and invalid spacing inputs safely', () => {
+    const impossible = calculatePlantSpacing({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      rowSpacingCm: 0,
+      plantSpacingCm: 100,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(impossible.isValid).toBe(false);
+    expect(impossible.estimatedPlantCount).toBe(0);
+
+    const tiny = calculatePlantSpacing({
+      landSizeValue: 1,
+      landSizeUnit: 'square_meter',
+      rowSpacingCm: 100,
+      plantSpacingCm: 100,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(tiny.isValid).toBe(true);
+    expect(tiny.warnings.join(' ')).toContain('พื้นที่เล็กมาก');
+
+    const huge = calculatePlantSpacing({
+      landSizeValue: 20000,
+      landSizeUnit: 'rai',
+      rowSpacingCm: 1,
+      plantSpacingCm: 1,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(huge.isValid).toBe(true);
+    expect(huge.warnings.join(' ')).toContain('พื้นที่ใหญ่มาก');
+    expect(huge.warnings.join(' ')).toContain('จำนวนต้นสูงมาก');
+
+    const invalidUnit = calculatePlantSpacing({
+      landSizeValue: 1,
+      landSizeUnit: undefined as unknown as ThaiAreaUnit,
+      rowSpacingCm: 100,
+      plantSpacingCm: 100,
+      seedlingBufferPercent: 0,
+      usableAreaPercent: 100,
+    });
+    expect(invalidUnit.isValid).toBe(false);
+    expect(invalidUnit.warnings.join(' ')).toContain('เลือกหน่วยพื้นที่');
+  });
+});
+
+describe('fertilizer helper calculator', () => {
+  test('calculates N target helper math without crop recommendation', () => {
+    const result = calculateFertilizerMix({
+      areaValue: 1,
+      areaUnit: 'rai',
+      targetNitrogenKgPerRai: 4,
+      targetPhosphorusKgPerRai: 0,
+      targetPotassiumKgPerRai: 0,
+      fertilizerNPercent: 46,
+      fertilizerPPercent: 0,
+      fertilizerKPercent: 0,
+      baseNutrient: 'nitrogen',
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.estimatedFertilizerKg).toBeCloseTo(8.69565, 4);
+    expect(result.limitingNutrient).toBe('nitrogen');
+  });
+
+  test('rejects divide-by-zero fertilizer states and invalid area units', () => {
+    const zeroFormula = calculateFertilizerMix({
+      areaValue: 1,
+      areaUnit: 'rai',
+      targetNitrogenKgPerRai: 4,
+      targetPhosphorusKgPerRai: 0,
+      targetPotassiumKgPerRai: 0,
+      fertilizerNPercent: 0,
+      fertilizerPPercent: 0,
+      fertilizerKPercent: 0,
+      baseNutrient: 'nitrogen',
+    });
+    expect(zeroFormula.isValid).toBe(false);
+    expect(zeroFormula.estimatedFertilizerKg).toBe(0);
+
+    const zeroTargets = calculateFertilizerMix({
+      areaValue: 1,
+      areaUnit: 'rai',
+      targetNitrogenKgPerRai: 0,
+      targetPhosphorusKgPerRai: 0,
+      targetPotassiumKgPerRai: 0,
+      fertilizerNPercent: 46,
+      fertilizerPPercent: 0,
+      fertilizerKPercent: 0,
+      baseNutrient: 'nitrogen',
+    });
+    expect(zeroTargets.isValid).toBe(false);
+
+    const invalidUnit = calculateFertilizerMix({
+      areaValue: 1,
+      areaUnit: 'hectare' as ThaiAreaUnit,
+      targetNitrogenKgPerRai: 4,
+      targetPhosphorusKgPerRai: 0,
+      targetPotassiumKgPerRai: 0,
+      fertilizerNPercent: 46,
+      fertilizerPPercent: 0,
+      fertilizerKPercent: 0,
+      baseNutrient: 'nitrogen',
+    });
+    expect(invalidUnit.isValid).toBe(false);
+    expect(invalidUnit.warnings.join(' ')).toContain('เลือกหน่วยพื้นที่');
+  });
+});
+
+describe('yield estimate calculator', () => {
+  test('calculates total yield, ton, and yield per rai', () => {
+    const result = calculateYieldEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      sampleCount: 10,
+      averageWeightKg: 0.5,
+      estimatedTotalUnits: 1000,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.sampleTotalKg).toBe(5);
+    expect(result.estimatedTotalKg).toBe(500);
+    expect(result.estimatedTotalTon).toBe(0.5);
+    expect(result.yieldPerRaiKg).toBe(500);
+  });
+
+  test('guards low sample count, unrealistic yield, and zero area', () => {
+    const lowSample = calculateYieldEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      sampleCount: 1,
+      averageWeightKg: 0.5,
+      estimatedTotalUnits: 1000,
+    });
+    expect(lowSample.isValid).toBe(true);
+    expect(lowSample.warnings.join(' ')).toContain('จำนวนตัวอย่างน้อย');
+
+    const unrealistic = calculateYieldEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      sampleCount: 10,
+      averageWeightKg: 1000,
+      estimatedTotalUnits: 2000,
+    });
+    expect(unrealistic.isValid).toBe(true);
+    expect(unrealistic.warnings.join(' ')).toContain('ผลผลิตรวมสูงมาก');
+
+    const zeroArea = calculateYieldEstimate({
+      landSizeValue: 0,
+      landSizeUnit: 'rai',
+      sampleCount: 10,
+      averageWeightKg: 0.5,
+      estimatedTotalUnits: 1000,
+    });
+    expect(zeroArea.isValid).toBe(false);
+    expect(zeroArea.yieldPerRaiKg).toBe(0);
+  });
+});
+
+describe('cost estimate calculator', () => {
+  test('calculates total, cost per rai, and optional break-even per kg', () => {
+    const result = calculateCostEstimate({
+      landSizeValue: 2,
+      landSizeUnit: 'rai',
+      fertilizerCost: 2000,
+      laborCost: 1000,
+      waterCost: 500,
+      machineryCost: 500,
+      otherCost: 0,
+      expectedYieldKg: 1000,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.totalCost).toBe(4000);
+    expect(result.costPerRai).toBe(2000);
+    expect(result.costPerKg).toBe(4);
+  });
+
+  test('guards all-zero cost, negative cost, huge cost, and zero expected yield', () => {
+    const allZero = calculateCostEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      fertilizerCost: 0,
+      laborCost: 0,
+      waterCost: 0,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 0,
+    });
+    expect(allZero.isValid).toBe(false);
+    expect(allZero.costPerKg).toBeUndefined();
+
+    const negative = calculateCostEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      fertilizerCost: -100,
+      laborCost: 0,
+      waterCost: 0,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 0,
+    });
+    expect(negative.isValid).toBe(false);
+    expect(negative.totalCost).toBe(0);
+
+    const huge = calculateCostEstimate({
+      landSizeValue: 1,
+      landSizeUnit: 'rai',
+      fertilizerCost: Number.MAX_SAFE_INTEGER / 4,
+      laborCost: Number.MAX_SAFE_INTEGER / 4,
+      waterCost: Number.MAX_SAFE_INTEGER / 4,
+      machineryCost: 0,
+      otherCost: 0,
+      expectedYieldKg: 1,
+    });
+    expect(huge.isValid).toBe(true);
+    expect(Number.isFinite(huge.totalCost)).toBe(true);
+    expect(huge.warnings.join(' ')).toContain('ต้นทุนรวมสูงมาก');
+  });
+});
+
+describe('crop profile example loading', () => {
+  test('loads all required crop profiles as planning-only examples', () => {
+    const requiredCropKeys = ['rice', 'cassava', 'sugarcane', 'maize', 'durian', 'longan', 'rubber', 'vegetable_mixed'];
+
+    expect(cropCalculatorProfiles.map((profile) => profile.cropKey).sort()).toEqual([...requiredCropKeys].sort());
+
+    cropCalculatorProfiles.forEach((profile) => {
+      expect(profile.thaiDisplayName.length).toBeGreaterThan(0);
+      expect(profile.commonSpacingExamples.length).toBeGreaterThan(0);
+      expect(profile.commonUnitExamples.length).toBeGreaterThan(0);
+      expect(profile.yieldEstimateInputExamples.length).toBeGreaterThan(0);
+      expect(profile.costCategoriesCommonlyUsed.length).toBeGreaterThan(0);
+      expect(profile.safetyDisclaimerNotes.length).toBeGreaterThan(0);
+      expect(profile.fertilizerPlanningStatus).toBe('planning_only');
+      expect(profile.fertilizerPlanningNote).toContain('ยังไม่แนะนำอัตราปุ๋ย');
+    });
+  });
+
+  test('rejects invalid crop keys without inventing recommendations', () => {
+    expect(isCropCalculatorKey('rice')).toBe(true);
+    expect(isCropCalculatorKey('banana_experimental')).toBe(false);
+    expect(getCropCalculatorProfile('rice').cropKey).toBe('rice');
+  });
+});
+
+describe('edge-case fixture regression suite', () => {
+  test('edge fixtures classify validation status and warnings as expected', () => {
+    agriCalculatorEdgeFixtures.forEach((fixture) => {
+      const run = runAgriCalculatorEdgeFixture(fixture);
+      expect(run.isMatch, `${run.id}: ${run.warnings.join(' | ')}`).toBe(true);
+    });
+  });
+
+  test('crop edge fixtures reject invalid crop profile keys', () => {
+    cropProfileEdgeFixtures.forEach((fixture) => {
+      const run = runCropProfileEdgeFixture(fixture);
+      expect(run.isMatch, run.id).toBe(true);
+    });
+  });
+});
+
+describe('calculator result summary service', () => {
+  test('builds local share metadata and Thai result recap for valid results', () => {
+    const input = {
+      tankLiters: 20,
+      tankSizeOption: 20 as const,
+      dosageAmount: 20,
+      dosageUnit: 'cc' as const,
+      dosageWaterLiters: 20,
+    };
+    const result = calculateSprayMix(input);
+    const summary = buildCalculatorResultSummary('spray_mix', input, result, {
+      createdAt: '2026-05-24T08:00:00.000Z',
+      id: 'summary-test',
+    });
+
+    expect(summary.id).toBe('summary-test');
+    expect(summary.summaryTitle).toContain('สรุปผลคำนวณเบื้องต้น');
+    expect(summary.inputRecap.join(' ')).toContain('ถังน้ำ 20 ลิตร');
+    expect(summary.resultRecap.join(' ')).toContain('ต้องใช้ยา/สาร');
+    expect(summary.safetyDisclaimer).toContain('ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญ');
+    expect(summary.shareText).toContain('สรุปผลคำนวณเบื้องต้น');
+    expect(summary.shareMetadata.native.source).toBe('native');
+    expect(summary.shareMetadata.line.source).toBe('line');
+    expect(summary.shareMetadata.facebook.source).toBe('facebook');
+    expect(summary.calculatorRoute).toBe('/app/calculators/spray-mix');
+  });
+
+  test('returns an empty saved-results state outside browser storage', () => {
+    const state = getSavedCalculatorResultSummaries();
+
+    expect(state.version).toBe(1);
+    expect(state.savedResults).toEqual([]);
+  });
+});
+
+describe('calculator export template service', () => {
+  function createSummary(category: CalculatorCategory) {
+    const input = {
+      spray_mix: {
+        tankLiters: 20,
+        tankSizeOption: 20 as const,
+        dosageAmount: 20,
+        dosageUnit: 'cc' as const,
+        dosageWaterLiters: 20,
+      },
+      plant_spacing: {
+        landSizeValue: 1,
+        landSizeUnit: 'rai' as const,
+        rowSpacingCm: 100,
+        plantSpacingCm: 100,
+        seedlingBufferPercent: 0,
+        usableAreaPercent: 100,
+      },
+      fertilizer_mix: {
+        areaValue: 1,
+        areaUnit: 'rai' as const,
+        targetNitrogenKgPerRai: 4,
+        targetPhosphorusKgPerRai: 0,
+        targetPotassiumKgPerRai: 0,
+        fertilizerNPercent: 46,
+        fertilizerPPercent: 0,
+        fertilizerKPercent: 0,
+        baseNutrient: 'nitrogen' as const,
+      },
+      yield_estimate: {
+        landSizeValue: 1,
+        landSizeUnit: 'rai' as const,
+        sampleCount: 10,
+        averageWeightKg: 0.5,
+        estimatedTotalUnits: 1000,
+      },
+      cost_estimate: {
+        landSizeValue: 2,
+        landSizeUnit: 'rai' as const,
+        fertilizerCost: 2000,
+        laborCost: 1000,
+        waterCost: 500,
+        machineryCost: 500,
+        otherCost: 0,
+        expectedYieldKg: 1000,
+      },
+    }[category];
+    const result = calculateAgriCalculator(category, input);
+
+    return buildCalculatorResultSummary(category, input, result, {
+      createdAt: '2026-05-24T08:00:00.000Z',
+      id: `template-${category}`,
+    });
+  }
+
+  test('formats short and long text templates for every calculator category', () => {
+    const categories: CalculatorCategory[] = ['spray_mix', 'plant_spacing', 'fertilizer_mix', 'yield_estimate', 'cost_estimate'];
+
+    categories.forEach((category) => {
+      const template = buildCalculatorExportTemplate(createSummary(category), {
+        cropLabel: category === 'plant_spacing' ? 'ข้าว' : undefined,
+        generatedAt: '2026-05-24T08:00:00.000Z',
+      });
+
+      expect(template.shortLineText).toContain('สรุปผลคำนวณเบื้องต้น');
+      expect(template.shortLineText).toContain('ควรตรวจสอบฉลาก/ผู้เชี่ยวชาญ');
+      expect(template.longDetailText).toContain('ข้อมูลที่กรอก');
+      expect(template.longDetailText).toContain('ผลคำนวณ');
+      expect(template.longDetailText).toContain('KasetHub เครื่องคำนวณเกษตร');
+      expect(template.longDetailText).toContain('ไม่มี PDF');
+      expect(template.resultRecap.length).toBeGreaterThan(0);
+    });
+  });
+
+  test('creates LINE-friendly templates and truncates oversized text safely', () => {
+    const summary = createSummary('spray_mix');
+    const template = buildCalculatorExportTemplate(summary, {
+      lineFriendlyMaxChars: 120,
+      longDetailMaxChars: 220,
+    });
+
+    expect(template.shortLineText.length).toBeLessThanOrEqual(120);
+    expect(template.shortLineWasTruncated).toBe(true);
+    expect(template.shortLineText).toContain('KasetHub');
+    expect(template.longDetailText.length).toBeLessThanOrEqual(220);
+    expect(template.longDetailWasTruncated).toBe(true);
+
+    const clamped = clampCalculatorExportText('ก'.repeat(500), 80);
+    expect(clamped.wasTruncated).toBe(true);
+    expect(clamped.text.length).toBeLessThanOrEqual(80);
+  });
+
+  test('protects empty summaries before copy or share', async () => {
+    expect(prepareCalculatorShareText('').status).toBe('empty');
+
+    const copyResult = await copyCalculatorExportText('', {
+      writeText: async () => undefined,
+    });
+    expect(copyResult.status).toBe('empty');
+
+    const shareResult = await shareCalculatorExportText({
+      title: 'empty',
+      text: '   ',
+      nativeShare: { share: async () => undefined },
+      clipboard: { writeText: async () => undefined },
+    });
+    expect(shareResult.status).toBe('empty');
+  });
+
+  test('copies text through clipboard and reports unsupported clipboard fallback', async () => {
+    let copiedText = '';
+    const copied = await copyCalculatorExportText('ข้อความทดสอบ', {
+      writeText: async (text) => {
+        copiedText = text;
+      },
+    });
+
+    expect(copied.status).toBe('copied');
+    expect(copied.message).toBe('คัดลอกข้อความสำเร็จ');
+    expect(copiedText).toBe('ข้อความทดสอบ');
+
+    const unsupported = await copyCalculatorExportText('ข้อความทดสอบ');
+    expect(unsupported.status).toBe('unsupported');
+    expect(unsupported.helperMessage).toBe('ลองคัดลอกข้อความแทน');
+  });
+
+  test('falls back from unsupported native share to clipboard text copy', async () => {
+    let copiedText = '';
+    const result = await shareCalculatorExportText({
+      title: 'สรุป',
+      text: 'ข้อความสำหรับแชร์',
+      nativeShare: {},
+      clipboard: {
+        writeText: async (text) => {
+          copiedText = text;
+        },
+      },
+    });
+
+    expect(result.status).toBe('copied_fallback');
+    expect(result.message).toBe('อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง');
+    expect(result.helperMessage).toBe('คัดลอกข้อความสำเร็จ');
+    expect(copiedText).toBe('ข้อความสำหรับแชร์');
+  });
+});
+
+describe('calculator AI explanation planner', () => {
+  test('allows formula explanation without real AI calls', () => {
+    const request = createSprayMixAIExplanationFixture();
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.noRealAICall).toBe(true);
+    expect(plan.allowedRequestedActions).toContain('explain_formulas');
+    expect(plan.allowedSections.some((section) => section.id === 'explain_formulas')).toBe(true);
+    expect(plan.promptScaffoldPreview).toContain('อธิบายสูตร');
+    expect(plan.promptScaffoldPreview).toContain('ห้ามเปลี่ยนผลคำนวณ');
+  });
+
+  test('blocks sponsor product and chemical product recommendations', () => {
+    const request = {
+      ...createSprayMixAIExplanationFixture(),
+      requestedActions: ['mention_sponsor_product', 'recommend_chemical_products'] as const,
+    };
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('mention_sponsor_product');
+    expect(plan.blockedRequestedActions).toContain('recommend_chemical_products');
+    expect(plan.riskLevel).toBe('high');
+    expect(plan.blockedSections.find((section) => section.id === 'mention_sponsor_product')?.reason).toContain('policy');
+  });
+
+  test('blocks deterministic result mutation and preserves result values', () => {
+    const request = {
+      ...createSprayMixAIExplanationFixture(),
+      requestedActions: ['change_deterministic_result'] as const,
+    };
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('change_deterministic_result');
+    expect(plan.formulaIntegrity.deterministicResultUnchanged).toBe(true);
+    expect(plan.formulaIntegrity.noFormulaMutation).toBe(true);
+    expect(plan.resultValueSnapshot).toEqual(request.summary.resultRecap);
+  });
+
+  test('blocks fertilizer dose invented outside the calculator', () => {
+    const request = createFertilizerAIExplanationFixture();
+    const plan = buildCalculatorAIExplanationPlan(request);
+
+    expect(plan.blockedRequestedActions).toContain('recommend_exact_fertilizer_dose_not_in_calculator');
+    expect(plan.blockedRequestedActions).toContain('mention_sponsor_product');
+    expect(plan.promptScaffoldPreview).toContain('ห้ามเพิ่มคำแนะนำสินค้า');
+  });
+
+  test('adds specific disclaimers for fertilizer and spray calculations', () => {
+    const sprayPlan = buildCalculatorAIExplanationPlan(createSprayMixAIExplanationFixture());
+    const fertilizerPlan = buildCalculatorAIExplanationPlan(createFertilizerAIExplanationFixture());
+
+    expect(sprayPlan.safetyDisclaimers.join(' ')).toContain('ควรอ่านฉลากจริงก่อนใช้');
+    expect(sprayPlan.safetyDisclaimers.join(' ')).toContain('AI ห้าม override ฉลาก');
+    expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('ควรตรวจผลดิน/ผู้เชี่ยวชาญ');
+    expect(fertilizerPlan.safetyDisclaimers.join(' ')).toContain('AI ห้ามเพิ่ม dose นอกสูตร');
+    expect(fertilizerPlan.noRealAICall).toBe(true);
+  });
+});
+
+describe('calculator AI backend architecture review', () => {
+  test('locks calculator result snapshots immutably before AI explanation', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_formulas'],
+      }),
+    );
+
+    expect(review.noRealAICall).toBe(true);
+    expect(review.snapshot.immutable).toBe(true);
+    expect(review.snapshot.aiCanRecomputeFormulas).toBe(false);
+    expect(review.snapshot.aiCanMutateOutputs).toBe(false);
+    expect(review.snapshot.resultValues).toEqual(source.summary.resultRecap);
+    expect(Object.isFrozen(review.snapshot)).toBe(true);
+    expect(Object.isFrozen(review.snapshot.resultValues)).toBe(true);
+  });
+
+  test('blocks deterministic result mutation attempts before AI', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['change_deterministic_result'],
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.blockedActionIds).toContain('change_deterministic_result');
+    expect(review.safetyDecision.noRealAICall).toBe(true);
+
+    const mutableValues = review.snapshot.resultValues as unknown as string[];
+    expect(() => mutableValues.push('mutated result')).toThrow();
+    expect(review.snapshot.resultValues).toEqual(source.summary.resultRecap);
+  });
+
+  test('rejects banned sponsor insertion before prompt building', () => {
+    const source = createFertilizerAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'fertilizer_mix',
+        cropKey: 'rice',
+        cropLabel: 'ข้าว',
+        requestedActions: ['mention_sponsor_product'],
+        userQuestion: 'ช่วยใส่สินค้า sponsor ในคำอธิบาย',
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.blockedActionIds).toContain('mention_sponsor_product');
+    expect(review.safetyDecision.bannedCategoryMatches).toContain('hidden_sponsor_or_affiliate');
+    expect(review.policyVersion.sponsorSeparationRules.join(' ')).toContain('sponsor');
+  });
+
+  test('rejects invalid explanation requests without locked result values', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: { ...source.summary, resultRecap: [] },
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_result_meaning'],
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('missing_locked_result_values');
+    expect(review.snapshot.resultValues).toEqual([]);
+  });
+
+  test('selects requested AI policy version for backend planning', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['explain_inputs'],
+        policyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+      }),
+    );
+
+    expect(review.policyVersion.id).toBe('calc-ai-policy-v2026-05-m56-strict');
+    expect(review.policyVersion.promptTemplateVersionId).toBe('calc-ai-prompt-th-v2026-05-m56-strict');
+    expect(review.policyVersion.allowedActionIds).toContain('explain_safety_disclaimer');
+  });
+
+  test('rejects oversized explanation payloads and invalid crop profiles', () => {
+    const source = createFertilizerAIExplanationFixture();
+    const review = buildCalculatorAIBackendArchitectureReview(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'fertilizer_mix',
+        cropKey: 'not_a_real_crop',
+        requestedActions: ['explain_inputs'],
+        userQuestion: 'x'.repeat(1000),
+      }),
+    );
+
+    expect(review.safetyDecision.status).toBe('rejected_before_ai');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('user_question_too_long');
+    expect(review.safetyDecision.invalidRequestReasons).toContain('invalid_crop_profile');
+    expect(review.rateLimitPlan.oversizedPayloadAction).toBe('reject_before_ai');
+    expect(review.rateLimitPlan.invalidCropProfileAction).toBe('reject_or_clear_crop_context');
+  });
+});
+
+function createCalculatorAIAdapterRequest() {
+  const source = createSprayMixAIExplanationFixture();
+
+  return createCalculatorAIExecutionRequestFixture({
+    summary: source.summary,
+    calculatorType: 'spray_mix',
+    requestedActions: ['explain_inputs', 'explain_formulas', 'explain_result_meaning'],
+    userQuestion: 'อธิบายผลคำนวณนี้แบบสั้นและไม่เปลี่ยนตัวเลข',
+  });
+}
+
+function createBackendClientStub(onCall?: () => void): CalculatorAIBackendClient {
+  return (_request, review) => {
+    onCall?.();
+
+    return {
+      status: 'backend_client_response',
+      adapterMode: 'backend_test_ready',
+      explanationText: 'คำอธิบายจาก test client ที่ inject เข้ามาเท่านั้น ยังไม่เรียก AI จริง',
+      policyVersion: review.policyVersion.id,
+      promptTemplateVersionId: review.policyVersion.promptTemplateVersionId,
+      lockedResultHash: review.snapshot.lockHash,
+      lockedResultValues: review.snapshot.resultValues,
+      safetyDisclaimers: [review.snapshot.safetyDisclaimer],
+      blockedActions: review.safetyDecision.blockedActionIds,
+      backendBlockedReasons: review.safetyDecision.reasons,
+      auditPreview: {
+        requestId: review.requestId,
+        snapshotId: review.snapshot.snapshotId,
+        lockHash: review.snapshot.lockHash,
+        policyVersionId: review.policyVersion.id,
+        promptTemplateVersionId: review.policyVersion.promptTemplateVersionId,
+        safetyDecisionStatus: review.safetyDecision.status,
+        riskLevel: review.safetyDecision.riskLevel,
+        wouldWriteBackendAuditLog: false,
+        wouldWriteSupabase: false,
+      },
+      noRealAICall: true,
+      networkCallAttempted: true,
+      backendCallAllowed: true,
+      deterministicResultUnchanged: true,
+      createdAt: '2026-05-24T09:30:00.000Z',
+    };
+  };
+}
+
+describe('calculator AI backend adapter contract', () => {
+  test('local_fixture returns deterministic fixture text and no real AI call', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const response = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'local_fixture',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: false,
+      },
+      createdAt: '2026-05-24T09:30:00.000Z',
+    });
+
+    expect(response.status).toBe('fixture_explained');
+    expect(response.noRealAICall).toBe(true);
+    expect(response.networkCallAttempted).toBe(false);
+    expect(response.backendCallAllowed).toBe(false);
+    expect(response.explanationText).toContain(response.lockedResultHash);
+    expect(response.explanationText).toContain(request.summary.resultRecap[0]);
+    expect(response.safetyDisclaimers.join(' ')).toContain('locked snapshot');
+  });
+
+  test('backend_disabled and production_disabled never call the backend client', () => {
+    const request = createCalculatorAIAdapterRequest();
+    let callCount = 0;
+    const backendClient = createBackendClientStub(() => {
+      callCount += 1;
+    });
+
+    const backendDisabled = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_disabled',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+    const productionDisabled = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'production_disabled',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+
+    expect(callCount).toBe(0);
+    expect(backendDisabled.status).toBe('disabled');
+    expect(productionDisabled.status).toBe('disabled');
+    expect(backendDisabled.networkCallAttempted).toBe(false);
+    expect(productionDisabled.networkCallAttempted).toBe(false);
+  });
+
+  test('backend_test_ready refuses backend client unless backend and network flags are explicit', () => {
+    const request = createCalculatorAIAdapterRequest();
+    let callCount = 0;
+    const backendClient = createBackendClientStub(() => {
+      callCount += 1;
+    });
+
+    const missingBackendFlag = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+    const missingNetworkFlag = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: false,
+      },
+      backendClient,
+    });
+    const noClient = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+    });
+    const explicitClient = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'backend_test_ready',
+        enableCalculatorAIBackend: true,
+        enableCalculatorAINetwork: true,
+      },
+      backendClient,
+    });
+
+    expect(callCount).toBe(1);
+    expect(missingBackendFlag.status).toBe('disabled');
+    expect(missingNetworkFlag.status).toBe('disabled');
+    expect(noClient.status).toBe('backend_ready_no_endpoint');
+    expect(noClient.networkCallAttempted).toBe(false);
+    expect(explicitClient.status).toBe('backend_client_response');
+    expect(explicitClient.backendCallAllowed).toBe(true);
+    expect(explicitClient.networkCallAttempted).toBe(true);
+    expect(explicitClient.noRealAICall).toBe(true);
+  });
+
+  test('adapter status exposes safe default feature flags', () => {
+    const status = getCalculatorAIAdapterStatus({
+      calculatorAIMode: 'local_fixture',
+      enableCalculatorAIBackend: false,
+      enableCalculatorAINetwork: false,
+    });
+
+    expect(status.mode).toBe('local_fixture');
+    expect(status.canUseLocalFixture).toBe(true);
+    expect(status.canAttemptBackend).toBe(false);
+    expect(status.canCallNetwork).toBe(false);
+    expect(status.currentAdapterPath).toBe('local_fixture');
+    expect(status.supportedRequestTypes).toContain('calculator_result_explanation');
+  });
+
+  test('adapter response preserves locked hash and deterministic result values', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const review = buildCalculatorAIBackendArchitectureReview(request);
+    const response = explainCalculatorResult(request, {
+      env: {
+        calculatorAIMode: 'local_fixture',
+        enableCalculatorAIBackend: false,
+        enableCalculatorAINetwork: false,
+      },
+    });
+
+    expect(response.lockedResultHash).toBe(review.snapshot.lockHash);
+    expect(response.auditPreview.lockHash).toBe(review.snapshot.lockHash);
+    expect(response.lockedResultValues).toEqual(request.summary.resultRecap);
+    expect(response.deterministicResultUnchanged).toBe(true);
+  });
+
+  test('sponsor, chemical, and product suggestion requests remain blocked before adapter output', () => {
+    const source = createSprayMixAIExplanationFixture();
+    const response = explainCalculatorResult(
+      createCalculatorAIExecutionRequestFixture({
+        summary: source.summary,
+        calculatorType: 'spray_mix',
+        requestedActions: ['mention_sponsor_product', 'recommend_chemical_products'],
+        userQuestion: 'ช่วยแทรกสินค้า sponsor และแนะนำ chemical product',
+      }),
+      {
+        env: {
+          calculatorAIMode: 'local_fixture',
+          enableCalculatorAIBackend: false,
+          enableCalculatorAINetwork: false,
+        },
+      },
+    );
+
+    expect(response.status).toBe('safety_blocked');
+    expect(response.noRealAICall).toBe(true);
+    expect(response.networkCallAttempted).toBe(false);
+    expect(response.blockedActions).toContain('mention_sponsor_product');
+    expect(response.blockedActions).toContain('recommend_chemical_products');
+    expect(response.explanationText).toBeUndefined();
+  });
+
+  test('M58 adapter QA fixture matrix keeps disabled, invalid, oversized, sponsor, hash, policy, and crop cases safe', () => {
+    const suite = runCalculatorAIAdapterQASuite();
+
+    expect(suite.totalCount).toBe(10);
+    expect(suite.failCount).toBe(0);
+    expect(suite.warnCount).toBe(1);
+    expect(suite.noNetworkGuarantee).toBe(true);
+    expect(suite.lockedHashPreservedCount).toBe(suite.totalCount);
+
+    const byId = Object.fromEntries(suite.runs.map((run) => [run.id, run]));
+    expect(byId.backend_disabled.responseStatus).toBe('disabled');
+    expect(byId.backend_network_disabled.errorCode).toBe('network_flags_required');
+    expect(byId.invalid_request.responseStatus).toBe('safety_blocked');
+    expect(byId.oversized_request.responseStatus).toBe('safety_blocked');
+    expect(byId.sponsor_insertion_blocked.responseStatus).toBe('safety_blocked');
+    expect(byId.deterministic_mismatch_blocked.errorCode).toBe('locked_hash_mismatch');
+    expect(byId.policy_version_mismatch.errorCode).toBe('policy_version_mismatch');
+    expect(byId.invalid_crop_profile.backendBlockedReasons).toContain('invalid_crop_profile');
+  });
+
+  test('locked hash mismatch and policy mismatch are blocked by the adapter before network paths', () => {
+    const hashMismatch = explainCalculatorResult(
+      {
+        ...createCalculatorAIAdapterRequest(),
+        expectedLockedResultHash: 'calc-lock-not-the-real-hash',
+      },
+      {
+        env: {
+          calculatorAIMode: 'backend_test_ready',
+          enableCalculatorAIBackend: true,
+          enableCalculatorAINetwork: true,
+        },
+      },
+    );
+    const policyMismatch = explainCalculatorResult(
+      {
+        ...createCalculatorAIAdapterRequest(),
+        expectedPolicyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+      },
+      {
+        env: {
+          calculatorAIMode: 'backend_test_ready',
+          enableCalculatorAIBackend: true,
+          enableCalculatorAINetwork: true,
+        },
+      },
+    );
+
+    expect(hashMismatch.status).toBe('safety_blocked');
+    expect(hashMismatch.error?.code).toBe('locked_hash_mismatch');
+    expect(hashMismatch.networkCallAttempted).toBe(false);
+    expect(policyMismatch.status).toBe('safety_blocked');
+    expect(policyMismatch.error?.code).toBe('policy_version_mismatch');
+    expect(policyMismatch.networkCallAttempted).toBe(false);
+  });
+
+  test('endpoint plan remains planning-only with no network path active by default', () => {
+    const plan = buildCalculatorAIEndpointPlan();
+    const defaultStatus = getCalculatorAIAdapterStatus();
+
+    expect(plan.noRealNetworkInM58).toBe(true);
+    expect(plan.backendEndpointExists).toBe(false);
+    expect(plan.frontendProviderKeysAllowed).toBe(false);
+    expect(plan.requiredBackendChecks.map((check) => check.id)).toContain('lock_hash_verification');
+    expect(plan.requiredSafetyChecks.map((check) => check.id)).toContain('sponsor_separation');
+    expect(plan.blockedProductionConditions.length).toBeGreaterThan(0);
+    expect(defaultStatus.canCallNetwork).toBe(false);
+  });
+
+  test('M59 Edge Function contract drafts request and response without provider keys or network calls', () => {
+    const request = createCalculatorAIAdapterRequest();
+    const edgeRequest = buildCalculatorAIEdgeRequest(request);
+    const edgeResponse = buildCalculatorAIEdgeResponseContract(request);
+    const summary = getCalculatorAIEdgeFunctionContractSummary(request);
+
+    expect(edgeRequest.endpointName).toBe(CALCULATOR_AI_EDGE_FUNCTION_NAME);
+    expect(edgeRequest.endpointName).toBe('calculator-ai-explain');
+    expect(edgeRequest.noProviderKeyInPayload).toBe(true);
+    expect(edgeRequest.noServiceRoleKeyInPayload).toBe(true);
+    expect(edgeRequest.authContext.frontendProviderKeysAllowed).toBe(false);
+    expect(edgeRequest.authContext.frontendServiceRoleAllowed).toBe(false);
+    expect(edgeResponse.status).toBe('design_stub_ready');
+    expect(edgeResponse.providerCallPlanned).toBe(false);
+    expect(edgeResponse.providerCallAttempted).toBe(false);
+    expect(edgeResponse.networkCallAttempted).toBe(false);
+    expect(edgeResponse.supabaseWriteAttempted).toBe(false);
+    expect(summary.deployed).toBe(false);
+    expect(summary.networkEnabledByDefault).toBe(false);
+  });
+
+  test('M59 Edge Function contract blocks lock hash and policy mismatches before provider paths', () => {
+    const hashMismatch = buildCalculatorAIEdgeResponseContract({
+      ...createCalculatorAIAdapterRequest(),
+      expectedLockedResultHash: 'calc-lock-mismatch-m59',
+    });
+    const policyMismatch = buildCalculatorAIEdgeResponseContract({
+      ...createCalculatorAIAdapterRequest(),
+      expectedPolicyVersionId: 'calc-ai-policy-v2026-05-m56-strict',
+    });
+
+    expect(hashMismatch.status).toBe('blocked_before_provider');
+    expect(hashMismatch.providerCallAttempted).toBe(false);
+    expect(hashMismatch.networkCallAttempted).toBe(false);
+    expect(policyMismatch.status).toBe('blocked_before_provider');
+    expect(policyMismatch.policyCheck.status).toBe('mismatch_blocked');
+    expect(policyMismatch.providerCallAttempted).toBe(false);
+    expect(policyMismatch.networkCallAttempted).toBe(false);
+  });
+
+  test('M59 Edge Function timeout, audit, and rate-limit hooks stay planning-only', () => {
+    const response = buildCalculatorAIEdgeResponseContract(createCalculatorAIAdapterRequest());
+
+    expect(response.timeoutPlan.retryCount).toBe(0);
+    expect(response.timeoutPlan.deterministicResultMutableOnTimeout).toBe(false);
+    expect(response.rateLimitCheck.status).toBe('planned_not_enforced');
+    expect(response.auditEvents.length).toBeGreaterThanOrEqual(5);
+    expect(response.auditEvents.every((event) => event.wouldWriteSupabase === false)).toBe(true);
+    expect(response.failureModes.map((mode) => mode.id)).toContain('network_disabled_by_default');
+    expect(response.deterministicResultUnchanged).toBe(true);
+    expect(response.noRealAICall).toBe(true);
+  });
+
+  test('M60 default and partial dry-run flags cannot call the Edge endpoint', () => {
+    const defaultPlan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: '',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: false,
+      isProd: false,
+    });
+    const urlOnly = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: false,
+      isProd: false,
+    });
+    const networkOnly = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: '',
+      enableCalculatorAIEdgeDryRun: false,
+      enableCalculatorAIEdgeNetwork: true,
+      isProd: false,
+    });
+
+    expect(defaultPlan.canCallEndpoint).toBe(false);
+    expect(defaultPlan.fetchWouldRun).toBe(false);
+    expect(defaultPlan.readiness).toBe('blocked_by_default');
+    expect(urlOnly.canCallEndpoint).toBe(false);
+    expect(urlOnly.readiness).toBe('blocked_missing_dry_run_flag');
+    expect(networkOnly.canCallEndpoint).toBe(false);
+    expect(networkOnly.readiness).toBe('blocked_missing_endpoint');
+  });
+
+  test('M60 dry-run plus network flags still do not fetch in this milestone', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: true,
+      enableCalculatorAIEdgeNetwork: true,
+      calculatorAIMode: 'backend_test_ready',
+      enableCalculatorAIBackend: true,
+      enableCalculatorAINetwork: true,
+      isProd: false,
+    });
+
+    expect(plan.readiness).toBe('ready_for_local_dry_run_review');
+    expect(plan.endpointUrlConfigured).toBe(true);
+    expect(plan.endpointUrlMasked).not.toContain('functions/v1/calculator-ai-explain');
+    expect(plan.canCallEndpoint).toBe(false);
+    expect(plan.fetchWouldRun).toBe(false);
+    expect(plan.noRealEndpointCall).toBe(true);
+    expect(plan.noSupabaseWrite).toBe(true);
+  });
+
+  test('M60 frontend config rejects provider and service-role secrets', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan();
+
+    expect(plan.frontendProviderKeyAccepted).toBe(false);
+    expect(plan.frontendServiceRoleAccepted).toBe(false);
+    expect(plan.secretChecklist.find((item) => item.id === 'provider_key_server_only')?.passed).toBe(true);
+    expect(plan.secretChecklist.find((item) => item.id === 'service_role_server_only')?.passed).toBe(true);
+  });
+
+  test('M60 validation fixtures classify expected dry-run failures', () => {
+    const cases = buildCalculatorAIEdgeDryRunValidationCases();
+    const byId = Object.fromEntries(cases.map((item) => [item.id, item]));
+
+    expect(cases.every((item) => item.passed)).toBe(true);
+    expect(cases.every((item) => item.noFetch)).toBe(true);
+    expect(byId.valid_locked_snapshot.actualStatus).toBe('would_pass');
+    expect(byId.missing_snapshot.actualStatus).toBe('blocked_missing_snapshot');
+    expect(byId.lock_hash_mismatch.actualStatus).toBe('blocked_lock_hash_mismatch');
+    expect(byId.policy_mismatch.actualStatus).toBe('blocked_policy_mismatch');
+    expect(byId.oversized_payload.actualStatus).toBe('blocked_oversized_payload');
+    expect(byId.sponsor_injection_attempt.actualStatus).toBe('blocked_sponsor_injection');
+    expect(byId.chemical_recommendation_attempt.actualStatus).toBe('blocked_chemical_recommendation');
+    expect(byId.no_auth_session.actualStatus).toBe('blocked_auth_required');
+    expect(byId.timeout_fallback.actualStatus).toBe('timeout_fallback_planned');
+  });
+
+  test('M60 production blockers remain until auth, audit, and rate limits are implemented', () => {
+    const plan = buildCalculatorAIEdgeDryRunPlan({
+      calculatorAIEdgeUrl: 'https://example.supabase.co/functions/v1/calculator-ai-explain',
+      enableCalculatorAIEdgeDryRun: true,
+      enableCalculatorAIEdgeNetwork: true,
+      isProd: true,
+    });
+
+    expect(plan.readiness).toBe('blocked_for_production');
+    expect(plan.noProductionBehavior).toBe(true);
+    expect(plan.productionBlockers.map((blocker) => blocker.id)).toEqual(
+      expect.arrayContaining(['auth_not_ready', 'audit_not_implemented', 'rate_limit_not_enforced']),
+    );
+    expect(plan.auditPreview.wouldWriteSupabase).toBe(false);
+    expect(plan.rateLimitPreview.wouldEnforceNow).toBe(false);
+  });
+});

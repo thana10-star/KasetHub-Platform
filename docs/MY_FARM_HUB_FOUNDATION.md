@@ -23,7 +23,9 @@ M34 aggregates existing local sources only:
 - Guest Memory farm records.
 - Saved plant analysis result summaries.
 - Farm area saved plots from `kasethub.farmArea.v1`.
+- M83-M92 Farm Records and Farm Finance Ledger from `kasethub.farmRecords.v1` and `/app/farm-records`, including local edit/timeline/export/restore/recovery/data-control, sync consent prototype status, cost summary, category breakdowns, harvest/yield records, cost-per-kg metrics, break-even estimate status, and a Home-first My Farm entry point.
 - Crop Watch followed crops and alert preferences from `kasethub.cropWatch.v1`.
+- Agriculture calculator history and favorites from `kasethub.agriCalculators.v1`.
 - Weather fixture context from the selected/default mock weather location.
 - Saved articles and videos from Guest Memory.
 - Recent AI questions from Guest Memory.
@@ -68,9 +70,16 @@ Quick actions:
 
 - วิเคราะห์โรคพืช
 - วัดพื้นที่แปลง
+- เครื่องคำนวณเกษตร
 - ดูสภาพอากาศ
 - ติดตามราคาพืช
 - ถาม AI
+
+## M92 Home-first Entry
+
+M92 adds a prominent Home Farm Hub card on `/app` so farmers can open My Farm without hunting through Profile. The card links to `/app/my-farm`, `/app/farm-records`, `/app/farm-records#farm-cost-dashboard`, and `/app/weather` with large Thai labels.
+
+The home summary reads the existing local Farm Records state only. It does not create a new store, does not sync, and does not change Farm Records service behavior.
 
 ## Timeline Rules
 
@@ -112,12 +121,39 @@ Recommended future tables:
 
 These should complement existing/future records such as `farm_records`, `farm_plots`, `farm_plot_measurements`, `crop_price_watches`, saved content, and AI history.
 
+M49 adds calculator-related future records that can also feed My Farm after auth and consent:
+
+- `calculator_history`
+- `fertilizer_profiles`
+- `planting_profiles`
+- `farm_cost_records`
+
+M83 adds local-first source records, M84 adds the farmer-facing local UI, M85 surfaces Farm Records status inside My Farm, M86 adds a My Farm entry point to Farm Records data control, M87 links My Farm to guarded local backup/restore plus a disabled sync consent gate, M88 adds restore recovery guidance plus sync architecture review, M89 links My Farm to the non-writing sync consent prototype, M90 links My Farm to the local Farm Cost Dashboard, M91 adds harvest/yield and cost-per-kg summary visibility, and M92 makes My Farm visible from Home with large Thai quick actions while still staying local-only. These records should later feed real My Farm cloud sync only after auth, consent, deletion/export tooling, restore/recovery review, audit/idempotency planning, and owner-scoped RLS:
+
+- `farm_plots`
+- `crop_cycles`
+- `farm_activity_records`
+- `farm_finance_entries`
+- `farm_harvest_records`
+- computed ledger summaries generated from owned records
+- latest activity/finance/harvest dates and recent local farm timeline events
+- local JSON backup and finance CSV readiness metadata
+- local JSON restore readiness metadata
+- pre-restore local snapshot/readiness metadata
+- disabled cloud sync consent gate status
+- local sync consent prototype status, which is not legal consent and does not enable sync
+- local cost summary fields such as cost per rai, cost per kg, total harvest kg, net profit, top expense category, and break-even estimate readiness
+
 ## Safety Rules
 
 - Do not upload raw images from My Farm.
 - Do not treat mock weather as real forecast.
 - Do not treat crop prices as production prices.
 - Do not treat farm area estimates as official land survey results.
+- Do not treat calculator output as an agronomist recommendation, product label, yield guarantee, or financial advice.
+- Do not treat Farm Records cost dashboard or break-even estimates as official accounting, tax, loan, or legal advice.
+- Do not treat harvest/yield or cost-per-kg estimates as official yield guarantees, accounting, tax, loan, or legal advice.
 - Do not delete local data from the hub without an explicit, reviewed recovery/confirmation flow.
 - Do not sync until real auth ownership and RLS are verified.
 - Do not treat local notification preferences as real push/LINE/SMS consent.
+- Do not process Farm Records or Farm Finance Ledger data with AI until a separate AI consent boundary exists.

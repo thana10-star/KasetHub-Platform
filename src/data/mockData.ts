@@ -1,5 +1,6 @@
 import {
   Bot,
+  Calculator,
   CloudSun,
   Coins,
   MessageCircleQuestion,
@@ -60,10 +61,17 @@ export const quickActions: QuickAction[] = [
   },
   {
     label: 'สภาพอากาศเกษตร',
-    description: 'ฝน แดด ลม ตัวอย่าง',
+    description: 'Open-Meteo flag + ตั้งค่าพื้นที่ในเครื่อง',
     href: '/app/weather',
     icon: CloudSun,
     accent: 'sky',
+  },
+  {
+    label: 'เครื่องคำนวณเกษตร',
+    description: 'ผสมยา ปุ๋ย ระยะปลูก',
+    href: '/app/calculators',
+    icon: Calculator,
+    accent: 'gold',
   },
   {
     label: 'วัดพื้นที่แปลง',

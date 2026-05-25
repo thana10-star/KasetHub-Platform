@@ -55,6 +55,7 @@ Best when the priority is operational control before public content/community.
 - Do not show crop price data as production truth without source attribution, freshness, and correction workflow.
 - Do not show weather data as production truth without source attribution, timestamp, freshness, and location privacy review.
 - Do not treat farm area estimates as official land survey results.
+- Do not treat agriculture calculator output as a product label, agronomist recommendation, yield guarantee, or financial advice.
 
 ## Suggested Milestone Order
 
@@ -64,10 +65,11 @@ Best when the priority is operational control before public content/community.
 4. M34 My Farm Hub Upgrade Foundation. Completed as a local-first farmer workspace aggregation layer.
 5. M35 Notification Center Upgrade Foundation. Completed as a local/mock in-app notification and preference layer.
 6. M36 Real Backend Phase Decision + Staging Branch Plan. Completed as planning only.
-7. M37 Supabase staging SQL/RLS execution and verification.
-8. M38 Phone Auth staging after SQL/RLS checks.
-9. M39 Guest Sync Edge Function staging after real session ownership.
-10. M40 AI text proxy staging, followed by plant vision and mobile/PWA work.
+7. M49 Agriculture Calculator Core Foundation. Completed as local-only calculator utility for spray, fertilizer, planting, yield, and cost.
+8. Supabase staging SQL/RLS execution and verification.
+9. Phone Auth staging after SQL/RLS checks.
+10. Guest Sync Edge Function staging after real session ownership.
+11. AI text proxy staging, followed by plant vision and mobile/PWA work.
 
 ## M31 Decision Update
 
@@ -114,3 +116,9 @@ Recommended order:
 AI text proxy can move earlier if demo value is the priority, but only with backend-owned secrets, rate limits, cost caps, safety logs, and fixture fallback.
 
 No real backend/API/auth behavior is enabled by this planning milestone.
+
+## M49 Decision Update
+
+M49 is low-risk because it adds deterministic calculator utilities and localStorage history only. It does not call AI, connect Supabase, write backend data, request GPS/maps, sync to cloud, or introduce payments/sponsor routing.
+
+This does not remove the need for real auth, RLS, consent, expert review, product-label handling, source attribution, and sponsor/affiliate separation before calculator history or recommendations become cloud-backed or monetized.

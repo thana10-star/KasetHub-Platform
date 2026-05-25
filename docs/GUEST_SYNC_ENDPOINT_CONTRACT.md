@@ -220,3 +220,30 @@ M29 narrows the first real sync endpoint plan to a Supabase Edge Function:
 - frontend: anon key only, no service-role key, no endpoint call in M29
 
 The Edge Function must validate `auth.uid()`, consent, payload version, owner id, idempotency key, duplicate merge rules, and rollback/audit behavior before writing. See `docs/GUEST_SYNC_EDGE_FUNCTION_CONTRACT.md` and `docs/GUEST_SYNC_STAGING_TEST_PLAN.md`.
+
+## M63 Ownership/RLS Gate Dependency
+
+M63 adds the `/app/ownership-rls-gate` review before this endpoint can be used. The endpoint must stay disabled until:
+
+- the request owner is derived from Supabase Auth, not from browser-supplied owner fields
+- `owner_id = auth.uid()` is verified server-side
+- consent and idempotency are required
+- audit logging exists
+- owner-scoped RLS checks prove own-only access
+- service-role credentials remain backend-only
+
+M63 does not deploy or call the endpoint.
+
+## M64 Dry-run Payload Contract Dependency
+
+M64 adds a local-only payload builder for the future endpoint. The future backend should accept only a server-validated version of the M64-safe groups:
+
+- saved items
+- farm records
+- recent AI questions when explicitly consented
+- crop watches
+- calculator saved summaries as safe summaries only
+- followed topics
+- likes
+
+The endpoint must reject raw images, base64 blobs, OTP/session tokens, service-role values, provider keys, and owner ids that do not match `auth.uid()`.

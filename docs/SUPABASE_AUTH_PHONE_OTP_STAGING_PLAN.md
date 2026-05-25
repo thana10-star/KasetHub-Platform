@@ -110,3 +110,34 @@ Required sequence:
 6. Keep `VITE_ENABLE_CLOUD_SYNC=false` outside a controlled staging test window.
 
 M29 adds the contract and readiness screen only. It does not send OTP, deploy an Edge Function, call an endpoint, or write Supabase data.
+
+## M61 Staging Test Review
+
+M61 returns to the Phone Auth roadmap after the calculator sub-phase.
+
+New route:
+
+- `/app/auth/phone-staging-test`
+
+New service:
+
+- `src/services/auth/phone-auth-staging-review.ts`
+
+M61 uses M42 and M44 evidence as prerequisites, then reviews redirect URLs, SMS provider setup, private test phone numbers, OTP cost/rate limits, ownership before sync, and rollback. It keeps `canSendRealOtp: false`, `noRealSms: true`, `noSupabaseWrite: true`, and `noCloudSync: true`.
+
+The first real OTP test must still happen in a future milestone after the dashboard setup and rollback plan are reviewed.
+## M62 Controlled Phone Auth Staging Test
+
+M62 changes the future staging mode name to `supabase_staging_ready` and adds an adapter that can call Supabase Auth only when local flags are explicitly enabled.
+
+Required local staging flags:
+
+```env
+VITE_ENABLE_SUPABASE=true
+VITE_ENABLE_AUTH=true
+VITE_ENABLE_PHONE_AUTH=true
+VITE_PHONE_AUTH_MODE=supabase_staging_ready
+VITE_ENABLE_CLOUD_SYNC=false
+```
+
+The app may request and verify OTP through Supabase Auth in this mode, but it must not write app tables or trigger Guest Memory sync.

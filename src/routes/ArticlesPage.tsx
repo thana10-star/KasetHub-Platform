@@ -1,4 +1,4 @@
-import { FileText, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react';
+import { BookOpenCheck, FileText, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArticleCard } from '@/components/kaset/ArticleCard';
@@ -10,6 +10,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { cx } from '@/components/ui/classNames';
 import { articleContents, contentToArticle } from '@/services/content/content-fixtures';
 import { contentCategories, contentDifficultyLabels } from '@/services/content/content-taxonomy';
+import { getOfflineAgriArticleReadinessSummary } from '@/services/content/offline-agri-article-service';
 import type { ContentCategory, ContentDifficulty } from '@/services/content/content.types';
 
 type CategoryFilter = ContentCategory | 'ทั้งหมด';
@@ -22,6 +23,8 @@ export function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('ทั้งหมด');
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('ทั้งหมด');
+
+  const offlineLibrary = getOfflineAgriArticleReadinessSummary();
 
   const filteredArticles = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -52,6 +55,25 @@ export function ArticlesPage() {
         <NoticeBox title="คลังบทความเกษตร" tone="success">
           เลือกอ่านตามหมวด ค้นหาหัวข้อที่เกี่ยวกับแปลงของคุณ และบันทึกบทความไว้กลับมาอ่านภายหลัง
         </NoticeBox>
+
+        <Link to="/app/articles/offline">
+          <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+                <BookOpenCheck aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-extrabold text-kaset-ink">คลังความรู้เกษตรออฟไลน์</h2>
+                  <StatusPill tone="success">{offlineLibrary.total} หัวข้อ</StatusPill>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-slate-700">
+                  บทความแกนหลักที่ฝังอยู่ในแอป อ่านได้แม้ยังไม่มี CMS หรือเครือข่าย พร้อมโครงสร้างรองรับ Supabase CMS ในอนาคต
+                </p>
+              </div>
+            </div>
+          </Card>
+        </Link>
 
         <Card className="p-4">
           <div className="flex items-center gap-3">

@@ -202,3 +202,39 @@ Run real Supabase work on `staging/supabase`, not directly on `main`.
 - `staging/supabase` can hold staging URL/anon env wiring, SQL/RLS verification UI changes, phone auth staging, and Guest Sync Edge Function work.
 - Never commit `.env.local`, service-role keys, SMS provider secrets, or production project credentials.
 - Merge back only after `npm run lint`, `npm run build`, manual route checks, RLS verification, and rollback notes are complete.
+
+## M39 Local Env Setup Step
+
+Before any real Supabase staging connection work:
+
+1. Read `docs/M39_SUPABASE_STAGING_ENV_LOCAL_SETUP.md`.
+2. Copy `.env.example` to `.env.local` on your machine only.
+3. Add only the staging Project URL and anon public key.
+4. Keep network dry-run, auth, cloud sync, and Guest Sync Edge disabled.
+5. Restart Vite.
+6. Open `/app/env-safety`.
+7. Continue to `/app/supabase-connection` only if env safety has no blockers.
+
+Do not add service-role keys or production credentials to any frontend env file.
+
+## M40 Manual Project And SQL Run Prep
+
+M40 prepares the actual Supabase staging project creation and manual SQL/RLS run. It still does not connect the app.
+
+Manual sequence:
+
+1. Create a new Supabase project named `kasethub-staging`.
+2. Choose a region close to Thailand/Singapore if available.
+3. Save Project URL and anon key locally only.
+4. Open SQL Editor.
+5. Run `supabase/migrations/0001_kasethub_core_schema.sql`.
+6. Run `supabase/policies/0001_kasethub_rls_policies.sql`.
+7. Verify tables, RLS, policies, indexes, and triggers.
+
+Required docs:
+
+- `docs/M40_SUPABASE_PROJECT_CREATION_GUIDE.md`
+- `docs/M40_SQL_RUN_PREP_CHECKLIST.md`
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+Keep auth, cloud sync, storage uploads, Edge Functions, AI, and app writes disabled.

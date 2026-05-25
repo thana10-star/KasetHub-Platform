@@ -20,9 +20,13 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { getGuestSyncAdapterStatus } from '@/services/backend/guest-sync-adapter';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
 import { runGuestSyncStagingReadiness } from '@/services/backend/guest-sync-staging-readiness';
 import { createGuestToCloudSyncPlan } from '@/services/backend/guest-to-cloud-sync-planner';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
+import { getPhoneAuthStagingAdapterStatus } from '@/services/auth/phone-auth-staging-adapter';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 
 const backupOptions = [
@@ -50,6 +54,17 @@ export function AccountPreviewPage() {
   const supabaseStatus = accountStatus.supabase;
   const guestSyncStatus = getGuestSyncAdapterStatus();
   const guestSyncEdge = runGuestSyncStagingReadiness();
+  const m61Review = runPhoneAuthStagingReview();
+  const phoneStagingStatus = getPhoneAuthStagingAdapterStatus();
+  const ownershipStatus = getAuthOwnershipStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+  });
+  const ownershipGate = buildOwnershipRlsGateStatus({
+    phoneMockSession: phoneStagingStatus.localMockSession,
+    supabaseSessionPreview: phoneStagingStatus.supabaseSessionPreview,
+    guestMemoryRecordCount: counts.savedItems + counts.likedPosts + counts.followedTopics + counts.farmRecords + counts.recentAIQuestions,
+  });
 
   return (
     <div>
@@ -95,10 +110,36 @@ export function AccountPreviewPage() {
             <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging">
               เปิด Phone OTP staging checklist
             </Link>
+            <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/auth/phone-staging-test">
+              เปิด M61 Phone Auth staging test
+            </Link>
             <Link className="inline-flex text-sm font-extrabold text-kaset-deep" to="/app/guest-sync-edge">
               เปิด Guest Sync Edge plan
             </Link>
           </div>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" title="M61 Phone Auth staging status">
+          {m61Review.levelLabel} · current mode {m61Review.flags.phoneAuthMode} · ข้อมูล Guest Memory จะยังไม่ขึ้น cloud จนกว่า Phone Auth staging และ ownership/RLS จะผ่านจริง
+        </NoticeBox>
+
+        <NoticeBox tone={ownershipStatus.realSupabaseSessionDetected ? 'success' : 'warning'} title="M62 Phone Auth ownership status">
+          {ownershipStatus.label} · real session detected {String(ownershipStatus.realSupabaseSessionDetected)} · sync allowed{' '}
+          {String(ownershipStatus.syncAllowed)} · {ownershipStatus.explanation}
+        </NoticeBox>
+
+        <NoticeBox tone="danger" title="M63 ownership/RLS gate">
+          {ownershipGate.statusLabel} · blockers {ownershipGate.blockers.length} · syncAllowed {String(ownershipGate.syncAllowed)} · Guest Memory upload ยังถูกบล็อกจนกว่า owner, consent, idempotency, audit และ RLS จะผ่านครบ
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/ownership-rls-gate">
+            เปิด Ownership/RLS gate review
+          </Link>
+        </NoticeBox>
+
+        <NoticeBox tone="warning" icon={CloudUpload} title="M64 dry-run payload preview">
+          ดูกลุ่มข้อมูลและ payload preview แบบ local-only ได้แล้ว แต่ยังไม่ sync cloud และยังไม่เขียน Supabase app table
+          <Link className="mt-3 inline-flex font-bold text-kaset-deep" to="/app/guest-sync-dry-run">
+            เปิด Guest Sync dry-run payload
+          </Link>
         </NoticeBox>
 
         {accountStatus.phoneMockSession ? (

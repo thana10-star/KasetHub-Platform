@@ -78,3 +78,34 @@ A real content system should add:
 - safety review gates for disease, fertilizer, pesticide, pricing, and AI-assisted claims
 - public read APIs that expose only published content
 - RLS or backend authorization aligned with the M18 schema draft
+
+## M65 Offline Agriculture Article Library
+
+M65 adds a separate offline-first agriculture article foundation:
+
+- `src/services/content/offline-agri-article.types.ts`
+- `src/services/content/offline-agri-article-taxonomy.ts`
+- `src/services/content/offline-agri-article-fixtures.ts`
+- `src/services/content/offline-agri-article-service.ts`
+- `/app/articles/offline`
+- `/app/articles/offline/:slug`
+
+The M65 library bundles evergreen Thai agriculture article outlines and starter snippets for offline reading. It covers soil, water, fertilizer, rice, sugarcane, cassava, and farm finance. It does not replace the M20 article fixtures; it prepares a more CMS-compatible schema for future Supabase content.
+
+M65 still does not add Supabase writes, backend CMS writes, AI article generation, YouTube import, sponsor/affiliate injection, external image URLs, or network calls.
+
+## M66 Offline Article QA And CMS Contract
+
+M66 adds `offline-agri-article-qa.ts` and `offline-agri-cms-override.ts` to harden the M65 library before full article content is added.
+
+The QA layer checks metadata, outline sections, required disclaimers, image metadata, version fixtures, and body/source readiness. The CMS override contract blocks disclaimer removal, external offline images, stale title/summary updates, and missing freshness dates for finance/government/seasonal content.
+
+`/app/articles/offline-qa` surfaces the current QA score and warnings without calling a backend or CMS.
+
+## M67 Offline Article Full-content Readiness
+
+M67 adds pilot full-content draft templates for five article topics and a readiness route at `/app/articles/full-content-readiness`.
+
+The new service layer prepares source placeholders, review requirements, image requirements, expert escalation notes, and publish blockers. All templates remain `draft_template`; none are official full articles.
+
+M67 still does not write CMS records, generate article text with AI, generate real images, load external images, add sponsor content, or hardcode official finance/loan/government facts.

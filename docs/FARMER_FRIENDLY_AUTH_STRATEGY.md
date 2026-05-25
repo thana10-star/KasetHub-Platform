@@ -149,3 +149,16 @@ Before real SMS is enabled, the team must verify:
 - logout is obvious on shared devices
 - Guest Sync remains disabled until session ownership is real
 - service-role keys and SMS provider secrets never appear in frontend
+
+## M61 Phone Auth Staging Test UX
+
+M61 adds a stricter staging test review route at `/app/auth/phone-staging-test`.
+
+The user-facing screens should keep the message simple:
+
+- "ยังไม่ส่ง OTP จริง"
+- "ตอนนี้ยังเป็น local mock"
+- "ต้องทดสอบบน staging ก่อน production"
+- "ข้อมูลในเครื่องจะยังไม่ขึ้น cloud จนกว่าจะยืนยันเจ้าของบัญชีจริง"
+
+Do not ask normal users to understand Supabase settings. Show dashboard, redirect, SMS, and rollback details only in staging/admin/QA contexts.

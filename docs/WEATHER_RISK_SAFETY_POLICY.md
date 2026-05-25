@@ -1,0 +1,43 @@
+# Weather Risk Safety Policy
+
+Weather risk intelligence in KasetHub is general caution only.
+
+## Allowed
+
+- Explain that rain or wind may affect spraying conditions.
+- Explain that high humidity may be a reason to inspect crops more carefully.
+- Explain that high heat may require planning outdoor work carefully.
+- Explain that stale forecasts should be checked again.
+- Suggest checking local conditions and official weather sources.
+- Suggest asking a local expert when uncertain.
+
+## Blocked
+
+- Product or sponsor recommendation.
+- Chemical product recommendation.
+- Exact chemical or fertilizer dose.
+- Instructions that override labels.
+- Guaranteed yield, profit, safety, or drying result.
+- Crop-specific disease diagnosis.
+- Push notification automation without future review.
+
+## Required Disclaimers
+
+- `คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ`
+- `อ่านฉลากจริงก่อนใช้เสมอ`
+- `พยากรณ์อากาศอาจคลาดเคลื่อนได้`
+
+## Data Boundary
+
+M78 uses weather adapter data only. It does not require GPS, precise farm location, Supabase writes, backend writes, or cloud sync.
+
+## M79 Expert Review Gate
+
+M79 requires safety reviewer sign-off before any future prescriptive behavior. The current implementation keeps all safety sign-offs pending and keeps `prescriptiveAllowed: false`.
+
+## M80 Human Release Safety
+
+M80 keeps final prescriptive release blocked even when governance fixtures exist. A human approval gate remains required before any future rule can move beyond general caution.
+## M81 AI Text Proxy Boundary
+
+Weather caution explanations may be routed through the future AI text proxy only as broad, non-prescriptive explanation. They must not become diagnosis, exact spraying/fertilizer instruction, product recommendation, guaranteed outcome, or sponsor content. M81 keeps the path staging-only and fixture fallback by default.

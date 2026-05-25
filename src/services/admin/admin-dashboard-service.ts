@@ -21,6 +21,8 @@ import { buildYouTubeImportPlan } from '@/services/content/youtube-import-planne
 import { cropPriceItems } from '@/services/crop-prices/crop-price-fixtures';
 import { cropPriceSources } from '@/services/crop-prices/crop-price-sources';
 import { getCropWatchState } from '@/services/crop-prices/crop-watch-service';
+import { computeHarvestYieldSummary } from '@/services/farm-records/farm-cost-analytics-service';
+import { computeFarmLedgerSummary, getFarmRecordsState } from '@/services/farm-records/farm-records-service';
 import {
   createLocalModeratorQueueItems,
   getCommunityModerationState,
@@ -60,6 +62,9 @@ export function buildAdminDashboardData(): AdminDashboardData {
   const localQueueItems = createLocalModeratorQueueItems(moderationState.reports);
   const moderationQueueItems = [...localQueueItems, ...mockModeratorQueueItems];
   const cropWatchState = getCropWatchState();
+  const farmRecordsState = getFarmRecordsState();
+  const farmLedgerSummary = computeFarmLedgerSummary();
+  const farmHarvestSummary = computeHarvestYieldSummary(farmRecordsState);
   const aiProxyStatus = getAIProxyAdapterStatus();
   const aiCreditState = getAICreditState();
   const aiCreditSummary = getCreditSummary(aiCreditState);
@@ -140,6 +145,16 @@ export function buildAdminDashboardData(): AdminDashboardData {
       route: '/app/crop-watch',
     }),
     createModule({
+      id: 'farm_records',
+      title: adminModuleLabels.farm_records,
+      summary: 'Local-first farmer-facing farm records and finance ledger UI with M92 home-first discovery, harvest/yield records, cost-per-kg analytics, category breakdown, break-even estimates, export/restore, and disabled sync consent prototype; no cloud sync, GPS, Supabase writes, AI processing, or official tax/accounting claims',
+      status: 'mock_only',
+      metricLabel: 'records',
+      metricValue: farmRecordsState.farmActivityRecords.length + farmRecordsState.farmFinanceEntries.length + farmRecordsState.farmHarvestRecords.length,
+      readinessLabel: `${farmRecordsState.farmPlots.length} plots - ${farmRecordsState.cropCycles.filter((cycle) => cycle.status === 'active').length} active cycles - ${farmHarvestSummary.totalHarvestKg.toLocaleString('th-TH')} kg harvest - net ${farmLedgerSummary.netProfit.toLocaleString('th-TH')} THB`,
+      route: '/app/farm-records',
+    }),
+    createModule({
       id: 'ai_safety',
       title: adminModuleLabels.ai_safety,
       summary: 'AI proxy, credit state, warnings และ safety review preview',
@@ -204,6 +219,7 @@ export function buildAdminDashboardData(): AdminDashboardData {
     cropPriceSources: cropPriceSources.length,
     cropPriceItems: cropPriceItems.length,
     cropWatchItems: cropWatchState.watches.length,
+    farmRecordItems: farmRecordsState.farmActivityRecords.length + farmRecordsState.farmFinanceEntries.length + farmRecordsState.farmHarvestRecords.length,
     aiSafetyItems,
     systemHealth,
   };

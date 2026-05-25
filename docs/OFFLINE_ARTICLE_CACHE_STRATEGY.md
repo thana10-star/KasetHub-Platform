@@ -56,3 +56,14 @@ A production offline reader should add:
 ## Safety Rule
 
 Offline content must preserve safety notes and source metadata. Disease, pesticide, fertilizer, pricing, and AI-assisted advice should not be cached without its disclaimer and publish version.
+
+## M65 Bundled Agriculture Articles
+
+M65 adds bundled offline agriculture article fixtures that are available without a cache fetch:
+
+- core article outlines live inside the app bundle
+- planned image metadata uses local paths only
+- cover images remain placeholders until optimized assets are intentionally added
+- future CMS content can override or extend body content, while the bundled article remains a fallback
+
+The M65 offline article library is not a service worker cache, IndexedDB body store, or Supabase CMS mirror yet. It is a schema and UI foundation for offline reading.

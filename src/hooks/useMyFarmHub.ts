@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useCropWatch } from '@/hooks/useCropWatch';
 import { useFarmArea } from '@/hooks/useFarmArea';
+import { useFarmRecords } from '@/hooks/useFarmRecords';
 import { useGuestMemory } from '@/hooks/useGuestMemory';
 import { useWeather } from '@/hooks/useWeather';
 import { buildMyFarmHub } from '@/services/my-farm/my-farm-hub-service';
@@ -8,6 +9,7 @@ import { buildMyFarmHub } from '@/services/my-farm/my-farm-hub-service';
 export function useMyFarmHub() {
   const guestMemory = useGuestMemory();
   const farmArea = useFarmArea();
+  const farmRecords = useFarmRecords();
   const cropWatch = useCropWatch();
   const weather = useWeather();
 
@@ -16,16 +18,18 @@ export function useMyFarmHub() {
       buildMyFarmHub({
         guestMemory: guestMemory.state,
         farmPlots: farmArea.plots,
+        farmRecords: farmRecords.state,
         cropWatches: cropWatch.watches,
         weatherForecast: weather.forecast,
       }),
-    [cropWatch.watches, farmArea.plots, guestMemory.state, weather.forecast],
+    [cropWatch.watches, farmArea.plots, farmRecords.state, guestMemory.state, weather.forecast],
   );
 
   return {
     ...hub,
     guestMemory,
     farmArea,
+    farmRecords,
     cropWatch,
     weather,
   };

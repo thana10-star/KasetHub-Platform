@@ -172,3 +172,18 @@ The M18 SQL draft does not create full admin RBAC. Verify that these are not acc
 - [ ] Rollback/cleanup plan reviewed.
 - [ ] Production remains untouched.
 - [ ] App route `/app/supabase-sql-checklist` still says SQL has not been run by the app.
+
+## M40 Post-SQL Verification Addendum
+
+After manually running the M18 schema and RLS SQL on `kasethub-staging`, also read:
+
+- `docs/M40_POST_SQL_VERIFICATION_GUIDE.md`
+
+Confirm:
+
+- schema SQL ran before RLS SQL
+- table list appears as expected
+- RLS is enabled on private/user-owned tables
+- public read policies are limited to published/visible/reference data
+- no public write policy was accidentally added
+- auth, uploads, Edge Functions, AI, and cloud sync remain untested and disabled

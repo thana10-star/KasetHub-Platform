@@ -22,6 +22,7 @@ export const adminModuleLabels: Record<AdminModuleId, string> = {
   moderation: 'Moderation',
   crop_prices: 'ราคาพืชผล',
   crop_watch: 'พืชที่ติดตาม',
+  farm_records: 'Farm Records',
   ai_safety: 'AI Safety',
   plant_analysis: 'วิเคราะห์โรคพืช',
   guest_sync: 'Guest Sync',

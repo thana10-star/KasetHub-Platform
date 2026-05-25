@@ -13,7 +13,13 @@ import {
 } from '@/services/auth/phone-auth-local-mock';
 
 function normalizeMode(value: string): PhoneAuthMode {
-  if (value === 'supabase_disabled' || value === 'supabase_ready_mock' || value === 'production_disabled') {
+  if (
+    value === 'supabase_disabled' ||
+    value === 'supabase_ready_mock' ||
+    value === 'supabase_staging_disabled' ||
+    value === 'supabase_staging_ready' ||
+    value === 'production_disabled'
+  ) {
     return value;
   }
 
@@ -29,6 +35,8 @@ function modeLabel(mode: PhoneAuthMode) {
     local_mock: 'Local mock',
     supabase_disabled: 'Supabase disabled',
     supabase_ready_mock: 'Supabase ready mock',
+    supabase_staging_disabled: 'Supabase staging disabled',
+    supabase_staging_ready: 'Supabase staging ready',
     production_disabled: 'Production disabled',
   };
 
@@ -39,7 +47,7 @@ function disabledResult(mode: PhoneAuthMode): PhoneAuthActionResult {
   return {
     success: false,
     message:
-      mode === 'supabase_ready_mock'
+      mode === 'supabase_ready_mock' || mode === 'supabase_staging_ready'
         ? 'Phone Auth flag ยังไม่เปิดครบ จึงยังไม่ส่ง OTP จริงหรือจำลองผ่าน Supabase'
         : 'Phone Auth ปิดอยู่ในโหมดนี้ ยังไม่มีการส่ง OTP จริง',
   };
@@ -58,7 +66,7 @@ export function getPhoneAuthAdapterStatus(): PhoneAuthAdapterStatus {
     phoneAuthEnabled: publicEnv.enablePhoneAuth,
     localMockEnabled: publicEnv.enablePhoneAuthLocalMock,
     canUseLocalMock,
-    canAttemptSupabaseMock: mode === 'supabase_ready_mock' && publicEnv.enablePhoneAuth,
+    canAttemptSupabaseMock: (mode === 'supabase_ready_mock' || mode === 'supabase_staging_ready') && publicEnv.enablePhoneAuth,
     networkCallsEnabled: false,
     serviceRoleAvailableInFrontend: false,
     currentAdapterPath: canUseLocalMock ? 'local_mock' : 'disabled_response',

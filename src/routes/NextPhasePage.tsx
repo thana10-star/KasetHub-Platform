@@ -3,11 +3,14 @@ import {
   Bot,
   CheckCircle2,
   CloudUpload,
+  CloudSun,
   Database,
   GitBranch,
   ImageUp,
   ListChecks,
+  LockKeyhole,
   Phone,
+  ServerOff,
   ShieldCheck,
   Smartphone,
 } from 'lucide-react';
@@ -18,7 +21,23 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { runPhoneAuthStagingReview } from '@/services/auth/phone-auth-staging-review';
+import { buildOwnershipRlsGateStatus } from '@/services/backend/ownership-rls-gate';
+import { runEnvSafetyCheck } from '@/services/config/env-safety-check';
+import { getArticleCmsPersistenceSummary } from '@/services/content/offline-agri-cms-persistence';
+import { getCmsMigrationReviewSummary } from '@/services/content/offline-agri-cms-migration-review';
+import { getArticleCmsSqlDraftSummary } from '@/services/content/offline-agri-cms-sql-draft';
 import { nextPhaseOptionLabels, runPhaseDecisionPlan } from '@/services/phase-planning/phase-decision-service';
+import { buildSupabasePublicReadReview } from '@/services/supabase/supabase-public-read-review';
+import { buildSupabaseReadonlyProbePlan } from '@/services/supabase/supabase-readonly-probe';
+import { summarizeSupabaseSetupProgress } from '@/services/supabase/supabase-setup-progress';
+import { getWeatherModeStatus } from '@/services/weather/weather-adapter';
+import { getWeatherLocalPreferenceStatus } from '@/services/weather/weather-source-readiness';
+import { getWeatherAgriRiskRuleSummary } from '@/services/weather/weather-agri-risk-rules';
+import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
+import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
+import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
+import { getAITextEndpointDryRunStatus } from '@/services/ai-text/ai-text-endpoint-contract';
 import type {
   NextPhaseOption,
   NextPhaseOptionId,
@@ -133,6 +152,22 @@ function OptionCard({ option }: { option: NextPhaseOption }) {
 
 export function NextPhasePage() {
   const plan = useMemo(() => runPhaseDecisionPlan(), []);
+  const envSafety = useMemo(() => runEnvSafetyCheck(), []);
+  const readonlyProbe = useMemo(() => buildSupabaseReadonlyProbePlan(), []);
+  const m44Review = useMemo(() => buildSupabasePublicReadReview(), []);
+  const setupProgress = useMemo(() => summarizeSupabaseSetupProgress(), []);
+  const phoneAuthM61 = useMemo(() => runPhoneAuthStagingReview(), []);
+  const ownershipGate = useMemo(() => buildOwnershipRlsGateStatus(), []);
+  const articleCmsPersistence = useMemo(() => getArticleCmsPersistenceSummary(), []);
+  const articleCmsMigration = useMemo(() => getCmsMigrationReviewSummary(), []);
+  const articleCmsSqlDrafts = useMemo(() => getArticleCmsSqlDraftSummary(), []);
+  const weatherMode = useMemo(() => getWeatherModeStatus(), []);
+  const weatherPreference = useMemo(() => getWeatherLocalPreferenceStatus(), []);
+  const weatherRiskRules = useMemo(() => getWeatherAgriRiskRuleSummary(), []);
+  const weatherRiskReview = useMemo(() => getWeatherRiskExpertReviewSummary(), []);
+  const weatherRiskAudit = useMemo(() => getWeatherRiskReleaseAuditSummary(), []);
+  const aiTextStatus = useMemo(() => getAITextProxyStatus(), []);
+  const aiTextEndpointStatus = useMemo(() => getAITextEndpointDryRunStatus(), []);
   const recommendedOption = plan.options.find((option) => option.id === plan.recommendation.recommendedOptionId) ?? plan.options[0];
 
   return (
@@ -161,6 +196,344 @@ export function NextPhasePage() {
           หน้านี้เป็นแผนตัดสินใจเท่านั้น ยังไม่เชื่อม Supabase ไม่เปิด auth ไม่เรียก AI API ไม่เพิ่ม key ไม่เขียน backend
           และไม่เพิ่ม network call ใหม่ main prototype ต้องยังเปิดได้แม้ไม่มี .env.local
         </NoticeBox>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <GitBranch aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M38 Supabase staging branch setup</h2>
+                <Badge tone="sky">staging/supabase</Badge>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                Recommended current branch: `staging/supabase` · current work mode: Supabase staging experiment · no real secrets in repo
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                Current milestone: M40 Supabase project creation + SQL run prep. ยังไม่เชื่อม Supabase ยังไม่เพิ่ม `.env.local` และยังไม่เปิด auth/cloud sync
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M39/M40 Supabase staging setup</h2>
+                <StatusPill tone={envSafety.blockers.length > 0 ? 'danger' : envSafety.warnings.length > 0 ? 'warning' : 'success'}>
+                  {envSafety.statusLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ใส่ staging URL และ anon key ได้เฉพาะใน `.env.local`; network check, auth, cloud sync, และ Guest Sync Edge ต้องยังปิดอยู่
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/env-safety">
+                เปิด Env Safety
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-edge-contract">
+                เปิด AI Edge contract
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+              <ListChecks aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-kaset-ink">M41 Supabase staging setup</h2>
+                <StatusPill tone={setupProgress.nextStep ? 'warning' : 'success'}>
+                  {setupProgress.completedCount}/{setupProgress.totalCount}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Next safe step: {setupProgress.nextSafeStep}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-kaset-deep">
+                blockers: {setupProgress.blockers.slice(0, 2).join(' · ') || 'ไม่มี blocker ใน local checklist'} · ยังไม่เปิด auth · ยังไม่เปิด cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+                เปิด M41 setup guide
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-900">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M73 CMS migration dry-run</h2>
+                <StatusPill tone="warning">{articleCmsMigration.tableCount} table plans</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                ตรวจ table DDL plan, RLS expectation, rollback plan และ seed fixture plan โดยยังไม่ run migration หรือเขียน Supabase
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-migration-review">
+                เปิด M73 CMS migration review
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-900">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M74 CMS SQL draft artifacts</h2>
+                <StatusPill tone="warning">{articleCmsSqlDrafts.sqlDraftCount} SQL drafts</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                Draft SQL อยู่ใน supabase/drafts/cms ไม่ใช่ migrations และยังไม่ run SQL จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/articles/cms-sql-drafts">
+                เปิด M74 CMS SQL drafts
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+              <CloudSun aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M75 real weather API</h2>
+                <StatusPill tone={weatherMode.canFetchOpenMeteo ? 'success' : 'warning'}>{weatherMode.mode}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                Open-Meteo is no-key and flag-gated. M77 preference is {weatherPreference.selectedLabel} in localStorage only. M78 adds {weatherRiskRules.rules.length} planning-only weather risk rules, M79 keeps {weatherRiskReview.pendingSignoffCount} expert signoffs pending, and M80 keeps {weatherRiskAudit.auditEventCount} audit fixtures blocked from prescriptive output.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather">
+                เปิด M75 weather
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/qa">
+                เปิด M76 QA
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/preferences">
+                เปิด M77 preferences
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/risk-rules">
+                เปิด M78 risk rules
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/risk-review">
+                เปิด M79 risk review
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/weather/risk-audit">
+                เปิด M80 risk audit
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <Bot aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M81 controlled AI text proxy</h2>
+                <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>{aiTextStatus.mode}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                Calculator explanation, weather caution, and education-only text. No provider key in frontend, no unrestricted chat, no product or prescription output, and fixture fallback remains active by default.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-status">
+                เปิด M81 AI text status
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-indigo-200 bg-white p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-indigo-100 text-indigo-800">
+              <ServerOff aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M82 AI text endpoint contract</h2>
+                <StatusPill tone="warning">fetch {String(aiTextEndpointStatus.fetchWouldRun)}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                Endpoint URL masked as {aiTextEndpointStatus.endpointUrlMasked}; provider calls remain blocked, audit/rate-limit are dry-run only, and default frontend builds still cannot call AI text endpoints.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/ai-text-endpoint-plan">
+                เปิด M82 endpoint contract
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M72 offline article CMS persistence</h2>
+                <StatusPill tone="warning">{articleCmsPersistence.tableCount} future tables</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                วาง role rules, release audit write contract, offline fallback policy และ rollback checklist โดยยังไม่ run migration หรือเขียน Database จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/articles/cms-persistence-plan">
+                เปิด M72 CMS persistence plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <Database aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M43 read-only public table probe</h2>
+                <StatusPill tone={readonlyProbe.statusTone}>{readonlyProbe.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">
+                {readonlyProbe.connectionStatus} Tables: {readonlyProbe.tables.map((table) => table.name).join(' / ')}
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                no writes · empty table is OK · ยังไม่เปิด auth/cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-sky-950" to="/app/supabase-readonly-probe">
+                Open M43 read-only probe
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-sky-200 bg-sky-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
+              <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-sky-950">M44 public read verification + RLS review</h2>
+                <StatusPill tone={m44Review.statusTone}>{m44Review.statusLabel}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-sky-900">{m44Review.summary}</p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                public read: {m44Review.publicReadVerificationStatus} · RLS: {m44Review.rlsReviewStatus}
+              </p>
+              <p className="mt-2 rounded-lg bg-white p-3 text-xs font-bold leading-5 text-sky-950">
+                blockers: {m44Review.blockers.slice(0, 3).join(' · ') || 'none'}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
+              <Bot aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-indigo-950">M56 calculator AI backend architecture</h2>
+                <StatusPill tone="warning">no real AI call</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-indigo-900">
+                รีวิว snapshot lock, backend policy check, prompt builder, safety filter, audit log และ rate limit ก่อนเปิด AI explanation จริง
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-architecture">
+                เปิด AI architecture review
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-edge-dry-run">
+                เปิด AI Edge dry-run
+              </Link>
+              <Link className="ml-4 mt-3 inline-flex text-sm font-extrabold text-indigo-950" to="/app/calculators/ai-endpoint-plan">
+                เปิด AI endpoint plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <Phone aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M61 Phone Auth staging test plan</h2>
+                <StatusPill tone={phoneAuthM61.blockerItems.length > 0 ? 'danger' : 'warning'}>
+                  {phoneAuthM61.levelLabel}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-950">
+                กลับสู่ production-readiness roadmap: เตรียม real Supabase Phone Auth staging test โดยยังไม่ส่ง OTP จริงและยังไม่เปิด cloud sync
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/auth/phone-staging-test">
+                เปิด Phone Auth staging test plan
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-rose-200 bg-rose-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-rose-800">
+              <LockKeyhole aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-rose-950">M63 ownership/RLS sync gate</h2>
+                <StatusPill tone="danger">{ownershipGate.statusCode}</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-rose-950">
+                Guest Memory upload stays blocked until real auth.uid() ownership, consent, idempotency, audit, and owner-scoped RLS checks pass.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-rose-950" to="/app/ownership-rls-gate">
+                เปิด Ownership/RLS gate review
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-amber-800">
+              <CloudUpload aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-extrabold text-amber-950">M64 Guest Sync dry-run payload</h2>
+                <StatusPill tone="warning">local-only</StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-amber-950">
+                Next safe step is to review payload groups, consent, idempotency, audit, conflict, and privacy filters before any real upload.
+              </p>
+              <Link className="mt-3 inline-flex text-sm font-extrabold text-amber-950" to="/app/guest-sync-dry-run">
+                เปิด Guest Sync dry-run payload
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Card className="p-4">
@@ -277,8 +650,20 @@ export function NextPhasePage() {
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/supabase-readiness">
             เปิด Supabase readiness
           </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-kaset-mint px-4 text-sm font-extrabold text-kaset-deep" to="/app/supabase-setup-guide">
+            เปิด M41 setup guide
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/supabase-readonly-probe">
+            Open M43 read-only probe
+          </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/ai-proxy-status">
             เปิด AI proxy status
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/ai-text-status">
+            เปิด M81 AI text status
+          </Link>
+          <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/ai-text-endpoint-plan">
+            เปิด M82 endpoint plan
           </Link>
           <Link className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/mvp-snapshot">
             เปิด MVP snapshot
