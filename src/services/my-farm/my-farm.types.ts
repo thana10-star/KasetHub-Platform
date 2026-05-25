@@ -16,6 +16,7 @@ export type MyFarmTimelineItemType =
   | 'farm_record'
   | 'farm_activity'
   | 'farm_finance'
+  | 'farm_harvest'
   | 'farm_plot'
   | 'crop_watch'
   | 'ai_question'
@@ -41,6 +42,9 @@ export type MyFarmHubSummary = {
   farmCostPerRai?: number;
   farmTopExpenseCategory?: string;
   farmTopExpenseCategoryAmount?: number;
+  farmTotalHarvestKg?: number;
+  farmCostPerKg?: number;
+  latestFarmHarvestDate?: string;
   latestFarmActivityDate?: string;
   latestFarmFinanceEntryDate?: string;
   analysisResultCount: number;

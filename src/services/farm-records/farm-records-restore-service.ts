@@ -26,6 +26,7 @@ export type FarmRecordsDetectedCounts = {
   cropCycleCount: number;
   activityRecordCount: number;
   financeEntryCount: number;
+  harvestRecordCount: number;
 };
 
 export type FarmRecordsBackupValidationResult = {
@@ -86,6 +87,7 @@ function countState(state?: FarmRecordsState): FarmRecordsDetectedCounts {
     cropCycleCount: state?.cropCycles.length ?? 0,
     activityRecordCount: state?.farmActivityRecords.length ?? 0,
     financeEntryCount: state?.farmFinanceEntries.length ?? 0,
+    harvestRecordCount: state?.farmHarvestRecords.length ?? 0,
   };
 }
 
@@ -157,6 +159,14 @@ function validateFinanceAmounts(records: unknown[], errors: string[]) {
   });
 }
 
+function validateHarvestQuantities(records: unknown[], errors: string[]) {
+  records.forEach((record, index) => {
+    if (!isObject(record) || typeof record.quantity !== 'number' || !Number.isFinite(record.quantity) || record.quantity < 0) {
+      errors.push(`farmHarvestRecords[${index}] requires a numeric non-negative quantity.`);
+    }
+  });
+}
+
 function latestDate(values: string[]) {
   return values
     .filter(Boolean)
@@ -206,6 +216,10 @@ export function validateFarmRecordsBackup(parsedBackup: unknown): FarmRecordsBac
     }
   });
 
+  if (parsedBackup.farmHarvestRecords !== undefined && !Array.isArray(parsedBackup.farmHarvestRecords)) {
+    errors.push('Backup farmHarvestRecords must be an array when present.');
+  }
+
   if (hasRawDataUri(parsedBackup)) {
     warnings.push('Raw data URI image payloads were found and will be stripped from the restore candidate.');
   }
@@ -228,15 +242,19 @@ export function validateFarmRecordsBackup(parsedBackup: unknown): FarmRecordsBac
   const cropCycles = parsedBackup.cropCycles as unknown[];
   const farmActivityRecords = parsedBackup.farmActivityRecords as unknown[];
   const farmFinanceEntries = parsedBackup.farmFinanceEntries as unknown[];
+  const farmHarvestRecords = Array.isArray(parsedBackup.farmHarvestRecords) ? (parsedBackup.farmHarvestRecords as unknown[]) : [];
 
   validateStableIds(farmPlots, 'farmPlots', errors);
   validateStableIds(cropCycles, 'cropCycles', errors);
   validateStableIds(farmActivityRecords, 'farmActivityRecords', errors);
   validateStableIds(farmFinanceEntries, 'farmFinanceEntries', errors);
+  validateStableIds(farmHarvestRecords, 'farmHarvestRecords', errors);
   validateRequiredDates(cropCycles, 'cropCycles', 'startDate', errors);
   validateRequiredDates(farmActivityRecords, 'farmActivityRecords', 'activityDate', errors);
   validateRequiredDates(farmFinanceEntries, 'farmFinanceEntries', 'entryDate', errors);
+  validateRequiredDates(farmHarvestRecords, 'farmHarvestRecords', 'harvestDate', errors);
   validateFinanceAmounts(farmFinanceEntries, errors);
+  validateHarvestQuantities(farmHarvestRecords, errors);
 
   const normalizedState = migrateFarmRecordsState({
     version: 1,
@@ -244,9 +262,14 @@ export function validateFarmRecordsBackup(parsedBackup: unknown): FarmRecordsBac
     cropCycles,
     farmActivityRecords,
     farmFinanceEntries,
+    farmHarvestRecords,
     migrations: ['m87-restore-preview'],
     updatedAt: typeof parsedBackup.exportedAt === 'string' ? parsedBackup.exportedAt : new Date().toISOString(),
   });
+
+  if (farmHarvestRecords.length !== normalizedState.farmHarvestRecords.length) {
+    warnings.push(`farmHarvestRecords had ${farmHarvestRecords.length - normalizedState.farmHarvestRecords.length} malformed record(s) removed during validation.`);
+  }
 
   const detectedCounts = countState(normalizedState);
   const detectedSummary = computeSummary(normalizedState);
@@ -289,12 +312,14 @@ export function buildFarmRecordsRestorePreview(currentState: FarmRecordsState, n
       cropCycleCount: backupCounts.cropCycleCount - currentCounts.cropCycleCount,
       activityRecordCount: backupCounts.activityRecordCount - currentCounts.activityRecordCount,
       financeEntryCount: backupCounts.financeEntryCount - currentCounts.financeEntryCount,
+      harvestRecordCount: backupCounts.harvestRecordCount - currentCounts.harvestRecordCount,
     },
     currentSummary: computeSummary(currentState),
     backupSummary: computeSummary(normalizedBackupState),
     latestBackupRecordDate: latestDate([
       ...normalizedBackupState.farmActivityRecords.map((record) => record.activityDate),
       ...normalizedBackupState.farmFinanceEntries.map((entry) => entry.entryDate),
+      ...normalizedBackupState.farmHarvestRecords.map((record) => record.harvestDate),
       ...normalizedBackupState.cropCycles.map((cycle) => cycle.updatedAt),
       ...normalizedBackupState.farmPlots.map((plot) => plot.updatedAt),
     ]),

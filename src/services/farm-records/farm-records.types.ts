@@ -125,6 +125,26 @@ export type FarmFinanceEntry = {
   updatedAt: string;
 };
 
+export type FarmHarvestQuantityUnit = 'kg' | 'ton' | 'sack' | 'basket' | 'other';
+
+export type FarmHarvestRecord = {
+  id: string;
+  farmPlotId: string;
+  cropCycleId?: string;
+  harvestDate: string;
+  cropName?: string;
+  quantity: number;
+  quantityUnit: FarmHarvestQuantityUnit;
+  normalizedQuantityKg?: number;
+  grade?: string;
+  buyer?: string;
+  salePricePerKg?: number;
+  grossIncome?: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type FarmLedgerSummary = {
   totalIncome: number;
   totalExpense: number;
@@ -143,6 +163,7 @@ export type FarmRecordsState = {
   cropCycles: CropCycle[];
   farmActivityRecords: FarmActivityRecord[];
   farmFinanceEntries: FarmFinanceEntry[];
+  farmHarvestRecords: FarmHarvestRecord[];
   migrations: string[];
   updatedAt: string;
 };
@@ -167,6 +188,11 @@ export type FarmFinanceEntryInput = Omit<FarmFinanceEntry, 'id' | 'currency' | '
 
 export type FarmFinanceEntryPatch = Partial<Omit<FarmFinanceEntry, 'id' | 'createdAt'>>;
 
+export type FarmHarvestRecordInput = Omit<FarmHarvestRecord, 'id' | 'normalizedQuantityKg' | 'createdAt' | 'updatedAt'> &
+  Partial<Pick<FarmHarvestRecord, 'id' | 'normalizedQuantityKg' | 'createdAt' | 'updatedAt'>>;
+
+export type FarmHarvestRecordPatch = Partial<Omit<FarmHarvestRecord, 'id' | 'createdAt'>>;
+
 export type FarmPlotListOptions = {
   includeArchived?: boolean;
 };
@@ -186,6 +212,14 @@ export type FarmFinanceEntryFilters = {
   endDate?: string;
   direction?: FarmFinanceDirection;
   category?: FarmFinanceCategory;
+};
+
+export type FarmHarvestRecordFilters = {
+  farmPlotId?: string;
+  cropCycleId?: string;
+  startDate?: string;
+  endDate?: string;
+  cropName?: string;
 };
 
 export type FarmLedgerSummaryFilters = FarmActivityRecordFilters &

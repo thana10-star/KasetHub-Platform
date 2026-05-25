@@ -17,6 +17,8 @@ import type {
   FarmFinanceCategory,
   FarmFinanceDirection,
   FarmFinanceEntry,
+  FarmHarvestQuantityUnit,
+  FarmHarvestRecord,
   FarmLedgerSummary,
   FarmLedgerSummaryFilters,
   FarmPlot,
@@ -79,17 +81,32 @@ export type CropCycleFormValues = {
   status: CropCycleStatus;
 };
 
+export type HarvestFormValues = {
+  farmPlotId: string;
+  cropCycleId: string;
+  harvestDate: string;
+  cropName: string;
+  quantity: string;
+  quantityUnit: FarmHarvestQuantityUnit;
+  grade: string;
+  buyer: string;
+  salePricePerKg: string;
+  note: string;
+};
+
 export type FarmRecordsViewModel = {
   counts: {
     plots: number;
     activeCropCycles: number;
     activityRecords: number;
     financeEntries: number;
+    harvestRecords: number;
   };
   plots: FarmPlot[];
   cropCycles: CropCycle[];
   activityRecords: FarmActivityRecord[];
   financeEntries: FarmFinanceEntry[];
+  harvestRecords: FarmHarvestRecord[];
   summary: FarmLedgerSummary;
   recentTimeline: FarmRecordsTimelineItem[];
   hasActiveFilters: boolean;
@@ -179,6 +196,21 @@ export function createInitialCropCycleForm(today: string): CropCycleFormValues {
     startDate: today,
     expectedHarvestDate: '',
     status: 'active',
+  };
+}
+
+export function createInitialHarvestForm(today: string): HarvestFormValues {
+  return {
+    farmPlotId: '',
+    cropCycleId: '',
+    harvestDate: today,
+    cropName: '',
+    quantity: '',
+    quantityUnit: 'kg',
+    grade: '',
+    buyer: '',
+    salePricePerKg: '',
+    note: '',
   };
 }
 
@@ -274,6 +306,12 @@ function matchesFinanceFilters(entry: FarmFinanceEntry, filters: FarmRecordsPage
   return isWithinDateRange(entry.entryDate, filters);
 }
 
+function matchesHarvestFilters(record: FarmHarvestRecord, filters: FarmRecordsPageFilters) {
+  if (filters.farmPlotId && record.farmPlotId !== filters.farmPlotId) return false;
+  if (filters.cropCycleId && record.cropCycleId !== filters.cropCycleId) return false;
+  return isWithinDateRange(record.harvestDate, filters);
+}
+
 function matchesCropCycleFilters(cycle: CropCycle, filters: FarmRecordsPageFilters) {
   if (filters.farmPlotId && cycle.farmPlotId !== filters.farmPlotId) return false;
   if (filters.cropCycleId && cycle.id !== filters.cropCycleId) return false;
@@ -335,6 +373,7 @@ export function buildFarmRecordsViewModel(state: FarmRecordsState, filters: Farm
       activeCropCycles: state.cropCycles.filter((cycle) => cycle.status === 'active').length,
       activityRecords: state.farmActivityRecords.length,
       financeEntries: state.farmFinanceEntries.length,
+      harvestRecords: state.farmHarvestRecords.length,
     },
     plots: state.farmPlots.filter((plot) => matchesPlotFilters(plot, filters)),
     cropCycles: sortByDateDesc(state.cropCycles.filter((cycle) => matchesCropCycleFilters(cycle, filters)), (cycle) => cycle.startDate),
@@ -345,6 +384,10 @@ export function buildFarmRecordsViewModel(state: FarmRecordsState, filters: Farm
     financeEntries: sortByDateDesc(
       state.farmFinanceEntries.filter((entry) => matchesFinanceFilters(entry, filters)),
       (entry) => entry.entryDate,
+    ),
+    harvestRecords: sortByDateDesc(
+      state.farmHarvestRecords.filter((record) => matchesHarvestFilters(record, filters)),
+      (record) => record.harvestDate,
     ),
     summary: service.computeFarmLedgerSummary(toFarmLedgerSummaryFilters(filters)),
     recentTimeline: buildRecentFarmTimeline(state),
@@ -442,6 +485,30 @@ export function validateCropCycleForm(values: CropCycleFormValues, availablePlot
 
   if (!cropCycleStatusIds.includes(values.status)) {
     errors.push('เลือกสถานะรอบปลูกให้ถูกต้อง');
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
+
+export function validateHarvestForm(values: HarvestFormValues, availablePlots: FarmPlot[]): FormValidationResult {
+  const errors: string[] = [];
+  const trimmedQuantity = values.quantity.trim();
+  const quantity = Number(trimmedQuantity);
+
+  if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
+    errors.push('à¹€à¸¥à¸·à¸­à¸à¹à¸›à¸¥à¸‡à¸›à¸¥à¸¹à¸à¸à¹ˆà¸­à¸™à¸šà¸±à¸™à¸—à¸¶à¸à¸œà¸¥à¸œà¸¥à¸´à¸•');
+  }
+
+  if (!hasValidDate(values.harvestDate)) {
+    errors.push('à¹ƒà¸ªà¹ˆà¸§à¸±à¸™à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¹€à¸à¸µà¹ˆà¸¢à¸§à¹ƒà¸«à¹‰à¸–à¸¹à¸à¸•à¹‰à¸­à¸‡');
+  }
+
+  if (!trimmedQuantity || !Number.isFinite(quantity) || quantity < 0) {
+    errors.push('à¸›à¸£à¸´à¸¡à¸²à¸“à¸œà¸¥à¸œà¸¥à¸´à¸•à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
+  }
+
+  if (values.salePricePerKg.trim() && parseOptionalNonNegativeNumber(values.salePricePerKg) === undefined) {
+    errors.push('à¸£à¸²à¸„à¸²à¸‚à¸²à¸¢à¸•à¹ˆà¸­ kg à¸•à¹‰à¸­à¸‡à¹€à¸›à¹‡à¸™à¸•à¸±à¸§à¹€à¸¥à¸‚à¹„à¸¡à¹ˆà¸•à¸´à¸”à¸¥à¸š');
   }
 
   return { isValid: errors.length === 0, errors };

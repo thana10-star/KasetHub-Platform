@@ -24,6 +24,7 @@ import {
   Trash2,
   Upload,
   WalletCards,
+  Wheat,
   X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -39,11 +40,13 @@ import {
   farmActivityTypes,
   farmExpenseCategories,
   farmFinanceCategoryLabels,
+  farmHarvestQuantityUnits,
   farmIncomeCategories,
 } from '@/services/farm-records/farm-records-config';
 import {
   computeBreakEvenEstimate,
   computeFarmCostDashboard,
+  computeHarvestYieldSummary,
   getFarmCostInsights,
   type FarmBreakEvenEstimate,
   type FarmCostCategoryBreakdownItem,
@@ -91,6 +94,7 @@ import type {
   FarmLedgerSummary,
   FarmPlot,
 } from '@/services/farm-records/farm-records.types';
+import { normalizeHarvestQuantityToKg } from '@/services/farm-records/farm-records-service';
 import {
   activityFormFromRecord,
   buildFarmRecordsViewModel,
@@ -100,6 +104,7 @@ import {
   createInitialCropCycleForm,
   createInitialFarmPlotForm,
   createInitialFinanceForm,
+  createInitialHarvestForm,
   farmRecordsDeleteConfirmationMessage,
   financeFormFromEntry,
   parseCommaTags,
@@ -108,14 +113,16 @@ import {
   validateCropCycleForm,
   validateFarmPlotForm,
   validateFinanceForm,
+  validateHarvestForm,
   type ActivityFormValues,
   type CropCycleFormValues,
   type FarmPlotFormValues,
   type FarmRecordsPageFilters,
   type FinanceFormValues,
+  type HarvestFormValues,
 } from '@/routes/farm-records-page-model';
 
-type FormMode = 'activity' | 'finance' | 'plot' | 'cycle' | null;
+type FormMode = 'activity' | 'finance' | 'plot' | 'cycle' | 'harvest' | null;
 type ExportPreviewMode = 'json' | 'csv' | null;
 type SyncConsentPrototypeToggleKey = Exclude<keyof FarmRecordsSyncConsentPrototypeState, 'updatedAt'>;
 type BreakEvenFormValues = {
@@ -268,6 +275,11 @@ function getCycleLabel(cycles: CropCycle[], cycleId?: string) {
 function getFinanceCategoryLabel(category: FarmFinanceCategory) {
   const label = farmFinanceCategoryLabels[category];
   return label ? `${label.th} / ${label.en}` : category;
+}
+
+function getHarvestUnitLabel(unitId: string) {
+  const unit = farmHarvestQuantityUnits.find((item) => item.id === unitId);
+  return unit ? `${unit.label.th} / ${unit.label.en}` : unitId;
 }
 
 function FormField({
@@ -698,6 +710,108 @@ function FinanceForm({
   );
 }
 
+function HarvestForm({
+  cycles,
+  errors,
+  onCancel,
+  onChange,
+  onSubmit,
+  plots,
+  values,
+}: {
+  cycles: CropCycle[];
+  errors: string[];
+  onCancel: () => void;
+  onChange: (values: HarvestFormValues) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  plots: FarmPlot[];
+  values: HarvestFormValues;
+}) {
+  const cycleOptions = cycles.filter((cycle) => !values.farmPlotId || cycle.farmPlotId === values.farmPlotId);
+
+  return (
+    <Card className="p-4">
+      <form className="grid gap-4" onSubmit={onSubmit}>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-extrabold text-kaset-ink">Add harvest record / à¸šà¸±à¸™à¸—à¸¶à¸à¸œà¸¥à¸œà¸¥à¸´à¸•</h2>
+          <button aria-label="à¸›à¸´à¸”à¸Ÿà¸­à¸£à¹Œà¸¡" className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={onCancel} type="button">
+            <X aria-hidden="true" className="h-5 w-5" />
+          </button>
+        </div>
+        <FormErrors errors={errors} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <FormField label="à¹à¸›à¸¥à¸‡à¸›à¸¥à¸¹à¸">
+            <select
+              className={inputClassName()}
+              onChange={(event) =>
+                onChange({
+                  ...values,
+                  farmPlotId: event.target.value,
+                  cropCycleId: cycleOptions.some((cycle) => cycle.id === values.cropCycleId && cycle.farmPlotId === event.target.value)
+                    ? values.cropCycleId
+                    : '',
+                })
+              }
+              value={values.farmPlotId}
+            >
+              <option value="">à¹€à¸¥à¸·à¸­à¸à¹à¸›à¸¥à¸‡</option>
+              {plots.map((plot) => (
+                <option key={plot.id} value={plot.id}>
+                  {plot.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="à¸£à¸­à¸šà¸›à¸¥à¸¹à¸ (à¸–à¹‰à¸²à¸¡à¸µ)">
+            <select className={inputClassName()} onChange={(event) => onChange({ ...values, cropCycleId: event.target.value })} value={values.cropCycleId}>
+              <option value="">à¹„à¸¡à¹ˆà¸œà¸¹à¸à¸à¸±à¸šà¸£à¸­à¸šà¸›à¸¥à¸¹à¸</option>
+              {cycleOptions.map((cycle) => (
+                <option key={cycle.id} value={cycle.id}>
+                  {cycle.cropName} {cycle.seasonLabel ? `- ${cycle.seasonLabel}` : ''}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="Harvest date">
+            <input className={inputClassName()} onChange={(event) => onChange({ ...values, harvestDate: event.target.value })} type="date" value={values.harvestDate} />
+          </FormField>
+          <FormField label="Crop name (optional)">
+            <input className={inputClassName()} onChange={(event) => onChange({ ...values, cropName: event.target.value })} placeholder="Rice, mango, cassava" value={values.cropName} />
+          </FormField>
+          <FormField label="Quantity">
+            <input className={inputClassName()} inputMode="decimal" onChange={(event) => onChange({ ...values, quantity: event.target.value })} value={values.quantity} />
+          </FormField>
+          <FormField label="Unit">
+            <select className={inputClassName()} onChange={(event) => onChange({ ...values, quantityUnit: event.target.value as HarvestFormValues['quantityUnit'] })} value={values.quantityUnit}>
+              {farmHarvestQuantityUnits.map((unit) => (
+                <option key={unit.id} value={unit.id}>
+                  {unit.label.th} / {unit.label.en}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="Grade (optional)">
+            <input className={inputClassName()} onChange={(event) => onChange({ ...values, grade: event.target.value })} value={values.grade} />
+          </FormField>
+          <FormField label="Buyer (optional)">
+            <input className={inputClassName()} onChange={(event) => onChange({ ...values, buyer: event.target.value })} value={values.buyer} />
+          </FormField>
+          <FormField label="Sale price / kg (optional)">
+            <input className={inputClassName()} inputMode="decimal" onChange={(event) => onChange({ ...values, salePricePerKg: event.target.value })} value={values.salePricePerKg} />
+          </FormField>
+        </div>
+        <FormField label="Note (optional)">
+          <textarea className={textAreaClassName()} onChange={(event) => onChange({ ...values, note: event.target.value })} value={values.note} />
+        </FormField>
+        <Button className="w-full" type="submit">
+          <Plus aria-hidden="true" className="h-5 w-5" />
+          Save harvest record
+        </Button>
+      </form>
+    </Card>
+  );
+}
+
 function PlotForm({
   errors,
   onCancel,
@@ -829,6 +943,7 @@ export function FarmRecordsDebugPage() {
   const [financeForm, setFinanceForm] = useState<FinanceFormValues>(() => createInitialFinanceForm(today));
   const [plotForm, setPlotForm] = useState<FarmPlotFormValues>(() => createInitialFarmPlotForm());
   const [cycleForm, setCycleForm] = useState<CropCycleFormValues>(() => createInitialCropCycleForm(today));
+  const [harvestForm, setHarvestForm] = useState<HarvestFormValues>(() => createInitialHarvestForm(today));
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
@@ -862,6 +977,7 @@ export function FarmRecordsDebugPage() {
     [filters.cropCycleId, filters.endDate, filters.farmPlotId, filters.startDate],
   );
   const farmCostDashboard = useMemo(() => computeFarmCostDashboard(farmRecords.state, farmCostFilters), [farmRecords.state, farmCostFilters]);
+  const harvestYieldSummary = useMemo(() => computeHarvestYieldSummary(farmRecords.state, farmCostFilters), [farmRecords.state, farmCostFilters]);
   const farmCostInsights = useMemo(() => getFarmCostInsights(farmCostDashboard), [farmCostDashboard]);
   const breakEvenEstimate = useMemo<FarmBreakEvenEstimate>(
     () =>
@@ -927,6 +1043,10 @@ export function FarmRecordsDebugPage() {
 
     if (mode === 'cycle') {
       setCycleForm(createInitialCropCycleForm(today));
+    }
+
+    if (mode === 'harvest') {
+      setHarvestForm(createInitialHarvestForm(today));
     }
 
     setActiveForm(mode);
@@ -1097,6 +1217,37 @@ export function FarmRecordsDebugPage() {
     setActiveForm(null);
   }
 
+  function handleHarvestSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const validation = validateHarvestForm(harvestForm, activePlots);
+    if (!validation.isValid) {
+      setFormErrors(validation.errors);
+      return;
+    }
+
+    const quantity = Number(harvestForm.quantity);
+    const salePricePerKg = parseOptionalNonNegativeNumber(harvestForm.salePricePerKg);
+    const normalizedQuantityKg = normalizeHarvestQuantityToKg(quantity, harvestForm.quantityUnit);
+
+    farmRecords.createHarvestRecord({
+      farmPlotId: harvestForm.farmPlotId,
+      cropCycleId: harvestForm.cropCycleId || undefined,
+      harvestDate: harvestForm.harvestDate,
+      cropName: harvestForm.cropName.trim() || undefined,
+      quantity,
+      quantityUnit: harvestForm.quantityUnit,
+      grade: harvestForm.grade.trim() || undefined,
+      buyer: harvestForm.buyer.trim() || undefined,
+      salePricePerKg,
+      grossIncome: salePricePerKg === undefined || normalizedQuantityKg === undefined ? undefined : normalizedQuantityKg * salePricePerKg,
+      note: harvestForm.note.trim() || undefined,
+    });
+    setHarvestForm(createInitialHarvestForm(today));
+    setFormErrors([]);
+    setSuccessMessage('Saved harvest record on this device only.');
+    setActiveForm(null);
+  }
+
   function handleDeleteActivity(id: string) {
     if (window.confirm(farmRecordsDeleteConfirmationMessage)) {
       farmRecords.deleteActivityRecord(id);
@@ -1114,6 +1265,13 @@ export function FarmRecordsDebugPage() {
         closeForm();
       }
       setSuccessMessage('ลบรายการเงินจากเครื่องนี้แล้ว');
+    }
+  }
+
+  function handleDeleteHarvestRecord(id: string) {
+    if (window.confirm(farmRecordsDeleteConfirmationMessage)) {
+      farmRecords.deleteHarvestRecord(id);
+      setSuccessMessage('Deleted harvest record from this device only.');
     }
   }
 
@@ -1263,6 +1421,7 @@ export function FarmRecordsDebugPage() {
           <SummaryCard icon={Leaf} label="แปลงปลูก" value={viewModel.counts.plots} />
           <SummaryCard icon={Sprout} label="รอบปลูก active" value={viewModel.counts.activeCropCycles} />
           <SummaryCard icon={ClipboardList} label="กิจกรรมฟาร์ม" value={viewModel.counts.activityRecords} />
+          <SummaryCard icon={Wheat} label="Harvest records" value={viewModel.counts.harvestRecords} />
           <SummaryCard icon={Banknote} label="รายรับรวม" value={formatCurrency(farmRecords.summary.totalIncome)} />
           <SummaryCard icon={ReceiptText} label="รายจ่ายรวม" value={formatCurrency(farmRecords.summary.totalExpense)} />
           <SummaryCard icon={Coins} label="กำไรสุทธิ" value={formatCurrency(farmRecords.summary.netProfit)} />
@@ -1285,6 +1444,10 @@ export function FarmRecordsDebugPage() {
             <Button className="w-full px-3" onClick={() => openForm('cycle')} variant="ghost">
               <Plus aria-hidden="true" className="h-5 w-5" />
               เพิ่มรอบปลูก
+            </Button>
+            <Button className="w-full px-3" onClick={() => openForm('harvest')} variant="soft">
+              <Plus aria-hidden="true" className="h-5 w-5" />
+              Add harvest
             </Button>
           </div>
 
@@ -1325,6 +1488,17 @@ export function FarmRecordsDebugPage() {
               onSubmit={handleCycleSubmit}
               plots={activePlots}
               values={cycleForm}
+            />
+          ) : null}
+          {activeForm === 'harvest' ? (
+            <HarvestForm
+              cycles={farmRecords.state.cropCycles}
+              errors={formErrors}
+              onCancel={closeForm}
+              onChange={setHarvestForm}
+              onSubmit={handleHarvestSubmit}
+              plots={activePlots}
+              values={harvestForm}
             />
           ) : null}
         </section>
@@ -1409,6 +1583,100 @@ export function FarmRecordsDebugPage() {
           </div>
         </Card>
 
+        <section className="grid gap-3" id="farm-harvest-yield">
+          <SectionTitle badge="local harvest estimate only" title="Harvest & Yield / ผลผลิตและการเก็บเกี่ยว" />
+          <NoticeBox tone="info" icon={Wheat} title="Harvest data stays on this device">
+            Harvest and yield values are calculated only from records stored on this device. They may reveal production volume and business performance. No cloud sync, GPS, AI analysis, or official accounting/tax claim is added.
+          </NoticeBox>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+            <SummaryCard icon={Wheat} label="Harvested kg" value={formatOptionalNumber(harvestYieldSummary.totalHarvestKg > 0 ? harvestYieldSummary.totalHarvestKg : undefined, 'kg')} />
+            <SummaryCard icon={ClipboardList} label="Harvest records" value={harvestYieldSummary.harvestRecordCount} />
+            <SummaryCard icon={Leaf} label="Yield per rai" value={formatOptionalNumber(harvestYieldSummary.yieldPerRai, 'kg/rai')} />
+            <SummaryCard icon={ReceiptText} label="Cost per kg" value={formatOptionalNumber(harvestYieldSummary.costPerKg, 'THB/kg')} />
+            <SummaryCard icon={Banknote} label="Income per kg" value={formatOptionalNumber(harvestYieldSummary.incomePerKg, 'THB/kg')} />
+            <SummaryCard icon={Coins} label="Profit per kg" value={formatOptionalNumber(harvestYieldSummary.profitPerKg, 'THB/kg')} />
+          </div>
+          <Card className="p-4">
+            <div className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="grid gap-2">
+                <h3 className="font-extrabold leading-6 text-kaset-ink">Recorded harvest summary</h3>
+                <p className="text-sm leading-6 text-slate-600">
+                  ต้นทุนต่อกิโลกรัมคำนวณจากรายจ่ายที่บันทึกและผลผลิตที่บันทึกในเครื่องนี้เท่านั้น
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg bg-kaset-mist p-3">
+                    <p className="text-xs font-bold text-slate-500">Average sale price / kg</p>
+                    <p className="mt-1 text-sm font-extrabold text-kaset-ink">{formatOptionalNumber(harvestYieldSummary.averageSalePricePerKg, 'THB/kg')}</p>
+                  </div>
+                  <div className="rounded-lg bg-kaset-mist p-3">
+                    <p className="text-xs font-bold text-slate-500">Actual break-even / kg</p>
+                    <p className="mt-1 text-sm font-extrabold text-kaset-ink">{formatOptionalNumber(harvestYieldSummary.breakEvenPricePerKg, 'THB/kg')}</p>
+                  </div>
+                  <div className="rounded-lg bg-kaset-mist p-3">
+                    <p className="text-xs font-bold text-slate-500">Latest harvest date</p>
+                    <p className="mt-1 text-sm font-extrabold text-kaset-ink">{harvestYieldSummary.latestHarvestDate ?? 'ยังไม่มีข้อมูลผลผลิต'}</p>
+                  </div>
+                  <div className="rounded-lg bg-kaset-mist p-3">
+                    <p className="text-xs font-bold text-slate-500">Net profit used</p>
+                    <p className="mt-1 text-sm font-extrabold text-kaset-ink">{formatCurrency(harvestYieldSummary.netProfit)}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <h3 className="font-extrabold leading-6 text-kaset-ink">Harvest warnings</h3>
+                {harvestYieldSummary.warnings.map((warning) => (
+                  <p className="rounded-lg bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900" key={warning}>
+                    {warning}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </Card>
+          <div className="grid gap-3">
+            <SectionTitle badge={`${viewModel.harvestRecords.length} records`} title="Harvest records" />
+            {viewModel.harvestRecords.length > 0 ? (
+              viewModel.harvestRecords.map((record) => (
+                <Card className="p-4" key={record.id}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge tone="green">{record.harvestDate}</Badge>
+                        <Badge tone={record.normalizedQuantityKg === undefined ? 'gold' : 'sky'}>{getHarvestUnitLabel(record.quantityUnit)}</Badge>
+                      </div>
+                      <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{record.cropName || getCycleLabel(farmRecords.state.cropCycles, record.cropCycleId) || 'Harvest record'}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        {getPlotName(farmRecords.state.farmPlots, record.farmPlotId)} {record.cropCycleId ? `· ${getCycleLabel(farmRecords.state.cropCycles, record.cropCycleId)}` : ''}
+                      </p>
+                      <p className="mt-2 text-sm font-bold leading-6 text-kaset-deep">
+                        {formatNumber(record.quantity)} {record.quantityUnit} {record.normalizedQuantityKg !== undefined ? `· ${formatNumber(record.normalizedQuantityKg)} kg` : '· cannot normalize to kg'}
+                      </p>
+                      {record.grade || record.buyer || record.salePricePerKg !== undefined ? (
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          {[record.grade ? `Grade: ${record.grade}` : undefined, record.buyer ? `Buyer: ${record.buyer}` : undefined, record.salePricePerKg !== undefined ? `Sale price: ${formatOptionalNumber(record.salePricePerKg, 'THB/kg')}` : undefined]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      ) : null}
+                      {record.note ? <p className="mt-2 text-sm leading-6 text-slate-600">{record.note}</p> : null}
+                    </div>
+                    <Button onClick={() => handleDeleteHarvestRecord(record.id)} variant="secondary">
+                      <Trash2 aria-hidden="true" className="h-5 w-5" />
+                      Delete
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <EmptyState
+                actionLabel="Add harvest record"
+                detail="บันทึกผลผลิตที่เก็บเกี่ยว เช่น กิโลกรัม ตัน หรือหน่วยอื่น เพื่อคำนวณต้นทุนต่อกิโลกรัมและผลผลิตต่อไร่"
+                onAction={() => openForm('harvest')}
+                title="ยังไม่มีข้อมูลผลผลิต"
+              />
+            )}
+          </div>
+        </section>
+
         <section className="grid gap-3" id="farm-cost-dashboard">
           <SectionTitle badge="local cost estimate only" title="Farm Cost Dashboard / สรุปต้นทุนและกำไรฟาร์ม" />
           <NoticeBox tone="info" icon={Calculator} title="คำนวณจากข้อมูลในเครื่องนี้เท่านั้น">
@@ -1421,6 +1689,10 @@ export function FarmRecordsDebugPage() {
             <SummaryCard icon={Coins} label="กำไร/ขาดทุนสุทธิ" value={formatCurrency(farmCostDashboard.netProfit)} />
             <SummaryCard icon={Leaf} label="ต้นทุนต่อไร่" value={formatOptionalCurrency(farmCostDashboard.costPerRai)} />
             <SummaryCard icon={Sprout} label="กำไรต่อไร่" value={formatOptionalCurrency(farmCostDashboard.profitPerRai)} />
+            <SummaryCard icon={Wheat} label="ต้นทุนต่อ kg" value={formatOptionalNumber(farmCostDashboard.costPerKg, 'THB/kg')} />
+            <SummaryCard icon={Leaf} label="Yield per rai" value={formatOptionalNumber(farmCostDashboard.yieldPerRai, 'kg/rai')} />
+            <SummaryCard icon={Coins} label="Profit per kg" value={formatOptionalNumber(farmCostDashboard.profitPerKg, 'THB/kg')} />
+            <SummaryCard icon={Calculator} label="Actual break-even / kg" value={formatOptionalNumber(farmCostDashboard.breakEvenPricePerKg, 'THB/kg')} />
             <SummaryCard
               icon={WalletCards}
               label="หมวดรายจ่ายสูงสุด"
@@ -1575,6 +1847,10 @@ export function FarmRecordsDebugPage() {
                   <p className="text-xs font-bold text-slate-500">บัญชี</p>
                   <p className="mt-1 text-lg font-extrabold text-kaset-ink">{exportPreview.financeEntryCount.toLocaleString('th-TH')}</p>
                 </div>
+                <div className="rounded-lg bg-kaset-mist p-3">
+                  <p className="text-xs font-bold text-slate-500">Harvest</p>
+                  <p className="mt-1 text-lg font-extrabold text-kaset-ink">{exportPreview.harvestRecordCount.toLocaleString('th-TH')}</p>
+                </div>
               </div>
               <div className="grid gap-2 sm:grid-cols-3">
                 <div className="rounded-lg bg-white p-3 ring-1 ring-slate-100">
@@ -1718,6 +1994,7 @@ export function FarmRecordsDebugPage() {
                     </Badge>
                     <Badge tone="neutral">{restoreValidation.detectedCounts.farmPlotCount.toLocaleString('th-TH')} plots</Badge>
                     <Badge tone="neutral">{restoreValidation.detectedCounts.financeEntryCount.toLocaleString('th-TH')} finance entries</Badge>
+                    <Badge tone="neutral">{restoreValidation.detectedCounts.harvestRecordCount.toLocaleString('th-TH')} harvest records</Badge>
                   </div>
                   {restoreValidation.warnings.map((warning) => (
                     <p className="rounded-lg bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900" key={warning}>
@@ -1763,6 +2040,13 @@ export function FarmRecordsDebugPage() {
                         {restoreRiskReview.currentCounts.financeEntryCount.toLocaleString('th-TH')} → {restoreRiskReview.backupCounts.financeEntryCount.toLocaleString('th-TH')}
                       </p>
                       <p className="text-xs font-bold text-kaset-deep">{formatCountDelta(restoreRiskReview.differenceCounts.financeEntryCount)}</p>
+                    </div>
+                    <div className="rounded-lg bg-white p-3 ring-1 ring-slate-100">
+                      <p className="text-xs font-bold text-slate-500">Harvest</p>
+                      <p className="mt-1 text-sm font-extrabold text-kaset-ink">
+                        {restoreRiskReview.currentCounts.harvestRecordCount.toLocaleString('th-TH')} → {restoreRiskReview.backupCounts.harvestRecordCount.toLocaleString('th-TH')}
+                      </p>
+                      <p className="text-xs font-bold text-kaset-deep">{formatCountDelta(restoreRiskReview.differenceCounts.harvestRecordCount)}</p>
                     </div>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-4">

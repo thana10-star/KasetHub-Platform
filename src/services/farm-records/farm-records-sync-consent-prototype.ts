@@ -26,6 +26,7 @@ export const farmRecordsSyncPrototypeIncludedData = [
   'Crop cycles',
   'Activity records',
   'Finance ledger entries',
+  'Harvest/yield records',
   'Image metadata only',
   'Restore/export metadata',
 ];

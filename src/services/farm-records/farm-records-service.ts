@@ -2,6 +2,7 @@ import {
   cropCycleStatusIds,
   farmActivityTypeIds,
   farmExpenseCategoryIds,
+  farmHarvestQuantityUnitIds,
   farmIncomeCategoryIds,
 } from '@/services/farm-records/farm-records-config';
 import { createDemoFarmRecordsState } from '@/services/farm-records/farm-records-fixtures';
@@ -22,6 +23,11 @@ import type {
   FarmFinanceEntryFilters,
   FarmFinanceEntryInput,
   FarmFinanceEntryPatch,
+  FarmHarvestQuantityUnit,
+  FarmHarvestRecord,
+  FarmHarvestRecordFilters,
+  FarmHarvestRecordInput,
+  FarmHarvestRecordPatch,
   FarmImageRef,
   FarmIncomeCategory,
   FarmLedgerSummary,
@@ -85,6 +91,7 @@ export function createEmptyFarmRecordsState(): FarmRecordsState {
     cropCycles: [],
     farmActivityRecords: [],
     farmFinanceEntries: [],
+    farmHarvestRecords: [],
     migrations: [],
     updatedAt: now(),
   };
@@ -119,6 +126,10 @@ function normalizeDateString(value: unknown, fallback: string) {
   return Number.isNaN(Date.parse(value)) ? fallback : value.trim();
 }
 
+function hasValidDateString(value: unknown) {
+  return typeof value === 'string' && value.trim().length > 0 && !Number.isNaN(Date.parse(value));
+}
+
 function isFarmActivityType(value: unknown): value is FarmActivityType {
   return typeof value === 'string' && farmActivityTypeIds.includes(value as FarmActivityType);
 }
@@ -133,6 +144,10 @@ function isExpenseCategory(value: unknown): value is FarmExpenseCategory {
 
 function isIncomeCategory(value: unknown): value is FarmIncomeCategory {
   return typeof value === 'string' && farmIncomeCategoryIds.includes(value as FarmIncomeCategory);
+}
+
+function isFarmHarvestQuantityUnit(value: unknown): value is FarmHarvestQuantityUnit {
+  return typeof value === 'string' && farmHarvestQuantityUnitIds.includes(value as FarmHarvestQuantityUnit);
 }
 
 function normalizeTags(value: unknown) {
@@ -296,6 +311,42 @@ function normalizeFinanceEntry(input: unknown): FarmFinanceEntry | undefined {
   };
 }
 
+export function normalizeHarvestQuantityToKg(quantity: number, unit: FarmHarvestQuantityUnit): number | undefined {
+  if (!Number.isFinite(quantity) || quantity < 0) return undefined;
+  if (unit === 'kg') return quantity;
+  if (unit === 'ton') return quantity * 1000;
+  return undefined;
+}
+
+function normalizeHarvestRecord(input: unknown): FarmHarvestRecord | undefined {
+  if (!isObject(input)) return undefined;
+
+  const timestamp = now();
+  const farmPlotId = normalizeOptionalString(input.farmPlotId);
+  const quantity = normalizeNonNegativeNumber(input.quantity);
+  if (!farmPlotId || quantity === undefined || !hasValidDateString(input.harvestDate)) return undefined;
+
+  const quantityUnit = isFarmHarvestQuantityUnit(input.quantityUnit) ? input.quantityUnit : 'other';
+
+  return {
+    id: normalizeOptionalString(input.id) ?? createId('farm-harvest'),
+    farmPlotId,
+    cropCycleId: normalizeOptionalString(input.cropCycleId),
+    harvestDate: normalizeDateString(input.harvestDate, timestamp.slice(0, 10)),
+    cropName: normalizeOptionalString(input.cropName),
+    quantity,
+    quantityUnit,
+    normalizedQuantityKg: normalizeHarvestQuantityToKg(quantity, quantityUnit),
+    grade: normalizeOptionalString(input.grade),
+    buyer: normalizeOptionalString(input.buyer),
+    salePricePerKg: normalizeNonNegativeNumber(input.salePricePerKg),
+    grossIncome: normalizeNonNegativeNumber(input.grossIncome),
+    note: normalizeOptionalString(input.note),
+    createdAt: normalizeDateString(input.createdAt, timestamp),
+    updatedAt: normalizeDateString(input.updatedAt, timestamp),
+  };
+}
+
 export function migrateFarmRecordsState(input: unknown): FarmRecordsState {
   if (!isObject(input)) {
     return createDemoFarmRecordsState();
@@ -313,6 +364,9 @@ export function migrateFarmRecordsState(input: unknown): FarmRecordsState {
   const farmFinanceEntries = Array.isArray(input.farmFinanceEntries)
     ? input.farmFinanceEntries.map(normalizeFinanceEntry).filter((entry): entry is FarmFinanceEntry => Boolean(entry))
     : [];
+  const farmHarvestRecords = Array.isArray(input.farmHarvestRecords)
+    ? input.farmHarvestRecords.map(normalizeHarvestRecord).filter((record): record is FarmHarvestRecord => Boolean(record))
+    : [];
 
   return {
     version: currentVersion,
@@ -320,6 +374,7 @@ export function migrateFarmRecordsState(input: unknown): FarmRecordsState {
     cropCycles,
     farmActivityRecords,
     farmFinanceEntries,
+    farmHarvestRecords,
     migrations: Array.isArray(input.migrations) ? input.migrations.filter((item): item is string => typeof item === 'string') : [],
     updatedAt: normalizeDateString(input.updatedAt, now()),
   };
@@ -403,6 +458,15 @@ function filterFinanceEntries(records: FarmFinanceEntry[], filters: FarmFinanceE
   });
 }
 
+function filterHarvestRecords(records: FarmHarvestRecord[], filters: FarmHarvestRecordFilters = {}) {
+  return records.filter((record) => {
+    if (filters.farmPlotId && record.farmPlotId !== filters.farmPlotId) return false;
+    if (filters.cropCycleId && record.cropCycleId !== filters.cropCycleId) return false;
+    if (filters.cropName && record.cropName?.toLowerCase() !== filters.cropName.toLowerCase()) return false;
+    return isWithinDateRange(record.harvestDate, filters.startDate, filters.endDate);
+  });
+}
+
 function getPlotAreaRai(plot: FarmPlot | undefined) {
   if (!plot) return 0;
 
@@ -453,8 +517,15 @@ function buildLedgerSummary(state: FarmRecordsState, filters: FarmLedgerSummaryF
   };
   const entries = filterFinanceEntries(state.farmFinanceEntries, financeFilters);
   const activities = filterActivityRecords(state.farmActivityRecords, activityFilters);
+  const harvestRecords = filterHarvestRecords(state.farmHarvestRecords, {
+    farmPlotId: filters.farmPlotId,
+    cropCycleId: filters.cropCycleId,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+  });
   const totalIncome = entries.filter((entry) => entry.direction === 'income').reduce((total, entry) => total + entry.amount, 0);
   const totalExpense = entries.filter((entry) => entry.direction === 'expense').reduce((total, entry) => total + entry.amount, 0);
+  const totalHarvestKg = harvestRecords.reduce((total, record) => total + (record.normalizedQuantityKg ?? 0), 0);
   const expenseByCategory = entries.reduce<Partial<Record<FarmExpenseCategory, number>>>((totals, entry) => {
     if (entry.direction === 'expense' && isExpenseCategory(entry.category)) {
       totals[entry.category] = (totals[entry.category] ?? 0) + entry.amount;
@@ -478,7 +549,7 @@ function buildLedgerSummary(state: FarmRecordsState, filters: FarmLedgerSummaryF
     expenseByCategory,
     incomeByCategory,
     costPerRai: areaRai > 0 ? totalExpense / areaRai : undefined,
-    costPerKg: undefined,
+    costPerKg: totalHarvestKg > 0 ? totalExpense / totalHarvestKg : undefined,
     entryCount: entries.length,
     activityCount: activities.length,
   };
@@ -671,6 +742,51 @@ function updateFinanceEntryWithStorage(storage: FarmRecordsStorageAdapter | unde
   }).result;
 }
 
+function createHarvestRecordWithStorage(storage: FarmRecordsStorageAdapter | undefined, input: FarmHarvestRecordInput) {
+  const timestamp = now();
+  const normalized = normalizeHarvestRecord({
+    ...input,
+    id: input.id ?? createId('farm-harvest'),
+    createdAt: input.createdAt ?? timestamp,
+    updatedAt: input.updatedAt ?? timestamp,
+  });
+
+  if (!normalized) {
+    throw new Error('Farm harvest record requires a farmPlotId, valid harvestDate, and non-negative quantity.');
+  }
+
+  return mutateState(storage, (state) => ({
+    result: normalized,
+    state: {
+      ...state,
+      farmHarvestRecords: [normalized, ...state.farmHarvestRecords.filter((record) => record.id !== normalized.id)],
+    },
+  })).result;
+}
+
+function updateHarvestRecordWithStorage(storage: FarmRecordsStorageAdapter | undefined, id: string, patch: FarmHarvestRecordPatch) {
+  let updated: FarmHarvestRecord | undefined;
+
+  return mutateState(storage, (state) => {
+    const farmHarvestRecords = state.farmHarvestRecords.map((record) => {
+      if (record.id !== id) return record;
+      updated = normalizeHarvestRecord({
+        ...record,
+        ...patch,
+        id: record.id,
+        createdAt: record.createdAt,
+        updatedAt: now(),
+      });
+      return updated ?? record;
+    });
+
+    return {
+      result: updated,
+      state: { ...state, farmHarvestRecords },
+    };
+  }).result;
+}
+
 export function getFarmRecordsState(storage?: FarmRecordsStorageAdapter) {
   return readState(storage);
 }
@@ -766,6 +882,26 @@ export function deleteFinanceEntry(id: string) {
   return createFarmRecordsService().deleteFinanceEntry(id);
 }
 
+export function listHarvestRecords(filters: FarmHarvestRecordFilters = {}) {
+  return createFarmRecordsService().listHarvestRecords(filters);
+}
+
+export function getHarvestRecordById(id: string) {
+  return createFarmRecordsService().getHarvestRecordById(id);
+}
+
+export function createHarvestRecord(input: FarmHarvestRecordInput) {
+  return createHarvestRecordWithStorage(getBrowserStorage(), input);
+}
+
+export function updateHarvestRecord(id: string, patch: FarmHarvestRecordPatch) {
+  return updateHarvestRecordWithStorage(getBrowserStorage(), id, patch);
+}
+
+export function deleteHarvestRecord(id: string) {
+  return createFarmRecordsService().deleteHarvestRecord(id);
+}
+
 export function computeFarmLedgerSummary(filters: FarmLedgerSummaryFilters = {}) {
   return createFarmRecordsService().computeFarmLedgerSummary(filters);
 }
@@ -835,6 +971,18 @@ export function createFarmRecordsService(storage = getBrowserStorage()) {
         state: {
           ...state,
           farmFinanceEntries: state.farmFinanceEntries.filter((entry) => entry.id !== id),
+        },
+      })).result,
+    listHarvestRecords: (filters: FarmHarvestRecordFilters = {}) => filterHarvestRecords(readState(storage).farmHarvestRecords, filters),
+    getHarvestRecordById: (id: string) => readState(storage).farmHarvestRecords.find((record) => record.id === id),
+    createHarvestRecord: (input: FarmHarvestRecordInput) => createHarvestRecordWithStorage(storage, input),
+    updateHarvestRecord: (id: string, patch: FarmHarvestRecordPatch) => updateHarvestRecordWithStorage(storage, id, patch),
+    deleteHarvestRecord: (id: string) =>
+      mutateState(storage, (state) => ({
+        result: state.farmHarvestRecords.some((record) => record.id === id),
+        state: {
+          ...state,
+          farmHarvestRecords: state.farmHarvestRecords.filter((record) => record.id !== id),
         },
       })).result,
     computeFarmLedgerSummary: (filters: FarmLedgerSummaryFilters = {}) => buildLedgerSummary(readState(storage), filters),

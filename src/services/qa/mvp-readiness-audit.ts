@@ -163,7 +163,7 @@ export function runMvpReadinessAudit(): MvpReadinessAudit {
       {
         label: 'Farm Records and ledger',
         status: 'ready_mock',
-        detail: 'M90 farm records UI uses kasethub.farmRecords.v1 for local plots, cycles, activity/finance create/edit flows, cost summary, category breakdown, break-even estimates, JSON/CSV export, guarded JSON restore, restore risk review, sync consent prototype visibility, My Farm cost entry, and no GPS, cloud sync, Supabase writes, AI processing, or official tax/accounting claims',
+        detail: 'M92 keeps Farm Records local under kasethub.farmRecords.v1 and makes the My Farm/Farm Records entry visible from Home with elder-friendly Thai actions. The feature still covers local plots, cycles, activity/finance/harvest flows, harvest yield summaries, cost-per-kg analytics, category breakdown, break-even estimates, JSON/CSV export, guarded JSON restore, restore risk review, sync consent prototype visibility, and no GPS, cloud sync, Supabase writes, AI processing, or official tax/accounting claims',
       },
       {
         label: 'Supabase staging',

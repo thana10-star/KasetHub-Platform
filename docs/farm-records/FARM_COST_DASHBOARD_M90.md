@@ -26,6 +26,21 @@ The dashboard reads only local Farm Records state from `kasethub.farmRecords.v1`
 - Top expense and income categories.
 - Latest finance and activity dates.
 
+## M91 Harvest Metrics Extension
+
+M91 extends this dashboard with local harvest/yield data when `farmHarvestRecords` are available:
+
+- Total harvested kg.
+- Harvest record count.
+- Yield per rai.
+- Cost per kg.
+- Income per kg.
+- Profit per kg.
+- Actual recorded break-even price per kg.
+- Latest harvest date.
+
+These values are still estimates from local user-entered records. If harvest quantity is missing, zero, or recorded in a unit that cannot be normalized to kg, cost-per-kg values remain unavailable and the UI shows a warning.
+
 ## Break-even Estimate
 
 The break-even calculator uses:
@@ -70,6 +85,6 @@ The dashboard is not official accounting, tax, loan, or legal advice. It is a pr
 ## Future Work
 
 - Farmer-facing saved dashboard presets.
-- Harvested quantity model for actual cost per kg.
+- Saved yield/cost-per-kg presets after M91 data is validated with more farmer examples.
 - Exportable cost summaries after export safety review.
 - Stronger conflict/recovery behavior before any cloud sync.

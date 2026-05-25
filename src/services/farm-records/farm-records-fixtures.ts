@@ -214,6 +214,25 @@ export const demoFarmRecordsState: FarmRecordsState = {
       updatedAt: '2026-05-15T14:00:00.000+07:00',
     },
   ],
+  farmHarvestRecords: [
+    {
+      id: 'harvest-demo-rice-first-cut',
+      farmPlotId: 'farm-plot-demo-rice-a',
+      cropCycleId: 'crop-cycle-demo-rice-2026-main',
+      harvestDate: '2026-09-02',
+      cropName: 'Rice',
+      quantity: 3.2,
+      quantityUnit: 'ton',
+      normalizedQuantityKg: 3200,
+      grade: 'Demo standard paddy',
+      buyer: 'Demo local mill',
+      salePricePerKg: 10.9,
+      grossIncome: 34880,
+      note: 'Demo harvest quantity for local cost-per-kg readiness. No real buyer identity.',
+      createdAt: '2026-09-02T16:00:00.000+07:00',
+      updatedAt: '2026-09-02T16:00:00.000+07:00',
+    },
+  ],
   migrations: ['m83-demo-seed-v1'],
   updatedAt: seedTimestamp,
 };
@@ -232,6 +251,7 @@ export function createDemoFarmRecordsState(): FarmRecordsState {
       ...entry,
       receiptImageRefs: entry.receiptImageRefs?.map((imageRef) => ({ ...imageRef })),
     })),
+    farmHarvestRecords: demoFarmRecordsState.farmHarvestRecords.map((record) => ({ ...record })),
     migrations: [...demoFarmRecordsState.migrations],
   };
 }

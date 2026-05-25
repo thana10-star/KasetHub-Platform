@@ -356,7 +356,7 @@ export function AdminDashboardPage() {
               <SummaryCard icon={Bell} label="local notifications" value={notificationCenter.digest.unreadCount} />
               <SummaryCard icon={Calculator} label="calculator history" value={agriCalculators.counts.recentCalculations} />
               <SummaryCard icon={Ruler} label="farm area plots" value={farmArea.counts.plots} />
-              <SummaryCard icon={ClipboardList} label="farm records" value={farmRecords.counts.activityRecords} />
+              <SummaryCard icon={ClipboardList} label="farm records" value={farmRecords.counts.activityRecords + farmRecords.counts.harvestRecords} />
               <SummaryCard icon={Calculator} label="farm ledger net" value={`${farmRecords.summary.netProfit.toLocaleString('th-TH')} THB`} />
               <SummaryCard icon={Bot} label="AI safety items" value={dashboard.summary.aiSafetyItems} />
               <SummaryCard icon={Video} label="YouTube candidates" value={dashboard.summary.youtubeImportCandidates} />
@@ -385,11 +385,11 @@ export function AdminDashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-kaset-ink">M90 Farm Records</h2>
+                    <h2 className="font-extrabold text-kaset-ink">M92 Farm Records Home Entry</h2>
                     <StatusPill tone="info">local-first</StatusPill>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {farmRecords.counts.plots} plots - {farmRecords.counts.activeCropCycles} active cycles - {farmRecords.counts.activityRecords} activities - net {farmRecords.summary.netProfit.toLocaleString('th-TH')} THB
+                    Home now links clearly to My Farm and Farm Records - {farmRecords.counts.plots} plots - {farmRecords.counts.activeCropCycles} active cycles - {farmRecords.counts.activityRecords} activities - {farmRecords.counts.harvestRecords} harvest records - net {farmRecords.summary.netProfit.toLocaleString('th-TH')} THB
                   </p>
                   <Link className="mt-3 inline-flex text-sm font-extrabold text-kaset-deep" to="/app/farm-records">
                     Open Farm Records

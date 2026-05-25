@@ -106,7 +106,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'คำนวณต้นทุน', route: '/app/calculators/cost' },
   { label: 'คำนวณพื้นที่แปลง', route: '/app/farm-area' },
   { label: 'คู่มือวัดพื้นที่แปลง', route: '/app/farm-area-guide' },
-  { label: 'M90 Farm Records cost summary + break-even dashboard', route: '/app/farm-records' },
+  { label: 'M92 Home-first Farm Hub and M91 Farm Records dashboard', route: '/app/farm-records' },
   { label: 'AI ผู้ช่วยเกษตร', route: '/app/ai' },
   { label: 'M81 real AI text proxy status', route: '/app/ai-text-status' },
   { label: 'M82 AI text endpoint dry-run', route: '/app/ai-text-endpoint-plan' },

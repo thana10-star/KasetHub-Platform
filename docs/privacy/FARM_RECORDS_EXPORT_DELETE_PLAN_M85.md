@@ -14,6 +14,7 @@ Future full data export should include:
 - crop cycles
 - farm activity records
 - farm finance entries
+- farm harvest/yield records
 - image and receipt metadata placeholders only, not raw image bytes
 - local metadata such as local schema version, record timestamps, and migration markers
 
@@ -94,3 +95,7 @@ M88 extends readiness without implementing cloud sync:
 - Bulk delete remains future.
 - Cloud export/delete remains future.
 - Supabase schema, sync queue, read, write, and delete remain future.
+
+## M91 Harvest/Yield Export Status
+
+M91 adds `farmHarvestRecords` to local JSON backup, restore validation, restore preview, and pre-restore snapshots. Old backups without harvest records still restore with an empty slice. Finance CSV remains finance-ledger focused only; harvest CSV/export remains future work.

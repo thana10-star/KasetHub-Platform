@@ -4,6 +4,7 @@ import type {
   FarmExpenseCategory,
   FarmFinanceCategory,
   FarmFinanceDirection,
+  FarmHarvestQuantityUnit,
   FarmIncomeCategory,
 } from '@/services/farm-records/farm-records.types';
 
@@ -27,6 +28,12 @@ export type FarmUnitConfig = {
   id: string;
   label: FarmConfigLabel;
   category: 'input' | 'labor' | 'yield' | 'money' | 'area' | 'other';
+};
+
+export type FarmHarvestQuantityUnitConfig = {
+  id: FarmHarvestQuantityUnit;
+  label: FarmConfigLabel;
+  normalizesToKg: boolean;
 };
 
 export type CropCycleStatusConfig = {
@@ -110,8 +117,17 @@ export const allowedFarmRecordUnits: FarmUnitConfig[] = [
   { id: 'other', label: { en: 'Other', th: 'อื่น ๆ' }, category: 'other' },
 ];
 
+export const farmHarvestQuantityUnits: FarmHarvestQuantityUnitConfig[] = [
+  { id: 'kg', label: { en: 'Kilogram', th: 'Kilogram' }, normalizesToKg: true },
+  { id: 'ton', label: { en: 'Ton', th: 'Ton' }, normalizesToKg: true },
+  { id: 'sack', label: { en: 'Sack', th: 'Sack' }, normalizesToKg: false },
+  { id: 'basket', label: { en: 'Basket', th: 'Basket' }, normalizesToKg: false },
+  { id: 'other', label: { en: 'Other', th: 'Other' }, normalizesToKg: false },
+];
+
 export const farmActivityTypeIds = farmActivityTypes.map((item) => item.id);
 export const cropCycleStatusIds = cropCycleStatuses.map((item) => item.id);
 export const farmExpenseCategoryIds = farmExpenseCategories.map((item) => item.id as FarmExpenseCategory);
 export const farmIncomeCategoryIds = farmIncomeCategories.map((item) => item.id as FarmIncomeCategory);
 export const farmFinanceCategoryIds = farmFinanceCategories.map((item) => item.id);
+export const farmHarvestQuantityUnitIds = farmHarvestQuantityUnits.map((item) => item.id);

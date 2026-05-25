@@ -25,6 +25,7 @@ Farm Records backups can contain sensitive farm and finance history. Restore mus
 - Crop cycles.
 - Farm activity records.
 - Farm finance ledger entries.
+- Farm harvest/yield records when present.
 - IDs and timestamps needed to preserve local relationships.
 - Computed restore preview summary.
 - Image and receipt metadata placeholders only.
@@ -80,3 +81,7 @@ M88 adds local restore recovery UX without changing the M87 cloud boundary:
 ## M89 Sync Consent Prototype Status
 
 M89 adds a local-only Cloud Sync Consent Prototype so users can preview future consent categories before any real sync exists. Prototype checkbox state may be stored under `kasethub.farmRecords.syncConsentPrototype.v1`, but it is not legal consent, does not unlock cloud sync, and does not call Supabase. Cloud sync, AI analysis, GPS/precise location, and image/receipt upload remain separate future gates.
+
+## M91 Harvest/Yield Restore Status
+
+M91 extends restore validation to `farmHarvestRecords`. Old backups without this slice still restore with an empty harvest array. New backups validate harvest IDs, dates, quantity, and normalized kg behavior, and restore remains local-device only with no Supabase calls, no AI calls, no GPS/geolocation fields, and no receipt/image upload.

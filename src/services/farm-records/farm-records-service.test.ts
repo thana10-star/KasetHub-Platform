@@ -22,6 +22,7 @@ describe('M83 farm records local-first service', () => {
     expect(Array.isArray(state.cropCycles)).toBe(true);
     expect(Array.isArray(state.farmActivityRecords)).toBe(true);
     expect(Array.isArray(state.farmFinanceEntries)).toBe(true);
+    expect(Array.isArray(state.farmHarvestRecords)).toBe(true);
     expect(state.farmPlots.length).toBeGreaterThanOrEqual(1);
     expect(state.farmFinanceEntries.some((entry) => entry.direction === 'income')).toBe(true);
     expect(state.farmFinanceEntries.some((entry) => entry.direction === 'expense')).toBe(true);
@@ -98,6 +99,56 @@ describe('M83 farm records local-first service', () => {
     expect(summary.activityCount).toBe(1);
   });
 
+  test('creates, filters, normalizes, updates, and deletes harvest records locally', () => {
+    const service = createEmptyService();
+    const plot = service.createFarmPlot({ name: 'Harvest Test Plot', areaRai: 2 });
+    const cycle = service.createCropCycle({ farmPlotId: plot.id, cropName: 'Rice', startDate: '2026-05-01', areaRai: 2 });
+
+    const harvest = service.createHarvestRecord({
+      farmPlotId: plot.id,
+      cropCycleId: cycle.id,
+      harvestDate: '2026-09-01',
+      cropName: 'Rice',
+      quantity: 1.5,
+      quantityUnit: 'ton',
+      salePricePerKg: 9,
+    });
+
+    expect(harvest.normalizedQuantityKg).toBe(1500);
+    expect(service.listHarvestRecords({ farmPlotId: plot.id })).toHaveLength(1);
+    expect(service.listHarvestRecords({ cropCycleId: cycle.id })).toHaveLength(1);
+    expect(service.listHarvestRecords({ startDate: '2026-09-02' })).toEqual([]);
+    expect(service.listHarvestRecords({ cropName: 'Rice' })).toHaveLength(1);
+
+    const updated = service.updateHarvestRecord(harvest.id, { quantity: 2, quantityUnit: 'kg' });
+    expect(updated?.normalizedQuantityKg).toBe(2);
+    expect(service.deleteHarvestRecord(harvest.id)).toBe(true);
+    expect(service.listHarvestRecords()).toEqual([]);
+  });
+
+  test('blocks invalid harvest quantity and date through service validation', () => {
+    const service = createEmptyService();
+    const plot = service.createFarmPlot({ name: 'Invalid Harvest Plot' });
+
+    expect(() =>
+      service.createHarvestRecord({
+        farmPlotId: plot.id,
+        harvestDate: 'bad-date',
+        quantity: 10,
+        quantityUnit: 'kg',
+      }),
+    ).toThrow('Farm harvest record requires');
+
+    expect(() =>
+      service.createHarvestRecord({
+        farmPlotId: plot.id,
+        harvestDate: '2026-09-01',
+        quantity: -1,
+        quantityUnit: 'kg',
+      }),
+    ).toThrow('Farm harvest record requires');
+  });
+
   test('filters by plot, cycle, date, activity type, direction, and category do not crash', () => {
     const service = createEmptyService();
     const plotA = service.createFarmPlot({ name: 'Plot A', areaRai: 1 });
@@ -152,6 +203,10 @@ describe('M83 farm records local-first service', () => {
         },
       ],
       farmFinanceEntries: [{ id: 'ok-finance', title: 'Bad amount', amount: 'abc', direction: 'income', category: 'fertilizer' }],
+      farmHarvestRecords: [
+        { id: 'bad-harvest', farmPlotId: 'ok-plot', harvestDate: '2026-09-01', quantity: -1, quantityUnit: 'kg' },
+        { id: 'ok-harvest', farmPlotId: 'ok-plot', harvestDate: '2026-09-02', quantity: 2, quantityUnit: 'ton' },
+      ],
       migrations: ['keep-this'],
       updatedAt: 'bad-date',
     });
@@ -163,6 +218,8 @@ describe('M83 farm records local-first service', () => {
     expect(state.farmActivityRecords[0]?.imageRefs?.[0]?.localUri).toBeUndefined();
     expect(state.farmFinanceEntries[0]?.amount).toBe(0);
     expect(state.farmFinanceEntries[0]?.category).toBe('other_income');
+    expect(state.farmHarvestRecords).toHaveLength(1);
+    expect(state.farmHarvestRecords[0]?.normalizedQuantityKg).toBe(2000);
     expect(() => service.computeFarmLedgerSummary()).not.toThrow();
   });
 

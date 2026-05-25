@@ -19,6 +19,7 @@ Conceptual tables:
 - `crop_cycles`
 - `farm_activity_records`
 - `farm_finance_entries`
+- `farm_harvest_records`
 - `farm_record_sync_audit`
 - `farm_record_sync_conflicts`, if conflict review is added later
 
@@ -32,6 +33,7 @@ Each table needs an immutable owner field, timestamps, local/source IDs for idem
 | `crop_cycles` | required | required | required | close/cancel/delete rules required | required | required |
 | `farm_activity_records` | required | required | required | required | required | required |
 | `farm_finance_entries` | required | required | required | required | required | required |
+| `farm_harvest_records` | required | required | required | required | required | required |
 | `farm_record_sync_audit` | required | backend-controlled insert | append-only preferred | deny by default | required | required |
 | `farm_record_sync_conflicts` | required | backend/sync-controlled insert | reviewed update only | deny until designed | required | required |
 

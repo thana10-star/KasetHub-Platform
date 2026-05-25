@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 import {
   computeBreakEvenEstimate,
   computeFarmCostDashboard,
+  computeHarvestYieldSummary,
   getFarmCostInsights,
 } from '@/services/farm-records/farm-cost-analytics-service';
 import { createDemoFarmRecordsState } from '@/services/farm-records/farm-records-fixtures';
@@ -39,6 +40,9 @@ describe('M90 farm cost analytics service', () => {
     expect(dashboard.activityRecordCount).toBe(4);
     expect(dashboard.farmPlotCount).toBe(2);
     expect(dashboard.cropCycleCount).toBe(1);
+    expect(dashboard.harvestRecordCount).toBe(1);
+    expect(dashboard.harvestKg).toBe(3200);
+    expect(dashboard.costPerKg).toBeCloseTo(4.03, 2);
   });
 
   test('profit status handles no-data, no-income, no-expense, break-even, profit, and loss', () => {
@@ -70,6 +74,8 @@ describe('M90 farm cost analytics service', () => {
     expect(riceDashboard.profitPerRai).toBe(-1612.5);
     expect(emptyDashboard.areaRaiTotal).toBeUndefined();
     expect(emptyDashboard.costPerRai).toBeUndefined();
+    expect(emptyDashboard.yieldPerRai).toBeUndefined();
+    expect(emptyDashboard.costPerKg).toBeUndefined();
   });
 
   test('sorts expense categories descending and computes top category', () => {
@@ -106,6 +112,36 @@ describe('M90 farm cost analytics service', () => {
     expect(estimate.warnings.join(' ')).toContain('expected selling price');
   });
 
+  test('computes harvest yield, cost per kg, and profit per kg safely', () => {
+    const summary = computeHarvestYieldSummary(createDemoFarmRecordsState(), {
+      cropCycleId: 'crop-cycle-demo-rice-2026-main',
+    });
+
+    expect(summary.harvestRecordCount).toBe(1);
+    expect(summary.totalHarvestKg).toBe(3200);
+    expect(summary.yieldPerRai).toBe(400);
+    expect(summary.costPerKg).toBeCloseTo(4.03125, 5);
+    expect(summary.incomePerKg).toBe(0);
+    expect(summary.profitPerKg).toBeCloseTo(-4.03125, 5);
+    expect(summary.breakEvenPricePerKg).toBeCloseTo(4.03125, 5);
+    expect(summary.averageSalePricePerKg).toBe(10.9);
+    expect(summary.latestHarvestDate).toBe('2026-09-02');
+  });
+
+  test('harvest yield summary handles missing harvest data and filters by plot/cycle/date', () => {
+    const state = createDemoFarmRecordsState();
+    const orchardSummary = computeHarvestYieldSummary(state, { farmPlotId: 'farm-plot-demo-mixed-orchard' });
+    const dateFilteredSummary = computeHarvestYieldSummary(state, { startDate: '2026-09-01', endDate: '2026-09-03' });
+    const missingDateSummary = computeHarvestYieldSummary(state, { endDate: '2026-08-31' });
+
+    expect(orchardSummary.totalHarvestKg).toBe(0);
+    expect(orchardSummary.costPerKg).toBeUndefined();
+    expect(orchardSummary.warnings.join(' ')).toContain('Harvest');
+    expect(dateFilteredSummary.totalHarvestKg).toBe(3200);
+    expect(missingDateSummary.harvestRecordCount).toBe(0);
+    expect(missingDateSummary.totalHarvestKg).toBe(0);
+  });
+
   test('returns deterministic local insights without AI', () => {
     const dashboard = computeFarmCostDashboard(createDemoFarmRecordsState(), {
       cropCycleId: 'crop-cycle-demo-rice-2026-main',
@@ -137,6 +173,7 @@ describe('M90 farm cost analytics service', () => {
 
     try {
       computeFarmCostDashboard(createDemoFarmRecordsState());
+      computeHarvestYieldSummary(createDemoFarmRecordsState());
       computeBreakEvenEstimate(createDemoFarmRecordsState(), { expectedYieldKg: 1000, expectedSellingPricePerKg: 10 });
       expect(fetchMock).not.toHaveBeenCalled();
     } finally {

@@ -18,6 +18,8 @@ describe('M90 My Farm cost summary entry', () => {
     expect(html).toContain('Sync consent: Prototype only');
     expect(html).toContain('ต้นทุนต่อไร่');
     expect(html).toContain('หมวดรายจ่ายสูงสุด');
+    expect(html).toContain('kg');
+    expect(html).toContain('2026-09-02');
     expect(html).toContain('Cloud Sync');
   });
 });

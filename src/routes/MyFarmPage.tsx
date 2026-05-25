@@ -42,6 +42,7 @@ const timelineIcons: Record<MyFarmTimelineItemType, LucideIcon> = {
   farm_record: Leaf,
   farm_activity: ClipboardList,
   farm_finance: WalletCards,
+  farm_harvest: Leaf,
   farm_plot: Ruler,
   crop_watch: Bell,
   ai_question: Bot,
@@ -63,6 +64,10 @@ function formatOptionalDate(value: string | undefined) {
 
 function formatOptionalCurrency(value: number | undefined) {
   return value === undefined ? 'ยังคำนวณไม่ได้' : formatCurrency(value);
+}
+
+function formatOptionalNumber(value: number | undefined, unit: string) {
+  return value === undefined ? 'ยังไม่มีข้อมูล' : `${value.toLocaleString('th-TH', { maximumFractionDigits: 2 })} ${unit}`;
 }
 
 function EmptyAction({
@@ -197,12 +202,24 @@ export function MyFarmPage() {
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{hub.summary.farmTopExpenseCategory ?? 'ยังไม่มี'}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">ผลผลิตรวม</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalNumber(hub.summary.farmTotalHarvestKg, 'kg')}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">ต้นทุนต่อ kg</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalCurrency(hub.summary.farmCostPerKg)}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
                     <p className="text-xs font-bold text-slate-500">กิจกรรมล่าสุด</p>
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmActivityDate)}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
                     <p className="text-xs font-bold text-slate-500">บัญชีล่าสุด</p>
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmFinanceEntryDate)}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 p-3">
+                    <p className="text-xs font-bold text-slate-500">เก็บเกี่ยวล่าสุด</p>
+                    <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmHarvestDate)}</p>
                   </div>
                 </div>
                 <p className="mt-3 text-sm font-extrabold text-kaset-deep">ดูต้นทุนและจุดคุ้มทุน · Backup/Restore ready locally · Cloud Sync ยังไม่เปิดใช้</p>

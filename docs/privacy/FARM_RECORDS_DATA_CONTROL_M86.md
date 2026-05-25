@@ -8,6 +8,7 @@ M86 adds local-only data control for Farm Records and Farm Finance Ledger before
 - Crop cycles.
 - Farm activity records.
 - Farm finance ledger entries.
+- Farm harvest/yield records.
 - Computed ledger summary.
 - Record IDs and timestamps so a future backup/restore design can preserve relationships.
 - Image and receipt metadata placeholders only.
@@ -55,6 +56,14 @@ M86 adds local-only data control for Farm Records and Farm Finance Ledger before
 - Optional prototype checkbox state may be stored under `kasethub.farmRecords.syncConsentPrototype.v1`.
 - Prototype state is not legal consent and cannot enable sync.
 - Owner/RLS future test plan exists, but Supabase schema, RLS, sync queue, cloud sync, and cloud delete remain blocked.
+
+## M91 Harvest/Yield Status
+
+- Local JSON backup includes `farmHarvestRecords`.
+- Local restore accepts old backups without harvest records and validates new backups with harvest records.
+- Pre-restore snapshots include harvest records.
+- Harvest/yield data may reveal production volume and sale-price assumptions, so future cloud sync consent copy must include it.
+- Supabase schema, sync queue, cloud sync, and cloud delete remain blocked.
 
 ## Future Requirements Before Cloud Sync
 

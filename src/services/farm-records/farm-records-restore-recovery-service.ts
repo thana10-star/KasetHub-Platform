@@ -8,6 +8,7 @@ import type {
   CropCycle,
   FarmActivityRecord,
   FarmFinanceEntry,
+  FarmHarvestRecord,
   FarmLedgerSummary,
   FarmPlot,
   FarmRecordsState,
@@ -26,6 +27,7 @@ export type FarmRecordsPreRestoreSnapshot = {
   cropCycles: CropCycle[];
   farmActivityRecords: FarmActivityRecord[];
   farmFinanceEntries: FarmFinanceEntry[];
+  farmHarvestRecords: FarmHarvestRecord[];
   summary: FarmLedgerSummary;
 };
 
@@ -88,6 +90,7 @@ function countState(state: FarmRecordsState): FarmRecordsDetectedCounts {
     cropCycleCount: state.cropCycles.length,
     activityRecordCount: state.farmActivityRecords.length,
     financeEntryCount: state.farmFinanceEntries.length,
+    harvestRecordCount: state.farmHarvestRecords.length,
   };
 }
 
@@ -105,6 +108,7 @@ function latestRecordDate(state: FarmRecordsState) {
   return latestDate([
     ...state.farmActivityRecords.map((record) => record.activityDate),
     ...state.farmFinanceEntries.map((entry) => entry.entryDate),
+    ...state.farmHarvestRecords.map((record) => record.harvestDate),
     ...state.cropCycles.map((cycle) => cycle.updatedAt),
     ...state.farmPlots.map((plot) => plot.updatedAt),
   ]);
@@ -138,6 +142,7 @@ export function buildPreRestoreSnapshot(
     cropCycles: backup.cropCycles,
     farmActivityRecords: backup.farmActivityRecords,
     farmFinanceEntries: backup.farmFinanceEntries,
+    farmHarvestRecords: backup.farmHarvestRecords,
     summary: backup.summary,
   };
 }
@@ -161,18 +166,21 @@ export function getRestoreRiskReview(currentState: FarmRecordsState, backupState
       cropCycleCount: backupCounts.cropCycleCount - currentCounts.cropCycleCount,
       activityRecordCount: backupCounts.activityRecordCount - currentCounts.activityRecordCount,
       financeEntryCount: backupCounts.financeEntryCount - currentCounts.financeEntryCount,
+      harvestRecordCount: backupCounts.harvestRecordCount - currentCounts.harvestRecordCount,
     },
     removedCountEstimate: {
       farmPlotCount: estimateRemoved(currentCounts.farmPlotCount, backupCounts.farmPlotCount),
       cropCycleCount: estimateRemoved(currentCounts.cropCycleCount, backupCounts.cropCycleCount),
       activityRecordCount: estimateRemoved(currentCounts.activityRecordCount, backupCounts.activityRecordCount),
       financeEntryCount: estimateRemoved(currentCounts.financeEntryCount, backupCounts.financeEntryCount),
+      harvestRecordCount: estimateRemoved(currentCounts.harvestRecordCount, backupCounts.harvestRecordCount),
     },
     addedCountEstimate: {
       farmPlotCount: estimateAdded(currentCounts.farmPlotCount, backupCounts.farmPlotCount),
       cropCycleCount: estimateAdded(currentCounts.cropCycleCount, backupCounts.cropCycleCount),
       activityRecordCount: estimateAdded(currentCounts.activityRecordCount, backupCounts.activityRecordCount),
       financeEntryCount: estimateAdded(currentCounts.financeEntryCount, backupCounts.financeEntryCount),
+      harvestRecordCount: estimateAdded(currentCounts.harvestRecordCount, backupCounts.harvestRecordCount),
     },
     changedNetProfitEstimate: backupSummary.netProfit - currentSummary.netProfit,
     currentSummary,
@@ -222,6 +230,7 @@ export function getLastPreRestoreSnapshot(storage = getBrowserStorage()): FarmRe
       cropCycles: Array.isArray(parsed.cropCycles) ? parsed.cropCycles : [],
       farmActivityRecords: Array.isArray(parsed.farmActivityRecords) ? parsed.farmActivityRecords : [],
       farmFinanceEntries: Array.isArray(parsed.farmFinanceEntries) ? parsed.farmFinanceEntries : [],
+      farmHarvestRecords: Array.isArray(parsed.farmHarvestRecords) ? parsed.farmHarvestRecords : [],
       summary: parsed.summary ?? emptySummary,
     };
   } catch {

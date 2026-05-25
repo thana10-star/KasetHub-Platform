@@ -10,9 +10,11 @@ import {
   changeFinanceFormDirection,
   createDefaultFarmRecordsFilters,
   createInitialFinanceForm,
+  createInitialHarvestForm,
   farmRecordsDeleteConfirmationMessage,
   financeFormFromEntry,
   validateFinanceForm,
+  validateHarvestForm,
 } from '@/routes/farm-records-page-model';
 
 describe('M90 farm records farmer-facing page', () => {
@@ -35,6 +37,13 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).toContain('Break-even price / kg');
     expect(html).toContain('This is not official accounting, tax, loan, or financial advice.');
     expect(html).toContain('Enter expected yield in kg');
+    expect(html).toContain('Harvest &amp; Yield');
+    expect(html).toContain('Harvested kg');
+    expect(html).toContain('Cost per kg');
+    expect(html).toContain('Yield per rai');
+    expect(html).toContain('Profit per kg');
+    expect(html).toContain('Actual break-even / kg');
+    expect(html).toContain('Add harvest');
     expect(html).toContain('Recent Farm Timeline');
     expect(html).toContain('Export &amp; Data Control');
     expect(html).toContain('Download JSON Backup');
@@ -71,6 +80,8 @@ describe('M90 farm records farmer-facing page', () => {
     expect(viewModel.counts.activeCropCycles).toBe(1);
     expect(viewModel.activityRecords.length).toBeGreaterThan(0);
     expect(viewModel.financeEntries.length).toBeGreaterThan(0);
+    expect(viewModel.harvestRecords.length).toBeGreaterThan(0);
+    expect(viewModel.counts.harvestRecords).toBe(1);
     expect(viewModel.summary.totalIncome).toBe(35000);
     expect(viewModel.summary.totalExpense).toBe(12900);
     expect(viewModel.summary.netProfit).toBe(22100);
@@ -104,8 +115,20 @@ describe('M90 farm records farmer-facing page', () => {
     expect(viewModel.cropCycles).toEqual([]);
     expect(viewModel.activityRecords).toEqual([]);
     expect(viewModel.financeEntries).toEqual([]);
+    expect(viewModel.harvestRecords).toEqual([]);
     expect(viewModel.summary.totalIncome).toBe(0);
     expect(viewModel.summary.totalExpense).toBe(0);
+  });
+
+  test('blocks invalid negative harvest quantity before local create', () => {
+    const form = createInitialHarvestForm('2026-09-01');
+    form.farmPlotId = 'farm-plot-demo-rice-a';
+    form.quantity = '-1';
+
+    const validation = validateHarvestForm(form, createDemoFarmRecordsState().farmPlots);
+
+    expect(validation.isValid).toBe(false);
+    expect(validation.errors.length).toBeGreaterThan(0);
   });
 
   test('blocks invalid finance amounts before local create', () => {

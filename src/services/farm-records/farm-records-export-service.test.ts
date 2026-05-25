@@ -20,6 +20,7 @@ describe('M86 farm records local export helpers', () => {
     expect(backup.cropCycles).toHaveLength(1);
     expect(backup.farmActivityRecords.length).toBeGreaterThan(0);
     expect(backup.farmFinanceEntries.length).toBeGreaterThan(0);
+    expect(backup.farmHarvestRecords.length).toBeGreaterThan(0);
     expect(backup.summary.totalIncome).toBe(35000);
     expect(backup.summary.totalExpense).toBe(12900);
     expect(backup.summary.netProfit).toBe(22100);
@@ -87,6 +88,7 @@ describe('M86 farm records local export helpers', () => {
     expect(preview.cropCycleCount).toBe(1);
     expect(preview.activityRecordCount).toBeGreaterThan(0);
     expect(preview.financeEntryCount).toBe(5);
+    expect(preview.harvestRecordCount).toBe(1);
     expect(preview.totalIncome).toBe(35000);
     expect(preview.totalExpense).toBe(12900);
     expect(preview.netProfit).toBe(22100);

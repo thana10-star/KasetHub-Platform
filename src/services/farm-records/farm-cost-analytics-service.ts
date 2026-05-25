@@ -4,6 +4,7 @@ import type {
   FarmActivityRecord,
   FarmExpenseCategory,
   FarmFinanceEntry,
+  FarmHarvestRecord,
   FarmIncomeCategory,
   FarmLedgerSummaryFilters,
   FarmPlot,
@@ -35,12 +36,36 @@ export type FarmCostDashboard = {
   costPerRai?: number;
   incomePerRai?: number;
   profitPerRai?: number;
+  harvestKg?: number;
+  harvestRecordCount: number;
+  yieldPerRai?: number;
+  costPerKg?: number;
+  incomePerKg?: number;
+  profitPerKg?: number;
+  breakEvenPricePerKg?: number;
   expenseByCategory: FarmCostCategoryBreakdownItem<FarmExpenseCategory>[];
   incomeByCategory: FarmCostCategoryBreakdownItem<FarmIncomeCategory>[];
   topExpenseCategory?: FarmCostCategoryBreakdownItem<FarmExpenseCategory>;
   topIncomeCategory?: FarmCostCategoryBreakdownItem<FarmIncomeCategory>;
   latestFinanceDate?: string;
   latestActivityDate?: string;
+  latestHarvestDate?: string;
+  warnings: string[];
+};
+
+export type FarmHarvestYieldSummary = {
+  totalHarvestKg: number;
+  harvestRecordCount: number;
+  yieldPerRai?: number;
+  totalExpense: number;
+  totalIncome: number;
+  netProfit: number;
+  costPerKg?: number;
+  incomePerKg?: number;
+  profitPerKg?: number;
+  averageSalePricePerKg?: number;
+  breakEvenPricePerKg?: number;
+  latestHarvestDate?: string;
   warnings: string[];
 };
 
@@ -83,12 +108,24 @@ function matchesActivityFilters(record: FarmActivityRecord, filters: FarmCostDas
   return isWithinDateRange(record.activityDate, filters);
 }
 
+function matchesHarvestFilters(record: FarmHarvestRecord, filters: FarmCostDashboardFilters = {}) {
+  if (filters.farmPlotId && record.farmPlotId !== filters.farmPlotId) return false;
+  if (filters.cropCycleId && record.cropCycleId !== filters.cropCycleId) return false;
+  return isWithinDateRange(record.harvestDate, filters);
+}
+
 function getPlotAreaRai(plot: FarmPlot | undefined) {
   if (!plot) return 0;
   return (plot.areaRai ?? 0) + (plot.areaNgan ?? 0) / 4 + (plot.areaSquareWah ?? 0) / 400;
 }
 
-function resolveAreaRai(state: FarmRecordsState, filters: FarmCostDashboardFilters, entries: FarmFinanceEntry[], activities: FarmActivityRecord[]) {
+function resolveAreaRai(
+  state: FarmRecordsState,
+  filters: FarmCostDashboardFilters,
+  entries: FarmFinanceEntry[],
+  activities: FarmActivityRecord[],
+  harvestRecords: FarmHarvestRecord[] = [],
+) {
   if (filters.cropCycleId) {
     const cycle = state.cropCycles.find((item) => item.id === filters.cropCycleId);
     return cycle?.areaRai ?? getPlotAreaRai(state.farmPlots.find((plot) => plot.id === cycle?.farmPlotId));
@@ -103,6 +140,7 @@ function resolveAreaRai(state: FarmRecordsState, filters: FarmCostDashboardFilte
     if (entry.farmPlotId) plotIds.add(entry.farmPlotId);
   });
   activities.forEach((activity) => plotIds.add(activity.farmPlotId));
+  harvestRecords.forEach((harvest) => plotIds.add(harvest.farmPlotId));
 
   return state.farmPlots
     .filter((plot) => !plot.isArchived && (plotIds.size === 0 || plotIds.has(plot.id)))
@@ -152,14 +190,72 @@ function normalizePositiveNumber(value: number | undefined) {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
-export function computeFarmCostDashboard(state: FarmRecordsState, filters: FarmCostDashboardFilters = {}): FarmCostDashboard {
+export function computeHarvestYieldSummary(state: FarmRecordsState, filters: FarmCostDashboardFilters = {}): FarmHarvestYieldSummary {
   const financeEntries = state.farmFinanceEntries.filter((entry) => matchesFinanceFilters(entry, filters));
   const activityRecords = state.farmActivityRecords.filter((record) => matchesActivityFilters(record, filters));
+  const harvestRecords = state.farmHarvestRecords.filter((record) => matchesHarvestFilters(record, filters));
   const incomeEntries = financeEntries.filter((entry) => entry.direction === 'income');
   const expenseEntries = financeEntries.filter((entry) => entry.direction === 'expense');
   const totalIncome = incomeEntries.reduce((total, entry) => total + entry.amount, 0);
   const totalExpense = expenseEntries.reduce((total, entry) => total + entry.amount, 0);
-  const areaRai = resolveAreaRai(state, filters, financeEntries, activityRecords);
+  const totalHarvestKg = harvestRecords.reduce((total, record) => total + (record.normalizedQuantityKg ?? 0), 0);
+  const areaRai = resolveAreaRai(state, filters, financeEntries, activityRecords, harvestRecords);
+  const weightedSaleRecords = harvestRecords.filter(
+    (record) => record.salePricePerKg !== undefined && record.normalizedQuantityKg !== undefined && record.normalizedQuantityKg > 0,
+  );
+  const weightedSaleKg = weightedSaleRecords.reduce((total, record) => total + (record.normalizedQuantityKg ?? 0), 0);
+  const weightedSaleTotal = weightedSaleRecords.reduce(
+    (total, record) => total + (record.salePricePerKg ?? 0) * (record.normalizedQuantityKg ?? 0),
+    0,
+  );
+  const warnings: string[] = [
+    'Harvest and cost-per-kg values are local estimates from records stored on this device.',
+    'This is not official accounting, tax, loan, or financial advice.',
+  ];
+
+  if (harvestRecords.length === 0 || totalHarvestKg <= 0) {
+    warnings.push('à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸œà¸¥à¸œà¸¥à¸´à¸•à¸—à¸µà¹ˆà¸„à¸³à¸™à¸§à¸“à¹€à¸›à¹‡à¸™ kg à¹„à¸”à¹‰');
+  }
+
+  if (harvestRecords.some((record) => record.normalizedQuantityKg === undefined)) {
+    warnings.push('Some harvest records use units that cannot be normalized to kg, so they are excluded from cost-per-kg math.');
+  }
+
+  if (areaRai <= 0) {
+    warnings.push('Area is missing or zero, so yield per rai cannot be calculated.');
+  }
+
+  if (incomeEntries.length === 0) {
+    warnings.push('No income entries are recorded for this view, so income/profit per kg may be incomplete.');
+  }
+
+  return {
+    totalHarvestKg,
+    harvestRecordCount: harvestRecords.length,
+    yieldPerRai: totalHarvestKg > 0 && areaRai > 0 ? totalHarvestKg / areaRai : undefined,
+    totalExpense,
+    totalIncome,
+    netProfit: totalIncome - totalExpense,
+    costPerKg: totalHarvestKg > 0 ? totalExpense / totalHarvestKg : undefined,
+    incomePerKg: totalHarvestKg > 0 ? totalIncome / totalHarvestKg : undefined,
+    profitPerKg: totalHarvestKg > 0 ? (totalIncome - totalExpense) / totalHarvestKg : undefined,
+    averageSalePricePerKg: weightedSaleKg > 0 ? weightedSaleTotal / weightedSaleKg : undefined,
+    breakEvenPricePerKg: totalHarvestKg > 0 ? totalExpense / totalHarvestKg : undefined,
+    latestHarvestDate: latestDate(harvestRecords.map((record) => record.harvestDate)),
+    warnings,
+  };
+}
+
+export function computeFarmCostDashboard(state: FarmRecordsState, filters: FarmCostDashboardFilters = {}): FarmCostDashboard {
+  const financeEntries = state.farmFinanceEntries.filter((entry) => matchesFinanceFilters(entry, filters));
+  const activityRecords = state.farmActivityRecords.filter((record) => matchesActivityFilters(record, filters));
+  const harvestRecords = state.farmHarvestRecords.filter((record) => matchesHarvestFilters(record, filters));
+  const harvestSummary = computeHarvestYieldSummary(state, filters);
+  const incomeEntries = financeEntries.filter((entry) => entry.direction === 'income');
+  const expenseEntries = financeEntries.filter((entry) => entry.direction === 'expense');
+  const totalIncome = incomeEntries.reduce((total, entry) => total + entry.amount, 0);
+  const totalExpense = expenseEntries.reduce((total, entry) => total + entry.amount, 0);
+  const areaRai = resolveAreaRai(state, filters, financeEntries, activityRecords, harvestRecords);
   const areaRaiTotal = areaRai > 0 ? areaRai : undefined;
   const summary = createFarmRecordsService(createMemoryFarmRecordsStorage(state)).computeFarmLedgerSummary(filters);
   const expenseByCategory = buildCategoryBreakdown(expenseEntries, farmExpenseCategoryIds, totalExpense);
@@ -181,6 +277,10 @@ export function computeFarmCostDashboard(state: FarmRecordsState, filters: FarmC
     warnings.push('No expense entries are recorded for this view.');
   }
 
+  if (harvestSummary.totalHarvestKg <= 0) {
+    warnings.push('No harvest quantity in kg is recorded for this view.');
+  }
+
   return {
     totalIncome,
     totalExpense,
@@ -195,12 +295,20 @@ export function computeFarmCostDashboard(state: FarmRecordsState, filters: FarmC
     costPerRai: summary.costPerRai,
     incomePerRai: areaRaiTotal ? totalIncome / areaRaiTotal : undefined,
     profitPerRai: areaRaiTotal ? (totalIncome - totalExpense) / areaRaiTotal : undefined,
+    harvestKg: harvestSummary.totalHarvestKg > 0 ? harvestSummary.totalHarvestKg : undefined,
+    harvestRecordCount: harvestSummary.harvestRecordCount,
+    yieldPerRai: harvestSummary.yieldPerRai,
+    costPerKg: harvestSummary.costPerKg,
+    incomePerKg: harvestSummary.incomePerKg,
+    profitPerKg: harvestSummary.profitPerKg,
+    breakEvenPricePerKg: harvestSummary.breakEvenPricePerKg,
     expenseByCategory,
     incomeByCategory,
     topExpenseCategory: expenseByCategory[0],
     topIncomeCategory: incomeByCategory[0],
     latestFinanceDate: latestDate(financeEntries.map((entry) => entry.entryDate)),
     latestActivityDate: latestDate(activityRecords.map((record) => record.activityDate)),
+    latestHarvestDate: harvestSummary.latestHarvestDate,
     warnings,
   };
 }
@@ -272,6 +380,12 @@ export function getFarmCostInsights(dashboard: FarmCostDashboard) {
     insights.push(`ต้นทุนต่อไร่ประมาณ ${dashboard.costPerRai.toLocaleString('th-TH', { maximumFractionDigits: 0 })} บาท`);
   } else {
     insights.push('ข้อมูลยังไม่พอคำนวณต้นทุนต่อไร่');
+  }
+
+  if (dashboard.costPerKg !== undefined) {
+    insights.push(`Cost per kg is about ${dashboard.costPerKg.toLocaleString('th-TH', { maximumFractionDigits: 2 })} THB from local records.`);
+  } else {
+    insights.push('à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸œà¸¥à¸œà¸¥à¸´à¸•à¸žà¸­à¸„à¸³à¸™à¸§à¸“à¸•à¹‰à¸™à¸—à¸¸à¸™à¸•à¹ˆà¸­ kg');
   }
 
   if (dashboard.totalExpense <= 0) {

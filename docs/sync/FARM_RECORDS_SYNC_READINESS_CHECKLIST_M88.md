@@ -73,3 +73,14 @@ M88 completes only local recovery/readiness work and architecture review artifac
 - [ ] Cloud sync remains disabled.
 - [ ] Cloud export/delete remains future work.
 - [ ] Browser/mobile QA still required before production sync.
+
+## M91 Status
+
+- [x] Local harvest/yield slice added under the existing Farm Records local key.
+- [x] JSON export/restore/pre-restore snapshot helpers include harvest records.
+- [x] Future sync data model docs mention `farm_harvest_records`.
+- [ ] Supabase schema implementation not started.
+- [ ] Supabase RLS implementation not started.
+- [ ] Sync queue not implemented.
+- [ ] Cloud sync remains disabled.
+- [ ] Harvest/yield privacy copy needs production review before any sync.

@@ -1014,4 +1014,24 @@ The `/app/farm-records#farm-cost-dashboard` section shows farmer-facing cost car
 
 M90 keeps the same local storage boundary and adds no Supabase schema, Supabase read/write, sync queue, cloud sync, cloud backup/delete, GPS/geolocation/map pins, AI record processing, receipt upload, OCR, notifications, bank/loan integration, tax filing, or official accounting/legal claims.
 
+## M91 Farm Records Harvest Yield + Cost-per-Kg Readiness
+
+M91 adds local harvested-quantity modeling to Farm Records through a dedicated `farmHarvestRecords` slice under the existing `kasethub.farmRecords.v1` state. Harvest records store plot/cycle links, harvest date, crop name, quantity/unit, normalized kg where possible, optional grade/buyer/sale price, and local notes.
+
+The local service adds harvest list/get/create/update/delete helpers, migration-safe defaults for old local state, demo harvest data, and export/restore/pre-restore snapshot compatibility. Old JSON backups without `farmHarvestRecords` still validate and restore with an empty harvest slice.
+
+The `/app/farm-records#farm-harvest-yield` section shows total harvested kg, harvest record count, yield per rai, cost per kg, income per kg, profit per kg, average sale price, actual recorded break-even per kg, latest harvest date, and missing-data warnings. The M90 cost dashboard and `/app/my-farm` now surface harvest/cost-per-kg context when available.
+
+M91 keeps the same local-only boundary and adds no Supabase schema, Supabase read/write, sync queue, cloud sync, cloud backup/delete, GPS/geolocation/map pins, AI record processing, receipt upload, OCR, notifications, bank/loan integration, tax filing, official accounting/legal claims, or yield guarantees.
+
+## M92 Home First Farm Hub + Elder-Friendly Navigation
+
+M92 moves Farm Records discovery onto the first app screen. `/app` now includes a large Home Farm Hub card with Thai-first copy, direct actions for `/app/my-farm` and `/app/farm-records`, and a short local Farm Records summary from the existing `kasethub.farmRecords.v1` state.
+
+The home card keeps the farmer-facing summary intentionally small: net profit/loss, cost per kg or rai when available, harvest kg when available, and latest farm record date. Large quick actions link to My Farm, farm work records, farm income/expense cost view, and weather.
+
+`docs/ux/HOME_FIRST_NAVIGATION_M92.md` documents the current navigation problem, why Farm Records should not be hidden in Profile, what should remain in Profile, what should be on Home, and a future bottom navigation proposal. M92 does not remove routes or change Farm Records data behavior.
+
+M92 remains UX/navigation only: no Supabase schema/read/write, no sync queue, no cloud sync, no GPS/geolocation/map pins, no AI record processing, no receipt upload, no OCR, no notifications, no tax/bank/loan integration, and no backend feature changes.
+
 The future endpoint is still not deployed. Frontend code cannot call a provider directly, cannot accept provider/service-role keys, cannot bypass blocked actions, and cannot enable production AI text behavior.

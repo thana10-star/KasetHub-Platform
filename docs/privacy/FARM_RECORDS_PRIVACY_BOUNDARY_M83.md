@@ -46,6 +46,10 @@ M89 adds a non-writing Cloud Sync Consent Prototype. Optional preview checkbox s
 
 M90 adds local deterministic cost analytics, category breakdowns, and break-even estimates from Farm Finance Ledger data. These calculations run only on records stored on this device and are planning aids, not official accounting, tax, loan, legal, or financial advice. M90 still adds no Supabase schema/read/write, no sync queue, no cloud sync, no cloud delete, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no OCR, no notifications, no bank/loan integration, and no legal-final PDPA copy.
 
+## M91 Harvest/Yield Note
+
+M91 adds local harvest records and cost-per-kg/yield analytics under the same `kasethub.farmRecords.v1` boundary. Harvest/yield data can reveal production volume, buyer patterns, sale price assumptions, and business performance. M91 keeps the data local-only, exports/restores harvest records only through the local JSON backup path, and still adds no Supabase schema/read/write, no sync queue, no cloud sync, no cloud delete, no GPS/geolocation/map pin, no AI reading of records, no receipt upload, no OCR, no notifications, no bank/loan integration, no legal-final PDPA copy, and no official accounting/tax/loan/yield guarantee claims.
+
 ## Future Consent Gates
 
 - Future cloud sync must require explicit opt-in consent before any farm record or ledger entry leaves the device.

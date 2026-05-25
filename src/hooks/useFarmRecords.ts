@@ -7,13 +7,16 @@ import {
   createCropCycle,
   createFarmPlot,
   createFinanceEntry,
+  createHarvestRecord,
   deleteActivityRecord,
   deleteFinanceEntry,
+  deleteHarvestRecord,
   getFarmRecordsState,
   replaceFarmRecordsState,
   subscribeFarmRecords,
   updateActivityRecord,
   updateFinanceEntry,
+  updateHarvestRecord,
 } from '@/services/farm-records/farm-records-service';
 import type {
   CropCycleInput,
@@ -22,6 +25,8 @@ import type {
   FarmActivityRecordPatch,
   FarmFinanceEntryInput,
   FarmFinanceEntryPatch,
+  FarmHarvestRecordInput,
+  FarmHarvestRecordPatch,
   FarmLedgerSummaryFilters,
   FarmPlotInput,
   FarmRecordsState,
@@ -47,6 +52,7 @@ export function useFarmRecords() {
       activeCropCycles: state.cropCycles.filter((cycle) => cycle.status === 'active').length,
       activityRecords: state.farmActivityRecords.length,
       financeEntries: state.farmFinanceEntries.length,
+      harvestRecords: state.farmHarvestRecords.length,
     }),
     [state],
   );
@@ -76,5 +82,8 @@ export function useFarmRecords() {
     createFinanceEntry: (input: FarmFinanceEntryInput) => runAndRefresh(() => createFinanceEntry(input)),
     updateFinanceEntry: (id: string, patch: FarmFinanceEntryPatch) => runAndRefresh(() => updateFinanceEntry(id, patch)),
     deleteFinanceEntry: (id: string) => runAndRefresh(() => deleteFinanceEntry(id)),
+    createHarvestRecord: (input: FarmHarvestRecordInput) => runAndRefresh(() => createHarvestRecord(input)),
+    updateHarvestRecord: (id: string, patch: FarmHarvestRecordPatch) => runAndRefresh(() => updateHarvestRecord(id, patch)),
+    deleteHarvestRecord: (id: string) => runAndRefresh(() => deleteHarvestRecord(id)),
   };
 }

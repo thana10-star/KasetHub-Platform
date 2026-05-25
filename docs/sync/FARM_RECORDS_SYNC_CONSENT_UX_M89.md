@@ -29,6 +29,7 @@ The prototype lists the data that future sync could include:
 - Crop cycles.
 - Activity records.
 - Finance ledger entries.
+- Harvest/yield records.
 - Image metadata only.
 - Restore/export metadata.
 

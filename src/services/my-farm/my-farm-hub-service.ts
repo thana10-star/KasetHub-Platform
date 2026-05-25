@@ -1,7 +1,7 @@
 import type { CropWatch } from '@/services/crop-prices/crop-watch.types';
 import type { FarmPlotRecord } from '@/services/farm-area/farm-area.types';
 import { farmFinanceCategoryLabels } from '@/services/farm-records/farm-records-config';
-import { computeFarmCostDashboard } from '@/services/farm-records/farm-cost-analytics-service';
+import { computeFarmCostDashboard, computeHarvestYieldSummary } from '@/services/farm-records/farm-cost-analytics-service';
 import { createFarmRecordsService, createMemoryFarmRecordsStorage } from '@/services/farm-records/farm-records-service';
 import type { FarmFinanceCategory, FarmRecordsState } from '@/services/farm-records/farm-records.types';
 import type { GuestMemoryState, SavedItem } from '@/services/guest-memory/guest-memory.types';
@@ -167,6 +167,17 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       ctaLabel: 'เปิดบัญชีฟาร์ม',
       sourceLabel: 'Farm Ledger local',
     })),
+    ...input.farmRecords.farmHarvestRecords.map((record) => ({
+      id: `farm-harvest-${record.id}`,
+      type: 'farm_harvest' as const,
+      title: record.cropName || 'Harvest record',
+      subtitle: `${record.normalizedQuantityKg?.toLocaleString('th-TH', { maximumFractionDigits: 2 }) ?? record.quantity.toLocaleString('th-TH', { maximumFractionDigits: 2 })} ${record.normalizedQuantityKg === undefined ? record.quantityUnit : 'kg'} · local harvest`,
+      dateIso: record.harvestDate,
+      dateLabel: formatThaiDate(record.harvestDate),
+      ctaRoute: '/app/farm-records',
+      ctaLabel: 'เปิดผลผลิต',
+      sourceLabel: 'Farm Harvest local',
+    })),
     ...analysisItems.map((item) => ({
       id: `analysis-${item.id}`,
       type: 'analysis_result' as const,
@@ -247,9 +258,10 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
   const totalSquareMeters = input.farmPlots.reduce((total, plot) => total + plot.areaSquareMeters, 0);
   const totalRai = totalSquareMeters / 1600;
   const farmLedgerSummary = createFarmRecordsService(createMemoryFarmRecordsStorage(input.farmRecords)).computeFarmLedgerSummary();
-  const farmCostDashboard = computeFarmCostDashboard(input.farmRecords);
+  const harvestYieldSummary = computeHarvestYieldSummary(input.farmRecords);
   const activeCropCycles = input.farmRecords.cropCycles.filter((cycle) => cycle.status === 'active').length;
-  const farmRecordItemCount = input.farmRecords.farmActivityRecords.length + input.farmRecords.farmFinanceEntries.length;
+  const farmRecordItemCount =
+    input.farmRecords.farmActivityRecords.length + input.farmRecords.farmFinanceEntries.length + input.farmRecords.farmHarvestRecords.length;
 
   return [
     {
@@ -273,7 +285,7 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
         farmRecordItemCount > 0
           ? `มี ${activeCropCycles.toLocaleString('th-TH')} รอบปลูก active และบัญชี local-only`
           : 'เริ่มบันทึกกิจกรรม รายรับ และรายจ่ายเพื่อเห็นต้นทุนกับกำไร',
-      valueLabel: farmCostDashboard.costPerRai === undefined ? formatCurrency(farmLedgerSummary.netProfit) : `${formatCurrency(farmCostDashboard.costPerRai)} / rai`,
+      valueLabel: harvestYieldSummary.costPerKg === undefined ? formatCurrency(farmLedgerSummary.netProfit) : `${formatCurrency(harvestYieldSummary.costPerKg)} / kg`,
       route: '/app/farm-records',
       badgeLabel: 'cost summary',
       tone: farmLedgerSummary.netProfit >= 0 ? 'green' : 'rose',
@@ -422,13 +434,16 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
   const timeline = buildTimeline(input);
   const farmLedgerSummary = createFarmRecordsService(createMemoryFarmRecordsStorage(input.farmRecords)).computeFarmLedgerSummary();
   const farmCostDashboard = computeFarmCostDashboard(input.farmRecords);
+  const harvestYieldSummary = computeHarvestYieldSummary(input.farmRecords);
   const latestFarmActivityDate = latestDate(input.farmRecords.farmActivityRecords.map((record) => record.activityDate));
   const latestFarmFinanceEntryDate = latestDate(input.farmRecords.farmFinanceEntries.map((entry) => entry.entryDate));
+  const latestFarmHarvestDate = latestDate(input.farmRecords.farmHarvestRecords.map((record) => record.harvestDate));
   const farmRecordsLocalItemCount =
     input.farmRecords.farmPlots.length +
     input.farmRecords.cropCycles.length +
     input.farmRecords.farmActivityRecords.length +
-    input.farmRecords.farmFinanceEntries.length;
+    input.farmRecords.farmFinanceEntries.length +
+    input.farmRecords.farmHarvestRecords.length;
   const totalLocalItems =
     input.guestMemory.farmRecords.length +
     analysisItems.length +
@@ -450,6 +465,9 @@ export function buildMyFarmHub(input: BuildMyFarmHubInput): MyFarmHub {
       farmCostPerRai: farmCostDashboard.costPerRai,
       farmTopExpenseCategory: formatFarmFinanceCategory(farmCostDashboard.topExpenseCategory?.category),
       farmTopExpenseCategoryAmount: farmCostDashboard.topExpenseCategory?.amount,
+      farmTotalHarvestKg: harvestYieldSummary.totalHarvestKg > 0 ? harvestYieldSummary.totalHarvestKg : undefined,
+      farmCostPerKg: harvestYieldSummary.costPerKg,
+      latestFarmHarvestDate,
       latestFarmActivityDate,
       latestFarmFinanceEntryDate,
       analysisResultCount: analysisItems.length,

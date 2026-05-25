@@ -3,6 +3,7 @@ import type {
   CropCycle,
   FarmActivityRecord,
   FarmFinanceEntry,
+  FarmHarvestRecord,
   FarmImageRef,
   FarmLedgerSummary,
   FarmLedgerSummaryFilters,
@@ -23,6 +24,7 @@ export type FarmRecordsJsonBackup = {
   cropCycles: CropCycle[];
   farmActivityRecords: FarmActivityRecord[];
   farmFinanceEntries: FarmFinanceEntry[];
+  farmHarvestRecords: FarmHarvestRecord[];
   summary: FarmLedgerSummary;
 };
 
@@ -46,6 +48,7 @@ export type FarmRecordsExportPreview = {
   cropCycleCount: number;
   activityRecordCount: number;
   financeEntryCount: number;
+  harvestRecordCount: number;
   totalIncome: number;
   totalExpense: number;
   netProfit: number;
@@ -192,6 +195,26 @@ function sanitizeFinanceEntry(entry: FarmFinanceEntry): FarmFinanceEntry {
   };
 }
 
+function sanitizeHarvestRecord(record: FarmHarvestRecord): FarmHarvestRecord {
+  return {
+    id: record.id,
+    farmPlotId: record.farmPlotId,
+    cropCycleId: record.cropCycleId,
+    harvestDate: record.harvestDate,
+    cropName: record.cropName,
+    quantity: record.quantity,
+    quantityUnit: record.quantityUnit,
+    normalizedQuantityKg: record.normalizedQuantityKg,
+    grade: record.grade,
+    buyer: record.buyer,
+    salePricePerKg: record.salePricePerKg,
+    grossIncome: record.grossIncome,
+    note: record.note,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  };
+}
+
 function isInDateRange(value: string, filters?: FarmRecordsExportFilters) {
   if (!filters) return true;
   const dateTime = Date.parse(value);
@@ -218,6 +241,13 @@ function filterFinanceEntry(entry: FarmFinanceEntry, filters?: FarmRecordsExport
   return isInDateRange(entry.entryDate, filters);
 }
 
+function filterHarvestRecord(record: FarmHarvestRecord, filters?: FarmRecordsExportFilters) {
+  if (!filters) return true;
+  if (filters.farmPlotId && record.farmPlotId !== filters.farmPlotId) return false;
+  if (filters.cropCycleId && record.cropCycleId !== filters.cropCycleId) return false;
+  return isInDateRange(record.harvestDate, filters);
+}
+
 function filterCropCycle(cycle: CropCycle, filters?: FarmRecordsExportFilters) {
   if (!filters) return true;
   if (filters.farmPlotId && cycle.farmPlotId !== filters.farmPlotId) return false;
@@ -238,6 +268,7 @@ function createFilteredState(state: FarmRecordsState, filters?: FarmRecordsExpor
     cropCycles: state.cropCycles.filter((cycle) => filterCropCycle(cycle, filters)),
     farmActivityRecords: state.farmActivityRecords.filter((record) => filterActivityRecord(record, filters)),
     farmFinanceEntries: state.farmFinanceEntries.filter((entry) => filterFinanceEntry(entry, filters)),
+    farmHarvestRecords: state.farmHarvestRecords.filter((record) => filterHarvestRecord(record, filters)),
   };
 }
 
@@ -318,6 +349,7 @@ export function buildFarmRecordsJsonBackup(input: FarmRecordsExportInput): FarmR
     cropCycles: filteredState.cropCycles.map(sanitizeCropCycle),
     farmActivityRecords: filteredState.farmActivityRecords.map(sanitizeActivityRecord),
     farmFinanceEntries: filteredState.farmFinanceEntries.map(sanitizeFinanceEntry),
+    farmHarvestRecords: filteredState.farmHarvestRecords.map(sanitizeHarvestRecord),
     summary: service.computeFarmLedgerSummary(),
   };
 }
@@ -338,6 +370,7 @@ export function getFarmRecordsExportPreview(input: FarmRecordsExportInput): Farm
   const latestRecordDate = latestDate([
     ...backup.farmActivityRecords.map((record) => record.activityDate),
     ...backup.farmFinanceEntries.map((entry) => entry.entryDate),
+    ...backup.farmHarvestRecords.map((record) => record.harvestDate),
     ...backup.cropCycles.map((cycle) => cycle.updatedAt),
     ...backup.farmPlots.map((plot) => plot.updatedAt),
   ]);
@@ -347,6 +380,7 @@ export function getFarmRecordsExportPreview(input: FarmRecordsExportInput): Farm
     cropCycleCount: backup.cropCycles.length,
     activityRecordCount: backup.farmActivityRecords.length,
     financeEntryCount: backup.farmFinanceEntries.length,
+    harvestRecordCount: backup.farmHarvestRecords.length,
     totalIncome: backup.summary.totalIncome,
     totalExpense: backup.summary.totalExpense,
     netProfit: backup.summary.netProfit,

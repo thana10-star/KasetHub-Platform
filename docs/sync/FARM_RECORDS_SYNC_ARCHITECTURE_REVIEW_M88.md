@@ -18,6 +18,10 @@ M89 adds a non-writing Cloud Sync Consent Prototype and `docs/sync/FARM_RECORDS_
 - Cloud export/delete remains future work.
 - AI, GPS, and image/receipt upload consent remain separate future gates.
 
+## M91 Status Update
+
+M91 adds local harvest/yield records and cost-per-kg analytics under `kasethub.farmRecords.v1`. This increases the future sync sensitivity because production volume, sale-price assumptions, and buyer context may be included. Supabase implementation is still not started and cloud sync remains disabled.
+
 ## 2. Current Status
 
 - Local-first storage is active under `kasethub.farmRecords.v1`.
@@ -39,6 +43,7 @@ Conceptual tables only, no migration:
 - `crop_cycles`
 - `farm_activity_records`
 - `farm_finance_entries`
+- `farm_harvest_records`
 - `farm_record_sync_audit` or shared `audit_events`
 - `farm_record_sync_conflicts` if user-visible conflict resolution is needed later
 

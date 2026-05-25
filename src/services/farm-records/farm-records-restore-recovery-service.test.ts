@@ -22,6 +22,7 @@ describe('M88 farm records restore recovery helpers', () => {
     expect(snapshot.snapshotVersion).toBe(1);
     expect(snapshot.reason).toBe('pre_restore_snapshot');
     expect(JSON.parse(json).farmPlots).toHaveLength(2);
+    expect(JSON.parse(json).farmHarvestRecords).toHaveLength(1);
     expect(json).toContain('pre_restore_snapshot');
   });
 
@@ -63,9 +64,13 @@ describe('M88 farm records restore recovery helpers', () => {
 
     expect(riskReview.willReplaceLocalData).toBe(true);
     expect(riskReview.currentCounts.farmPlotCount).toBe(2);
+    expect(riskReview.currentCounts.harvestRecordCount).toBe(1);
     expect(riskReview.backupCounts.farmPlotCount).toBe(0);
+    expect(riskReview.backupCounts.harvestRecordCount).toBe(0);
     expect(riskReview.removedCountEstimate.farmPlotCount).toBe(2);
+    expect(riskReview.removedCountEstimate.harvestRecordCount).toBe(1);
     expect(riskReview.addedCountEstimate.farmPlotCount).toBe(0);
+    expect(riskReview.addedCountEstimate.harvestRecordCount).toBe(0);
     expect(riskReview.changedNetProfitEstimate).toBe(-22100);
     expect(riskReview.warnings.join(' ')).toContain('Restore replaces local Farm Records');
     expect(riskReview.warnings.join(' ')).toContain('Cloud sync is not active');
@@ -90,6 +95,7 @@ describe('M88 farm records restore recovery helpers', () => {
       state,
     });
 
+    expect(snapshot.farmHarvestRecords).toHaveLength(1);
     expect(JSON.stringify(snapshot)).not.toContain('data:image');
     expect(JSON.stringify(backup)).not.toContain('data:image');
     expect(validateFarmRecordsBackup(backup).isValid).toBe(true);

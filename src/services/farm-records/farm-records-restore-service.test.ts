@@ -57,11 +57,13 @@ describe('M87 farm records local restore helpers', () => {
     const validation = validateFarmRecordsBackup(parsed.parsedBackup);
     expect(validation.isValid).toBe(true);
     expect(validation.detectedCounts.farmPlotCount).toBe(2);
+    expect(validation.detectedCounts.harvestRecordCount).toBe(1);
     expect(validation.detectedSummary.netProfit).toBe(22100);
 
     const preview = buildFarmRecordsRestorePreview(currentState, validation.normalizedState!);
     expect(preview.currentCounts.farmPlotCount).toBe(0);
     expect(preview.backupCounts.financeEntryCount).toBeGreaterThan(0);
+    expect(preview.backupCounts.harvestRecordCount).toBe(1);
     expect(preview.differenceCounts.activityRecordCount).toBeGreaterThan(0);
     expect(preview.restoreModeOptions).toEqual(['replace_local_farm_records']);
   });
@@ -113,6 +115,24 @@ describe('M87 farm records local restore helpers', () => {
     expect(validation.errors).toContain('farmFinanceEntries[0] requires a numeric non-negative amount.');
   });
 
+  test('accepts old backups without harvest records and validates harvest records when present', () => {
+    const backup = buildFarmRecordsJsonBackup({ state: createDemoFarmRecordsState() });
+    const oldBackup = { ...backup } as Record<string, unknown>;
+    delete oldBackup.farmHarvestRecords;
+
+    const oldValidation = validateFarmRecordsBackup(oldBackup);
+    expect(oldValidation.isValid).toBe(true);
+    expect(oldValidation.normalizedState?.farmHarvestRecords).toEqual([]);
+
+    backup.farmHarvestRecords[0] = {
+      ...backup.farmHarvestRecords[0]!,
+      quantity: -1,
+    };
+    const invalidHarvestValidation = validateFarmRecordsBackup(backup);
+    expect(invalidHarvestValidation.isValid).toBe(false);
+    expect(invalidHarvestValidation.errors).toContain('farmHarvestRecords[0] requires a numeric non-negative quantity.');
+  });
+
   test('requires explicit confirmation and phrase before local restore', () => {
     const validation = validateFarmRecordsBackup(buildFarmRecordsJsonBackup({ state: createDemoFarmRecordsState() }));
 
@@ -152,6 +172,7 @@ describe('M87 farm records local restore helpers', () => {
 
     const service = createFarmRecordsService(storage);
     expect(service.getState().farmPlots).toHaveLength(2);
+    expect(service.getState().farmHarvestRecords).toHaveLength(1);
     if (result.ok) {
       expect(buildFarmRecordsJsonBackup({ state: result.restoredState }).summary.netProfit).toBe(22100);
     }
