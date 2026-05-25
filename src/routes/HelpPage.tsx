@@ -13,14 +13,14 @@ const guideSections = [
     lines: ['กดฟาร์มของฉันจากเมนูล่าง', 'ใช้ดูข้อมูลฟาร์มและสมุดบันทึก'],
   },
   {
-    title: 'บันทึกงานในฟาร์ม',
-    icon: ClipboardList,
-    lines: ['ใส่ปุ๋ย', 'พ่นยา', 'ให้น้ำ', 'เก็บเกี่ยว', 'จ้างแรงงาน'],
-  },
-  {
-    title: 'บันทึกรายรับรายจ่าย',
+    title: 'บันทึกรายรับ/รายจ่าย',
     icon: WalletCards,
     lines: ['ค่าปุ๋ย', 'ค่ายา', 'ค่าแรง', 'รายได้จากขายผลผลิต'],
+  },
+  {
+    title: 'บันทึกผลผลิต',
+    icon: ClipboardList,
+    lines: ['น้ำหนักผลผลิต', 'วันที่เก็บเกี่ยว', 'รายได้จากการขายถ้ามี'],
   },
   {
     title: 'ดูต้นทุน กำไร และผลผลิต',
@@ -34,7 +34,7 @@ const guideSections = [
   },
 ];
 
-const farmStartSteps = ['เพิ่มแปลง', 'บันทึกงานในฟาร์ม', 'บันทึกรายรับรายจ่าย', 'บันทึกผลผลิต'];
+const farmStartSteps = ['เพิ่มแปลง', 'บันทึกรายรับ/รายจ่าย', 'บันทึกผลผลิต'];
 
 export function HelpPage() {
   return (
@@ -42,7 +42,7 @@ export function HelpPage() {
       <PageHeader title="วิธีเริ่มใช้ KasetHub" subtitle="คู่มือสั้น ๆ สำหรับเริ่มใช้งานครั้งแรก" showBack />
       <div className="grid gap-5 px-5 pb-6">
         <NoticeBox tone="success" title="เริ่มจากงานฟาร์มที่ทำอยู่จริง">
-          กดฟาร์มของฉัน บันทึกงาน รายรับรายจ่าย และผลผลิต ข้อมูลยังอยู่ในเครื่องนี้
+          กดฟาร์มของฉัน เพิ่มแปลง บันทึกรายรับรายจ่าย และบันทึกผลผลิต ข้อมูลยังอยู่ในเครื่องนี้
         </NoticeBox>
 
         <Card className="border-kaset-leaf/30 bg-kaset-mint p-4">
@@ -51,13 +51,20 @@ export function HelpPage() {
               <ClipboardList aria-hidden="true" className="h-6 w-6" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">เริ่มบันทึกฟาร์ม 4 ขั้นตอน</h2>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">เริ่มบันทึกฟาร์ม 3 ขั้นตอน</h2>
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
                 {farmStartSteps.map((step, index) => (
                   <p className="rounded-lg bg-white/85 p-3 text-sm font-extrabold leading-5 text-kaset-ink" key={step}>
                     {index + 1}. {step}
                   </p>
                 ))}
+              </div>
+              <p className="mt-3 rounded-lg bg-white/70 p-3 text-sm font-semibold leading-6 text-kaset-ink">
+                ถ้าต้องการจดงานในฟาร์ม เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ สามารถเพิ่มทีหลังได้
+              </p>
+              <div className="mt-3 grid gap-2 text-sm font-semibold leading-6 text-kaset-ink sm:grid-cols-2">
+                <p className="rounded-lg bg-white/70 p-3">ตัวอย่างชื่อแปลง: แปลงข้าวหลังบ้าน</p>
+                <p className="rounded-lg bg-white/70 p-3">ตัวอย่างงาน: ใส่ปุ๋ยข้าว วันที่ 12 มิ.ย.</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/my-farm">
@@ -102,16 +109,16 @@ export function HelpPage() {
           </div>
           <div className="grid gap-3">
             <LargeActionButton description="เปิดศูนย์รวมข้อมูลฟาร์มและสมุดบันทึก" icon={Sprout} label="เปิดฟาร์มของฉัน" to="/app/my-farm" variant="soft" />
-            <LargeActionButton description="บันทึกงาน รายรับรายจ่าย และผลผลิต" icon={ClipboardList} label="เปิดสมุดฟาร์ม" to="/app/farm-records" variant="white" />
+            <LargeActionButton description="เพิ่มแปลง บันทึกรายรับรายจ่าย และผลผลิต" icon={ClipboardList} label="เปิดสมุดฟาร์ม" to="/app/farm-records" variant="white" />
             <LargeActionButton description="คำนวณปุ๋ย ระยะปลูก ต้นทุน และผลผลิต" icon={Calculator} label="เปิดเครื่องมือ" to="/app/calculators" variant="white" />
             <LargeActionButton description="ถามเรื่องความรู้ทั่วไป ยังไม่อ่านสมุดฟาร์มของคุณ" icon={Bot} label="ถาม AI" to="/app/ai" variant="white" />
-            <LargeActionButton description="ดูอากาศและความเสี่ยงเกษตรแบบตัวอย่าง/local" icon={CloudSun} label="เช็กอากาศ" to="/app/weather" variant="white" />
+            <LargeActionButton description="ดูอากาศและความเสี่ยงเกษตร" icon={CloudSun} label="เช็กอากาศ" to="/app/weather" variant="white" />
           </div>
         </section>
 
         <Card className="p-4">
           <h2 className="font-extrabold text-kaset-ink">จำง่าย ๆ</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">เริ่มจากฟาร์มของฉัน แล้วค่อยบันทึกงานและเงินเข้าออกทีละรายการ</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">เริ่มจากฟาร์มของฉัน แล้วค่อยเพิ่มแปลง เงินเข้าออก และผลผลิตทีละรายการ</p>
           <Link className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white" to="/app/my-farm">
             ไปฟาร์มของฉัน
           </Link>

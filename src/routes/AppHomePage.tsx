@@ -81,7 +81,7 @@ export function AppHomePage() {
                   </Badge>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  รวมอากาศ ราคา My Farm ชุมชน และระบบแบบ local/mock ยังไม่มี push จริง
+                  รวมอากาศ ราคา ฟาร์มของฉัน และชุมชนไว้ให้ติดตามในแอพ
                 </p>
               </div>
             </div>
@@ -104,7 +104,7 @@ export function AppHomePage() {
         </section>
 
         <section className="grid gap-3">
-          <SectionHeader actionHref="/app/prices" actionLabel="ดูราคา" title="ราคาพืชผลตัวอย่าง" />
+          <SectionHeader actionHref="/app/prices" actionLabel="ดูราคา" title="ราคาพืชผล" />
           <Card>
             {cropPrices.slice(0, 3).map((price) => (
               <PriceRow key={price.id} price={price} />

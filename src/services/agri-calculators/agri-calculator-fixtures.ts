@@ -16,7 +16,7 @@ export const agriCalculatorStorageKey = 'kasethub.agriCalculators.v1';
 export const agriCalculatorChangedEvent = 'kasethub:agri-calculators-changed';
 
 export const calculatorLocalOnlyDisclaimer =
-  'ข้อมูลนี้บันทึกในเครื่องนี้เท่านั้น ยังไม่มี cloud sync, Supabase write, AI API, GPS, แผนที่ หรือการรับประกันผลผลิตจริง';
+  'ข้อมูลที่บันทึกไว้จะอยู่ในเครื่องนี้ ผลลัพธ์เป็นการคำนวณเบื้องต้นและไม่รับประกันผลในแปลงจริง';
 
 export const agricultureSafetyDisclaimer =
   'ผลลัพธ์เป็นการคำนวณเบื้องต้น ไม่ใช่คำแนะนำจากนักวิชาการเกษตร และไม่รับประกันผลลัพธ์ในแปลงจริง';

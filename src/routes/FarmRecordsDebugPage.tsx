@@ -154,8 +154,6 @@ const archivePlotConfirmationMessage =
 const closeCropCycleConfirmationMessage =
   'เปลี่ยนสถานะรอบปลูกนี้หรือไม่? รายการกิจกรรมและบัญชีเดิมจะยังอยู่ในเครื่องนี้ เป็นการเปลี่ยนสถานะเท่านั้น';
 
-const firstUseFarmSteps = ['เพิ่มแปลง', 'บันทึกงานในฟาร์ม', 'บันทึกรายรับรายจ่าย', 'บันทึกผลผลิต'];
-
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -369,6 +367,34 @@ function SummaryCard({
   );
 }
 
+function BasicFarmActionButton({
+  detail,
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  detail: string;
+  icon: typeof Activity;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="flex min-h-[112px] w-full items-start gap-3 rounded-lg bg-white p-4 text-left shadow-card ring-1 ring-kaset-deep/8 transition hover:bg-kaset-mist focus:outline-none focus-visible:ring-2 focus-visible:ring-kaset-leaf"
+      onClick={onClick}
+      type="button"
+    >
+      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+        <Icon aria-hidden="true" className="h-6 w-6" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-lg font-extrabold leading-7 text-kaset-ink">{label}</span>
+        <span className="mt-1 block text-sm font-semibold leading-6 text-slate-600">{detail}</span>
+      </span>
+    </button>
+  );
+}
+
 function SectionTitle({
   action,
   badge,
@@ -490,14 +516,14 @@ export function ActivityForm({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">{title}</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">บันทึกงานช่วยให้จำได้ว่าใส่ปุ๋ย พ่นยา หรือเก็บเกี่ยววันไหน</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">เช่น ใส่ปุ๋ย พ่นยา ให้น้ำ เก็บเกี่ยว หรือจ้างแรงงาน</p>
           </div>
           <button aria-label="ปิดฟอร์ม" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={onCancel} type="button">
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
         <FormErrors errors={errors} />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
           <FormField label="แปลง (จำเป็น)">
             <select
               className={inputClassName()}
@@ -520,20 +546,10 @@ export function ActivityForm({
               ))}
             </select>
           </FormField>
-          <FormField label="รอบปลูก (ถ้ามี)">
-            <select className={inputClassName()} onChange={(event) => onChange({ ...values, cropCycleId: event.target.value })} value={values.cropCycleId}>
-              <option value="">ไม่ผูกกับรอบปลูก</option>
-              {cycleOptions.map((cycle) => (
-                <option key={cycle.id} value={cycle.id}>
-                  {cycle.cropName} {cycle.seasonLabel ? `- ${cycle.seasonLabel}` : ''}
-                </option>
-              ))}
-            </select>
-          </FormField>
-          <FormField label="วันที่ทำงาน">
+          <FormField label="วันที่ทำงาน (จำเป็น)">
             <input className={inputClassName()} onChange={(event) => onChange({ ...values, activityDate: event.target.value })} type="date" value={values.activityDate} />
           </FormField>
-          <FormField label="ประเภทงานในฟาร์ม">
+          <FormField label="ประเภทงาน (จำเป็น)">
             <select
               className={inputClassName()}
               onChange={(event) => onChange({ ...values, activityType: event.target.value as FarmActivityType })}
@@ -541,16 +557,16 @@ export function ActivityForm({
             >
               {farmActivityTypes.map((activity) => (
                 <option key={activity.id} value={activity.id}>
-                  {activity.label.th} / {activity.label.en}
+                  {activity.label.th}
                 </option>
               ))}
             </select>
           </FormField>
         </div>
-        <FormField label="ชื่องานในฟาร์ม (จำเป็น)">
-          <input className={inputClassName()} onChange={(event) => onChange({ ...values, title: event.target.value })} placeholder="เช่น ใส่ปุ๋ยครั้งที่ 1" value={values.title} />
+        <FormField label="หัวข้อสั้น ๆ (จำเป็น)">
+          <input className={inputClassName()} onChange={(event) => onChange({ ...values, title: event.target.value })} placeholder="เช่น ใส่ปุ๋ยข้าว" value={values.title} />
         </FormField>
-        <FormField label="รายละเอียด (ถ้ามี)">
+        <FormField label="รายละเอียดเพิ่มเติม (ถ้ามี)">
           <textarea className={textAreaClassName()} onChange={(event) => onChange({ ...values, description: event.target.value })} value={values.description} />
         </FormField>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -565,7 +581,7 @@ export function ActivityForm({
               <option value="">ไม่ระบุ</option>
               {allowedFarmRecordUnits.map((unit) => (
                 <option key={unit.id} value={unit.id}>
-                  {unit.label.th} / {unit.label.en}
+                  {unit.label.th}
                 </option>
               ))}
             </select>
@@ -574,10 +590,25 @@ export function ActivityForm({
         <FormField hint="คั่นด้วย comma เช่น ปุ๋ย, แรงงาน" label="แท็ก (ถ้ามี)">
           <input className={inputClassName()} onChange={(event) => onChange({ ...values, tags: event.target.value })} value={values.tags} />
         </FormField>
-        <Button className="w-full" type="submit">
-          <Plus aria-hidden="true" className="h-5 w-5" />
-          {submitLabel}
-        </Button>
+        <FormField label="รอบปลูก (ถ้ามี)">
+          <select className={inputClassName()} onChange={(event) => onChange({ ...values, cropCycleId: event.target.value })} value={values.cropCycleId}>
+            <option value="">ไม่ผูกกับรอบปลูก</option>
+            {cycleOptions.map((cycle) => (
+              <option key={cycle.id} value={cycle.id}>
+                {cycle.cropName} {cycle.seasonLabel ? `- ${cycle.seasonLabel}` : ''}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button className="w-full" onClick={onCancel} type="button" variant="secondary">
+            ยกเลิก
+          </Button>
+          <Button className="w-full" type="submit">
+            <Plus aria-hidden="true" className="h-5 w-5" />
+            {submitLabel}
+          </Button>
+        </div>
       </form>
     </Card>
   );
@@ -845,8 +876,11 @@ export function PlotForm({
   return (
     <Card className="p-4">
       <form className="grid gap-4" onSubmit={onSubmit}>
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-extrabold text-kaset-ink">เพิ่มแปลง</h2>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">เพิ่มแปลง</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">ตั้งชื่อแปลงก่อน เช่น แปลงข้าวหลังบ้าน หรือ สวนมะม่วง</p>
+          </div>
           <button aria-label="ปิดฟอร์ม" className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={onCancel} type="button">
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
@@ -856,7 +890,7 @@ export function PlotForm({
           <input className={inputClassName()} onChange={(event) => onChange({ ...values, name: event.target.value })} placeholder="เช่น แปลงนาข้าวหลังบ้าน" value={values.name} />
         </FormField>
         <div className="grid gap-3 sm:grid-cols-2">
-          <FormField label="พื้นที่ (ไร่) ถ้ามี">
+          <FormField label="พื้นที่กี่ไร่ (ถ้ามี)">
             <input className={inputClassName()} inputMode="decimal" onChange={(event) => onChange({ ...values, areaRai: event.target.value })} value={values.areaRai} />
           </FormField>
           <FormField label="จังหวัด (ถ้ามี)">
@@ -872,10 +906,19 @@ export function PlotForm({
         <FormField label="หมายเหตุ (ถ้ามี)">
           <textarea className={textAreaClassName()} onChange={(event) => onChange({ ...values, notes: event.target.value })} value={values.notes} />
         </FormField>
-        <Button className="w-full" type="submit">
-          <Plus aria-hidden="true" className="h-5 w-5" />
-          เพิ่มแปลง
-        </Button>
+        <div className="grid gap-2 rounded-lg bg-kaset-mist p-3 text-sm font-semibold leading-6 text-slate-700">
+          <p>ไม่ต้องกรอกที่อยู่ละเอียดก็ได้</p>
+          <p>ระบบยังไม่ใช้ GPS</p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button className="w-full" onClick={onCancel} type="button" variant="secondary">
+            ยกเลิก
+          </Button>
+          <Button className="w-full" type="submit">
+            <Plus aria-hidden="true" className="h-5 w-5" />
+            บันทึกแปลง
+          </Button>
+        </div>
       </form>
     </Card>
   );
@@ -1411,94 +1454,45 @@ export function FarmRecordsDebugPage() {
     <div>
       <PageHeader
         title="สมุดบันทึกฟาร์ม"
-        subtitle="บันทึกงานในฟาร์ม รายรับรายจ่าย และผลผลิตในเครื่องนี้"
+        subtitle="บันทึกแปลง รายรับรายจ่าย และผลผลิตในเครื่องนี้"
         showBack
       />
       <div className="grid gap-5 px-5 pb-6">
-        <Card className="overflow-hidden bg-kaset-deep text-white">
-          <div className="relative p-5">
-            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10" />
-            <div className="relative flex gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
-                <Leaf aria-hidden="true" className="h-7 w-7" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <Badge className="bg-white/15 text-white" tone="green">
-                  ข้อมูลในเครื่องนี้
-                </Badge>
-                <h2 className="mt-3 text-2xl font-extrabold leading-8">สมุดฟาร์มและบัญชีฟาร์มในเครื่องนี้</h2>
-                <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  ข้อมูลนี้ถูกเก็บในเครื่องก่อน ยังไม่ซิงก์ขึ้นคลาวด์
-                </p>
+        <section className="grid gap-4" data-testid="farm-records-basic-actions">
+          <Card className={needsFirstUseGuide ? 'border-kaset-leaf/30 bg-kaset-mint p-4' : 'p-4'}>
+            <div className="grid gap-4">
+              <div className="flex items-start gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep shadow-soft">
+                  <ClipboardList aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <Badge tone={needsFirstUseGuide ? 'green' : 'neutral'}>{needsFirstUseGuide ? 'เริ่มต้นแบบง่าย' : 'ใช้งานหลัก'}</Badge>
+                  <h2 className="mt-2 text-2xl font-extrabold leading-8 text-kaset-ink">สมุดฟาร์มแบบง่าย</h2>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+                    เริ่มจากบันทึกแปลง รายรับรายจ่าย และผลผลิตก่อน รายละเอียดอื่นค่อยเพิ่มทีหลังได้
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <BasicFarmActionButton detail="ตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน" icon={Leaf} label="เพิ่มแปลง" onClick={() => openForm('plot')} />
+                <BasicFarmActionButton detail="จดค่าใช้จ่ายหรือรายได้จากการขายผลผลิต" icon={WalletCards} label="บันทึกรายรับ/รายจ่าย" onClick={() => openForm('finance')} />
+                <BasicFarmActionButton detail="จดน้ำหนักผลผลิตที่เก็บเกี่ยวได้" icon={Wheat} label="บันทึกผลผลิต" onClick={() => openForm('harvest')} />
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <NoticeBox tone="success" icon={ShieldCheck} title="ขอบเขตความเป็นส่วนตัว">
-          ตอนนี้ข้อมูลสมุดฟาร์มถูกเก็บในเครื่องนี้ก่อน ยังไม่มีการซิงก์ขึ้นคลาวด์ และยังไม่มีการใช้ GPS แบบละเอียด
-        </NoticeBox>
-
-        <Card className={needsFirstUseGuide ? 'border-kaset-leaf/30 bg-kaset-mint p-4' : 'p-4'}>
-          <div className="grid gap-3">
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep shadow-soft">
-                <ClipboardList aria-hidden="true" className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-2">
-                  <Badge tone={needsFirstUseGuide ? 'green' : 'neutral'}>{needsFirstUseGuide ? 'เริ่มต้น' : 'ทางลัด'}</Badge>
-                </div>
-                <h2 className="mt-2 font-extrabold leading-6 text-kaset-ink">เริ่มใช้สมุดฟาร์ม</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  เริ่มจากเพิ่มแปลง แล้วค่อยบันทึกงาน รายรับรายจ่าย และผลผลิต
-                </p>
+          <Card className="p-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="min-w-0">
+                <h2 className="font-extrabold leading-6 text-kaset-ink">จดงานในฟาร์มเพิ่มเติม</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">เช่น ใส่ปุ๋ย พ่นยา ให้น้ำ หรือจ้างแรงงาน</p>
               </div>
+              <Button className="w-full sm:w-auto" onClick={() => openForm('activity')} variant="secondary">
+                <Plus aria-hidden="true" className="h-5 w-5" />
+                บันทึกงานในฟาร์ม
+              </Button>
             </div>
-            <div className="grid gap-2 sm:grid-cols-4">
-              {firstUseFarmSteps.map((step, index) => (
-                <div className="rounded-lg bg-white/85 p-3" key={step}>
-                  <p className="text-xs font-bold text-slate-500">ขั้นตอน {index + 1}</p>
-                  <p className="mt-1 text-sm font-extrabold leading-5 text-kaset-ink">{step}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <section className="grid grid-cols-2 gap-3">
-          <SummaryCard icon={Leaf} label="แปลงปลูก" value={viewModel.counts.plots} />
-          <SummaryCard icon={Sprout} label="รอบปลูก active" value={viewModel.counts.activeCropCycles} />
-          <SummaryCard icon={ClipboardList} label="กิจกรรมฟาร์ม" value={viewModel.counts.activityRecords} />
-          <SummaryCard icon={Wheat} label="รายการเก็บเกี่ยว" value={viewModel.counts.harvestRecords} />
-          <SummaryCard icon={Banknote} label="รายรับรวม" value={formatCurrency(farmRecords.summary.totalIncome)} />
-          <SummaryCard icon={ReceiptText} label="รายจ่ายรวม" value={formatCurrency(farmRecords.summary.totalExpense)} />
-          <SummaryCard icon={Coins} label="กำไรสุทธิ" value={formatCurrency(farmRecords.summary.netProfit)} />
-        </section>
-
-        <section className="grid gap-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Button className="w-full px-3" onClick={() => openForm('plot')} variant="primary">
-              <Plus aria-hidden="true" className="h-5 w-5" />
-              เพิ่มแปลง
-            </Button>
-            <Button className="w-full px-3" onClick={() => openForm('activity')} variant="secondary">
-              <Plus aria-hidden="true" className="h-5 w-5" />
-              เพิ่มกิจกรรม
-            </Button>
-            <Button className="w-full px-3" onClick={() => openForm('finance')} variant="soft">
-              <Plus aria-hidden="true" className="h-5 w-5" />
-              เพิ่มเงิน
-            </Button>
-            <Button className="w-full px-3" onClick={() => openForm('harvest')} variant="soft">
-              <Plus aria-hidden="true" className="h-5 w-5" />
-              เพิ่มผลผลิต
-            </Button>
-            <Button className="w-full px-3" onClick={() => openForm('cycle')} variant="ghost">
-              <Plus aria-hidden="true" className="h-5 w-5" />
-              เพิ่มรอบปลูก
-            </Button>
-          </div>
+          </Card>
 
           {successMessage ? <StatusPill tone="success">{successMessage}</StatusPill> : null}
 
@@ -1510,8 +1504,8 @@ export function FarmRecordsDebugPage() {
               onChange={setActivityForm}
               onSubmit={handleActivitySubmit}
               plots={activePlots}
-              submitLabel="บันทึก"
-              title={editingActivityId ? 'แก้ไขงานในฟาร์ม' : 'เพิ่มกิจกรรม'}
+              submitLabel="บันทึกงาน"
+              title={editingActivityId ? 'แก้ไขงานในฟาร์ม' : 'บันทึกงานในฟาร์ม'}
               values={activityForm}
             />
           ) : null}
@@ -1550,6 +1544,37 @@ export function FarmRecordsDebugPage() {
               values={harvestForm}
             />
           ) : null}
+        </section>
+
+        <section className="grid gap-3" data-testid="farm-records-advanced-section">
+          <Card className="border-slate-200 bg-slate-50 p-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="min-w-0">
+                <h2 className="text-lg font-extrabold leading-7 text-kaset-ink">ข้อมูลเพิ่มเติม / ขั้นสูง</h2>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">
+                  ส่วนนี้สำหรับดูรายละเอียด ต้นทุน การสำรองข้อมูล และการตั้งค่าขั้นสูง ไม่จำเป็นต้องใช้ตอนเริ่มต้น
+                </p>
+              </div>
+              <Button className="w-full sm:w-auto" onClick={() => openForm('cycle')} variant="ghost">
+                <Plus aria-hidden="true" className="h-5 w-5" />
+                เพิ่มรอบปลูก
+              </Button>
+            </div>
+          </Card>
+        </section>
+
+        <NoticeBox tone="success" icon={ShieldCheck} title="ข้อมูลนี้บันทึกไว้ในเครื่องนี้">
+          ใช้บันทึกข้อมูลฟาร์มของคุณได้ก่อน รายละเอียดการสำรอง กู้คืน และซิงก์บัญชีอยู่ในส่วนข้อมูลเพิ่มเติมด้านล่าง
+        </NoticeBox>
+
+        <section className="grid grid-cols-2 gap-3">
+          <SummaryCard icon={Leaf} label="แปลงปลูก" value={viewModel.counts.plots} />
+          <SummaryCard icon={Sprout} label="รอบปลูก active" value={viewModel.counts.activeCropCycles} />
+          <SummaryCard icon={ClipboardList} label="กิจกรรมฟาร์ม" value={viewModel.counts.activityRecords} />
+          <SummaryCard icon={Wheat} label="รายการเก็บเกี่ยว" value={viewModel.counts.harvestRecords} />
+          <SummaryCard icon={Banknote} label="รายรับรวม" value={formatCurrency(farmRecords.summary.totalIncome)} />
+          <SummaryCard icon={ReceiptText} label="รายจ่ายรวม" value={formatCurrency(farmRecords.summary.totalExpense)} />
+          <SummaryCard icon={Coins} label="กำไรสุทธิ" value={formatCurrency(farmRecords.summary.netProfit)} />
         </section>
 
         <Card className="p-4">

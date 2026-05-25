@@ -31,11 +31,7 @@ import { computeWeatherStaleAgeLabel, getWeatherCacheFreshnessQa } from '@/servi
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
-import { getWeatherRiskExpertReviewSummary } from '@/services/weather/weather-risk-expert-review';
-import { getWeatherRiskReleaseAuditSummary } from '@/services/weather/weather-risk-release-audit';
 import { buildWeatherSourceReadiness, getWeatherFallbackLabel } from '@/services/weather/weather-source-readiness';
-import { getAITextProxyStatus } from '@/services/ai-text/ai-text-proxy';
-import { buildAITextEndpointDryRunPlan } from '@/services/ai-text/ai-text-endpoint-dry-run';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
 const conditionIconClass: Record<WeatherForecastDay['iconTone'], string> = {
@@ -90,11 +86,6 @@ export function WeatherPage() {
   const staleAgeLabel = computeWeatherStaleAgeLabel(cacheStatus);
   const offlineState = sourceReadiness.offlineState;
   const agriRiskAssessment = assessWeatherAgriRisk({ forecast, cacheStatus });
-  const expertReviewSummary = getWeatherRiskExpertReviewSummary();
-  const releaseAuditSummary = getWeatherRiskReleaseAuditSummary();
-  const aiTextStatus = getAITextProxyStatus();
-  const aiTextEndpointPlan = buildAITextEndpointDryRunPlan();
-
   return (
     <div>
       <PageHeader title="สภาพอากาศเกษตร" subtitle="ฝน ลม ความชื้น และพยากรณ์สำหรับวางแผนงานแปลง" showBack />
@@ -108,11 +99,11 @@ export function WeatherPage() {
               </span>
               <div className="min-w-0">
                 <StatusPill className="bg-white/15 text-white ring-white/20" tone={isOpenMeteo ? 'success' : 'warning'}>
-                  {isOpenMeteo ? 'Open-Meteo' : 'local fixture'}
+                  {isOpenMeteo ? 'ข้อมูลอากาศล่าสุด' : 'ข้อมูลสำรองในเครื่อง'}
                 </StatusPill>
                 <h2 className="mt-3 text-2xl font-extrabold leading-8">{forecast.location.label}</h2>
                 <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  {isOpenMeteo ? 'ข้อมูลอ้างอิงจาก API ภายนอก' : 'ใช้ข้อมูลตัวอย่างในเครื่องเมื่อ API ยังไม่เปิดหรือเรียกไม่ได้'}
+                  {isOpenMeteo ? 'ข้อมูลอ้างอิงจากแหล่งพยากรณ์ภายนอก' : 'ใช้ข้อมูลล่าสุดที่มีในเครื่องเมื่อดึงข้อมูลใหม่ไม่ได้'}
                 </p>
               </div>
             </div>
@@ -122,8 +113,8 @@ export function WeatherPage() {
         <Card className="p-4">
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={modeStatus.canFetchOpenMeteo ? 'success' : 'warning'}>{modeStatus.mode}</StatusPill>
-            <Badge tone="neutral">no GPS</Badge>
-            <Badge tone="neutral">no location storage</Badge>
+            <Badge tone="neutral">ไม่ใช้ GPS</Badge>
+            <Badge tone="neutral">ไม่บันทึกตำแหน่งส่วนตัว</Badge>
             <Badge tone={cacheStatus.isFresh ? 'green' : cacheStatus.isStale ? 'gold' : 'neutral'}>
               {cacheFreshnessQa.label}
             </Badge>
@@ -133,18 +124,15 @@ export function WeatherPage() {
             {isLoading ? <Badge tone="sky">loading</Badge> : null}
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            {modeStatus.statusLabel} · source: {forecast.source.label} · fetched: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}
+            อัปเดต: {sourceReadiness.fetchedTimeLabel} · อายุข้อมูล: {staleAgeLabel}
           </p>
           <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
             <p>{sourceReadiness.attributionLabel}</p>
             <p>{offlineState.message}</p>
-            <p>fallback: {getWeatherFallbackLabel(sourceReadiness.fallbackReason)}</p>
+            <p>ข้อมูลสำรอง: {getWeatherFallbackLabel(sourceReadiness.fallbackReason)}</p>
             <p>ข้อมูลอาจล่าช้าหรือคลาดเคลื่อนได้</p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link className="inline-flex min-h-11 items-center rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/qa">
-              Weather QA
-            </Link>
             <Link className="inline-flex min-h-11 items-center gap-2 rounded-full bg-kaset-mist px-4 text-sm font-extrabold text-kaset-deep" to="/app/weather/preferences">
               <Settings2 aria-hidden="true" className="h-4 w-4" />
               ตั้งค่า
@@ -163,7 +151,7 @@ export function WeatherPage() {
               onClick={clearSelectedCache}
               type="button"
             >
-              ล้าง cache พื้นที่นี้
+              ล้างข้อมูลอากาศพื้นที่นี้
             </button>
           </div>
           <p className="mt-3 flex items-center gap-2 text-xs font-bold leading-5 text-slate-500">
@@ -173,7 +161,7 @@ export function WeatherPage() {
             {lastSuccessfulRefresh ? ` · ล่าสุด ${new Date(lastSuccessfulRefresh).toLocaleString('th-TH')}` : ''}
           </p>
           <p className="mt-2 text-xs font-bold leading-5 text-slate-500">
-            ตั้งค่าพื้นที่: {localPreferenceStatus.selectedLabel} · localStorage เท่านั้น · ไม่มี background refresh
+            ตั้งค่าพื้นที่: {localPreferenceStatus.selectedLabel} · บันทึกไว้ในเครื่องนี้
           </p>
         </Card>
 
@@ -185,11 +173,11 @@ export function WeatherPage() {
 
         {forecast.isFallback ? (
           <NoticeBox tone="warning" icon={ShieldAlert} title="ใช้ข้อมูลสำรองในเครื่อง">
-            {forecast.fallbackReason ?? 'Weather API ยังไม่เปิดหรือเรียกไม่ได้'} · API unavailable หรือถูกปิดด้วย flag จึงใช้ local/mock fallback ที่พร้อมใช้งานเสมอ
+            ตอนนี้ใช้ข้อมูลอากาศล่าสุดที่มีในเครื่องนี้ เมื่อเชื่อมต่อแหล่งข้อมูลล่าสุดไม่ได้ ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
           </NoticeBox>
         ) : (
-          <NoticeBox tone="info" title="ข้อมูลอ้างอิงจาก API ภายนอก">
-            ใช้ Open-Meteo public API แบบ no-key เฉพาะพิกัดเริ่มต้นที่ตั้งค่าไว้ ไม่ขอ GPS และไม่บันทึกตำแหน่งส่วนตัว
+          <NoticeBox tone="info" title="ข้อมูลอ้างอิงจากแหล่งพยากรณ์ภายนอก">
+            ใช้พื้นที่เริ่มต้นแบบจังหวัดหรือเมืองกลาง ไม่ขอ GPS และไม่บันทึกตำแหน่งส่วนตัว
           </NoticeBox>
         )}
 
@@ -204,29 +192,12 @@ export function WeatherPage() {
               <StatusPill tone={weatherAgriRiskLevelTone[agriRiskAssessment.overallLevel]}>
                 {weatherAgriRiskLevelLabels[agriRiskAssessment.overallLevel]}
               </StatusPill>
-              <StatusPill tone="warning">M79 expert review pending</StatusPill>
+              <StatusPill tone="warning">คำแนะนำทั่วไป</StatusPill>
             </div>
           </div>
           <NoticeBox tone="info" title="คำแนะนำเบื้องต้น ไม่แทนผู้เชี่ยวชาญ">
-            การ์ดนี้เป็น preview จากกฎ planning-only ยังไม่ใช่ agronomy engine ที่ผู้เชี่ยวชาญตรวจทาน และไม่แนะนำสินค้า อัตราสารเคมี หรือผลลัพธ์รับประกัน · rule versions {expertReviewSummary.versionCount} · audit events {releaseAuditSummary.auditEventCount} · prescriptiveAllowed false
+            ใช้ดูความเสี่ยงทั่วไปก่อนวางแผนงานแปลง ไม่แนะนำสินค้า อัตราสารเคมี หรือรับประกันผลลัพธ์
           </NoticeBox>
-          <Card className="border-indigo-200 bg-indigo-50 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusPill tone={aiTextStatus.canCallNetwork ? 'success' : 'warning'}>M81 {aiTextStatus.mode}</StatusPill>
-              <StatusPill tone="warning">M82 fetch {String(aiTextEndpointPlan.fetchWouldRun)}</StatusPill>
-              <Badge tone="green">proxy only</Badge>
-              <Badge tone="green">fixture fallback</Badge>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-indigo-900">
-              Weather caution explanation can use the AI text proxy only in controlled staging. It cannot become diagnosis, product advice, prescription, or guaranteed outcome.
-            </p>
-            <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/ai-text-status">
-              เปิด M81 AI text status
-            </Link>
-            <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-950 ring-1 ring-indigo-900/10" to="/app/ai-text-endpoint-plan">
-              เปิด M82 endpoint plan
-            </Link>
-          </Card>
           <div className="grid gap-3 md:grid-cols-2">
             {agriRiskAssessment.cards.slice(0, 6).map((card) => (
               <Card className="p-4" key={card.id}>
@@ -400,7 +371,7 @@ export function WeatherPage() {
 
         {alerts.length > 0 && !isOpenMeteo ? (
           <section className="grid gap-3">
-            <h2 className="text-lg font-extrabold text-kaset-ink">แจ้งเตือนตัวอย่าง</h2>
+            <h2 className="text-lg font-extrabold text-kaset-ink">แจ้งเตือนอากาศ</h2>
             {alerts.map((alert) => (
               <Card className="p-4" key={alert.id}>
                 <div className="flex gap-3">
@@ -410,7 +381,7 @@ export function WeatherPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2">
                       <Badge tone={weatherRiskTone[alert.riskId]}>{weatherRiskLabels[alert.riskId]}</Badge>
-                      <Badge tone="neutral">{alert.demoLabel}</Badge>
+                      <Badge tone="neutral">ข้อมูลอากาศ</Badge>
                     </div>
                     <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{alert.title}</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">{alert.body}</p>

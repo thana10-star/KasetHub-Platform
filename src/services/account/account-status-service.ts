@@ -32,8 +32,8 @@ export function getAccountStatus(state?: GuestMemoryState): AccountStatus {
   if (phoneAuth.session) {
     return {
       mode: 'phone_mock_authenticated',
-      label: 'Phone mock session active',
-      description: `ยืนยันเบอร์โทรจำลองแล้ว (${phoneAuth.session.phoneNumberMasked}) ยังเป็นโหมดทดสอบ ไม่ใช่บัญชีจริง`,
+      label: 'บัญชีในเครื่อง',
+      description: `มีสถานะเบอร์โทรในเครื่องนี้ (${phoneAuth.session.phoneNumberMasked}) การสำรองขึ้นคลาวด์ยังไม่เปิดใช้งาน`,
       isGuest: false,
       canAuthenticate: false,
       canCloudSync: false,
@@ -67,8 +67,8 @@ export function getAccountStatus(state?: GuestMemoryState): AccountStatus {
   if (!supabase.canUseAuth) {
     return {
       mode: 'guest_supabase_configured_auth_disabled',
-      label: 'Guest mode + Supabase test scaffold',
-      description: 'Supabase ENV พร้อมแล้ว แต่ Auth ยังปิดไว้เพื่อไม่ให้เกิด login จริง',
+      label: 'ใช้งานได้ทันที',
+      description: 'ใช้งานได้ทันทีโดยไม่ต้องสมัคร ข้อมูลยังอยู่ในเครื่องนี้',
       isGuest: true,
       canAuthenticate: false,
       canCloudSync: supabase.canUseCloudSync,
@@ -83,8 +83,8 @@ export function getAccountStatus(state?: GuestMemoryState): AccountStatus {
 
   return {
     mode: 'guest_supabase_test_ready',
-    label: 'Guest mode + Auth test flag',
-    description: 'Auth flag เปิดไว้สำหรับการทดสอบในอนาคต แต่ M06 ยังไม่เรียก login จริง',
+    label: 'ใช้งานได้ทันที',
+    description: 'ใช้งานได้ทันทีโดยไม่ต้องสมัคร ข้อมูลยังอยู่ในเครื่องนี้',
     isGuest: true,
     canAuthenticate: false,
     canCloudSync: supabase.canUseCloudSync,

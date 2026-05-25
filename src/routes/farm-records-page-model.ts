@@ -136,12 +136,12 @@ export const farmRecordsDeleteConfirmationMessage =
 export const farmRecordsFirstUseEmptyStates = {
   plots: {
     actionLabel: 'เพิ่มแปลง',
-    detail: 'เริ่มจากเพิ่มแปลงของคุณก่อน',
+    detail: 'เริ่มจากตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน',
     title: 'ยังไม่มีแปลง',
   },
   activity: {
     actionLabel: 'เพิ่มกิจกรรม',
-    detail: 'บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา ให้น้ำ หรือเก็บเกี่ยว',
+    detail: 'บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ',
     title: 'ยังไม่มีบันทึกงานในฟาร์ม',
   },
   finance: {
@@ -423,19 +423,19 @@ export function validateActivityForm(values: ActivityFormValues, availablePlots:
   const errors: string[] = [];
 
   if (!values.farmPlotId || !availablePlots.some((plot) => plot.id === values.farmPlotId)) {
-    errors.push('เลือกแปลงก่อนบันทึกกิจกรรม');
+    errors.push('กรุณาเลือกแปลง');
   }
 
   if (!hasValidDate(values.activityDate)) {
-    errors.push('ใส่วันที่กิจกรรมให้ถูกต้อง');
+    errors.push('กรุณาเลือกวันที่ทำงาน');
   }
 
   if (!farmActivityTypeIds.includes(values.activityType)) {
-    errors.push('เลือกประเภทกิจกรรมให้ถูกต้อง');
+    errors.push('กรุณาเลือกประเภทงาน');
   }
 
   if (!values.title.trim()) {
-    errors.push('ใส่ชื่องานในฟาร์ม');
+    errors.push('กรุณากรอกหัวข้อสั้น ๆ');
   }
 
   if (values.inputQuantity.trim() && parseOptionalNonNegativeNumber(values.inputQuantity) === undefined) {
@@ -477,7 +477,7 @@ export function validateFarmPlotForm(values: FarmPlotFormValues): FormValidation
   const errors: string[] = [];
 
   if (!values.name.trim()) {
-    errors.push('ใส่ชื่อแปลง');
+    errors.push('กรุณากรอกชื่อแปลง');
   }
 
   if (values.areaRai.trim() && parseOptionalNonNegativeNumber(values.areaRai) === undefined) {

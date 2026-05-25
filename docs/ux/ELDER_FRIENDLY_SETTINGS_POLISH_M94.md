@@ -13,7 +13,7 @@ The page keeps the M93 grouping, makes the first three groups visually primary, 
 - Safety copy is shown near the top:
   - `ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้`
   - `การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน`
-  - `การตั้งค่าบางอย่างเป็นตัวอย่างสำหรับเวอร์ชันถัดไป`
+  - `บางการตั้งค่าจะเพิ่มในเวอร์ชันถัดไป`
 - Primary rows use larger tap targets, clearer Thai labels, and status pills for future-only settings.
 - Technical words are reduced in farmer-facing groups.
 
@@ -63,6 +63,19 @@ Copy inside the section says:
 M95 adds `/app/help` as the first farmer start guide and updates `วิธีใช้แอพ` in Profile to link there.
 
 M95 also adds `/app/field-test-feedback` as a static/local checklist for observing real farmers or elderly users. It has no backend submission, no Supabase write, and warns not to enter personal data.
+
+## 6.2 M97.2 Follow-up
+
+M97.2 keeps the Profile data/privacy safety copy but removes repeated test-build wording from normal settings rows.
+
+The Profile page still shows:
+
+- `การซิงก์ข้อมูล` as `ปิดอยู่`
+- farm data remains in this device
+- backup/restore/data-control links
+- collapsed Admin/QA/internal tools
+
+Normal account/help/privacy rows now use production-facing local-data wording, while staging, QA, readiness, and mock terms remain inside the collapsed `สำหรับทีมงานหรือทดสอบ` section.
 
 ## 7. Non-goals
 

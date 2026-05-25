@@ -51,8 +51,6 @@ const timelineIcons: Record<MyFarmTimelineItemType, LucideIcon> = {
   saved_video: Sparkles,
 };
 
-const firstUseFarmSteps = ['เพิ่มแปลง', 'บันทึกงานในฟาร์ม', 'บันทึกรายรับรายจ่าย', 'บันทึกผลผลิต'];
-
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('th-TH', {
     currency: 'THB',
@@ -111,65 +109,50 @@ export function MyFarmPage() {
 
   return (
     <div>
-      <PageHeader title="ฟาร์มของฉัน" subtitle="ศูนย์รวมข้อมูลเกษตรที่บันทึกไว้ในเครื่องนี้" showBack />
+      <PageHeader title="ฟาร์มของฉัน" subtitle="เริ่มจากเพิ่มแปลง แล้วบันทึกรายรับรายจ่ายหรือผลผลิต" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        <Card className="overflow-hidden bg-kaset-deep text-white">
-          <div className="relative p-5">
-            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10" />
-            <div className="relative flex gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
-                <Leaf aria-hidden="true" className="h-7 w-7" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <Badge className="bg-white/15 text-white" tone="green">
-                  Local My Farm Hub
-                </Badge>
-                <h2 className="mt-3 text-2xl font-extrabold leading-8">งานสำคัญของฟาร์มอยู่หน้าเดียว</h2>
-                <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  รวมประวัติวิเคราะห์พืช แปลงที่บันทึก พืชที่ติดตาม อากาศตัวอย่าง บทความ วิดีโอ และคำถาม AI ล่าสุด
-                </p>
-                <Link className="mt-3 inline-flex text-sm font-extrabold text-white underline underline-offset-4" to="/app/my-farm/settings">
-                  ตั้งค่าและดูสถานะข้อมูล
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <NoticeBox tone="warning" title="ข้อมูลอยู่ในเครื่องนี้เท่านั้น" icon={ShieldCheck}>
-          My Farm ยังไม่เชื่อมต่อ backend, Supabase, cloud sync, AI จริง, อากาศจริง, แผนที่ หรือ GPS
-        </NoticeBox>
-
-        <Card className="p-4">
-          <div className="grid gap-3">
+        <Card className="border-kaset-leaf/30 bg-kaset-mint p-4" data-testid="my-farm-primary-area">
+          <div className="grid gap-4">
             <div className="flex gap-3">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-                <ClipboardList aria-hidden="true" className="h-6 w-6" />
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep shadow-soft">
+                <Leaf aria-hidden="true" className="h-6 w-6" />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="font-extrabold leading-6 text-kaset-ink">เริ่มใช้ฟาร์มของฉัน</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">เริ่มจากเพิ่มแปลง แล้วค่อยบันทึกงาน รายรับรายจ่าย และผลผลิต</p>
+                <h2 className="text-2xl font-extrabold leading-8 text-kaset-ink">ฟาร์มของฉัน</h2>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">เริ่มจากเพิ่มแปลง แล้วบันทึกรายรับรายจ่ายหรือผลผลิต</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {firstUseFarmSteps.map((step, index) => (
-                <div className="rounded-lg bg-kaset-mist p-3" key={step}>
-                  <p className="text-xs font-bold text-slate-500">ขั้นตอน {index + 1}</p>
-                  <p className="mt-1 text-sm font-extrabold leading-5 text-kaset-ink">{step}</p>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/farm-records">
+            <div className="grid gap-2 sm:grid-cols-3">
+              <Link className="inline-flex min-h-12 items-center justify-center rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white" to="/app/farm-records">
                 เปิดสมุดฟาร์ม
               </Link>
-              <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/help">
-                <HelpCircle aria-hidden="true" className="h-4 w-4" />
-                ดูวิธีใช้
+              <Link className="inline-flex min-h-12 items-center justify-center rounded-lg bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/farm-records">
+                บันทึกรายรับ/รายจ่าย
+              </Link>
+              <Link className="inline-flex min-h-12 items-center justify-center rounded-lg bg-white px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10" to="/app/farm-records">
+                บันทึกผลผลิต
               </Link>
             </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="rounded-lg bg-white/80 p-3">
+                <p className="text-xs font-bold text-slate-500">กำไร/ขาดทุน</p>
+                <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatCurrency(hub.summary.farmLedgerNetProfit)}</p>
+              </div>
+              <div className="rounded-lg bg-white/80 p-3">
+                <p className="text-xs font-bold text-slate-500">ผลผลิตรวม</p>
+                <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalNumber(hub.summary.farmTotalHarvestKg, 'kg')}</p>
+              </div>
+            </div>
+            <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white/70 px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10 sm:w-fit" to="/app/help">
+              <HelpCircle aria-hidden="true" className="h-4 w-4" />
+              ดูวิธีใช้
+            </Link>
           </div>
         </Card>
+
+        <NoticeBox tone="success" title="ข้อมูลฟาร์มยังอยู่ในเครื่องนี้" icon={ShieldCheck}>
+          ใช้บันทึกข้อมูลพื้นฐานก่อนได้ รายละเอียดและสถานะขั้นสูงดูได้ด้านล่าง
+        </NoticeBox>
 
         <Link to="/app/notifications">
           <Card className="p-4">
@@ -185,7 +168,7 @@ export function MyFarmPage() {
                   </Badge>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  เตือนงานฟาร์ม ราคา อากาศ และระบบแบบ local/mock ยังไม่มีการส่งแจ้งเตือนจริง
+                  รวมงานฟาร์ม ราคา อากาศ และเรื่องที่ควรติดตามไว้ในที่เดียว
                 </p>
               </div>
             </div>
@@ -195,7 +178,7 @@ export function MyFarmPage() {
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4">
             <p className="text-3xl font-extrabold text-kaset-deep">{hub.summary.totalLocalItems}</p>
-            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">รายการ local ที่เกี่ยวกับฟาร์ม</p>
+            <p className="mt-1 text-xs font-bold leading-5 text-slate-500">รายการที่บันทึกไว้</p>
           </Card>
           <Card className="p-4">
             <p className="text-3xl font-extrabold text-kaset-deep">{hub.summary.timelineCount}</p>
@@ -211,20 +194,19 @@ export function MyFarmPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="green">local-only</Badge>
-                  <Badge tone="green">Backup/Restore ready locally</Badge>
-                  <Badge tone="neutral">Cloud Sync: Not enabled</Badge>
-                  <Badge tone="sky">Sync consent: Prototype only</Badge>
+                  <Badge tone="green">บันทึกในเครื่องนี้</Badge>
+                  <Badge tone="green">สำรอง/กู้คืนได้</Badge>
+                  <Badge tone="neutral">ซิงก์บัญชีปิดอยู่</Badge>
                 </div>
-                <h2 className="mt-2 font-extrabold leading-6 text-kaset-ink">สมุดบันทึกฟาร์ม</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">บันทึกกิจกรรมและรายรับรายจ่าย ดูต้นทุนและกำไรของแปลงจากข้อมูลในเครื่องนี้</p>
+                <h2 className="mt-2 font-extrabold leading-6 text-kaset-ink">สมุดฟาร์มของฉัน</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">ดูรายรับรายจ่าย ผลผลิต และข้อมูลฟาร์มที่คุณบันทึกไว้</p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <div className="rounded-lg bg-white/80 p-3">
                     <p className="text-xs font-bold text-slate-500">กำไรสุทธิ</p>
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatCurrency(hub.summary.farmLedgerNetProfit)}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
-                    <p className="text-xs font-bold text-slate-500">รอบปลูก active</p>
+                    <p className="text-xs font-bold text-slate-500">รอบปลูกใช้งานอยู่</p>
                     <p className="mt-1 text-sm font-extrabold text-kaset-deep">{hub.summary.farmActiveCropCycleCount.toLocaleString('th-TH')}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
@@ -240,7 +222,7 @@ export function MyFarmPage() {
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalNumber(hub.summary.farmTotalHarvestKg, 'kg')}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
-                    <p className="text-xs font-bold text-slate-500">ต้นทุนต่อ kg</p>
+                    <p className="text-xs font-bold text-slate-500">ต้นทุนต่อกก.</p>
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalCurrency(hub.summary.farmCostPerKg)}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 p-3">
@@ -256,7 +238,7 @@ export function MyFarmPage() {
                     <p className="mt-1 break-words text-sm font-extrabold text-kaset-deep">{formatOptionalDate(hub.summary.latestFarmHarvestDate)}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-extrabold text-kaset-deep">ดูต้นทุนและจุดคุ้มทุน · Backup/Restore ready locally · Cloud Sync ยังไม่เปิดใช้</p>
+                <p className="mt-3 text-sm font-extrabold text-kaset-deep">ดูต้นทุน รายรับรายจ่าย และผลผลิตที่บันทึกไว้</p>
               </div>
             </div>
           </Card>
@@ -374,7 +356,7 @@ export function MyFarmPage() {
                       <Camera aria-hidden="true" className="h-5 w-5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <Badge tone="sky">Guest Memory</Badge>
+                      <Badge tone="sky">บันทึกไว้ในเครื่องนี้</Badge>
                       <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{record.cropName}</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-600">{record.diseaseName}</p>
                     </div>
@@ -402,7 +384,7 @@ export function MyFarmPage() {
           ) : (
             <EmptyAction
               cta="เริ่มวิเคราะห์โรคพืช"
-              detail="รูปยังไม่ถูกอัปโหลดจริง และผลยังเป็น mock/local"
+              detail="เมื่อบันทึกผลวิเคราะห์แล้ว จะแสดงไว้ในหน้านี้"
               title="ยังไม่มีผลวิเคราะห์ที่บันทึก"
               to="/app/analyze"
             />
@@ -450,8 +432,8 @@ export function MyFarmPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="neutral">M75 weather</Badge>
-                  <Badge tone="neutral">M77 local preference</Badge>
+                  <Badge tone="neutral">อากาศเกษตร</Badge>
+                  <Badge tone="neutral">พื้นที่ที่เลือก</Badge>
                   <Badge tone="sky">{hub.weather.forecast.updatedAtLabel}</Badge>
                 </div>
                 <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{hub.weather.forecast.location.label}</h3>
@@ -509,7 +491,7 @@ export function MyFarmPage() {
                     <Bot aria-hidden="true" className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <Badge tone="neutral">local AI history</Badge>
+                    <Badge tone="neutral">คำถามที่บันทึกไว้</Badge>
                     <h3 className="mt-2 font-extrabold leading-6 text-kaset-ink">{question.question}</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">{question.answerSummary || question.topic || 'ถามต่อในหน้า AI ได้'}</p>
                   </div>
@@ -517,14 +499,14 @@ export function MyFarmPage() {
               </Card>
             ))
           ) : (
-            <EmptyAction cta="ถาม AI" detail="ยังไม่มี API จริง คำถามจะบันทึกในเครื่องนี้เท่านั้น" title="ยังไม่มีคำถาม AI ล่าสุด" to="/app/ai" />
+            <EmptyAction cta="ถาม AI" detail="คำถามที่บันทึกไว้จะแสดงในหน้านี้" title="ยังไม่มีคำถาม AI ล่าสุด" to="/app/ai" />
           )}
         </section>
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-extrabold text-kaset-ink">ไทม์ไลน์ My Farm</h2>
-            <Badge tone="neutral">local/demo</Badge>
+            <Badge tone="neutral">รายการที่บันทึกไว้</Badge>
           </div>
           {hub.timeline.length > 0 ? (
             hub.timeline.map((item) => {
@@ -565,7 +547,7 @@ export function MyFarmPage() {
         </section>
 
         <LargeActionButton
-          description="ดูสถานะข้อมูล local วิธีสำรองในอนาคต และลิงก์ Guest Memory"
+          description="ดูสถานะข้อมูล วิธีสำรองในอนาคต และข้อมูลที่บันทึกไว้ในเครื่องนี้"
           icon={Settings}
           label="ตั้งค่า My Farm"
           to="/app/my-farm/settings"

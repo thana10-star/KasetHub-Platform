@@ -9,7 +9,7 @@ import { HelpPage } from '@/routes/HelpPage';
 import { MyFarmPage } from '@/routes/MyFarmPage';
 import { ProfilePage } from '@/routes/ProfilePage';
 
-describe('M96 farmer help, settings, and first-use readiness', () => {
+describe('M97.1 farmer help, settings, and first-use readiness', () => {
   test('renders Profile as a farmer-facing settings page with grouped sections', () => {
     const html = renderToString(
       <MemoryRouter>
@@ -82,16 +82,17 @@ describe('M96 farmer help, settings, and first-use readiness', () => {
     );
 
     expect(html).toContain('วิธีเริ่มใช้ KasetHub');
-    expect(html).toContain('เริ่มบันทึกฟาร์ม 4 ขั้นตอน');
+    expect(html).toContain('เริ่มบันทึกฟาร์ม 3 ขั้นตอน');
     expect(html).toContain('เพิ่มแปลง');
-    expect(html).toContain('บันทึกงานในฟาร์ม');
-    expect(html).toContain('บันทึกรายรับรายจ่าย');
+    expect(html).toContain('บันทึกรายรับ/รายจ่าย');
     expect(html).toContain('บันทึกผลผลิต');
+    expect(html).toContain('ถ้าต้องการจดงานในฟาร์ม เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ สามารถเพิ่มทีหลังได้');
+    expect(html).toContain('ตัวอย่างชื่อแปลง: แปลงข้าวหลังบ้าน');
+    expect(html).toContain('ตัวอย่างงาน: ใส่ปุ๋ยข้าว วันที่ 12 มิ.ย.');
     expect(html).toContain('เริ่มจาก “ฟาร์มของฉัน”');
     expect(html).toContain('กดฟาร์มของฉันจากเมนูล่าง');
     expect(html).toContain('ใช้ดูข้อมูลฟาร์มและสมุดบันทึก');
-    expect(html).toContain('บันทึกงานในฟาร์ม');
-    expect(html).toContain('บันทึกรายรับรายจ่าย');
+    expect(html).toContain('บันทึกรายรับ/รายจ่าย');
     expect(html).toContain('ดูต้นทุน กำไร และผลผลิต');
     expect(html).toContain('ใช้เครื่องมือ / ถาม AI / เช็กอากาศ');
     expect(html).toContain('/app/my-farm');
@@ -110,11 +111,19 @@ describe('M96 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('หา “ฟาร์มของฉัน” เจอไหม');
     expect(html).toContain('กดเพิ่มกิจกรรมได้ไหม');
     expect(html).toContain('กดเพิ่มรายรับรายจ่ายได้ไหม');
+    expect(html).toContain('ผู้ใช้เข้าใจ 3 ปุ่มหลักไหม');
     expect(html).toContain('ผู้ใช้เข้าใจไหมว่าต้องเริ่มจากเพิ่มแปลง');
+    expect(html).toContain('ผู้ใช้เข้าใจรายรับ/รายจ่ายไหม');
+    expect(html).toContain('ผู้ใช้กรอกชื่อแปลงได้เองไหม');
     expect(html).toContain('ผู้ใช้เข้าใจคำว่า “บันทึกงานในฟาร์ม” ไหม');
+    expect(html).toContain('ผู้ใช้เลือกประเภทงานได้ไหม');
     expect(html).toContain('ผู้ใช้เข้าใจคำว่า “เพิ่มเงิน” หมายถึงรายรับรายจ่ายไหม');
     expect(html).toContain('ผู้ใช้หา “เพิ่มผลผลิต” เจอไหม');
+    expect(html).toContain('มีส่วนไหนเยอะเกินไปไหม');
+    expect(html).toContain('ผู้ใช้สับสนคำว่า รอบปลูก / จุดคุ้มทุน / ซิงก์ หรือไม่');
+    expect(html).toContain('ผู้ใช้ยังต้องการ “บันทึกงานในฟาร์ม” อยู่หน้าแรกหรือไม่');
     expect(html).toContain('ผู้ใช้รู้ไหมว่าช่องไหนจำเป็น/ไม่จำเป็น');
+    expect(html).toContain('ผู้ใช้รู้ไหมว่าช่องไหนไม่จำเป็นต้องกรอก');
     expect(html).toContain('คะแนนความง่าย 1-5');
     expect(html).toContain('อย่าใส่ชื่อจริง เบอร์โทร ที่อยู่ หรือข้อมูลส่วนตัวของผู้ทดสอบ');
     expect(html).toContain('ข้อมูลนี้ไม่ถูกส่งไป backend');
@@ -158,14 +167,18 @@ describe('M96 farmer help, settings, and first-use readiness', () => {
     expect(homeHtml).toContain('/app/help');
     expect(homeHtml).not.toContain('ต้นทุนต่อกก.');
     expect(homeHtml).not.toContain('/app/farm-records#farm-cost-dashboard');
-    expect(myFarmHtml).toContain('เริ่มใช้ฟาร์มของฉัน');
-    expect(myFarmHtml).toContain('เริ่มจากเพิ่มแปลง แล้วค่อยบันทึกงาน รายรับรายจ่าย และผลผลิต');
-    expect(myFarmHtml).toContain('ขั้นตอน');
+    expect(homeHtml.toLowerCase()).not.toContain('prototype');
+    expect(homeHtml.toLowerCase()).not.toContain('debug');
+    expect(homeHtml).not.toContain('QA');
+    expect(homeHtml.toLowerCase()).not.toContain('readiness');
+    expect(myFarmHtml).toContain('เริ่มจากเพิ่มแปลง แล้วบันทึกรายรับรายจ่ายหรือผลผลิต');
+    expect(myFarmHtml).toContain('บันทึกรายรับ/รายจ่าย');
     expect(myFarmHtml).toContain('บันทึกผลผลิต');
     expect(myFarmHtml).toContain('เปิดสมุดฟาร์ม');
-    expect(myFarmHtml).toContain('ดูวิธีใช้');
-    expect(myFarmHtml).toContain('/app/help');
-    expect(myFarmHtml).toContain('Backup/Restore ready locally');
-    expect(farmRecordsHtml).toContain('ผลผลิตและการเก็บเกี่ยว');
+    expect(myFarmHtml).toContain('กำไร/ขาดทุน');
+    expect(myFarmHtml).toContain('ผลผลิตรวม');
+    expect(myFarmHtml).toContain('สำรอง/กู้คืนได้');
+    expect(farmRecordsHtml).toContain('สมุดฟาร์มแบบง่าย');
+    expect(farmRecordsHtml).toContain('ข้อมูลเพิ่มเติม / ขั้นสูง');
   });
 });

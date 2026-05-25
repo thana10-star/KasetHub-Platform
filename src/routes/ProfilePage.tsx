@@ -78,10 +78,10 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'สมัครหรือสำรองข้อมูลภายหลัง',
-        description: 'ตัวอย่างการสมัครในอนาคต ยังไม่เปิดสำรองขึ้นคลาวด์จริง',
+        description: 'บัญชีและการสำรองข้อมูลจะเพิ่มในเวอร์ชันถัดไป',
         icon: UserRound,
         href: '/app/auth',
-        status: 'ตัวอย่าง',
+        status: 'เร็ว ๆ นี้',
         statusTone: 'neutral',
       },
       {
@@ -105,7 +105,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'ตั้งค่าการแจ้งเตือน',
-        description: 'จัดการการแจ้งเตือนตัวอย่างในเครื่องนี้',
+        description: 'จัดการรายการแจ้งเตือนที่บันทึกไว้ในเครื่องนี้',
         icon: Bell,
         href: '/app/notification-settings',
       },
@@ -150,19 +150,19 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'ข้อมูลที่บันทึกไว้ในเครื่องนี้',
-        description: 'ดูหน่วยความจำ guest ที่อยู่ในเครื่องนี้',
+        description: 'ดูข้อมูลที่แอพบันทึกไว้ในเครื่องนี้',
         icon: Sprout,
         href: '/app/memory',
       },
       {
         label: 'ความเป็นส่วนตัวของรูปภาพ',
-        description: 'ขอบเขตรูปภาพและการวิเคราะห์ตัวอย่าง',
+        description: 'ขอบเขตรูปภาพและการวิเคราะห์ภาพ',
         icon: FileLock2,
         href: '/app/image-privacy',
       },
       {
         label: 'สำรองข้อมูลในอนาคต',
-        description: 'ตัวอย่างบัญชีและการสำรองข้อมูล ยังไม่เชื่อมคลาวด์จริง',
+        description: 'แผนบัญชีและการสำรองข้อมูลสำหรับเวอร์ชันถัดไป',
         icon: CloudUpload,
         href: '/app/account-preview',
       },
@@ -194,7 +194,7 @@ const profileMenuGroups: ProfileMenuGroup[] = [
       },
       {
         label: 'สภาพอากาศเกษตร',
-        description: 'ดูอากาศและคำเตือนแบบ local/coarse location',
+        description: 'ดูอากาศและคำเตือนจากพื้นที่โดยประมาณ',
         icon: CloudSun,
         href: '/app/weather',
       },
@@ -462,7 +462,7 @@ export function ProfilePage() {
         <NoticeBox tone="info" title="สิ่งที่ควรรู้ตอนนี้">
           <p>ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้</p>
           <p>การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน</p>
-          <p>การตั้งค่าบางอย่างเป็นตัวอย่างสำหรับเวอร์ชันถัดไป</p>
+          <p>บางการตั้งค่าจะเพิ่มในเวอร์ชันถัดไป</p>
         </NoticeBox>
 
         <Card className="p-4">
@@ -474,7 +474,7 @@ export function ProfilePage() {
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-extrabold text-kaset-ink">สถานะบัญชี</h2>
                 <StatusPill tone={accountStatus.phoneMockSession ? 'success' : 'warning'}>
-                  {accountStatus.phoneMockSession ? 'phone mock' : 'guest'}
+                  {accountStatus.phoneMockSession ? 'บัญชีในเครื่อง' : 'ใช้งานได้ทันที'}
                 </StatusPill>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">{accountStatus.description}</p>
@@ -527,7 +527,7 @@ export function ProfilePage() {
           </div>
           <Button className="mt-4 w-full" variant="secondary">
             <LogOut aria-hidden="true" className="h-4 w-4" />
-            ออกจากระบบตัวอย่าง
+            ออกจากระบบ
           </Button>
         </Card>
       </div>

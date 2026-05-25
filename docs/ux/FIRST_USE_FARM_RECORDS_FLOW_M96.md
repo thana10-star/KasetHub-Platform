@@ -15,21 +15,27 @@ The goal is to make the first action obvious: start with a farm plot, then recor
 
 ## 3. First-Use Path
 
-The repeated 4-step path is:
+The original M96 repeated 4-step path was:
 
 1. เพิ่มแปลง
 2. บันทึกงานในฟาร์ม
 3. บันทึกรายรับรายจ่าย
 4. บันทึกผลผลิต
 
-This appears on `/app/my-farm`, `/app/farm-records`, and `/app/help`.
+M97.1 later simplifies the default basic path to:
+
+1. เพิ่มแปลง
+2. บันทึกรายรับ/รายจ่าย
+3. บันทึกผลผลิต
+
+`บันทึกงานในฟาร์ม` remains available as a secondary action.
 
 ## 4. Empty-State Strategy
 
-`/app/farm-records` now uses direct next-step copy:
+`/app/farm-records` now uses direct next-step copy. M97 later tightens the first two empty states:
 
-- No plots: `ยังไม่มีแปลง` and `เริ่มจากเพิ่มแปลงของคุณก่อน`.
-- No farm work: `ยังไม่มีบันทึกงานในฟาร์ม` with examples such as fertilizer, spraying, watering, and harvest.
+- No plots: `ยังไม่มีแปลง` and `เริ่มจากตั้งชื่อแปลง เช่น แปลงข้าวหลังบ้าน`.
+- No farm work: `ยังไม่มีบันทึกงานในฟาร์ม` and `บันทึกสิ่งที่ทำ เช่น ใส่ปุ๋ย พ่นยา หรือให้น้ำ`.
 - No income/expense: `ยังไม่มีรายรับรายจ่าย` with examples such as fertilizer, chemicals, labor, and crop sale income.
 - No harvest: `ยังไม่มีข้อมูลผลผลิต` and a reminder to record harvest weight for cost per kg.
 
@@ -65,6 +71,8 @@ The checklist remains static/local and does not submit to a backend.
 
 ## 7. What Remains Future
 
+- M97 follow-up: the first `เพิ่มแปลง` and `บันทึกงานในฟาร์ม` forms now have clearer Thai-first labels, required/optional wording, no-GPS helper copy, and friendlier activity type labels.
+- M97.1 follow-up: `/app/farm-records` now starts with Basic Farm Records Mode and moves advanced content lower under `ข้อมูลเพิ่มเติม / ขั้นสูง`.
 - Real field-test observations should decide which Farm Records flow to simplify next.
 - A future lightweight guided mode may be useful if field testing shows users still get stuck.
 - More Thai examples can be added after real crop/work patterns are observed.
