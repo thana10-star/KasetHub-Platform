@@ -55,6 +55,18 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - Standardizes the shared header Home affordance with `กลับหน้าแรก` linking to `/app`.
 - Keeps Weather provider/API behavior unchanged and does not add GPS, Supabase writes, cloud sync, real AI, OCR, notifications, or Farm Records storage/schema changes.
 
+## M105 V1 Store Readiness Decisions
+
+- Creates final planning docs for the V1 app icon, privacy policy structure, support contact options, release channel/wrapper direction, and screenshot checklist.
+- Sets the V1 alpha feedback path as Cloudflare/PWA preview first, Android wrapper next candidate, and iOS later.
+- Keeps native permissions, AI provider backend, Supabase writes, cloud sync, GPS/geolocation, OCR, notifications, and wrapper implementation deferred.
+
+## M106 Final Store Asset Package Lock
+
+- Creates `docs/release/v1-package/` as the owner-facing release package for final V1 approval.
+- Locks package docs for store listing copy, public privacy draft, support copy, screenshot status, icon approval status, release channel decision, and final owner actions.
+- Keeps release blockers honest: icon, privacy URL, support contact, and screenshots remain owner-pending until real assets/URLs/captures exist.
+
 ## M53 Calculator Export/Share And Rewarded Ads Planning
 
 - Adds structured `CalculatorResultSummary` models for copy/share/save flows.

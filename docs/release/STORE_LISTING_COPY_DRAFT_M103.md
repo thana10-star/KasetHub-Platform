@@ -88,9 +88,12 @@ Do not use these claims in the store listing:
 - แมลงศัตรูพืช
 - เกษตรกรไทย
 
+## M106 Final Package Link
+
+The final owner-review store listing draft is locked in `docs/release/v1-package/STORE_LISTING_FINAL_DRAFT_M106.md`.
+
 ## Owner Review Notes
 
 - Confirm final app name before icon/screenshot export.
 - Add final privacy policy URL and support contact before public store submission.
 - Adjust copy if the first release is PWA-only rather than a native app store release.
-

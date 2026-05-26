@@ -141,3 +141,30 @@ M104 adds owner-side production verification worksheets:
 - `docs/release/M104_OWNER_COMMANDS_AND_LINKS.md`
 
 Use these during production deploy verification, mobile route QA, screenshot capture, and blocker tracking.
+
+## 10. M105 Store Readiness Addendum
+
+M105 adds decision docs for the remaining store-readiness items:
+
+- `docs/release/APP_ICON_FINAL_BRIEF_M105.md`
+- `docs/release/PRIVACY_POLICY_DRAFT_STRUCTURE_M105.md`
+- `docs/release/SUPPORT_CONTACT_DECISION_M105.md`
+- `docs/release/V1_RELEASE_CHANNEL_DECISION_M105.md`
+- `docs/release/STORE_SCREENSHOT_FINAL_CHECKLIST_M105.md`
+
+Use these to keep icon, privacy, support, screenshots, and release-channel decisions scoped before final owner approval.
+
+## 11. M106 Release Package Lock Addendum
+
+M106 adds the final owner approval package:
+
+- `docs/release/v1-package/RELEASE_PACKAGE_INDEX_M106.md`
+- `docs/release/v1-package/STORE_LISTING_FINAL_DRAFT_M106.md`
+- `docs/release/v1-package/PRIVACY_POLICY_PUBLIC_PAGE_DRAFT_M106.md`
+- `docs/release/v1-package/SUPPORT_CONTACT_PUBLIC_COPY_M106.md`
+- `docs/release/v1-package/SCREENSHOT_CAPTURE_STATUS_M106.md`
+- `docs/release/v1-package/APP_ICON_APPROVAL_STATUS_M106.md`
+- `docs/release/v1-package/RELEASE_CHANNEL_DECISION_LOCK_M106.md`
+- `docs/release/v1-package/FINAL_OWNER_ACTIONS_M106.md`
+
+Use `docs/release/v1-package/` as the source of truth for final owner action tracking before V1 alpha sharing.

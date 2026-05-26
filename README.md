@@ -82,6 +82,20 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Adds route scroll-to-top behavior while preserving hash anchors, and standardizes the shared header Home action as `กลับหน้าแรก`.
 - Keeps Weather provider/API behavior unchanged and adds no GPS, Supabase writes, cloud sync, real AI provider, OCR, notifications, or Farm Records storage/schema changes.
 
+## M105 V1 Store Readiness Decisions
+
+- Adds release-readiness docs for final icon direction, privacy policy draft structure, support contact options, release channel, and final screenshot checklist.
+- Locks V1 alpha feedback direction as Cloudflare/PWA preview first, with Android wrapper as the next candidate and iOS later.
+- Keeps support email/form, public privacy URL, final icon exports, and screenshot approval as owner decisions.
+- Does not generate final icon files, implement a wrapper, submit to stores, enable AI provider, add GPS, write Supabase data, or change app behavior.
+
+## M106 Final Store Asset Package Lock
+
+- Adds `docs/release/v1-package/` as the final owner approval package for V1 alpha sharing.
+- Includes final store listing draft, public privacy page draft, support public copy, screenshot capture status, icon approval status, release channel lock, and final owner actions.
+- Keeps the release channel locked to Cloudflare/PWA preview first, with Android wrapper after the first feedback round.
+- Leaves remaining owner actions as publishing privacy/support URLs, approving icon assets, capturing screenshots, confirming production Weather, and sharing with testers.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.
