@@ -1,13 +1,17 @@
 import { describe, expect, test } from 'vitest';
 import {
+  applyCommunityCommentLikeUiState,
   applyCommunityLikeUiState,
   getCommunityCommentSubmitText,
+  getCommunityRepliesForComment,
   getCommunityTextInputValue,
   getSafeCommunityComments,
+  getTopLevelCommunityComments,
+  reconcileCommunityCommentsAfterLikeRefresh,
   reconcileCommunityPostsAfterLikeRefresh,
   updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
-import type { CommunityPost } from '@/services/community/community.types';
+import type { CommunityComment, CommunityPost } from '@/services/community/community.types';
 import { communityPostCategories } from '@/services/community/community.types';
 
 const basePost: CommunityPost = {
@@ -28,6 +32,29 @@ const basePost: CommunityPost = {
   updatedAt: '2026-05-26T00:00:00.000Z',
   likedByCurrentUser: false,
   ownedByCurrentUser: false,
+};
+
+const baseComment: CommunityComment = {
+  id: 'comment-1',
+  postId: 'post-1',
+  authorUserId: 'user-a',
+  contentText: 'top-level comment',
+  status: 'published',
+  likeCount: 0,
+  replyCount: 1,
+  reportCount: 0,
+  createdAt: '2026-05-26T00:00:00.000Z',
+  updatedAt: '2026-05-26T00:00:00.000Z',
+  likedByCurrentUser: false,
+  ownedByCurrentUser: false,
+};
+
+const baseReply: CommunityComment = {
+  ...baseComment,
+  id: 'reply-1',
+  parentCommentId: 'comment-1',
+  contentText: 'one-level reply',
+  replyCount: 0,
 };
 
 describe('M116.2 Community interaction regressions without DOM dependency', () => {
@@ -101,5 +128,50 @@ describe('M116.2 Community interaction regressions without DOM dependency', () =
     expect(getSafeCommunityComments(undefined)).toEqual([]);
     expect(getSafeCommunityComments(null)).toEqual([]);
     expect(getSafeCommunityComments([])).toEqual([]);
+  });
+
+  test('splits top-level comments from one-level replies safely', () => {
+    const comments = [baseComment, baseReply];
+
+    expect(getTopLevelCommunityComments(comments)).toEqual([baseComment]);
+    expect(getCommunityRepliesForComment(comments, 'comment-1')).toEqual([baseReply]);
+    expect(getCommunityRepliesForComment(comments, 'reply-1')).toEqual([]);
+    expect(getCommunityRepliesForComment(undefined, 'comment-1')).toEqual([]);
+  });
+
+  test('comment like and unlike update count without double counting', () => {
+    const liked = applyCommunityCommentLikeUiState([baseComment], 'comment-1', true);
+    expect(liked[0]).toMatchObject({
+      likedByCurrentUser: true,
+      likeCount: 1,
+    });
+
+    const duplicateLike = applyCommunityCommentLikeUiState(liked, 'comment-1', true);
+    expect(duplicateLike[0]).toMatchObject({
+      likedByCurrentUser: true,
+      likeCount: 1,
+    });
+
+    const unliked = applyCommunityCommentLikeUiState(duplicateLike, 'comment-1', false);
+    expect(unliked[0]).toMatchObject({
+      likedByCurrentUser: false,
+      likeCount: 0,
+    });
+  });
+
+  test('comment like refresh preserves successful state when backend counters are stale', () => {
+    const currentComments = applyCommunityCommentLikeUiState([baseComment], 'comment-1', true);
+    const staleRefresh: CommunityComment[] = [
+      {
+        ...baseComment,
+        likeCount: 0,
+        likedByCurrentUser: false,
+      },
+    ];
+
+    expect(reconcileCommunityCommentsAfterLikeRefresh(currentComments, staleRefresh, 'comment-1', true)[0]).toMatchObject({
+      likedByCurrentUser: true,
+      likeCount: 1,
+    });
   });
 });

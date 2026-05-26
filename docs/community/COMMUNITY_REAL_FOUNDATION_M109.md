@@ -14,12 +14,15 @@ Reason: the current app has Supabase scaffolding and SQL/RLS drafts, but real pu
 
 M110 update: a staging SQL/RLS/storage pack now exists at `supabase/sql/community_v1_schema_m110.sql`, and the frontend has `VITE_ENABLE_COMMUNITY_WRITES=false` by default. This does not enable public writes; it prepares the next owner-side staging verification step.
 
+M116.3 update: comment polish is drafted and wired for staging with one-level replies and comment likes. SQL lives at `supabase/sql/community_comment_replies_likes_m116_3.sql`. Production writes still stay disabled by default.
+
 ## 3. Behavior
 
 - Composer renders with category selection and safety copy.
 - Post submit is disabled with: "เข้าสู่ระบบก่อนโพสต์ คอมเมนต์ หรือกดไลก์".
 - Feed renders an empty state and explicitly avoids fake posts, fake likes, fake comments, and fake names.
-- Comment/reply, like/unlike, report, own hide, and own delete controls are shown as gated V1 capabilities.
+- Comment/reply, comment-like, post-like, report, own hide, and own delete controls are shown as gated V1 capabilities.
+- Replies are one-level only: users can reply to a top-level comment, but replies do not show another reply action.
 - Report reasons are visible, but report submission is disabled until auth/RLS/moderation persistence is safe.
 - Share is implemented for `/app/community` using Web Share API with clipboard fallback. LINE and Facebook share links are plain URL sharers only.
 

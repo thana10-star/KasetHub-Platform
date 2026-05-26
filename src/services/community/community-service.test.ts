@@ -108,7 +108,19 @@ describe('M114 gated community staging service contract', () => {
       ok: false,
       code: 'feature_flag_disabled',
     });
+    await expect(service.createReply('post-1', 'comment-1', { contentText: 'reply' })).resolves.toMatchObject({
+      ok: false,
+      code: 'feature_flag_disabled',
+    });
     await expect(service.likePost('post-1')).resolves.toMatchObject({
+      ok: false,
+      code: 'feature_flag_disabled',
+    });
+    await expect(service.likeComment('comment-1')).resolves.toMatchObject({
+      ok: false,
+      code: 'feature_flag_disabled',
+    });
+    await expect(service.unlikeComment('comment-1')).resolves.toMatchObject({
       ok: false,
       code: 'feature_flag_disabled',
     });
@@ -131,6 +143,14 @@ describe('M114 gated community staging service contract', () => {
     });
 
     await expect(service.createPost({ contentText: 'hello', category: communityPostCategories[6] })).resolves.toMatchObject({
+      ok: false,
+      code: 'auth_session_required',
+    });
+    await expect(service.createReply('post-1', 'comment-1', { contentText: 'reply' })).resolves.toMatchObject({
+      ok: false,
+      code: 'auth_session_required',
+    });
+    await expect(service.likeComment('comment-1')).resolves.toMatchObject({
       ok: false,
       code: 'auth_session_required',
     });
@@ -211,6 +231,85 @@ describe('M114 gated community staging service contract', () => {
     expect(allLikesQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
     expect(ownLikesQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
     expect(ownLikesQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
+  });
+
+  test('lists comments with reply counts and comment-like state when staging SQL is applied', async () => {
+    const commentsQuery = createQueryMock({
+      data: [
+        {
+          id: 'comment-1',
+          post_id: 'post-1',
+          parent_comment_id: null,
+          author_user_id: '00000000-0000-4000-8000-00000000000b',
+          author_display_name: null,
+          content_text: 'top-level comment',
+          status: 'published',
+          report_count: 0,
+          created_at: '2026-05-26T00:00:00.000Z',
+          updated_at: '2026-05-26T00:00:00.000Z',
+        },
+        {
+          id: 'reply-1',
+          post_id: 'post-1',
+          parent_comment_id: 'comment-1',
+          author_user_id: userA.id,
+          author_display_name: 'User A',
+          content_text: 'one-level reply',
+          status: 'published',
+          report_count: 0,
+          created_at: '2026-05-26T00:01:00.000Z',
+          updated_at: '2026-05-26T00:01:00.000Z',
+        },
+      ],
+      error: null,
+    });
+    const allCommentLikesQuery = createQueryMock({
+      data: [{ comment_id: 'comment-1' }, { comment_id: 'comment-1' }],
+      error: null,
+    });
+    const ownCommentLikesQuery = createQueryMock({
+      data: [{ comment_id: 'comment-1' }],
+      error: null,
+    });
+    let likeQueryCount = 0;
+    const from = vi.fn((table: string) => {
+      if (table !== 'community_comment_likes') return commentsQuery;
+      likeQueryCount += 1;
+      return likeQueryCount === 1 ? allCommentLikesQuery : ownCommentLikesQuery;
+    });
+    const client = {
+      from,
+      auth: {
+        getUser: vi.fn(),
+      },
+      storage: {
+        from: vi.fn(),
+      },
+    } as unknown as SupabaseClient;
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.listComments('post-1')).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: 'comment-1',
+          likeCount: 2,
+          replyCount: 1,
+          likedByCurrentUser: true,
+        },
+        {
+          id: 'reply-1',
+          parentCommentId: 'comment-1',
+          replyCount: 0,
+        },
+      ],
+    });
+    expect(commentsQuery.select).toHaveBeenCalledWith(expect.stringContaining('parent_comment_id'));
+    expect(allCommentLikesQuery.in).toHaveBeenCalledWith('comment_id', ['comment-1', 'reply-1']);
+    expect(ownCommentLikesQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
   });
 
   test('creates a post through the Supabase adapter when flag and auth are ready', async () => {
@@ -294,6 +393,91 @@ describe('M114 gated community staging service contract', () => {
     }));
   });
 
+  test('creates a one-level reply with parent_comment_id when flag and auth are ready', async () => {
+    const parentQuery = createQueryMock({
+      data: {
+        id: 'comment-1',
+        post_id: 'post-1',
+        parent_comment_id: null,
+        status: 'published',
+      },
+      error: null,
+    });
+    const insertQuery = createQueryMock({
+      data: {
+        id: 'reply-1',
+        post_id: 'post-1',
+        parent_comment_id: 'comment-1',
+        author_user_id: userA.id,
+        author_display_name: 'User A',
+        content_text: 'reply to comment',
+        status: 'published',
+        report_count: 0,
+        created_at: '2026-05-26T00:00:00.000Z',
+        updated_at: '2026-05-26T00:00:00.000Z',
+      },
+      error: null,
+    });
+    let commentQueryCount = 0;
+    const from = vi.fn((table: string) => {
+      if (table !== 'community_comments') return createQueryMock({ data: null, error: null });
+      commentQueryCount += 1;
+      return commentQueryCount === 1 ? parentQuery : insertQuery;
+    });
+    const client = {
+      from,
+      auth: {
+        getUser: vi.fn(),
+      },
+      storage: {
+        from: vi.fn(),
+      },
+    } as unknown as SupabaseClient;
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.createReply('post-1', 'comment-1', { contentText: ' reply to comment ' })).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: 'reply-1',
+        parentCommentId: 'comment-1',
+        contentText: 'reply to comment',
+      },
+    });
+    expect(parentQuery.select).toHaveBeenCalledWith('id, post_id, parent_comment_id, status');
+    expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+      post_id: 'post-1',
+      parent_comment_id: 'comment-1',
+      author_user_id: userA.id,
+      content_text: 'reply to comment',
+    }));
+  });
+
+  test('blocks nested replies in the service before inserting', async () => {
+    const parentQuery = createQueryMock({
+      data: {
+        id: 'reply-1',
+        post_id: 'post-1',
+        parent_comment_id: 'comment-1',
+        status: 'published',
+      },
+      error: null,
+    });
+    const { client } = createClientMock(parentQuery);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.createReply('post-1', 'reply-1', { contentText: 'nested' })).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_input',
+    });
+    expect(parentQuery.insert).not.toHaveBeenCalled();
+  });
+
   test('handles duplicate likes as already liked and can unlike own like', async () => {
     const duplicateLikeQuery = createQueryMock({
       data: null,
@@ -321,6 +505,36 @@ describe('M114 gated community staging service contract', () => {
     await expect(unlikeService.unlikePost('post-1')).resolves.toMatchObject({ ok: true });
     expect(unlikeQuery.delete).toHaveBeenCalled();
     expect(unlikeQuery.eq).toHaveBeenCalledWith('post_id', 'post-1');
+    expect(unlikeQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
+  });
+
+  test('handles comment likes as the current user and can unlike them', async () => {
+    const duplicateLikeQuery = createQueryMock({
+      data: null,
+      error: { code: '23505', message: 'duplicate key value violates unique constraint' },
+    });
+    const { client } = createClientMock(duplicateLikeQuery);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.likeComment('comment-1')).resolves.toMatchObject({ ok: true });
+    expect(duplicateLikeQuery.insert).toHaveBeenCalledWith({
+      comment_id: 'comment-1',
+      user_id: userA.id,
+    });
+
+    const unlikeQuery = createQueryMock({ data: null, error: null });
+    const { client: unlikeClient } = createClientMock(unlikeQuery);
+    const unlikeService = createCommunityService(enabledReadiness(), {
+      getClient: () => unlikeClient,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(unlikeService.unlikeComment('comment-1')).resolves.toMatchObject({ ok: true });
+    expect(unlikeQuery.delete).toHaveBeenCalled();
+    expect(unlikeQuery.eq).toHaveBeenCalledWith('comment_id', 'comment-1');
     expect(unlikeQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
   });
 
@@ -451,6 +665,8 @@ describe('M114 gated community staging service contract', () => {
     const evidencePath = join(root, 'docs/community/COMMUNITY_TWO_USER_EVIDENCE_STATUS_M113.md');
     const stagingFlagGuidePath = join(root, 'docs/community/COMMUNITY_STAGING_WRITE_FLAG_ENABLEMENT_M114.md');
     const uiChecklistPath = join(root, 'docs/community/COMMUNITY_STAGING_UI_WRITE_TEST_CHECKLIST_M114.md');
+    const commentReplyLikeSqlPath = join(root, 'supabase/sql/community_comment_replies_likes_m116_3.sql');
+    const commentReplyLikeDocPath = join(root, 'docs/community/COMMUNITY_COMMENT_REPLY_LIKE_M116_3.md');
     const envExample = readFileSync(join(root, '.env.example'), 'utf8');
     const envSource = readFileSync(join(root, 'src/config/env.ts'), 'utf8');
     const sql = readFileSync(sqlPath, 'utf8');
@@ -464,6 +680,8 @@ describe('M114 gated community staging service contract', () => {
     expect(existsSync(evidencePath)).toBe(true);
     expect(existsSync(stagingFlagGuidePath)).toBe(true);
     expect(existsSync(uiChecklistPath)).toBe(true);
+    expect(existsSync(commentReplyLikeSqlPath)).toBe(true);
+    expect(existsSync(commentReplyLikeDocPath)).toBe(true);
     expect(sql).toContain('community_posts');
     expect(sql).toContain('community_notifications');
     expect(sql).toContain('community-post-images');

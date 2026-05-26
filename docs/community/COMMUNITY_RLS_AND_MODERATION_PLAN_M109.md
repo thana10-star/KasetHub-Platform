@@ -14,6 +14,8 @@ No exact location fields, phone fields, image bytes, or service-role frontend ac
 
 M110 staging pack: `supabase/sql/community_v1_schema_m110.sql` translates this model into a staging SQL/RLS/storage draft. Apply only to staging and verify with `docs/community/COMMUNITY_STAGING_VERIFICATION_M110.md`.
 
+M116.3 comment polish pack: `supabase/sql/community_comment_replies_likes_m116_3.sql` adds `community_comments.parent_comment_id` and `community_comment_likes` for one-level replies and comment likes.
+
 ## RLS Matrix
 
 | Area | Read | Insert | Update/Delete |
@@ -23,6 +25,21 @@ M110 staging pack: `supabase/sql/community_v1_schema_m110.sql` translates this m
 | Likes | User can read own like state; aggregate counts via controlled query/function | Authenticated user can like as self only | User can unlike own like only |
 | Reports | Normal users cannot browse reports | Authenticated users create reports | Moderator/admin future role only |
 | Notifications | User reads own notifications only | Controlled app logic or backend function | User marks own notifications read only |
+
+## Comment Replies And Comment Likes
+
+M116.3 keeps replies intentionally shallow:
+
+- `community_comments.parent_comment_id = null` means a top-level comment.
+- `parent_comment_id` pointing to a top-level comment means a V1 reply.
+- Replies to replies are blocked in the service and guarded in the staging SQL insert policy.
+
+`community_comment_likes` is separate from post likes:
+
+- One row per `(comment_id, user_id)`.
+- Authenticated users insert/delete only their own comment-like rows.
+- Counts are read from visible comment-like rows where RLS permits.
+- If staging count reads become too restrictive, a future RPC/backend aggregate can replace broad row reads.
 
 ## Storage Bucket Policy
 
@@ -54,7 +71,9 @@ Like/reply notification insertion should happen through a controlled service pat
 Add rate limits before public launch:
 - Posts per user per hour/day
 - Comments per user per hour/day
+- Replies per user per hour/day
 - Likes per user per minute
+- Comment likes per user per minute
 - Reports per user per day
 - Uploads per user per day
 

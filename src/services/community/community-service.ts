@@ -58,6 +58,7 @@ type CommunityPostRow = {
 type CommunityCommentRow = {
   id: string;
   post_id: string;
+  parent_comment_id?: string | null;
   author_user_id: string;
   author_display_name: string | null;
   content_text: string;
@@ -85,6 +86,9 @@ const communityPostSelect =
 
 const communityCommentSelect =
   'id, post_id, author_user_id, author_display_name, content_text, status, report_count, created_at, updated_at';
+
+const communityCommentSelectWithReplies =
+  'id, post_id, parent_comment_id, author_user_id, author_display_name, content_text, status, report_count, created_at, updated_at';
 
 function createPostId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -135,6 +139,11 @@ function supabaseFailure(error: SupabaseFailure | null | undefined, fallback: st
   return failure('supabase_write_failed', error?.message ? `${fallback}: ${error.message}` : fallback);
 }
 
+function isMissingReplyColumnError(error: SupabaseFailure | null | undefined) {
+  const message = error?.message?.toLowerCase() ?? '';
+  return error?.code === '42703' || message.includes('parent_comment_id');
+}
+
 function toCommunityPostCategory(value: string | null | undefined): CommunityPostCategory {
   return communityPostCategories.includes(value as CommunityPostCategory)
     ? value as CommunityPostCategory
@@ -179,10 +188,13 @@ function mapCommentRow(row: CommunityCommentRow, currentUserId?: string): Commun
   return {
     id: row.id ?? '',
     postId: row.post_id ?? '',
+    parentCommentId: row.parent_comment_id ?? undefined,
     authorUserId: row.author_user_id ?? '',
     authorDisplayName: row.author_display_name ?? undefined,
     contentText: row.content_text ?? '',
     status: toPublishedCommentStatus(row.status),
+    likeCount: 0,
+    replyCount: 0,
     reportCount: row.report_count ?? 0,
     createdAt: row.created_at ?? '',
     updatedAt: row.updated_at ?? row.created_at ?? '',
@@ -458,20 +470,94 @@ export function createCommunityService(
       if (!client) return { ok: true, data: [] };
 
       const currentUser = await deps.getCurrentUser(client);
-      const { data, error } = await client
+      const primaryResult = await client
         .from('community_comments')
-        .select(communityCommentSelect)
+        .select(communityCommentSelectWithReplies)
         .eq('post_id', postId)
         .eq('status', 'published')
         .order('created_at', { ascending: true });
+      let data: unknown[] | null = primaryResult.data as unknown[] | null;
+      let error: SupabaseFailure | null = primaryResult.error;
+
+      if (error && isMissingReplyColumnError(error)) {
+        const fallbackResult = await client
+          .from('community_comments')
+          .select(communityCommentSelect)
+          .eq('post_id', postId)
+          .eq('status', 'published')
+          .order('created_at', { ascending: true });
+        data = fallbackResult.data as unknown[] | null;
+        error = fallbackResult.error;
+      }
 
       if (error) {
         return supabaseFailure(error, 'โหลดคอมเมนต์ไม่สำเร็จ');
       }
 
+      const comments = (Array.isArray(data) ? data : []).map((row) =>
+        mapCommentRow(row as CommunityCommentRow, currentUser?.id),
+      );
+
+      const replyCountsByComment = new Map<string, number>();
+      for (const comment of comments) {
+        if (comment.parentCommentId) {
+          replyCountsByComment.set(
+            comment.parentCommentId,
+            (replyCountsByComment.get(comment.parentCommentId) ?? 0) + 1,
+          );
+        }
+      }
+
+      if (!currentUser || comments.length === 0) {
+        return {
+          ok: true,
+          data: comments.map((comment) => ({
+            ...comment,
+            replyCount: replyCountsByComment.get(comment.id) ?? 0,
+          })),
+        };
+      }
+
+      const commentIds = comments.map((comment) => comment.id).filter(Boolean);
+      if (commentIds.length === 0) {
+        return {
+          ok: true,
+          data: comments,
+        };
+      }
+
+      const likeCountsByComment = new Map<string, number>();
+      const { data: allLikeRows, error: allLikeError } = await client
+        .from('community_comment_likes')
+        .select('comment_id')
+        .in('comment_id', commentIds);
+
+      if (!allLikeError && Array.isArray(allLikeRows)) {
+        for (const row of allLikeRows) {
+          const commentId = (row as { comment_id?: string }).comment_id;
+          if (commentId) {
+            likeCountsByComment.set(commentId, (likeCountsByComment.get(commentId) ?? 0) + 1);
+          }
+        }
+      }
+
+      const { data: ownLikeRows } = await client
+        .from('community_comment_likes')
+        .select('comment_id')
+        .eq('user_id', currentUser.id)
+        .in('comment_id', commentIds);
+      const likedCommentIds = new Set(
+        (Array.isArray(ownLikeRows) ? ownLikeRows : []).map((row) => (row as { comment_id: string }).comment_id),
+      );
+
       return {
         ok: true,
-        data: (Array.isArray(data) ? data : []).map((row) => mapCommentRow(row as CommunityCommentRow, currentUser?.id)),
+        data: comments.map((comment) => ({
+          ...comment,
+          likeCount: likeCountsByComment.get(comment.id) ?? comment.likeCount ?? 0,
+          replyCount: replyCountsByComment.get(comment.id) ?? 0,
+          likedByCurrentUser: likedCommentIds.has(comment.id),
+        })),
       };
     },
 
@@ -498,6 +584,60 @@ export function createCommunityService(
 
       if (error || !data) {
         return supabaseFailure(error, 'ส่งคอมเมนต์ไม่สำเร็จ');
+      }
+
+      return {
+        ok: true,
+        data: mapCommentRow(data as CommunityCommentRow, context.user.id),
+      };
+    },
+
+    async createReply(postId: string, parentCommentId: string, input: CreateCommunityCommentInput) {
+      const context = await requireWriteContext(readiness, deps);
+      if (!context.ok) return context;
+
+      const contentText = input.contentText.trim();
+      if (!contentText) {
+        return failure('invalid_input', 'กรุณาเขียนคำตอบ');
+      }
+
+      if (!postId || !parentCommentId) {
+        return failure('invalid_input', 'ยังไม่พบคอมเมนต์ที่ต้องการตอบกลับ');
+      }
+
+      const { data: parentComment, error: parentError } = await context.client
+        .from('community_comments')
+        .select('id, post_id, parent_comment_id, status')
+        .eq('id', parentCommentId)
+        .single();
+
+      if (parentError || !parentComment) {
+        return supabaseFailure(
+          parentError,
+          'ตอบกลับยังไม่พร้อม ต้องใช้ SQL M116.3 และคอมเมนต์หลักต้องยังอยู่',
+        );
+      }
+
+      const parent = parentComment as { post_id?: string; parent_comment_id?: string | null; status?: string };
+      if (parent.post_id !== postId || parent.parent_comment_id || parent.status !== 'published') {
+        return failure('invalid_input', 'ตอบกลับได้เฉพาะคอมเมนต์หลักของโพสต์นี้');
+      }
+
+      const { data, error } = await context.client
+        .from('community_comments')
+        .insert({
+          post_id: postId,
+          parent_comment_id: parentCommentId,
+          author_user_id: context.user.id,
+          author_display_name: context.user.displayName ?? null,
+          content_text: contentText,
+          status: 'published',
+        })
+        .select(communityCommentSelectWithReplies)
+        .single();
+
+      if (error || !data) {
+        return supabaseFailure(error, 'ส่งคำตอบไม่สำเร็จ');
       }
 
       return {
@@ -542,6 +682,36 @@ export function createCommunityService(
         .eq('user_id', context.user.id);
 
       return error ? supabaseFailure(error, 'ยกเลิกไลก์ไม่สำเร็จ') : { ok: true, data: undefined };
+    },
+
+    async likeComment(commentId: string) {
+      const context = await requireWriteContext(readiness, deps);
+      if (!context.ok) return context;
+
+      const { error } = await context.client.from('community_comment_likes').insert({
+        comment_id: commentId,
+        user_id: context.user.id,
+      });
+
+      if (error) {
+        const duplicate = error.code === '23505' || error.message?.toLowerCase().includes('duplicate');
+        return duplicate ? { ok: true, data: undefined } : supabaseFailure(error, 'ถูกใจคอมเมนต์ไม่สำเร็จ');
+      }
+
+      return { ok: true, data: undefined };
+    },
+
+    async unlikeComment(commentId: string) {
+      const context = await requireWriteContext(readiness, deps);
+      if (!context.ok) return context;
+
+      const { error } = await context.client
+        .from('community_comment_likes')
+        .delete()
+        .eq('comment_id', commentId)
+        .eq('user_id', context.user.id);
+
+      return error ? supabaseFailure(error, 'ยกเลิกถูกใจคอมเมนต์ไม่สำเร็จ') : { ok: true, data: undefined };
     },
 
     async reportPost(postId: string, input: ReportCommunityInput) {

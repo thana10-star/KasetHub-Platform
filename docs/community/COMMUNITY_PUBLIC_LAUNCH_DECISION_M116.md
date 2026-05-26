@@ -11,6 +11,7 @@ Community remains a staging write adapter only.
 - Staging SQL/RLS/storage checks passed in earlier owner evidence.
 - M115 fixed the first staging UI defects for like count and comment crash.
 - M116 app-level owner retest evidence is still pending.
+- M116.3 adds staging-ready comment likes and one-level replies, pending owner staging retest after the SQL draft is applied.
 
 ## What Passed So Far
 
@@ -27,6 +28,7 @@ Community remains a staging write adapter only.
 - Public moderation/admin review workflow.
 - Rate limiting for posts, comments, likes, and reports.
 - Backend-created like/reply in-app notifications, or an explicit owner decision to launch without them.
+- Owner staging verification for comment likes and one-level replies.
 - Support/report handling process for live community reports.
 - Privacy/support URL readiness for public launch.
 - Owner approval for production flag enablement.
@@ -52,4 +54,4 @@ The feature flag is only a UI/app gate. Real production safety still depends on 
 
 Keep production community writes disabled.
 
-Continue staging testing with `VITE_ENABLE_COMMUNITY_WRITES=true` only in staging/preview. If the M116 owner retest passes, the next milestone should add backend-created in-app notifications only after confirming the core write flow is stable.
+Continue staging testing with `VITE_ENABLE_COMMUNITY_WRITES=true` only in staging/preview. Apply and verify the M116.3 comment-like/reply SQL in staging before broad owner testing. If the core write flow and comment polish pass, the next milestone should add backend-created in-app notifications only after confirming the community flow is stable.

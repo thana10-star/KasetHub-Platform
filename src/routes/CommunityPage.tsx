@@ -28,9 +28,13 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { publicEnv } from '@/config/env';
 import {
   applyCommunityLikeUiState,
+  applyCommunityCommentLikeUiState,
   getCommunityCommentSubmitText,
+  getCommunityRepliesForComment,
   getCommunityTextInputValue,
   getSafeCommunityComments,
+  getTopLevelCommunityComments,
+  reconcileCommunityCommentsAfterLikeRefresh,
   reconcileCommunityPostsAfterLikeRefresh,
   updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
@@ -148,6 +152,8 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   const [commentsByPost, setCommentsByPost] = useState<Record<string, CommunityComment[]>>({});
   const [openCommentsByPost, setOpenCommentsByPost] = useState<Record<string, boolean>>({});
   const [commentTextByPost, setCommentTextByPost] = useState<Record<string, string>>({});
+  const [replyTextByComment, setReplyTextByComment] = useState<Record<string, string>>({});
+  const [replyingToByPost, setReplyingToByPost] = useState<Record<string, string | undefined>>({});
   const [reportReasonByPost, setReportReasonByPost] = useState<Record<string, CommunityReportReason>>({});
   const [selectedCategory, setSelectedCategory] = useState<CommunityPostCategory>('ปัญหาพืช');
   const [activeFilter, setActiveFilter] = useState<CommunityPostCategory | 'ทั้งหมด'>('ทั้งหมด');
@@ -375,6 +381,65 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
   }
 
+  async function handleCreateReply(postId: string, parentComment: CommunityComment) {
+    if (!postId || !parentComment.id) {
+      setActionStatus('ส่งคำตอบไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    if (parentComment.parentCommentId) {
+      setActionStatus('ตอบกลับได้เฉพาะคอมเมนต์หลักใน V1');
+      return;
+    }
+
+    if (!canWrite) {
+      setActionStatus(gateCopy);
+      return;
+    }
+
+    const contentText = getCommunityCommentSubmitText(replyTextByComment, parentComment.id);
+    if (!contentText) {
+      setActionStatus('กรุณาเขียนคำตอบ');
+      return;
+    }
+
+    try {
+      const result = await service.createReply(postId, parentComment.id, {
+        contentText,
+        parentCommentId: parentComment.id,
+      });
+      if (result.ok) {
+        setReplyTextByComment((current) => ({ ...current, [parentComment.id]: '' }));
+        setReplyingToByPost((current) => ({ ...current, [postId]: undefined }));
+        setCommentsByPost((current) => ({
+          ...current,
+          [postId]: [
+            ...getSafeCommunityComments(current[postId]).map((comment) =>
+              comment.id === parentComment.id
+                ? { ...comment, replyCount: Math.max(0, comment.replyCount ?? 0) + 1 }
+                : comment,
+            ),
+            result.data,
+          ],
+        }));
+        setPosts((currentPosts) =>
+          currentPosts.map((post) =>
+            post.id === postId
+              ? { ...post, commentCount: Math.max(0, post.commentCount ?? 0) + 1 }
+              : post,
+          ),
+        );
+        setActionStatus('ส่งคำตอบแล้ว');
+        void loadPosts();
+        return;
+      }
+
+      setActionStatus(result.message);
+    } catch {
+      setActionStatus('ส่งคำตอบไม่สำเร็จ ลองอีกครั้ง');
+    }
+  }
+
   async function handleLike(post: CommunityPost) {
     if (!post.id) {
       setActionStatus('อัปเดตไลก์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
@@ -409,6 +474,79 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     setCommentTextByPost((current) => updateCommunityCommentDraft(current, postId, value));
+  }
+
+  function handleReplyTextChange(commentId: string, value: string) {
+    if (!commentId) {
+      setActionStatus('เขียนคำตอบไม่ได้ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    setReplyTextByComment((current) => updateCommunityCommentDraft(current, commentId, value));
+  }
+
+  function handleStartReply(postId: string, commentId: string) {
+    if (!postId || !commentId) {
+      setActionStatus('ตอบกลับไม่ได้ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    setReplyingToByPost((current) => ({ ...current, [postId]: commentId }));
+  }
+
+  function handleCancelReply(postId: string, commentId: string) {
+    setReplyTextByComment((current) => ({ ...current, [commentId]: '' }));
+    setReplyingToByPost((current) => ({ ...current, [postId]: undefined }));
+  }
+
+  async function handleLikeComment(postId: string, comment: CommunityComment) {
+    if (!postId || !comment.id) {
+      setActionStatus('ถูกใจคอมเมนต์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    if (!canWrite) {
+      setActionStatus(gateCopy);
+      return;
+    }
+
+    try {
+      const nextLiked = !comment.likedByCurrentUser;
+      const result = comment.likedByCurrentUser
+        ? await service.unlikeComment(comment.id)
+        : await service.likeComment(comment.id);
+      setActionStatus(getActionMessage(result, comment.likedByCurrentUser ? 'ยกเลิกถูกใจแล้ว' : 'ถูกใจแล้ว'));
+      if (result.ok) {
+        setCommentsByPost((current) => ({
+          ...current,
+          [postId]: applyCommunityCommentLikeUiState(
+            getSafeCommunityComments(current[postId]),
+            comment.id,
+            nextLiked,
+          ),
+        }));
+        void service.listComments(postId).then((refreshed) => {
+          if (!refreshed.ok) {
+            setActionStatus(refreshed.message);
+            return;
+          }
+
+          setCommentsByPost((current) => ({
+            ...current,
+            [postId]: reconcileCommunityCommentsAfterLikeRefresh(
+              getSafeCommunityComments(current[postId]),
+              getSafeCommunityComments(refreshed.data),
+              comment.id,
+              nextLiked,
+            ),
+          }));
+        }).catch(() => {
+          setActionStatus(nextLiked ? 'ถูกใจแล้ว' : 'ยกเลิกถูกใจแล้ว');
+        });
+      }
+    } catch {
+      setActionStatus('ถูกใจคอมเมนต์ไม่สำเร็จ ลองอีกครั้ง');
+    }
   }
 
   async function handleReportPost(postId: string) {
@@ -658,6 +796,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
 
           {filteredPosts.map((post) => {
             const comments = getSafeCommunityComments(commentsByPost[post.id]);
+            const topLevelComments = getTopLevelCommunityComments(comments);
             const imageUrl = getCommunityImagePublicUrl(post.image?.imagePath);
 
             return (
@@ -749,34 +888,133 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
 
                   {openCommentsByPost[post.id] ? (
                     <div className="grid gap-3 rounded-lg bg-slate-50 p-3">
-                      {comments.length === 0 ? (
+                      {topLevelComments.length === 0 ? (
                         <p className="text-sm font-semibold text-slate-600">ยังไม่มีคอมเมนต์จริง</p>
                       ) : (
-                        comments.map((comment) => (
-                          <div className="rounded-lg bg-white p-3" key={comment.id}>
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-extrabold text-kaset-ink">
-                                  {comment.authorDisplayName || 'ผู้ใช้ KasetHub'}
-                                </p>
-                                <p className="text-xs font-semibold text-slate-500">
-                                  {formatCommunityTime(comment.createdAt)}
-                                </p>
+                        topLevelComments.map((comment) => {
+                          const replies = getCommunityRepliesForComment(comments, comment.id);
+                          const isReplying = replyingToByPost[post.id] === comment.id;
+                          const replyTargetName = comment.authorDisplayName || 'ผู้ใช้ KasetHub';
+
+                          return (
+                            <div className="grid gap-2 rounded-lg bg-white p-3" key={comment.id}>
+                              <div className="flex flex-wrap items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-sm font-extrabold text-kaset-ink">
+                                    {replyTargetName}
+                                  </p>
+                                  <p className="text-xs font-semibold text-slate-500">
+                                    {formatCommunityTime(comment.createdAt)}
+                                  </p>
+                                </div>
+                                {comment.ownedByCurrentUser ? (
+                                  <Button
+                                    className="min-h-9 px-3 text-xs"
+                                    onClick={() => handleHideComment(post.id, comment.id)}
+                                    variant="secondary"
+                                  >
+                                    <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+                                    ซ่อน
+                                  </Button>
+                                ) : null}
                               </div>
-                              {comment.ownedByCurrentUser ? (
+                              <p className="whitespace-pre-wrap text-sm leading-6 text-kaset-ink">{comment.contentText}</p>
+
+                              <div className="flex flex-wrap gap-2">
                                 <Button
                                   className="min-h-9 px-3 text-xs"
-                                  onClick={() => handleHideComment(post.id, comment.id)}
+                                  disabled={!canWrite || !comment.id}
+                                  onClick={() => handleLikeComment(post.id, comment)}
                                   variant="secondary"
                                 >
-                                  <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
-                                  ซ่อน
+                                  <Heart aria-hidden="true" className="h-3.5 w-3.5" />
+                                  {comment.likedByCurrentUser ? 'เลิกถูกใจ' : 'ถูกใจ'} {comment.likeCount ?? 0}
                                 </Button>
+                                <Button
+                                  className="min-h-9 px-3 text-xs"
+                                  disabled={!canWrite || !comment.id}
+                                  onClick={() => handleStartReply(post.id, comment.id)}
+                                  variant="secondary"
+                                >
+                                  <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
+                                  ตอบกลับ {comment.replyCount ?? replies.length}
+                                </Button>
+                              </div>
+
+                              {replies.length === 0 && isReplying ? (
+                                <p className="rounded-lg bg-slate-50 p-2 text-xs font-semibold text-slate-600">
+                                  ยังไม่มีคำตอบ
+                                </p>
+                              ) : null}
+
+                              {replies.length > 0 ? (
+                                <div className="ml-3 grid gap-2 border-l-2 border-kaset-deep/10 pl-3">
+                                  {replies.map((reply) => (
+                                    <div className="rounded-lg bg-slate-50 p-3" key={reply.id}>
+                                      <div className="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                          <p className="text-sm font-extrabold text-kaset-ink">
+                                            {reply.authorDisplayName || 'ผู้ใช้ KasetHub'}
+                                          </p>
+                                          <p className="text-xs font-semibold text-slate-500">
+                                            {formatCommunityTime(reply.createdAt)}
+                                          </p>
+                                        </div>
+                                        {reply.ownedByCurrentUser ? (
+                                          <Button
+                                            className="min-h-9 px-3 text-xs"
+                                            onClick={() => handleHideComment(post.id, reply.id)}
+                                            variant="secondary"
+                                          >
+                                            <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+                                            ซ่อน
+                                          </Button>
+                                        ) : null}
+                                      </div>
+                                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-kaset-ink">
+                                        {reply.contentText}
+                                      </p>
+                                      <Button
+                                        className="mt-2 min-h-9 px-3 text-xs"
+                                        disabled={!canWrite || !reply.id}
+                                        onClick={() => handleLikeComment(post.id, reply)}
+                                        variant="secondary"
+                                      >
+                                        <Heart aria-hidden="true" className="h-3.5 w-3.5" />
+                                        {reply.likedByCurrentUser ? 'เลิกถูกใจ' : 'ถูกใจ'} {reply.likeCount ?? 0}
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : null}
+
+                              {isReplying ? (
+                                <div className="grid gap-2 rounded-lg bg-kaset-mist p-3">
+                                  <p className="text-xs font-extrabold text-kaset-ink">
+                                    กำลังตอบกลับ {replyTargetName}
+                                  </p>
+                                  <textarea
+                                    className="min-h-16 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
+                                    disabled={!canWrite}
+                                    onChange={(event) => handleReplyTextChange(comment.id, getCommunityTextInputValue(event))}
+                                    onInput={(event) => handleReplyTextChange(comment.id, getCommunityTextInputValue(event))}
+                                    placeholder={canWrite ? 'เขียนคำตอบ...' : readiness.writeGateMessage}
+                                    value={replyTextByComment[comment.id] ?? ''}
+                                  />
+                                  <div className="flex flex-wrap gap-2">
+                                    <Button disabled={!canWrite} onClick={() => handleCreateReply(post.id, comment)}>
+                                      <Send aria-hidden="true" className="h-4 w-4" />
+                                      ส่งคำตอบ
+                                    </Button>
+                                    <Button onClick={() => handleCancelReply(post.id, comment.id)} variant="secondary">
+                                      ยกเลิก
+                                    </Button>
+                                  </div>
+                                </div>
                               ) : null}
                             </div>
-                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-kaset-ink">{comment.contentText}</p>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
 
                       <textarea

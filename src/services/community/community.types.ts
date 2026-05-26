@@ -61,13 +61,17 @@ export type CommunityPost = {
 export type CommunityComment = {
   id: string;
   postId: string;
+  parentCommentId?: string;
   authorUserId: string;
   authorDisplayName?: string;
   contentText: string;
   status: CommunityCommentStatus;
+  likeCount?: number;
+  replyCount?: number;
   reportCount: number;
   createdAt: string;
   updatedAt: string;
+  likedByCurrentUser?: boolean;
   ownedByCurrentUser?: boolean;
 };
 
@@ -93,6 +97,7 @@ export type CreateCommunityPostInput = {
 
 export type CreateCommunityCommentInput = {
   contentText: string;
+  parentCommentId?: string;
 };
 
 export type ReportCommunityInput = {
@@ -156,9 +161,12 @@ export type CommunityService = {
   deleteOwnPost(postId: string): Promise<CommunityActionResult>;
   listComments(postId: string): Promise<CommunityActionResult<CommunityComment[]>>;
   createComment(postId: string, input: CreateCommunityCommentInput): Promise<CommunityActionResult<CommunityComment>>;
+  createReply(postId: string, parentCommentId: string, input: CreateCommunityCommentInput): Promise<CommunityActionResult<CommunityComment>>;
   hideOwnComment(commentId: string): Promise<CommunityActionResult>;
   likePost(postId: string): Promise<CommunityActionResult>;
   unlikePost(postId: string): Promise<CommunityActionResult>;
+  likeComment(commentId: string): Promise<CommunityActionResult>;
+  unlikeComment(commentId: string): Promise<CommunityActionResult>;
   reportPost(postId: string, input: ReportCommunityInput): Promise<CommunityActionResult>;
   reportComment(commentId: string, input: ReportCommunityInput): Promise<CommunityActionResult>;
   listNotifications(): Promise<CommunityActionResult<CommunityNotification[]>>;
