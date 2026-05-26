@@ -319,8 +319,26 @@ export function createCommunityService(
         };
       }
 
+      const posts = (data ?? []).map((row) => mapPostRow(row as CommunityPostRow, currentUser?.id));
+      if (!currentUser || posts.length === 0) {
+        return {
+          posts,
+          readiness,
+        };
+      }
+
+      const { data: likedRows } = await client
+        .from('community_likes')
+        .select('post_id')
+        .eq('user_id', currentUser.id)
+        .in('post_id', posts.map((post) => post.id));
+      const likedPostIds = new Set((likedRows ?? []).map((row) => (row as { post_id: string }).post_id));
+
       return {
-        posts: (data ?? []).map((row) => mapPostRow(row as CommunityPostRow, currentUser?.id)),
+        posts: posts.map((post) => ({
+          ...post,
+          likedByCurrentUser: likedPostIds.has(post.id),
+        })),
         readiness,
       };
     },

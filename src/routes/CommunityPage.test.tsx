@@ -2,8 +2,57 @@ import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import { CommunityPage } from '@/routes/CommunityPage';
+import { communitySignInGateMessage } from '@/services/community/community-service';
+import type {
+  CommunityActionResult,
+  CommunityListPostsResult,
+  CommunityReadiness,
+  CommunityService,
+} from '@/services/community/community.types';
 
-describe('M112 Community route', () => {
+function readinessForTest(overrides: Partial<CommunityReadiness> = {}): CommunityReadiness {
+  return {
+    path: 'gated',
+    canReadPublishedPosts: true,
+    canWrite: false,
+    canUploadImage: false,
+    canCreateNotifications: false,
+    writesFeatureFlagEnabled: false,
+    hasAuthenticatedUser: false,
+    backendServiceReady: true,
+    writeGateMessage: 'ชุมชนพร้อมเชื่อมต่อฐานข้อมูลแล้ว เหลือทดสอบบัญชีและสิทธิ์ก่อนเปิดโพสต์จริง',
+    imageGateMessage: 'แนบรูปจะเปิดใช้งานหลังตั้งค่าพื้นที่เก็บรูป',
+    blockers: [],
+    ...overrides,
+  };
+}
+
+function createNoopCommunityService(readiness: CommunityReadiness): CommunityService {
+  const gated = async <T,>(): Promise<CommunityActionResult<T>> => ({
+    ok: false,
+    code: 'feature_flag_disabled',
+    message: readiness.writeGateMessage,
+  });
+
+  return {
+    getReadiness: () => readiness,
+    listPosts: async (): Promise<CommunityListPostsResult> => ({ posts: [], readiness }),
+    createPost: async () => gated(),
+    hideOwnPost: async () => gated(),
+    deleteOwnPost: async () => gated(),
+    listComments: async () => ({ ok: true, data: [] }),
+    createComment: async () => gated(),
+    hideOwnComment: async () => gated(),
+    likePost: async () => gated(),
+    unlikePost: async () => gated(),
+    reportPost: async () => gated(),
+    reportComment: async () => gated(),
+    listNotifications: async () => gated(),
+    markNotificationRead: async () => gated(),
+  };
+}
+
+describe('M114 Community route', () => {
   test('renders the gated Community Feed V1 staging foundation without fake engagement', () => {
     const html = renderToString(
       <MemoryRouter>
@@ -48,5 +97,26 @@ describe('M112 Community route', () => {
     expect(html).toContain('เนื้อหาไม่เหมาะสม');
     expect(html).toContain('แจ้งเตือนในแอป');
     expect(html).toContain('/app/notifications');
+  });
+
+  test('shows auth-required state when staging flag is true but no real user is signed in', () => {
+    const readiness = readinessForTest({
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: false,
+      writeGateMessage: communitySignInGateMessage,
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain(communitySignInGateMessage);
+    expect(html).toContain('ยังไม่มีโพสต์ชุมชนจริง');
+    expect(html).not.toContain('คุณสายฝน');
   });
 });

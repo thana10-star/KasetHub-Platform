@@ -136,6 +136,13 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Keeps community writes disabled by default; the SQL pack is drafted for owner-side staging application and verification, not applied by the app.
 - Adds no service-role exposure, anonymous writes, fake community data, push notifications, private chat, follow graph, GPS/geolocation, or Farm Records schema changes.
 
+## M114 Community Staging UI Write Test Guide
+
+- Keeps `.env.example` at `VITE_ENABLE_COMMUNITY_WRITES=false`; production community writes remain disabled.
+- Adds staging-only owner docs for enabling the write flag in preview/staging and testing `/app/community` with User A/User B.
+- Wires `/app/community` to use the real community service adapter only when the flag and real Supabase session are ready.
+- Keeps notifications backend-needed and avoids service-role keys, anonymous writes, fake posts, fake likes, and fake comments.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.
