@@ -107,6 +107,11 @@ function getActionMessage(result: CommunityActionResult, fallback: string) {
   return result.ok ? fallback : result.message;
 }
 
+function getTextInputValue(event: Pick<FormEvent<HTMLTextAreaElement>, 'target'>) {
+  const target = event.target as HTMLTextAreaElement | null;
+  return typeof target?.value === 'string' ? target.value : '';
+}
+
 export function CommunityPage({ readinessOverride, serviceOverride }: CommunityPageProps = {}) {
   const baseReadiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
   const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
@@ -289,6 +294,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   }
 
   async function loadComments(postId: string) {
+    if (!postId) {
+      setActionStatus('เปิดคอมเมนต์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
     try {
       const result = await service.listComments(postId);
       if (result.ok) {
@@ -304,6 +314,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   }
 
   async function handleToggleComments(postId: string) {
+    if (!postId) {
+      setActionStatus('เปิดคอมเมนต์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
     try {
       const willOpen = !openCommentsByPost[postId];
       setOpenCommentsByPost((current) => ({ ...current, [postId]: willOpen }));
@@ -318,6 +333,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   }
 
   async function handleCreateComment(postId: string) {
+    if (!postId) {
+      setActionStatus('ส่งคอมเมนต์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
     if (!canWrite) {
       setActionStatus(gateCopy);
       return;
@@ -358,6 +378,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   }
 
   async function handleLike(post: CommunityPost) {
+    if (!post.id) {
+      setActionStatus('อัปเดตไลก์ไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
     try {
       const nextLiked = !post.likedByCurrentUser;
       const result = post.likedByCurrentUser
@@ -366,18 +391,29 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       setActionStatus(getActionMessage(result, post.likedByCurrentUser ? 'ยกเลิกไลก์แล้ว' : 'กดไลก์แล้ว'));
       if (result.ok) {
         setPosts((currentPosts) => applyCommunityLikeUiState(currentPosts, post.id, nextLiked));
-        try {
-          const refreshedPosts = await fetchPosts();
+        void fetchPosts().then((refreshedPosts) => {
           setPosts((currentPosts) =>
             reconcileCommunityPostsAfterLikeRefresh(currentPosts, refreshedPosts, post.id, nextLiked),
           );
-        } catch {
+        }).catch(() => {
           setActionStatus(nextLiked ? 'กดไลก์แล้ว' : 'ยกเลิกไลก์แล้ว');
-        }
+        });
       }
     } catch {
       setActionStatus('อัปเดตไลก์ไม่สำเร็จ ลองอีกครั้ง');
     }
+  }
+
+  function handleCommentTextChange(postId: string, value: string) {
+    if (!postId) {
+      setActionStatus('เขียนคอมเมนต์ไม่ได้ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    setCommentTextByPost((current) => ({
+      ...current,
+      [postId]: value,
+    }));
   }
 
   async function handleReportPost(postId: string) {
@@ -671,11 +707,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                   ) : null}
 
                   <div className="flex flex-wrap gap-2">
-                    <Button disabled={!canWrite} onClick={() => handleLike(post)} variant="secondary">
+                    <Button disabled={!canWrite || !post.id} onClick={() => handleLike(post)} variant="secondary">
                       <Heart aria-hidden="true" className="h-4 w-4" />
                       {post.likedByCurrentUser ? 'เลิกไลก์' : 'Like'} {post.likeCount}
                     </Button>
-                    <Button onClick={() => handleToggleComments(post.id)} variant="secondary">
+                    <Button disabled={!post.id} onClick={() => handleToggleComments(post.id)} variant="secondary">
                       <MessageCircle aria-hidden="true" className="h-4 w-4" />
                       คอมเมนต์ {post.commentCount}
                     </Button>
@@ -683,7 +719,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                       <Share2 aria-hidden="true" className="h-4 w-4" />
                       แชร์
                     </Button>
-                    <Button disabled={!canWrite} onClick={() => handleReportPost(post.id)} variant="secondary">
+                    <Button disabled={!canWrite || !post.id} onClick={() => handleReportPost(post.id)} variant="secondary">
                       <Flag aria-hidden="true" className="h-4 w-4" />
                       รายงาน
                     </Button>
@@ -698,7 +734,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                   </label>
                   <select
                     className="min-h-11 rounded-lg border border-kaset-deep/10 bg-white px-3 text-sm font-semibold text-kaset-ink"
-                    disabled={!canWrite}
+                    disabled={!canWrite || !post.id}
                     id={`report-${post.id}`}
                     onChange={(event) => {
                       const nextReason = event.currentTarget.value as CommunityReportReason;
@@ -750,18 +786,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
 
                       <textarea
                         className="min-h-20 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
-                        disabled={!canWrite}
-                        onChange={(event) => {
-                          const nextCommentText = event.currentTarget.value;
-                          setCommentTextByPost((current) => ({
-                            ...current,
-                            [post.id]: nextCommentText,
-                          }));
-                        }}
+                        disabled={!canWrite || !post.id}
+                        onChange={(event) => handleCommentTextChange(post.id, getTextInputValue(event))}
+                        onInput={(event) => handleCommentTextChange(post.id, getTextInputValue(event))}
                         placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
                         value={commentTextByPost[post.id] ?? ''}
                       />
-                      <Button disabled={!canWrite} onClick={() => handleCreateComment(post.id)}>
+                      <Button disabled={!canWrite || !post.id} onClick={() => handleCreateComment(post.id)}>
                         <Send aria-hidden="true" className="h-4 w-4" />
                         ส่งคอมเมนต์
                       </Button>

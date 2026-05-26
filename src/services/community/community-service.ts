@@ -344,6 +344,13 @@ export function createCommunityService(
       }
 
       const postIds = posts.map((post) => post.id).filter(Boolean);
+      if (postIds.length === 0) {
+        return {
+          posts,
+          readiness,
+        };
+      }
+
       const likeCountsByPost = new Map<string, number>();
       const { data: allLikeRows, error: allLikeError } = await client
         .from('community_likes')

@@ -28,6 +28,9 @@ Status guide:
 - AI safety
 - privacy/support
 - store asset
+- community
+- moderation
+- notifications
 
 ## Log
 
@@ -40,6 +43,10 @@ M106 note: The final V1 package lock was created under `docs/release/v1-package/
 M107 note: The owner publication and alpha feedback launch pack was created under `docs/release/alpha-launch/`. This prepares sharing and feedback collection but does not close owner-pending URL, support, icon, or screenshot blockers.
 
 M108 note: The alpha feedback intake package was created under `docs/release/alpha-feedback/`. No actual feedback was provided in M108, so tracker rows remain placeholders and existing owner-pending blockers remain unchanged.
+
+M116 note: Community staging writes remain staging-only. M113 RLS/storage evidence passed and M115 fixed like/comment UI defects, but M116 owner app-level retest evidence is pending. Production community writes remain blocked.
+
+M116.1 note: Owner app-level retest found Community like count still stale and comment typing still crashing. Codex applied a narrow UI fix and added typing/stale-like regression tests; owner redeploy/retest is still required.
 
 | ID | Route / screen | Blocker type | Severity | Screenshot reference | Fix owner | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -61,6 +68,10 @@ M108 note: The alpha feedback intake package was created under `docs/release/alp
 | M104-B011 | Main app pages | visual | important | Owner mobile feedback | Codex | closed | M104.1 standardized shared header Home affordance with `กลับหน้าแรก`; M104.2 owner real-mobile check passed. |
 | M104-B012 | Store screenshots/listing | store asset | important | M106 package screenshot status | Owner | in progress | M106 final listing draft and screenshot status tracker exist; remains in progress until screenshots are captured and owner-approved. |
 | M104-B013 | Alpha feedback intake | visual | important | M108 feedback intake tracker | Owner | in progress | M108 tracker, summary template, triage board, fix-only policy, and Android wrapper decision framework created; no real feedback processed yet. |
+| M104-B014 | `/app/community` staging writes | community | important | M116.1 retest doc | Owner | blocked | M116.1 fixed stale-like and comment-typing crash paths in code; owner staging redeploy/retest is still pending before this can move to passed. |
+| M104-B015 | Community production writes | community | blocker | M116 launch decision | Owner / Codex | blocked | Production writes must stay disabled until app-level staging retest, moderation/report handling, rate limiting, privacy/support readiness, and owner approval pass. |
+| M104-B016 | Community like/reply notifications | notifications | important | M116 notification decision | Codex | blocked | Backend-created in-app notifications are not implemented. Browser-created notifications remain unsafe and gated. |
+| M104-B017 | Community moderation/rate limiting | moderation | blocker | M116 launch decision | Owner / Codex | open | Public launch needs moderation/admin queue, report handling ownership, and rate limiting or accepted operational controls. |
 
 ## Release Rule
 

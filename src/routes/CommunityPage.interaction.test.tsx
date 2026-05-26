@@ -207,6 +207,47 @@ describe('M115 Community interactions', () => {
     expect(container.textContent).toContain('Like 0');
   });
 
+  test('successful like does not revert to zero when backend refresh returns stale counters', async () => {
+    const { service } = createService({
+      listPosts: async (): Promise<CommunityListPostsResult> => ({
+        posts: [
+          {
+            ...basePost,
+            likeCount: 0,
+            likedByCurrentUser: false,
+          },
+        ],
+        readiness,
+      }),
+    });
+    const container = document.getElementById('root');
+    if (!container) throw new Error('Missing root');
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <MemoryRouter>
+          <CommunityPage readinessOverride={readiness} serviceOverride={service} />
+        </MemoryRouter>,
+      );
+    });
+    await flush();
+
+    await act(async () => {
+      findButton(container, 'Like 0').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await flush();
+    await flush();
+    expect(container.textContent).toContain('เลิกไลก์ 1');
+
+    await act(async () => {
+      findButton(container, 'เลิกไลก์ 1').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await flush();
+    await flush();
+    expect(container.textContent).toContain('Like 0');
+  });
+
   test('clicking comments opens a safe section even when listComments throws', async () => {
     const { service } = createService({
       listComments: async () => {
@@ -274,5 +315,74 @@ describe('M115 Community interactions', () => {
 
     expect(createComment).toHaveBeenCalledWith('post-1', { contentText: 'reply from staging UI' });
     expect(container.textContent).toContain('comment from staging');
+  });
+
+  test('typing Thai text into the comment textarea keeps the app visible and controlled', async () => {
+    const { service } = createService();
+    const container = document.getElementById('root');
+    if (!container) throw new Error('Missing root');
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <MemoryRouter>
+          <CommunityPage readinessOverride={readiness} serviceOverride={service} />
+        </MemoryRouter>,
+      );
+    });
+    await flush();
+
+    await act(async () => {
+      findButton(container, 'คอมเมนต์ 0').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await flush();
+
+    const textarea = findCommentTextarea(container);
+    await act(async () => {
+      setTextareaValue(textarea, 'ทดสอบคอมเมนต์จากมือถือ');
+    });
+    await flush();
+
+    expect(findCommentTextarea(container).value).toBe('ทดสอบคอมเมนต์จากมือถือ');
+    expect(container.textContent).toContain('ชุมชนเกษตร');
+    expect(container.textContent).toContain('ส่งคอมเมนต์');
+  });
+
+  test('comment service errors show a friendly message instead of crashing', async () => {
+    const createComment = vi.fn(async (): Promise<CommunityActionResult<CommunityComment>> => ({
+      ok: false,
+      code: 'supabase_write_failed',
+      message: 'ส่งคอมเมนต์ไม่สำเร็จ ลองอีกครั้ง',
+    }));
+    const { service } = createService({ createComment });
+    const container = document.getElementById('root');
+    if (!container) throw new Error('Missing root');
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <MemoryRouter>
+          <CommunityPage readinessOverride={readiness} serviceOverride={service} />
+        </MemoryRouter>,
+      );
+    });
+    await flush();
+
+    await act(async () => {
+      findButton(container, 'คอมเมนต์ 0').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await flush();
+
+    await act(async () => {
+      setTextareaValue(findCommentTextarea(container), 'มีโรคใบไหม้ควรทำอย่างไร');
+    });
+    await act(async () => {
+      findButton(container, 'ส่งคอมเมนต์').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await flush();
+
+    expect(createComment).toHaveBeenCalledWith('post-1', { contentText: 'มีโรคใบไหม้ควรทำอย่างไร' });
+    expect(container.textContent).toContain('ส่งคอมเมนต์ไม่สำเร็จ');
+    expect(container.textContent).toContain('ชุมชนเกษตร');
   });
 });

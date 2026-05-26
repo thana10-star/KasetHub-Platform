@@ -31,6 +31,11 @@ export function reconcileCommunityPostsAfterLikeRefresh(
   nextLiked: boolean,
 ) {
   const optimisticPost = applyCommunityLikeUiState(currentPosts, postId, nextLiked).find((post) => post.id === postId);
+  const refreshedHasTargetPost = refreshedPosts.some((post) => post.id === postId);
+
+  if (!refreshedHasTargetPost) {
+    return optimisticPost ? applyCommunityLikeUiState(currentPosts, postId, nextLiked) : currentPosts;
+  }
 
   return refreshedPosts.map((post) => {
     if (post.id !== postId || !optimisticPost) return post;

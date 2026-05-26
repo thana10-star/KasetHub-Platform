@@ -179,6 +179,16 @@ describe('M114 Community route', () => {
     });
   });
 
+  test('keeps the locally updated post if a refresh omits it after like success', () => {
+    const currentPosts = applyCommunityLikeUiState([basePost], 'post-1', true);
+
+    expect(reconcileCommunityPostsAfterLikeRefresh(currentPosts, [], 'post-1', true)[0]).toMatchObject({
+      id: 'post-1',
+      likedByCurrentUser: true,
+      likeCount: 1,
+    });
+  });
+
   test('keeps comment rendering safe for undefined or empty comment arrays', () => {
     expect(getSafeCommunityComments(undefined)).toEqual([]);
     expect(getSafeCommunityComments(null)).toEqual([]);
