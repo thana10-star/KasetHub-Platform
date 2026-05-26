@@ -363,6 +363,7 @@ describe('M114 gated community staging service contract', () => {
       data: {
         id: 'comment-1',
         post_id: 'post-1',
+        parent_comment_id: null,
         author_user_id: userA.id,
         author_display_name: 'User A',
         content_text: 'reply',
@@ -388,9 +389,11 @@ describe('M114 gated community staging service contract', () => {
     });
     expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
       post_id: 'post-1',
+      parent_comment_id: null,
       author_user_id: userA.id,
       content_text: 'reply',
     }));
+    expect(query.select).toHaveBeenCalledWith(expect.stringContaining('parent_comment_id'));
   });
 
   test('creates a one-level reply with parent_comment_id when flag and auth are ready', async () => {

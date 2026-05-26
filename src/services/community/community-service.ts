@@ -565,23 +565,46 @@ export function createCommunityService(
       const context = await requireWriteContext(readiness, deps);
       if (!context.ok) return context;
 
+      if (!postId) {
+        return failure('invalid_input', 'ยังไม่พบโพสต์ที่ต้องการคอมเมนต์');
+      }
+
       const contentText = input.contentText.trim();
       if (!contentText) {
         return failure('invalid_input', 'กรุณาเขียนคอมเมนต์');
       }
 
-      const { data, error } = await context.client
+      const insertPayload = {
+        post_id: postId,
+        parent_comment_id: null,
+        author_user_id: context.user.id,
+        author_display_name: context.user.displayName ?? null,
+        content_text: contentText,
+        status: 'published',
+      };
+
+      let insertResult = await context.client
         .from('community_comments')
-        .insert({
-          post_id: postId,
-          author_user_id: context.user.id,
-          author_display_name: context.user.displayName ?? null,
-          content_text: contentText,
-          status: 'published',
-        })
-        .select(communityCommentSelect)
+        .insert(insertPayload)
+        .select(communityCommentSelectWithReplies)
         .single();
 
+      if (insertResult.error && isMissingReplyColumnError(insertResult.error)) {
+        const legacyInsertPayload = {
+          post_id: insertPayload.post_id,
+          author_user_id: insertPayload.author_user_id,
+          author_display_name: insertPayload.author_display_name,
+          content_text: insertPayload.content_text,
+          status: insertPayload.status,
+        };
+        insertResult = await context.client
+          .from('community_comments')
+          .insert(legacyInsertPayload)
+          .select(communityCommentSelect)
+          .single();
+      }
+
+      const { data, error } = insertResult;
       if (error || !data) {
         return supabaseFailure(error, 'ส่งคอมเมนต์ไม่สำเร็จ');
       }

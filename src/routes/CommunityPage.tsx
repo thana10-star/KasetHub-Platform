@@ -29,6 +29,7 @@ import { publicEnv } from '@/config/env';
 import {
   applyCommunityLikeUiState,
   applyCommunityCommentLikeUiState,
+  canUseTopLevelCommunityCommentSubmit,
   getCommunityCommentSubmitText,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
@@ -152,6 +153,8 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   const [commentsByPost, setCommentsByPost] = useState<Record<string, CommunityComment[]>>({});
   const [openCommentsByPost, setOpenCommentsByPost] = useState<Record<string, boolean>>({});
   const [commentTextByPost, setCommentTextByPost] = useState<Record<string, string>>({});
+  const [commentStatusByPost, setCommentStatusByPost] = useState<Record<string, string>>({});
+  const [submittingCommentByPost, setSubmittingCommentByPost] = useState<Record<string, boolean>>({});
   const [replyTextByComment, setReplyTextByComment] = useState<Record<string, string>>({});
   const [replyingToByPost, setReplyingToByPost] = useState<Record<string, string | undefined>>({});
   const [reportReasonByPost, setReportReasonByPost] = useState<Record<string, CommunityReportReason>>({});
@@ -344,21 +347,25 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
 
     if (!canWrite) {
       setActionStatus(gateCopy);
+      setCommentStatusByPost((current) => ({ ...current, [postId]: gateCopy }));
       return;
     }
 
     const contentText = getCommunityCommentSubmitText(commentTextByPost, postId);
     if (!contentText) {
       setActionStatus('กรุณาเขียนคอมเมนต์');
+      setCommentStatusByPost((current) => ({ ...current, [postId]: 'กรุณาเขียนคอมเมนต์' }));
       return;
     }
 
+    setSubmittingCommentByPost((current) => ({ ...current, [postId]: true }));
     try {
       const result = await service.createComment(postId, {
         contentText,
       });
       if (result.ok) {
         setCommentTextByPost((current) => ({ ...current, [postId]: '' }));
+        setCommentStatusByPost((current) => ({ ...current, [postId]: 'ส่งคอมเมนต์แล้ว' }));
         setCommentsByPost((current) => ({
           ...current,
           [postId]: [...getSafeCommunityComments(current[postId]), result.data],
@@ -376,9 +383,18 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       }
 
       setActionStatus(result.message);
+      setCommentStatusByPost((current) => ({ ...current, [postId]: result.message }));
     } catch {
       setActionStatus('ส่งคอมเมนต์ไม่สำเร็จ ลองอีกครั้ง');
+      setCommentStatusByPost((current) => ({ ...current, [postId]: 'ส่งคอมเมนต์ไม่สำเร็จ ลองอีกครั้ง' }));
+    } finally {
+      setSubmittingCommentByPost((current) => ({ ...current, [postId]: false }));
     }
+  }
+
+  function handleSubmitTopLevelComment(event: FormEvent<HTMLFormElement>, postId: string) {
+    event.preventDefault();
+    void handleCreateComment(postId);
   }
 
   async function handleCreateReply(postId: string, parentComment: CommunityComment) {
@@ -474,6 +490,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     setCommentTextByPost((current) => updateCommunityCommentDraft(current, postId, value));
+    setCommentStatusByPost((current) => ({ ...current, [postId]: '' }));
   }
 
   function handleReplyTextChange(commentId: string, value: string) {
@@ -1017,18 +1034,32 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                         })
                       )}
 
-                      <textarea
-                        className="min-h-20 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
-                        disabled={!canWrite || !post.id}
-                        onChange={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
-                        onInput={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
-                        placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
-                        value={commentTextByPost[post.id] ?? ''}
-                      />
-                      <Button disabled={!canWrite || !post.id} onClick={() => handleCreateComment(post.id)}>
-                        <Send aria-hidden="true" className="h-4 w-4" />
-                        ส่งคอมเมนต์
-                      </Button>
+                      <form className="grid gap-2" onSubmit={(event) => handleSubmitTopLevelComment(event, post.id)}>
+                        <textarea
+                          className="min-h-20 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
+                          disabled={!canWrite || !post.id}
+                          onChange={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
+                          onInput={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
+                          placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
+                          value={commentTextByPost[post.id] ?? ''}
+                        />
+                        {commentStatusByPost[post.id] ? (
+                          <p className="rounded-lg bg-white p-2 text-xs font-semibold leading-5 text-kaset-ink">
+                            {commentStatusByPost[post.id]}
+                          </p>
+                        ) : null}
+                        <Button
+                          disabled={!canUseTopLevelCommunityCommentSubmit(
+                            canWrite,
+                            post.id,
+                            submittingCommentByPost[post.id],
+                          )}
+                          type="submit"
+                        >
+                          <Send aria-hidden="true" className="h-4 w-4" />
+                          {submittingCommentByPost[post.id] ? 'กำลังส่ง' : 'ส่งคอมเมนต์'}
+                        </Button>
+                      </form>
                     </div>
                   ) : null}
                 </article>

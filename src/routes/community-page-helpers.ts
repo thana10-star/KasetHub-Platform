@@ -46,6 +46,14 @@ export function getCommunityCommentSubmitText(
   return (drafts?.[postId] ?? '').trim();
 }
 
+export function canUseTopLevelCommunityCommentSubmit(
+  canWrite: boolean,
+  postId: string | undefined | null,
+  isSubmitting = false,
+) {
+  return Boolean(canWrite && postId && !isSubmitting);
+}
+
 export function applyCommunityLikeUiState(posts: CommunityPost[], postId: string, nextLiked: boolean) {
   return posts.map((post) => {
     if (post.id !== postId) return post;

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   applyCommunityCommentLikeUiState,
   applyCommunityLikeUiState,
+  canUseTopLevelCommunityCommentSubmit,
   getCommunityCommentSubmitText,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
@@ -86,6 +87,13 @@ describe('M116.2 Community interaction regressions without DOM dependency', () =
     const drafts = updateCommunityCommentDraft({}, 'post-1', '   ');
 
     expect(getCommunityCommentSubmitText(drafts, 'post-1')).toBe('');
+  });
+
+  test('top-level comment submit gate allows authenticated staging writes with a post id', () => {
+    expect(canUseTopLevelCommunityCommentSubmit(true, 'post-1')).toBe(true);
+    expect(canUseTopLevelCommunityCommentSubmit(true, 'post-1', true)).toBe(false);
+    expect(canUseTopLevelCommunityCommentSubmit(false, 'post-1')).toBe(false);
+    expect(canUseTopLevelCommunityCommentSubmit(true, '')).toBe(false);
   });
 
   test('like and unlike update the visible count state without double counting', () => {
