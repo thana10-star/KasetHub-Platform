@@ -14,9 +14,9 @@ export function getSupabaseClient(): SupabaseClient | null {
   if (!cachedClient) {
     cachedClient = createClient(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {
       auth: {
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-        persistSession: false,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        persistSession: true,
       },
     });
   }

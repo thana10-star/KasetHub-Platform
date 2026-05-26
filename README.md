@@ -143,6 +143,12 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Wires `/app/community` to use the real community service adapter only when the flag and real Supabase session are ready.
 - Keeps notifications backend-needed and avoids service-role keys, anonymous writes, fake posts, fake likes, and fake comments.
 
+## M114.1 Community Auth Entry
+
+- Adds `/app/login` as a small staging-safe email/password sign-in surface for Community testing with prepared Supabase accounts.
+- Adds direct login entries from `/app/community` and `/app/profile` so testers can return to Community after sign-in.
+- Uses Supabase anon auth only, keeps production community writes controlled by `VITE_ENABLE_COMMUNITY_WRITES=false`, and does not add service-role keys or anonymous writes.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.

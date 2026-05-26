@@ -47,6 +47,7 @@ import { HelpPage } from '@/routes/HelpPage';
 import { ImagePrivacyPage } from '@/routes/ImagePrivacyPage';
 import { ImagePreflightPage } from '@/routes/ImagePreflightPage';
 import { LandingPage } from '@/routes/LandingPage';
+import { LoginPage } from '@/routes/LoginPage';
 import { MemoryPage } from '@/routes/MemoryPage';
 import { ModerationCenterPage } from '@/routes/ModerationCenterPage';
 import { MvpSnapshotPage } from '@/routes/MvpSnapshotPage';
@@ -169,6 +170,7 @@ export default function App() {
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="notification-settings" element={<NotificationSettingsPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="login" element={<LoginPage />} />
         <Route path="account-preview" element={<AccountPreviewPage />} />
         <Route path="ownership-rls-gate" element={<OwnershipRlsGatePage />} />
         <Route path="guest-sync-dry-run" element={<GuestSyncDryRunPage />} />

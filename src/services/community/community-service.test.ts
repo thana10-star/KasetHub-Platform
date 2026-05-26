@@ -428,6 +428,7 @@ describe('M114 gated community staging service contract', () => {
     expect(routeList).toContain('/app/farm-records');
     expect(routeList).toContain('/app/help');
     expect(routeList).toContain('/app/profile');
+    expect(routeList).toContain('/app/login');
     expect(routeList).toContain('/app/notifications');
   });
 

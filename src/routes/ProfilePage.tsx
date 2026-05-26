@@ -18,6 +18,7 @@ import {
   Languages,
   LifeBuoy,
   Link2,
+  LogIn,
   LockKeyhole,
   LogOut,
   Ruler,
@@ -26,8 +27,10 @@ import {
   Settings,
   Sprout,
   UserRound,
+  UserCheck,
   UsersRound,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -42,6 +45,13 @@ import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import {
+  getCachedSupabaseAuthSessionSnapshot,
+  getCurrentSupabaseAuthSession,
+  signOutSupabaseAuth,
+  subscribeToSupabaseAuthSession,
+  type SupabaseAuthSessionSnapshot,
+} from '@/services/auth/supabase-auth-session';
 import type { AppRoute } from '@/types/kaset';
 
 type ProfileMenuHref = AppRoute | `${AppRoute}#${string}`;
@@ -408,14 +418,53 @@ function ProfileMenuGroupCard({ group }: { group: ProfileMenuGroup }) {
   );
 }
 
-export function ProfilePage() {
+type ProfilePageProps = {
+  authSessionOverride?: SupabaseAuthSessionSnapshot;
+};
+
+export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
   const { savedCount } = useSavedArticles();
   const { savedCount: savedVideoCount } = useSavedVideos();
   const { counts, state } = useGuestMemory();
   const notificationCenter = useNotificationCenter();
   const accountStatus = getAccountStatus(state);
+  const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
+    () => authSessionOverride ?? getCachedSupabaseAuthSessionSnapshot(),
+  );
+  const [authStatusMessage, setAuthStatusMessage] = useState('');
 
   const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
+
+  useEffect(() => {
+    if (authSessionOverride) {
+      setAuthSession(authSessionOverride);
+      return undefined;
+    }
+
+    let active = true;
+    void getCurrentSupabaseAuthSession().then((snapshot) => {
+      if (active) setAuthSession(snapshot);
+    });
+    const unsubscribe = subscribeToSupabaseAuthSession((snapshot) => {
+      if (active) setAuthSession(snapshot);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [authSessionOverride]);
+
+  async function handleSignOut() {
+    const result = await signOutSupabaseAuth();
+    if (result.ok) {
+      setAuthSession(result.session);
+      setAuthStatusMessage('ออกจากระบบแล้ว');
+      return;
+    }
+
+    setAuthStatusMessage(result.message);
+  }
 
   return (
     <div>
@@ -460,6 +509,50 @@ export function ProfilePage() {
                 บันทึกไว้ในเครื่องนี้: {counts.farmRecords} ฟาร์ม · {counts.savedArticles} บทความ ·{' '}
                 {counts.savedVideos} วิดีโอ · {counts.recentAIQuestions} คำถาม AI
               </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4" aria-labelledby="profile-community-login-title">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+              {authSession.isSignedIn ? (
+                <UserCheck aria-hidden="true" className="h-5 w-5" />
+              ) : (
+                <LogIn aria-hidden="true" className="h-5 w-5" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 id="profile-community-login-title" className="font-extrabold text-kaset-ink">
+                  {authSession.isSignedIn ? 'เข้าสู่ระบบแล้ว' : 'เข้าสู่ระบบ'}
+                </h2>
+                <StatusPill tone={authSession.isSignedIn ? 'success' : 'warning'}>
+                  {authSession.isSignedIn ? 'พร้อมใช้ชุมชน' : 'ยังไม่ได้เข้าสู่ระบบ'}
+                </StatusPill>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {authSession.isSignedIn
+                  ? authSession.email ?? 'ใช้บัญชีนี้สำหรับชุมชนและฟีเจอร์ที่ต้องมีบัญชี'
+                  : 'ใช้สำหรับชุมชนและฟีเจอร์ที่ต้องมีบัญชี'}
+              </p>
+              {authSession.isSignedIn ? (
+                <Button className="mt-3 w-full" onClick={handleSignOut} variant="secondary">
+                  <LogOut aria-hidden="true" className="h-4 w-4" />
+                  ออกจากระบบ
+                </Button>
+              ) : (
+                <Link
+                  className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-full bg-kaset-deep px-5 text-[15px] font-bold leading-5 text-white"
+                  to="/app/login"
+                >
+                  <LogIn aria-hidden="true" className="h-4 w-4" />
+                  เข้าสู่ระบบ
+                </Link>
+              )}
+              {authStatusMessage ? (
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{authStatusMessage}</p>
+              ) : null}
             </div>
           </div>
         </Card>

@@ -70,6 +70,7 @@ export type AppRoute =
   | '/app/notifications'
   | '/app/notification-settings'
   | '/app/profile'
+  | '/app/login'
   | '/app/account-preview'
   | '/app/ownership-rls-gate'
   | '/app/guest-sync-dry-run'

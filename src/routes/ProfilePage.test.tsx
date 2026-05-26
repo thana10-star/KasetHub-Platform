@@ -51,6 +51,40 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('เร็ว ๆ นี้');
   });
 
+  test('shows a clear Community login entry from Profile', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('เข้าสู่ระบบ');
+    expect(html).toContain('ใช้สำหรับชุมชนและฟีเจอร์ที่ต้องมีบัญชี');
+    expect(html).toContain('/app/login');
+  });
+
+  test('shows signed-in Profile state when a Supabase auth session is present', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <ProfilePage
+          authSessionOverride={{
+            isConfigured: true,
+            canUseAuth: true,
+            isSignedIn: true,
+            userId: '00000000-0000-4000-8000-00000000000a',
+            userIdMasked: '000000...000a',
+            email: 'farmer@example.com',
+            message: 'เข้าสู่ระบบแล้ว',
+          }}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('เข้าสู่ระบบแล้ว');
+    expect(html).toContain('farmer@example.com');
+    expect(html).toContain('ออกจากระบบ');
+  });
+
   test('hides internal links from the production Profile menu', () => {
     const html = renderToString(
       <MemoryRouter>

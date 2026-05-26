@@ -6,6 +6,7 @@ import {
   Flag,
   Heart,
   Link as LinkIcon,
+  LogIn,
   MessageCircle,
   MoreHorizontal,
   RefreshCw,
@@ -13,6 +14,7 @@ import {
   Share2,
   ShieldCheck,
   Trash2,
+  UserCheck,
   UsersRound,
 } from 'lucide-react';
 import type { ChangeEvent, FormEvent } from 'react';
@@ -24,6 +26,12 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { publicEnv } from '@/config/env';
+import {
+  getCachedSupabaseAuthSessionSnapshot,
+  getCurrentSupabaseAuthSession,
+  subscribeToSupabaseAuthSession,
+  type SupabaseAuthSessionSnapshot,
+} from '@/services/auth/supabase-auth-session';
 import {
   communityReadOnlyGateMessage,
   communitySignInGateMessage,
@@ -95,7 +103,34 @@ function getActionMessage(result: CommunityActionResult, fallback: string) {
 }
 
 export function CommunityPage({ readinessOverride, serviceOverride }: CommunityPageProps = {}) {
-  const readiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
+  const baseReadiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
+  const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
+    () => getCachedSupabaseAuthSessionSnapshot(),
+  );
+  const readiness = useMemo(() => {
+    if (readinessOverride) return readinessOverride;
+
+    const hasAuthenticatedUser = baseReadiness.hasAuthenticatedUser || authSession.isSignedIn;
+    const canWrite =
+      baseReadiness.writesFeatureFlagEnabled &&
+      hasAuthenticatedUser &&
+      baseReadiness.canReadPublishedPosts &&
+      baseReadiness.backendServiceReady;
+
+    return {
+      ...baseReadiness,
+      path: canWrite ? 'real' as const : 'gated' as const,
+      canWrite,
+      canUploadImage: canWrite,
+      hasAuthenticatedUser,
+      writeGateMessage: baseReadiness.writesFeatureFlagEnabled && !hasAuthenticatedUser
+        ? communitySignInGateMessage
+        : baseReadiness.writeGateMessage,
+      blockers: hasAuthenticatedUser
+        ? baseReadiness.blockers.filter((blocker) => blocker.code !== 'auth_session_required')
+        : baseReadiness.blockers,
+    };
+  }, [authSession.isSignedIn, baseReadiness, readinessOverride]);
   const service = useMemo(
     () => serviceOverride ?? createCommunityService(readiness),
     [readiness, serviceOverride],
@@ -126,6 +161,23 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   useEffect(() => {
     void loadPosts();
   }, [loadPosts]);
+
+  useEffect(() => {
+    if (readinessOverride) return undefined;
+
+    let active = true;
+    void getCurrentSupabaseAuthSession().then((snapshot) => {
+      if (active) setAuthSession(snapshot);
+    });
+    const unsubscribe = subscribeToSupabaseAuthSession((snapshot) => {
+      if (active) setAuthSession(snapshot);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [readinessOverride]);
 
   const filteredPosts = useMemo(
     () => (activeFilter === 'ทั้งหมด' ? posts : posts.filter((post) => post.category === activeFilter)),
@@ -313,6 +365,47 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
         >
           {gateCopy}
         </NoticeBox>
+
+        {readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser ? (
+          <Card className="p-4" aria-labelledby="community-login-title">
+            <div className="flex gap-3">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <LogIn aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 id="community-login-title" className="text-lg font-extrabold leading-7 text-kaset-ink">
+                  เข้าสู่ระบบก่อนใช้งานชุมชน
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  เข้าสู่ระบบเพื่อโพสต์ คอมเมนต์ กดไลก์ หรือรายงานเนื้อหา
+                </p>
+                <Link
+                  className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-full bg-kaset-deep px-5 text-[15px] font-bold leading-5 text-white"
+                  to="/app/login?next=/app/community"
+                >
+                  <LogIn aria-hidden="true" className="h-4 w-4" />
+                  เข้าสู่ระบบ
+                </Link>
+              </div>
+            </div>
+          </Card>
+        ) : null}
+
+        {readiness.hasAuthenticatedUser ? (
+          <Card className="p-4" aria-label="สถานะเข้าสู่ระบบชุมชน">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
+                <UserCheck aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-extrabold text-kaset-ink">เข้าสู่ระบบแล้ว</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {authSession.email ?? 'พร้อมทดสอบโพสต์ คอมเมนต์ และกดไลก์ในชุมชน'}
+                </p>
+              </div>
+            </div>
+          </Card>
+        ) : null}
 
         <Card className="p-4" aria-labelledby="community-composer-title">
           <form onSubmit={handleCreatePost}>

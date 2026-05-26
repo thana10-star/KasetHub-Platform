@@ -116,6 +116,8 @@ describe('M114 Community route', () => {
     );
 
     expect(html).toContain(communitySignInGateMessage);
+    expect(html).toContain('เข้าสู่ระบบก่อนใช้งานชุมชน');
+    expect(html).toContain('/app/login?next=/app/community');
     expect(html).toContain('ยังไม่มีโพสต์ชุมชนจริง');
     expect(html).not.toContain('คุณสายฝน');
   });

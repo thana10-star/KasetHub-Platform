@@ -133,6 +133,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     description: 'auth mock, account preview, sync preview และแผน Edge Function',
     routes: [
       { route: '/app/auth', label: 'Auth entry', milestone: 'M07', notes: 'สมัครภายหลังแบบ mock', manualCheckPath: '/app/auth' },
+      { route: '/app/login', label: 'Community staging login', milestone: 'M114.1', notes: 'email/password sign-in surface for controlled Community staging tests; anon Supabase auth only and production writes stay flag-gated', manualCheckPath: '/app/login' },
       { route: '/app/auth/status', label: 'Auth status', milestone: 'M17-M19', notes: 'สถานะบัญชี mock', manualCheckPath: '/app/auth/status' },
       { route: '/app/auth/linking', label: 'Account linking', milestone: 'M19', notes: 'กติกาเชื่อม Phone + LINE แบบ local', manualCheckPath: '/app/auth/linking' },
       { route: '/app/auth/phone', label: 'Phone auth mock', milestone: 'M17/M28', notes: 'OTP mock ไม่มี SMS จริง', manualCheckPath: '/app/auth/phone' },
