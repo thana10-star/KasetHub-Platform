@@ -22,12 +22,12 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
     routes: [
-      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93-M96', notes: 'mobile-first home surfaces a compact My Farm launcher, small start-guide link, and bottom nav still includes My Farm; detailed Farm Records metrics stay in My Farm/Farm Records', manualCheckPath: '/app' },
+      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93-M96/M108.2', notes: 'mobile-first home surfaces AI, Weather, price hub, tools, and a compact My Farm launcher; bottom nav now prioritizes agriculture prices while My Farm remains a secondary route', manualCheckPath: '/app' },
       { route: '/app/help', label: 'Farmer start guide', milestone: 'M95-M97.1', notes: 'คู่มือเริ่มใช้ KasetHub แบบสั้นสำหรับเกษตรกร พร้อม basic flow 3 ขั้นตอนและตัวอย่างชื่อแปลง/งานในฟาร์ม; no backend', manualCheckPath: '/app/help' },
       { route: '/app/field-test-feedback', label: 'Field-test feedback checklist', milestone: 'M95-M97.1', notes: 'เช็กลิสต์ภาคสนามแบบ static/local สำหรับสังเกตผู้ใช้จริง เพิ่มคำถาม basic mode, first-use, and first add plot/activity ไม่มี backend submit และเตือนห้ามใส่ข้อมูลส่วนตัว', manualCheckPath: '/app/field-test-feedback' },
       { route: '/app/profile', label: 'Profile / Settings', milestone: 'M02-M29/M93-M95', notes: 'โปรไฟล์และการตั้งค่าจัดกลุ่มบัญชี ข้อมูล/ความเป็นส่วนตัว ช่วยเหลือ ลิงก์วิธีใช้แอพไป /app/help แสดง cloud sync ปิดอยู่ และยุบ Advanced สำหรับทีมงาน/QA เป็นค่าเริ่มต้น', manualCheckPath: '/app/profile' },
       { route: '/app/memory', label: 'Guest Memory', milestone: 'M04', notes: 'ดูข้อมูลที่เก็บใน localStorage', manualCheckPath: '/app/memory' },
-      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92-M97.1', notes: 'My Farm local hub with simplified basic Farm Records entry, Farm Records cost, harvest/yield, backup/restore recovery, sync consent prototype status, compact Home entry point, dedicated bottom-nav slot, and Profile settings data-control links; no cloud sync', manualCheckPath: '/app/my-farm' },
+      { route: '/app/my-farm', label: 'My Farm Hub', milestone: 'M02/M10/M34/M92-M97.1/M108.2', notes: 'My Farm local hub with simplified basic Farm Records entry, compact Home/Profile access, local cost/harvest/export/restore/sync-readiness sections, and no cloud sync; no longer a bottom-nav tab', manualCheckPath: '/app/my-farm' },
       { route: '/app/my-farm/settings', label: 'My Farm settings', milestone: 'M34', notes: 'สถานะข้อมูล local และแผน cloud sync ในอนาคต', manualCheckPath: '/app/my-farm/settings' },
       { route: '/app/weather', label: 'Agriculture weather', milestone: 'M32/M75/M100', notes: 'Open-Meteo public weather API is flag-gated for V1; default backup data remains, with no GPS/geolocation, no personal location storage, and no Supabase writes', manualCheckPath: '/app/weather' },
       { route: '/app/weather/qa', label: 'Weather QA Cache Coarse Location', milestone: 'M76', notes: 'cache freshness, coarse province/city-center locations, failure fixtures, stale examples, and no-GPS/no-precise-storage proof', manualCheckPath: '/app/weather/qa' },
@@ -110,11 +110,11 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
   {
     id: 'prices_crop_watch',
     label: 'Prices / Crop watch',
-    description: 'ราคาอ้างอิงตัวอย่าง พืชที่ติดตาม และ alert preference ในเครื่อง',
+    description: 'Agriculture price hub, source-pending commodity list, and local crop-watch preferences without fake production prices',
     routes: [
-      { route: '/app/prices', label: 'Crop prices', milestone: 'M21/M22', notes: 'ราคาอ้างอิง demo/sample ไม่มี API ราคา', manualCheckPath: '/app/prices' },
-      { route: '/app/prices/:priceId', label: 'Price detail', milestone: 'M21/M22', notes: 'รายละเอียดราคาตัวอย่างและคำเตือน', manualCheckPath: '/app/prices/price-rice-jasmine-105-yasothon-demo' },
-      { route: '/app/crop-watch', label: 'Crop watch', milestone: 'M22', notes: 'ติดตามพืชและตั้ง alert preference ใน localStorage', manualCheckPath: '/app/crop-watch' },
+      { route: '/app/prices', label: 'Agriculture prices', milestone: 'M21/M22/M108.2', notes: 'source-pending price hub with key Thai commodity categories; no fake numeric prices are shown until a real source is connected', manualCheckPath: '/app/prices' },
+      { route: '/app/prices/:priceId', label: 'Price deep-link fallback', milestone: 'M21/M22/M108.2', notes: 'legacy price detail links render the same source-pending price hub rather than old sample prices', manualCheckPath: '/app/prices/price-rice-jasmine-105-yasothon-demo' },
+      { route: '/app/crop-watch', label: 'Crop watch', milestone: 'M22/M108.2', notes: 'local crop watch preferences remain available but show source-pending status instead of reference price values', manualCheckPath: '/app/crop-watch' },
     ],
   },
   {

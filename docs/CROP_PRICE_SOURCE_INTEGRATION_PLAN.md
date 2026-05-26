@@ -61,13 +61,13 @@ User-facing copy should say `ข้อมูลอาจล่าช้า` when
 
 Every user-facing price explanation must include:
 
-- `ราคาอ้างอิง`
 - source label
 - source date/time
 - market or region
 - unit
 - grade when available
 - reliability badge
+- non-guarantee copy that price can differ by area, grade, moisture, season, and buyer
 
 Do not remove attribution in share cards, AI answers, notifications, or saved references.
 
@@ -75,11 +75,12 @@ Do not remove attribution in share cards, AI answers, notifications, or saved re
 
 - Never guarantee sale price.
 - Never claim fixture/demo data is real.
+- In M108.2 source-pending state, do not show fake numeric prices at all.
 - Never combine sources into a single average unless the method is documented.
 - Never show community reports as official.
 - Always show the disclaimer: `ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ`
-- AI must cite source label/date and use `ราคาอ้างอิง`.
-- Price alerts must also say they are based on `ราคาอ้างอิง`, not a guaranteed sale or buyer quote.
+- AI must cite source label/date and avoid treating a price as a guaranteed sale price.
+- Price alerts must also cite source/date and avoid guaranteed-sale or buyer-quote wording.
 
 ## Caching Strategy
 
@@ -147,11 +148,11 @@ Community reports should remain hidden or clearly marked until reviewed.
 
 Short copy for price cards:
 
-> ราคาอ้างอิงเท่านั้น ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ
+> ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ
 
 AI price explanation copy:
 
-> คำตอบนี้อธิบายจากราคาอ้างอิงและแหล่งข้อมูลที่ระบุ ไม่รับประกันราคาขายจริง
+> คำตอบนี้อธิบายจากแหล่งข้อมูลที่ระบุ ไม่รับประกันราคาขายจริง
 
 Stale data copy:
 

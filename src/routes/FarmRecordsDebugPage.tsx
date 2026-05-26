@@ -242,8 +242,8 @@ function getSyncChecklistTone(status: FarmRecordsSyncChecklistStatus) {
 
 function getSyncChecklistLabel(status: FarmRecordsSyncChecklistStatus) {
   if (status === 'ready') return 'Ready';
-  if (status === 'prototype_only') return 'Prototype only';
-  if (status === 'documented_only') return 'Documented only';
+  if (status === 'prototype_only') return 'Planned only';
+  if (status === 'documented_only') return 'Documented';
   if (status === 'separate_future_gate') return 'Separate future gate';
   return 'Not implemented';
 }
@@ -1382,7 +1382,7 @@ export function FarmRecordsDebugPage() {
       [key]: checked,
     });
     setSyncConsentPrototypeState(nextState);
-    setSuccessMessage('Sync consent prototype state was saved on this device only. It is not legal consent and does not enable cloud sync.');
+    setSuccessMessage('Sync consent settings were saved on this device only. It is not legal consent and does not enable cloud sync.');
   }
 
   async function handleRestoreFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -2048,7 +2048,7 @@ export function FarmRecordsDebugPage() {
                   <span className="mt-1 block break-words font-mono text-xs font-extrabold text-kaset-ink">{farmRecordsRestoreConfirmationPhrase}</span>
                 </div>
               </div>
-              <FormField hint="Paste an M86/M87/M88/M89 Farm Records JSON backup. CSV restore is not supported in M89." label="Paste JSON backup">
+              <FormField hint="Paste a KasetHub Farm Records JSON backup. CSV restore is not supported here." label="Paste JSON backup">
                 <textarea
                   className={`${textAreaClassName()} min-h-40 font-mono text-xs leading-5`}
                   onChange={(event) => handleRestoreTextChange(event.target.value)}
@@ -2204,7 +2204,7 @@ export function FarmRecordsDebugPage() {
         </section>
 
         <section className="grid gap-3" id="farm-records-sync">
-          <SectionTitle badge="future consent gate only" title="Cloud Sync Readiness / การซิงก์ข้อมูลขึ้นคลาวด์" />
+          <SectionTitle badge="future consent gate only" title="Cloud Sync Planning / การซิงก์ข้อมูลขึ้นคลาวด์" />
           <NoticeBox tone="info" icon={CloudOff} title="Cloud sync is not enabled">
             ตอนนี้ Farm Records อยู่ใน local-only mode เท่านั้น Supabase writes ปิดอยู่ ไม่มี GPS แบบละเอียด และ AI ไม่มีสิทธิ์อ่านสมุดฟาร์ม
             ส่วนนี้เป็น gate/checklist สำหรับอนาคต ไม่ได้ซิงก์หรือเรียก backend
@@ -2212,13 +2212,13 @@ export function FarmRecordsDebugPage() {
           <Card className="border-sky-100 bg-sky-50/70 p-4">
             <div className="grid gap-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge tone="sky">prototype only</Badge>
+                <Badge tone="sky">not enabled</Badge>
                 <Badge tone="neutral">not legal consent</Badge>
                 <Badge tone="neutral">no backend calls</Badge>
               </div>
               <div>
                 <h3 className="font-extrabold leading-6 text-kaset-ink">
-                  Cloud Sync Consent Prototype / ทดลองหน้าขอความยินยอมซิงก์ข้อมูลขึ้นคลาวด์
+                  Cloud Sync Consent Plan / หน้าขอความยินยอมซิงก์ข้อมูลขึ้นคลาวด์
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   ตอนนี้ข้อมูลยังอยู่ในเครื่องนี้เท่านั้น การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน หากเปิดในอนาคต ต้องขอความยินยอมก่อน
@@ -2257,7 +2257,7 @@ export function FarmRecordsDebugPage() {
                 </div>
                 <div className="rounded-lg bg-white p-3 ring-1 ring-sky-100">
                   <p className="text-xs font-extrabold uppercase text-sky-800">Step 4</p>
-                  <h4 className="mt-1 font-extrabold text-kaset-ink">Consent options prototype</h4>
+                  <h4 className="mt-1 font-extrabold text-kaset-ink">Consent options</h4>
                   <div className="mt-3 grid gap-2">
                     {farmRecordsSyncPrototypeConsentCategories.map((category) => {
                       const toggleKey = category.id;
@@ -2293,7 +2293,7 @@ export function FarmRecordsDebugPage() {
                         onChange={(event) => handleSyncConsentPrototypeChange('acknowledgedLocalOnlyPrototype', event.target.checked)}
                         type="checkbox"
                       />
-                      <span>I understand this is local prototype state only and not production legal consent.</span>
+                      <span>I understand this is saved on this device only and not production legal consent.</span>
                     </label>
                   </div>
                 </div>
@@ -2301,7 +2301,7 @@ export function FarmRecordsDebugPage() {
               <div className="grid gap-3 lg:grid-cols-2">
                 <div className="rounded-lg bg-white p-3 ring-1 ring-sky-100">
                   <p className="text-xs font-extrabold uppercase text-sky-800">Step 5</p>
-                  <h4 className="mt-1 font-extrabold text-kaset-ink">Prototype warnings</h4>
+                  <h4 className="mt-1 font-extrabold text-kaset-ink">Important warnings</h4>
                   <div className="mt-2 grid gap-2">
                     {syncConsentPrototypeWarnings.map((warning) => (
                       <p className="rounded-lg bg-kaset-mist p-3 text-sm leading-6 text-slate-700" key={warning}>
@@ -2309,15 +2309,12 @@ export function FarmRecordsDebugPage() {
                       </p>
                     ))}
                   </div>
-                  <p className="mt-3 text-xs font-bold leading-5 text-slate-500">
-                    Prototype key: {syncConsentPrototypeReadiness.storageKey}
-                  </p>
                 </div>
                 <div className="rounded-lg bg-white p-3 ring-1 ring-sky-100">
                   <p className="text-xs font-extrabold uppercase text-sky-800">Step 6</p>
                   <h4 className="mt-1 font-extrabold text-kaset-ink">Disabled action</h4>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Cloud sync is not available yet. It requires Supabase RLS, ownership tests, cloud export/delete, and privacy review.
+                    Cloud sync is not available yet. It requires Supabase RLS, ownership checks, cloud export/delete, and privacy review.
                   </p>
                   <div className="mt-3 grid gap-2">
                     {syncConsentPrototypeReadiness.blockers.map((blocker) => (
@@ -2364,7 +2361,7 @@ export function FarmRecordsDebugPage() {
               </div>
               <div className="grid gap-2">
                 <div>
-                  <h3 className="font-extrabold leading-6 text-kaset-ink">Sync readiness checklist</h3>
+                  <h3 className="font-extrabold leading-6 text-kaset-ink">Sync checklist</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
                     These statuses are informational only. Cloud sync remains disabled and no backend calls are made.
                   </p>

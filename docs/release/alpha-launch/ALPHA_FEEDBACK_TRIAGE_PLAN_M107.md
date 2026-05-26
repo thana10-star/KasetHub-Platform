@@ -78,3 +78,5 @@ After the first 20-50 responses:
 - fix only critical mobile/readability/safety issues
 - summarize top requested improvements
 - decide Android wrapper timing from actual user demand
+
+M108 follow-up: use `docs/release/alpha-feedback/ALPHA_FEEDBACK_INTAKE_INDEX_M108.md` for the response tracker, summary template, triage board, fix-only policy, and Android wrapper decision framework.

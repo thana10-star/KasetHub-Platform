@@ -42,7 +42,7 @@ Technical words can remain in the Advanced group because that area is explicitly
 
 ## 5. Bottom Navigation Recommendation
 
-M93 implements a dedicated `ฟาร์มของฉัน` bottom-nav slot because:
+At the time, M93 implemented a dedicated `ฟาร์มของฉัน` bottom-nav slot because:
 
 - `/app/my-farm` already exists.
 - The route is local-only and stable.
@@ -65,6 +65,12 @@ M93 also renames calculator access in bottom nav to `เครื่องมื
 M94 builds on this structure by polishing `/app/profile` into `โปรไฟล์และการตั้งค่า`, adding placeholders for `ภาษา`, `วิธีใช้แอพ`, and `ติดต่อทีมงาน`, clarifying Farm Records export/restore/sync status links, and collapsing `สำหรับทีมงานหรือทดสอบ` by default.
 
 M94 still preserves every route and keeps Admin, QA, readiness, Supabase staging, AI proxy, content admin, moderation, and Guest Sync planning links accessible.
+
+## 6.2 M108.2 Follow-up
+
+M108.2 supersedes the M93 bottom-nav decision. The persistent bottom nav now shows `หน้าแรก`, `ราคาเกษตร`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`.
+
+`/app/my-farm` remains available from Home, Profile/Help, direct links, and Farm Records links. My Farm stays a basic local notebook, while bottom nav prioritizes price checking because it is likely to be a more frequent farmer action.
 
 ## 7. What Remains Future
 

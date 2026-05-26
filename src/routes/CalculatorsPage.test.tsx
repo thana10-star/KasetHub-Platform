@@ -48,7 +48,8 @@ describe('M98.1 calculator mobile UX and crop selection', () => {
     );
     const fertilizerIndex = html.indexOf('คำนวณปุ๋ย/การให้ปุ๋ย');
     const sprayIndex = html.indexOf('คำนวณตามฉลากยา/สาร');
-    const primaryHtml = html.slice(0, html.indexOf('<details'));
+    const detailsIndex = html.indexOf('<details');
+    const primaryHtml = detailsIndex === -1 ? html : html.slice(0, detailsIndex);
 
     expect(fertilizerIndex).toBeGreaterThan(-1);
     expect(sprayIndex).toBeGreaterThan(fertilizerIndex);
@@ -57,6 +58,11 @@ describe('M98.1 calculator mobile UX and crop selection', () => {
     expect(html).not.toContain('คำนวณผสมยา');
     expect(primaryHtml).not.toContain('Local calculator');
     expect(primaryHtml).not.toContain('planning only');
+    expect(html).not.toContain('QA');
+    expect(html).not.toContain('M50');
+    expect(html).not.toContain('M55');
+    expect(html).not.toContain('test case');
+    expect(html).not.toContain('/app/ai-backend');
   });
 
   test('fertilizer page exposes a mobile-safe fertigation planning scaffold', () => {

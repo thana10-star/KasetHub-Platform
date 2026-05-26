@@ -23,20 +23,23 @@ describe('M101 AI-first farmer assistant UX', () => {
     expect(html).toContain(AI_FARMER_ASSISTANT_SAFETY_NOTE);
   });
 
-  test('keeps certainty claims out of the AI page and moves internals behind advanced copy', () => {
+  test('keeps certainty claims and internal controls out of the AI page', () => {
     const html = renderToString(
       <MemoryRouter>
         <AIPage />
       </MemoryRouter>,
     );
-    const advancedIndex = html.indexOf('ข้อมูลเพิ่มเติม / สำหรับทีมงาน');
+    const lowerHtml = html.toLowerCase();
 
     expect(html).not.toContain('ตอบถูกทุกเรื่อง');
     expect(html).not.toContain('คำแนะนำแน่นอน');
     expect(html).not.toContain('ใช้แทนผู้เชี่ยวชาญ');
     expect(html).not.toContain('วิเคราะห์โรคได้ชัวร์');
-    expect(advancedIndex).toBeGreaterThan(-1);
-    expect(html.indexOf('/app/ai-proxy-status')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('ตัวเลือกคำตอบสำหรับทีมงาน')).toBeGreaterThan(advancedIndex);
+    expect(html).not.toContain('/app/ai-proxy-status');
+    expect(html).not.toContain('ตัวเลือกคำตอบสำหรับทีมงาน');
+    expect(html).not.toContain('QA');
+    expect(lowerHtml).not.toContain('readiness');
+    expect(lowerHtml).not.toContain('prototype');
+    expect(lowerHtml).not.toContain('debug');
   });
 });

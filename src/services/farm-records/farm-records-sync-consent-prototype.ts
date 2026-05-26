@@ -63,9 +63,9 @@ export const farmRecordsSyncPrototypeConsentCategories = [
 ] as const;
 
 const prototypeWarnings = [
-  'This is local prototype UI state only and is not legal consent.',
+  'This is local planning state only and is not legal consent.',
   'Cloud sync is not available and no farm records are uploaded.',
-  'Supabase RLS, ownership tests, cloud export/delete, and privacy review are required before sync.',
+  'Supabase RLS, ownership checks, cloud export/delete, and privacy review are required before sync.',
   'AI, GPS, and image/receipt upload consent must remain separate future gates.',
 ];
 
@@ -131,7 +131,7 @@ export function getSyncConsentPrototypeReadiness(): FarmRecordsSyncConsentProtot
     canEnableCloudSync: false,
     blockers: [
       'Supabase owner-only RLS is not implemented.',
-      'Authenticated ownership tests are not implemented.',
+      'Authenticated ownership checks are not implemented.',
       'Sync queue and idempotency are not implemented.',
       'Cloud export/delete and privacy review are not complete.',
     ],

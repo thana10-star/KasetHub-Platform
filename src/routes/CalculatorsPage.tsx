@@ -10,7 +10,7 @@ import { cropCalculatorProfiles } from '@/services/agri-calculators/crop-calcula
 import { useAgriCalculators } from '@/hooks/useAgriCalculators';
 import { RecentCalculations } from '@/routes/calculators/CalculatorUi';
 import { calculatorIconMap } from '@/routes/calculators/calculator-icons';
-import { BrainCircuit, FlaskConical, History, ShieldCheck, Sprout, Star } from 'lucide-react';
+import { History, ShieldCheck, Sprout, Star } from 'lucide-react';
 
 export function CalculatorsPage() {
   const calculators = useAgriCalculators();
@@ -87,73 +87,6 @@ export function CalculatorsPage() {
             </div>
           </div>
         </Card>
-
-        <details className="group rounded-lg border border-slate-200 bg-slate-50/80">
-          <summary className="flex min-h-[68px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
-              <FlaskConical aria-hidden="true" className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold leading-6 text-slate-800">ข้อมูลเพิ่มเติม / ขั้นสูง</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">เครื่องมือสำหรับทีมงานและการตรวจระบบ ไม่จำเป็นต้องใช้ตอนคำนวณทั่วไป</p>
-            </div>
-          </summary>
-          <div className="grid gap-3 border-t border-slate-200 p-3">
-            <Card className="border-sky-200 bg-sky-50 p-4 shadow-none">
-              <div className="flex gap-3">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-sky-800">
-                  <FlaskConical aria-hidden="true" className="h-6 w-6" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-sky-950">QA เครื่องคำนวณ</h2>
-                    <StatusPill tone="info">M50</StatusPill>
-                  </div>
-                  <p className="mt-1 text-sm leading-6 text-sky-900">ดู test case, expected vs actual และคำเตือนของสูตรหลักแบบ local-only</p>
-                  <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-sky-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/qa">
-                    เปิด QA เครื่องคำนวณ
-                  </Link>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="border-indigo-200 bg-indigo-50 p-4 shadow-none">
-              <div className="flex gap-3">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-indigo-800">
-                  <BrainCircuit aria-hidden="true" className="h-6 w-6" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-indigo-950">แผน AI อธิบายผล</h2>
-                    <Badge tone="sky">M55 preview</Badge>
-                    <StatusPill tone="warning">ยังไม่เรียก AI จริง</StatusPill>
-                  </div>
-                  <p className="mt-1 text-sm leading-6 text-indigo-900">
-                    ดูขอบเขต AI ในอนาคต: อธิบายสูตรได้ แต่ห้ามเปลี่ยนผลลัพธ์ แนะนำสินค้า หรือซ่อนความไม่แน่นอน
-                  </p>
-                  <Link className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-indigo-900 px-4 text-sm font-extrabold text-white" to="/app/calculators/ai-explanation-preview">
-                    เปิดแผน AI อธิบายผล
-                  </Link>
-                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-architecture">
-                    AI backend architecture
-                  </Link>
-                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-adapter-status">
-                    AI adapter status
-                  </Link>
-                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-endpoint-plan">
-                    AI endpoint plan
-                  </Link>
-                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-contract">
-                    AI Edge contract
-                  </Link>
-                  <Link className="ml-3 mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-extrabold text-indigo-900 ring-1 ring-indigo-900/15" to="/app/calculators/ai-edge-dry-run">
-                    AI Edge dry-run
-                  </Link>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </details>
 
         <Card className="border-emerald-200 bg-emerald-50 p-4">
           <div className="flex gap-3">

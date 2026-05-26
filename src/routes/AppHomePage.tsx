@@ -1,7 +1,6 @@
 import { ArticleCard } from '@/components/kaset/ArticleCard';
 import { CommunityPostCard } from '@/components/kaset/CommunityPostCard';
 import { HeroCard } from '@/components/kaset/HeroCard';
-import { PriceRow } from '@/components/kaset/PriceRow';
 import { QuickActionGrid } from '@/components/kaset/QuickActionGrid';
 import { VideoCard } from '@/components/kaset/VideoCard';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -9,11 +8,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { articles, communityPosts, cropPrices, videos } from '@/data/mockData';
+import { articles, communityPosts, videos } from '@/data/mockData';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 import { AI_HOME_PROMPT_EXAMPLES } from '@/services/ai/ai-farmer-assistant-copy';
-import { Bell, Bot, HelpCircle, Sprout } from 'lucide-react';
+import { Bell, Bot, CloudSun, HelpCircle, Sprout, Tags } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AppHomePage() {
@@ -61,6 +60,36 @@ export function AppHomePage() {
               </div>
             </div>
           </Card>
+        </section>
+
+        <section className="grid gap-3 sm:grid-cols-2" aria-label="ทางลัดสำคัญ">
+          <Link to="/app/weather">
+            <Card className="h-full p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+                  <CloudSun aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold leading-6 text-kaset-ink">สภาพอากาศเกษตร</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">เช็กฝน ลม และความเสี่ยงก่อนวางแผนงานในไร่</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          <Link to="/app/prices">
+            <Card className="h-full p-4">
+              <div className="flex gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                  <Tags aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-extrabold leading-6 text-kaset-ink">ราคาเกษตร</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">ดูรายการสินค้าที่เตรียมเชื่อมแหล่งข้อมูลราคา</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
         </section>
 
         <section aria-labelledby="home-farm-hub-title">
@@ -138,15 +167,6 @@ export function AppHomePage() {
         <section className="grid gap-3">
           <SectionHeader actionHref="/app/community" actionLabel="เปิดชุมชน" title="คำถามล่าสุดในชุมชน" />
           <CommunityPostCard compact post={communityPosts[0]} />
-        </section>
-
-        <section className="grid gap-3">
-          <SectionHeader actionHref="/app/prices" actionLabel="ดูราคา" title="ราคาพืชผล" />
-          <Card>
-            {cropPrices.slice(0, 3).map((price) => (
-              <PriceRow key={price.id} price={price} />
-            ))}
-          </Card>
         </section>
 
         <section className="grid gap-3">

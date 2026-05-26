@@ -49,7 +49,7 @@ export const FARM_RECORDS_SYNC_REQUIREMENTS: FarmRecordsSyncRequirement[] = [
   {
     id: 'export-delete-tools',
     label: 'Export/delete tools',
-    detail: 'Local export and restore readiness exists, but cloud export/delete behavior still needs review before sync.',
+    detail: 'Local export and restore tools exist, but cloud export/delete behavior still needs review before sync.',
     status: 'ready_local',
   },
   {
@@ -100,25 +100,25 @@ export const FARM_RECORDS_SYNC_READINESS_CHECKLIST: FarmRecordsSyncChecklistItem
   {
     id: 'restore-recovery-guidance',
     label: 'Restore recovery guidance',
-    detail: 'M88 adds risk review and pre-restore local snapshot/download guidance before replacement.',
+    detail: 'Risk review and pre-restore local snapshot/download guidance are available before replacement.',
     status: 'ready',
   },
   {
     id: 'user-cloud-consent',
     label: 'Sync consent UX',
-    detail: 'M89 adds a local-only consent UX prototype. It is not legal consent and cannot enable sync.',
+    detail: 'Local consent copy is available for planning. It is not legal consent and cannot enable sync.',
     status: 'prototype_only',
   },
   {
     id: 'owner-rls-design',
     label: 'Owner/RLS design',
-    detail: 'Owner/RLS architecture and future test plan are documented only.',
+    detail: 'Owner/RLS architecture and future verification steps are documented only.',
     status: 'documented_only',
   },
   {
     id: 'supabase-rls',
     label: 'Supabase RLS',
-    detail: 'Owner-only RLS policies and tests are not implemented for Farm Records tables.',
+    detail: 'Owner-only RLS policies and verification checks are not implemented for Farm Records tables.',
     status: 'not_implemented',
   },
   {

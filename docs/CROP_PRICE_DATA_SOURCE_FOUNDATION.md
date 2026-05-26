@@ -4,9 +4,9 @@ M21 creates the crop price data foundation for KasetHub. The app still uses only
 
 ## Product Boundary
 
-- All price rows are `ราคาอ้างอิง`.
-- All M21 fixture rows are demo/reference samples for UI and data-model testing.
-- No screen may present a fixture value as a real market price.
+- M108.2 supersedes normal display of M21 fixture prices: farmer-facing price screens show source pending until a real source is connected.
+- M21 fixture rows remain only for internal data-model testing and must not be presented as real market prices.
+- No screen may present a fixture value as a real market price or show fake numeric commodity prices while source is pending.
 - Every price item must show source label, date/time, market or region, unit, optional grade, reliability level, and the Thai disclaimer.
 - Required disclaimer: `ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ`
 
@@ -54,7 +54,7 @@ Supported future sources:
 - `community_unverified`: user/community reports before review.
 - `demo_sample`: local demo data for prototype screens.
 
-Reliability does not make a value a guaranteed sale price. The UI must still say `ราคาอ้างอิง`.
+Reliability does not make a value a guaranteed sale price. When a real source is connected, the UI must still show attribution, freshness, unit, market/area, and non-guarantee copy.
 
 ## Price Item Contract
 
@@ -91,12 +91,13 @@ Future production snapshots should store:
 
 ## UI Rules
 
-- `/app/prices` shows search, category chips, source filter, region/market filter, reference price cards, trend direction, follow, save, share, source badges, reliability badges, and demo notice.
-- `/app/prices/:priceId` shows the latest reference price, source, market/region, unit, grade, mock trend, related content, follow CTA, ask AI CTA, share, and strong disclaimer.
-- `/app/crop-watch` shows local followed crops, alert preferences, latest mock reference price, market/region, enabled status, and remove/edit controls.
+- M108.2 supersedes the original sample-price UI for normal users.
+- `/app/prices` now shows source-pending commodity cards until a real source is connected.
+- `/app/prices/:priceId` remains as a legacy deep-link fallback to the same source-pending price hub.
+- `/app/crop-watch` shows local followed crops, alert preferences, source-pending status, market/region, enabled status, and remove/edit controls.
 - Guest Memory may store followed topics and saved price references locally.
 - Crop Watch may store local alert preferences separately from Guest Memory.
-- No production price claims should appear in UI copy.
+- No production price claims or fake numeric commodity prices should appear in normal UI copy.
 
 ## Current Limitations
 

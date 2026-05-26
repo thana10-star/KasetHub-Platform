@@ -1,4 +1,4 @@
-import { Bot, Calculator, CloudSun, ClipboardList, HelpCircle, Sprout, WalletCards } from 'lucide-react';
+import { Bot, Calculator, CloudSun, ClipboardList, HelpCircle, Sprout, Tags, WalletCards } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -11,7 +11,12 @@ const guideSections = [
   {
     title: 'เริ่มจาก “ฟาร์มของฉัน”',
     icon: Sprout,
-    lines: ['กดฟาร์มของฉันจากเมนูล่าง', 'ใช้ดูข้อมูลฟาร์มและสมุดบันทึก'],
+    lines: ['เปิดฟาร์มของฉันจากหน้าแรกหรือโปรไฟล์', 'ใช้ดูข้อมูลฟาร์มและสมุดบันทึก'],
+  },
+  {
+    title: 'เช็กราคาเกษตร',
+    icon: Tags,
+    lines: ['ใช้ดูแหล่งข้อมูลราคาสินค้าเกษตร เมื่อระบบเชื่อมข้อมูลจริงแล้ว', 'ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล'],
   },
   {
     title: 'บันทึกรายรับ/รายจ่าย',
@@ -131,6 +136,7 @@ export function HelpPage() {
           <div className="grid gap-3">
             <LargeActionButton description="เปิดศูนย์รวมข้อมูลฟาร์มและสมุดบันทึก" icon={Sprout} label="เปิดฟาร์มของฉัน" to="/app/my-farm" variant="soft" />
             <LargeActionButton description="เพิ่มแปลง บันทึกรายรับรายจ่าย และผลผลิต" icon={ClipboardList} label="เปิดสมุดฟาร์ม" to="/app/farm-records" variant="white" />
+            <LargeActionButton description="ดูแหล่งข้อมูลราคาสินค้าเกษตร เมื่อระบบเชื่อมข้อมูลจริงแล้ว" icon={Tags} label="เช็กราคาเกษตร" to="/app/prices" variant="white" />
             <LargeActionButton description="คำนวณปุ๋ย ระยะปลูก ต้นทุน และผลผลิต" icon={Calculator} label="เปิดเครื่องมือ" to="/app/calculators" variant="white" />
             <LargeActionButton description="ถามเรื่องพืช ดิน ปุ๋ย โรค แมลง อากาศ และการจัดการฟาร์ม" icon={Bot} label="ถาม AI เกษตร" to="/app/ai" variant="white" />
             <LargeActionButton description="ดูอากาศและความเสี่ยงเกษตร" icon={CloudSun} label="เช็กอากาศ" to="/app/weather" variant="white" />

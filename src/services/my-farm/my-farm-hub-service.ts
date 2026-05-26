@@ -65,9 +65,9 @@ export const myFarmQuickActions: MyFarmQuickAction[] = [
   },
   {
     id: 'crop-watch',
-    label: 'ติดตามราคาพืช',
-    description: 'ดูพืชที่ติดตามและราคาอ้างอิง',
-    route: '/app/crop-watch',
+    label: 'ราคาเกษตร',
+    description: 'ดูสินค้าที่เตรียมเชื่อมแหล่งข้อมูลราคา',
+    route: '/app/prices',
     iconKey: 'price',
     tone: 'warning',
   },
@@ -222,12 +222,12 @@ function buildTimeline(input: BuildMyFarmHubInput): MyFarmTimelineItem[] {
       id: `watch-${watch.id}`,
       type: 'crop_watch' as const,
       title: watch.cropName,
-      subtitle: `${watch.latestPriceLabel} · ${watch.preferredMarketLabel}`,
+      subtitle: `รอแหล่งข้อมูลราคา · ${watch.preferredMarketLabel}`,
       dateIso: watch.updatedAt,
       dateLabel: formatThaiDate(watch.updatedAt),
-      ctaRoute: '/app/crop-watch',
-      ctaLabel: 'ดูราคาที่ติดตาม',
-      sourceLabel: 'ราคาที่ติดตาม',
+      ctaRoute: '/app/prices',
+      ctaLabel: 'เปิดราคาเกษตร',
+      sourceLabel: 'รอแหล่งข้อมูลราคา',
     })),
     ...input.guestMemory.recentAIQuestions.map((question) => ({
       id: `ai-${question.id}`,
@@ -324,14 +324,14 @@ function buildInsights(input: BuildMyFarmHubInput): MyFarmInsightCard[] {
     {
       id: 'crop-watch',
       module: 'crop_watch',
-      title: 'พืช/ราคาที่ติดตาม',
+      title: 'ราคาเกษตร',
       detail:
         input.cropWatches.length > 0
-          ? `${input.cropWatches.filter((watch) => watch.enabled).length} พืชเปิดติดตามอยู่`
-          : 'ยังไม่ได้ติดตามราคาพืช',
+          ? `${input.cropWatches.filter((watch) => watch.enabled).length} สินค้าเปิดติดตามอยู่`
+          : 'ยังไม่ได้เลือกสินค้าเกษตรที่อยากติดตาม',
       valueLabel: `${input.cropWatches.length} พืช`,
-      route: '/app/crop-watch',
-      badgeLabel: 'ราคาอ้างอิง',
+      route: '/app/prices',
+      badgeLabel: 'รอแหล่งข้อมูล',
       tone: 'gold',
     },
     {
@@ -423,10 +423,10 @@ function buildNextActions(input: BuildMyFarmHubInput): MyFarmNextAction[] {
   if (input.cropWatches.length === 0) {
     actions.push({
       id: 'watch-crop',
-      title: 'ติดตามราคาพืชที่ปลูก',
-      detail: 'เลือกพืชที่สนใจและดูราคาอ้างอิง',
+      title: 'เช็กราคาเกษตร',
+      detail: 'เลือกสินค้าที่สนใจและรอเชื่อมแหล่งข้อมูลราคาจริง',
       route: '/app/prices',
-      ctaLabel: 'เปิดราคาพืช',
+      ctaLabel: 'เปิดราคาเกษตร',
       priority: actions.length === 0 ? 'primary' : 'secondary',
     });
   }

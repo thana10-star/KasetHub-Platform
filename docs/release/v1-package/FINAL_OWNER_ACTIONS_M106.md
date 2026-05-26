@@ -36,6 +36,10 @@ This is the final owner checklist before sharing the V1 Cloudflare/PWA preview w
 
 Use `docs/release/alpha-launch/ALPHA_LAUNCH_INDEX_M107.md` to prepare the first public/YouTube alpha share, tester guide, feedback form, known limitations, and triage process.
 
+## M108 Feedback Intake Pack
+
+Use `docs/release/alpha-feedback/ALPHA_FEEDBACK_INTAKE_INDEX_M108.md` after launch to track first responses, classify blockers, enforce the fix-only policy, and decide Android wrapper timing from feedback.
+
 ## Recommended Feedback Questions
 
 - Is the first screen clear?

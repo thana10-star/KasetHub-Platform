@@ -21,7 +21,6 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('บัญชีของฉัน');
     expect(html).toContain('ข้อมูลและความเป็นส่วนตัว');
     expect(html).toContain('ช่วยเหลือ');
-    expect(html).toContain('สำหรับทีมงานหรือทดสอบ');
     expect(html).toContain('/app/my-farm');
     expect(html).toContain('ข้อมูลสำคัญของฟาร์มยังอยู่ในเครื่องนี้');
     expect(html).toContain('การซิงก์ขึ้นคลาวด์ยังไม่เปิดใช้งาน');
@@ -52,26 +51,24 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('เร็ว ๆ นี้');
   });
 
-  test('keeps internal Admin and QA links accessible inside a collapsed advanced section', () => {
+  test('hides internal links from the production Profile menu', () => {
     const html = renderToString(
       <MemoryRouter>
         <ProfilePage />
       </MemoryRouter>,
     );
+    const lowerHtml = html.toLowerCase();
 
-    const advancedIndex = html.indexOf('สำหรับทีมงานหรือทดสอบ');
-    const advancedDetails = html.match(/<details(?=[^>]*data-testid="profile-advanced-section")[^>]*>/);
-
-    expect(advancedIndex).toBeGreaterThan(-1);
-    expect(advancedDetails).not.toBeNull();
-    expect(advancedDetails?.[0]).not.toContain('open');
-    expect(html.indexOf('/app/admin')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('Admin')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('/app/qa')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('ตรวจสอบระบบ')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('/app/field-test-feedback')).toBeGreaterThan(advancedIndex);
-    expect(html.indexOf('สถานะความพร้อม Supabase staging')).toBeGreaterThan(advancedIndex);
-    expect(html).toContain('ส่วนนี้สำหรับทีมพัฒนา ไม่จำเป็นต้องใช้ในการใช้งานทั่วไป');
+    expect(html).not.toContain('data-testid="profile-advanced-section"');
+    expect(html).not.toContain('/app/admin');
+    expect(html).not.toContain('/app/qa');
+    expect(html).not.toContain('/app/field-test-feedback');
+    expect(html).not.toContain('/app/supabase-readiness');
+    expect(html).not.toContain('Admin');
+    expect(html).not.toContain('QA');
+    expect(lowerHtml).not.toContain('readiness');
+    expect(lowerHtml).not.toContain('prototype');
+    expect(lowerHtml).not.toContain('debug');
   });
 
   test('renders the farmer start guide with My Farm and Farm Records entry points', () => {
@@ -90,8 +87,11 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('ตัวอย่างชื่อแปลง: แปลงข้าวหลังบ้าน');
     expect(html).toContain('ตัวอย่างงาน: ใส่ปุ๋ยข้าว วันที่ 12 มิ.ย.');
     expect(html).toContain('เริ่มจาก “ฟาร์มของฉัน”');
-    expect(html).toContain('กดฟาร์มของฉันจากเมนูล่าง');
+    expect(html).toContain('เปิดฟาร์มของฉันจากหน้าแรกหรือโปรไฟล์');
     expect(html).toContain('ใช้ดูข้อมูลฟาร์มและสมุดบันทึก');
+    expect(html).toContain('เช็กราคาเกษตร');
+    expect(html).toContain('ใช้ดูแหล่งข้อมูลราคาสินค้าเกษตร เมื่อระบบเชื่อมข้อมูลจริงแล้ว');
+    expect(html).toContain('/app/prices');
     expect(html).toContain('บันทึกรายรับ/รายจ่าย');
     expect(html).toContain('ดูต้นทุน กำไร และผลผลิต');
     expect(html).toContain('ใช้เครื่องมือ / ถาม AI / เช็กอากาศ');
@@ -129,16 +129,18 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('ข้อมูลนี้ไม่ถูกส่งไป backend');
   });
 
-  test('bottom navigation keeps the M93 farmer-facing slots', () => {
+  test('bottom navigation uses agriculture prices instead of My Farm as the main tab', () => {
     const html = renderToString(
-      <MemoryRouter initialEntries={['/app/my-farm']}>
+      <MemoryRouter initialEntries={['/app/prices']}>
         <BottomNav />
       </MemoryRouter>,
     );
 
     expect(html).toContain('หน้าแรก');
-    expect(html).toContain('ฟาร์มของฉัน');
-    expect(html).toContain('/app/my-farm');
+    expect(html).toContain('ราคาเกษตร');
+    expect(html).toContain('/app/prices');
+    expect(html).not.toContain('ฟาร์มของฉัน');
+    expect(html).not.toContain('/app/my-farm');
     expect(html).toContain('เครื่องมือ');
     expect(html).toContain('/app/calculators');
     expect(html).toContain('ถาม AI');

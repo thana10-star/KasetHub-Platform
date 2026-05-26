@@ -2,14 +2,13 @@ import { ArrowRight, Bell, Bot, LineChart, PlaySquare, ShieldCheck, Sprout, User
 import { Link } from 'react-router-dom';
 import { ArticleCard } from '@/components/kaset/ArticleCard';
 import { HeroCard } from '@/components/kaset/HeroCard';
-import { PriceRow } from '@/components/kaset/PriceRow';
 import { QuickActionGrid } from '@/components/kaset/QuickActionGrid';
 import { VideoCard } from '@/components/kaset/VideoCard';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { articles, cropPrices, platformHighlights, videos } from '@/data/mockData';
+import { articles, platformHighlights, videos } from '@/data/mockData';
 
 export function LandingPage() {
   const featuredVideo = videos.find((video) => video.isFeatured) ?? videos[0];
@@ -84,7 +83,7 @@ export function LandingPage() {
             <div className="rounded-lg bg-white/80 p-4 shadow-soft ring-1 ring-kaset-deep/8">
               <LineChart aria-hidden="true" className="mb-3 h-5 w-5 text-kaset-gold" />
               <p className="text-2xl font-extrabold">ราคา</p>
-              <p className="text-sm text-slate-500">ข้อมูลตัวอย่าง</p>
+              <p className="text-sm text-slate-500">รอแหล่งข้อมูลจริง</p>
             </div>
             <div className="rounded-lg bg-white/80 p-4 shadow-soft ring-1 ring-kaset-deep/8">
               <ShieldCheck aria-hidden="true" className="mb-3 h-5 w-5 text-sky-600" />
@@ -111,11 +110,17 @@ export function LandingPage() {
               <QuickActionGrid />
               <SectionHeader title="วิดีโอแนะนำ" />
               <VideoCard featured video={featuredVideo} />
-              <SectionHeader title="ราคาตัวอย่าง" />
-              <Card>
-                {cropPrices.slice(0, 2).map((price) => (
-                  <PriceRow key={price.id} price={price} />
-                ))}
+              <SectionHeader title="ราคาเกษตร" />
+              <Card className="p-4">
+                <div className="flex gap-3">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                    <LineChart aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-extrabold leading-6 text-kaset-ink">รอเชื่อมแหล่งข้อมูลจริง</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล</p>
+                  </div>
+                </div>
               </Card>
               <SectionHeader title="บทความล่าสุด" />
               <ArticleCard article={articles[0]} />

@@ -83,11 +83,19 @@ Detailed Farm Records summaries, cost/yield metrics, export/restore controls, an
 
 ## M93 Elder-friendly Navigation
 
-M93 makes My Farm easier to reach from the persistent bottom navigation with a dedicated `ฟาร์มของฉัน` slot. Profile remains a secondary access path, but it is no longer the discovery surface for My Farm.
+M93 originally made My Farm easier to reach from the persistent bottom navigation with a dedicated `ฟาร์มของฉัน` slot. M108.2 supersedes that slot with `ราคาเกษตร`; My Farm remains available from Home, Profile/Help, Farm Records links, and direct routes.
 
 Profile is grouped into account, data/privacy, help, and advanced/internal testing sections. Farm Records backup/restore and local data control remain available from the data/privacy group, while Admin, QA, readiness, and staging tools move into `สำหรับทีมงานหรือทดสอบ`.
 
 M93 does not change My Farm data aggregation, Farm Records local storage, sync consent state, export/restore behavior, or any backend boundary.
+
+## M108.2 Price-first Bottom Navigation Update
+
+M108.2 supersedes the M93 bottom-nav slot. The persistent bottom navigation now prioritizes `ราคาเกษตร` at `/app/prices` because commodity price checking is expected to be a higher-frequency farmer need than opening the notebook.
+
+My Farm is not removed. `/app/my-farm`, `/app/my-farm/settings`, `/app/farm-records`, Farm Records links, local storage, export/restore, and sync-readiness sections remain intact. Home still keeps a compact `ฟาร์มของฉัน` launcher, and Profile/Help remain secondary access paths.
+
+My Farm continues to be a basic local notebook. M108.2 adds no Supabase writes, cloud sync, GPS/geolocation, AI provider execution, or new My Farm storage behavior.
 
 ## M94 Elder-friendly Settings
 

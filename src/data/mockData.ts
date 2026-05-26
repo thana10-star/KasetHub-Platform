@@ -53,8 +53,8 @@ export const quickActions: QuickAction[] = [
     accent: 'rose',
   },
   {
-    label: 'ราคาพืชผล',
-    description: 'ติดตามแนวโน้มตลาด',
+    label: 'ราคาเกษตร',
+    description: 'เตรียมเชื่อมแหล่งข้อมูลราคา',
     href: '/app/prices',
     icon: Coins,
     accent: 'earth',
@@ -204,8 +204,8 @@ export const notifications: NotificationItem[] = [
   },
   {
     id: 'notice-002',
-    title: 'ราคาอ้างอิงทุเรียนปรับขึ้น',
-    body: 'ข้อมูลตัวอย่างเดโม: ทุเรียนหมอนทอง จันทบุรี เพิ่มขึ้น 2.4% จาก mock data',
+    title: 'ราคาเกษตรกำลังเตรียมเชื่อมแหล่งข้อมูล',
+    body: 'ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล เปิดหน้า ราคาเกษตร เพื่อดูรายการสินค้าที่รองรับก่อน',
     time: 'ตัวอย่าง 38 นาทีที่แล้ว',
     type: 'price',
     unread: true,

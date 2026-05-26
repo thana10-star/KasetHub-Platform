@@ -407,7 +407,7 @@ export function MyFarmPage() {
 
         <section className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-extrabold text-kaset-ink">พืช/ราคาที่ติดตาม</h2>
+            <h2 className="text-lg font-extrabold text-kaset-ink">ราคาเกษตรที่ติดตาม</h2>
             <Badge tone="gold">{hub.cropWatch.watches.length} พืช</Badge>
           </div>
           {hub.cropWatch.watches.length > 0 ? (
@@ -420,7 +420,7 @@ export function MyFarmPage() {
                   <div className="min-w-0 flex-1">
                     <h3 className="font-extrabold leading-6 text-kaset-ink">{watch.cropName}</h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      {watch.latestPriceLabel} · {watch.preferredMarketLabel}
+                      รอแหล่งข้อมูลราคา · {watch.preferredMarketLabel}
                     </p>
                   </div>
                   <StatusPill tone={watch.enabled ? 'success' : 'neutral'}>{watch.enabled ? 'เปิด' : 'ปิด'}</StatusPill>
@@ -429,8 +429,8 @@ export function MyFarmPage() {
             ))
           ) : (
             <EmptyAction
-              cta="ติดตามราคาพืช"
-              detail="ดูราคาอ้างอิงและตรวจสอบตลาดจริงก่อนตัดสินใจ"
+              cta="เช็กราคาเกษตร"
+              detail="ดูรายการสินค้าที่เตรียมเชื่อมแหล่งข้อมูลราคาจริง"
               title="ยังไม่มีพืชที่ติดตาม"
               to="/app/prices"
             />

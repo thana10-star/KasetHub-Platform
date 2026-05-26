@@ -6,7 +6,6 @@ import {
   PlayCircle,
   RotateCcw,
   SendHorizonal,
-  Server,
   ShieldAlert,
   Sparkles,
 } from 'lucide-react';
@@ -14,7 +13,6 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AICreditBalanceCard } from '@/components/kaset/AICreditBalanceCard';
 import { AILimitReachedSheet } from '@/components/kaset/AILimitReachedSheet';
-import { RewardedAdUnlockCard } from '@/components/kaset/RewardedAdUnlockCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -32,20 +30,9 @@ import {
 } from '@/services/ai/ai-farmer-assistant-copy';
 import { buildAIRequestPlan } from '@/services/ai/ai-request-planner';
 import { askTextQuestion, getAIProxyAdapterStatus } from '@/services/ai-proxy/ai-proxy-adapter';
-import { aiMockScenarioDescriptions, aiMockScenarioLabels } from '@/services/ai-proxy/ai-proxy-fixtures';
-import type { AIMockScenario, AIProxyStatus, AITextProxyResponse } from '@/services/ai-proxy/ai-proxy.types';
+import type { AIProxyStatus, AITextProxyResponse } from '@/services/ai-proxy/ai-proxy.types';
 
 const promptIcons = [Leaf, Sparkles, PlayCircle, AlertTriangle, Cpu, Bot];
-
-const aiScenarioOptions: AIMockScenario[] = [
-  'success',
-  'insufficient_credits',
-  'safety_blocked',
-  'failed_retryable',
-  'low_confidence',
-  'no_plant_detected',
-  'safety_warning',
-];
 
 const statusTone: Record<AIProxyStatus, 'green' | 'gold' | 'rose' | 'neutral'> = {
   success: 'green',
@@ -62,50 +49,6 @@ const statusCopy: Record<AIProxyStatus, string> = {
   safety_blocked: 'บล็อกเพื่อความปลอดภัย',
   failed: 'ล้มเหลว',
 };
-
-function ScenarioSelector({
-  scenario,
-  setScenario,
-}: {
-  scenario: AIMockScenario;
-  setScenario: (scenario: AIMockScenario) => void;
-}) {
-  return (
-    <Card className="p-4">
-      <div className="flex items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-          <Server aria-hidden="true" className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">ตัวเลือกคำตอบสำหรับทีมงาน</h2>
-            <Badge tone="neutral">สำหรับทีมงาน</Badge>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            ใช้ตรวจคำตอบหลายแบบในเครื่องนี้โดยไม่ส่งข้อมูลออกจากหน้าเว็บ
-          </p>
-        </div>
-      </div>
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {aiScenarioOptions.map((option) => (
-          <button
-            className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-bold transition ${
-              scenario === option ? 'bg-kaset-deep text-white shadow-soft' : 'bg-kaset-mist text-kaset-deep'
-            }`}
-            key={option}
-            onClick={() => setScenario(option)}
-            type="button"
-          >
-            {aiMockScenarioLabels[option]}
-          </button>
-        ))}
-      </div>
-      <p className="mt-3 rounded-lg bg-kaset-mist p-3 text-xs leading-5 text-slate-600">
-        {aiMockScenarioDescriptions[scenario]}
-      </p>
-    </Card>
-  );
-}
 
 function ProxyResponseCard({
   question,
@@ -176,19 +119,6 @@ function ProxyResponseCard({
           {showChemicalCaution ? <p className="mt-2 font-bold">{AI_CHEMICAL_SAFETY_NOTE}</p> : null}
         </div>
 
-        <details className="rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-          <summary className="cursor-pointer font-extrabold text-slate-800">ข้อมูลเพิ่มเติมสำหรับทีมงาน</summary>
-          <div className="mt-2 grid gap-1">
-            <p>Request ID: {response.requestId}</p>
-            <p>Credit cost: {response.creditCost}</p>
-            <p>Credit status: {response.creditValidation.message}</p>
-            <p>Model plan: {response.modelPlan.selectedModelTier}</p>
-            <p>Network: {response.logsPreview.networkCalls ? 'yes' : 'no'}</p>
-            <p>Provider key: {response.logsPreview.providerKeyLocation}</p>
-            <p>Would write: {response.logsPreview.wouldWriteTables.join(', ')}</p>
-          </div>
-        </details>
-
         {response.retryable ? (
           <Button className="w-full" onClick={onRetry} variant="soft">
             <RotateCcw aria-hidden="true" className="h-4 w-4" />
@@ -200,39 +130,10 @@ function ProxyResponseCard({
   );
 }
 
-function AIProxyModeCard() {
-  const status = getAIProxyAdapterStatus();
-
-  return (
-    <Card className="p-4">
-      <div className="flex gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-          <Server aria-hidden="true" className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-extrabold text-kaset-ink">สถานะผู้ช่วย AI</h2>
-            <Badge tone={status.mode === 'local_fixture' ? 'green' : 'gold'}>{status.modeLabel}</Badge>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{status.readinessLabel}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            การเชื่อมต่อบริการ AI: {status.backendProxyEnabled ? 'เปิดไว้สำหรับตรวจระบบ' : 'ปิดอยู่'} · ไม่เก็บ provider keys ในหน้าเว็บ
-          </p>
-          <Link className="mt-3 inline-flex text-sm font-bold text-kaset-deep" to="/app/ai-proxy-status">
-            ดูสถานะระบบ AI
-          </Link>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 export function AIPage() {
   const [question, setQuestion] = useState('');
   const [savedMessage, setSavedMessage] = useState('');
-  const [unlockMessage, setUnlockMessage] = useState('');
   const [showLimitReached, setShowLimitReached] = useState(false);
-  const [scenario, setScenario] = useState<AIMockScenario>('success');
   const [proxyResponse, setProxyResponse] = useState<AITextProxyResponse | null>(null);
   const { addRecentAIQuestion, saveItem } = useGuestMemory();
   const { addUsageLog, consumeCredits, grantRewardedCredit, summary } = useAICredits();
@@ -247,7 +148,6 @@ export function AIPage() {
         sourceRoute: '/app/ai',
       },
     });
-    setUnlockMessage('เพิ่มเครดิตจากโฆษณาจำลองแล้ว 1 คำถาม');
     setShowLimitReached(false);
   }
 
@@ -301,7 +201,7 @@ export function AIPage() {
         ...metadata,
       },
     });
-    setSavedMessage('บันทึกคำถาม ประวัติการใช้เครดิต และ response preview ไว้ในเครื่องนี้แล้ว');
+    setSavedMessage('บันทึกคำถามและประวัติการใช้เครดิตไว้ในเครื่องนี้แล้ว');
     setShowLimitReached(false);
   }
 
@@ -316,7 +216,7 @@ export function AIPage() {
     const response = askTextQuestion({
       question: cleanQuestion,
       creditSummary: summary,
-      scenario,
+      scenario: 'success',
     });
 
     setProxyResponse(response);
@@ -432,23 +332,6 @@ export function AIPage() {
             </div>
           </div>
         </Card>
-
-        <details className="group rounded-lg border border-slate-200 bg-slate-50/80">
-          <summary className="flex min-h-[68px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700">
-              <Server aria-hidden="true" className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-extrabold leading-6 text-slate-800">ข้อมูลเพิ่มเติม / สำหรับทีมงาน</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">สถานะระบบและตัวเลือกคำตอบ ไม่จำเป็นต้องใช้ตอนถามทั่วไป</p>
-            </div>
-          </summary>
-          <div className="grid gap-3 border-t border-slate-200 p-3">
-            <AIProxyModeCard />
-            <ScenarioSelector scenario={scenario} setScenario={setScenario} />
-            <RewardedAdUnlockCard message={unlockMessage} onUnlock={handleRewardedUnlock} />
-          </div>
-        </details>
 
         {proxyResponse ? <ProxyResponseCard question={question} onRetry={() => askMockAI(question)} response={proxyResponse} /> : null}
 

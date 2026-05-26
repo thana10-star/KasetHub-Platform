@@ -116,7 +116,7 @@ const reviewedRoutes: Array<{ label: string; route: AppRoute }> = [
   { label: 'ชุมชน', route: '/app/community' },
   { label: 'กติกาชุมชน', route: '/app/community-rules' },
   { label: 'ศูนย์รายงานชุมชน', route: '/app/moderation-center' },
-  { label: 'ราคาพืชผล', route: '/app/prices' },
+  { label: 'ราคาเกษตร', route: '/app/prices' },
   { label: 'บทความ', route: '/app/articles' },
   { label: 'คลังความรู้เกษตรออฟไลน์', route: '/app/articles/offline' },
   { label: 'QA คลังบทความออฟไลน์', route: '/app/articles/offline-qa' },

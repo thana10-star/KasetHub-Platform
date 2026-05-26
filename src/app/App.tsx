@@ -68,7 +68,6 @@ import { OfflineArticleReleaseAuditPage } from '@/routes/OfflineArticleReleaseAu
 import { OfflinePilotArticleDraftReviewPage } from '@/routes/OfflinePilotArticleDraftReviewPage';
 import { OwnershipRlsGatePage } from '@/routes/OwnershipRlsGatePage';
 import { PlantSpacingCalculatorPage } from '@/routes/PlantSpacingCalculatorPage';
-import { PriceDetailPage } from '@/routes/PriceDetailPage';
 import { PricesPage } from '@/routes/PricesPage';
 import { ProfilePage } from '@/routes/ProfilePage';
 import { QAPage } from '@/routes/QAPage';
@@ -151,7 +150,7 @@ export default function App() {
         <Route path="community-rules" element={<CommunityRulesPage />} />
         <Route path="moderation-center" element={<ModerationCenterPage />} />
         <Route path="prices" element={<PricesPage />} />
-        <Route path="prices/:priceId" element={<PriceDetailPage />} />
+        <Route path="prices/:priceId" element={<PricesPage />} />
         <Route path="crop-watch" element={<CropWatchPage />} />
         <Route path="articles" element={<ArticlesPage />} />
         <Route path="articles/offline" element={<OfflineAgriArticlesPage />} />

@@ -119,23 +119,23 @@ No cloud sync for V1 unless separately approved.
 
 ## 10. Navigation Recommendation
 
-Current bottom nav can stay:
+M108.2 updates the bottom nav to prioritize a higher-frequency farmer need:
 
 - `หน้าแรก`
-- `ฟาร์มของฉัน`
+- `ราคาเกษตร`
 - `เครื่องมือ`
 - `ถาม AI`
 - `โปรไฟล์`
 
-AI is already visible in bottom nav. For the next small UX pass, Home should make the first screen feel more AI-first without making the page crowded.
+AI remains visible in bottom nav. My Farm stays available from Home and secondary locations, while the bottom nav sends farmers to `/app/prices`.
 
 Recommended Home priority:
 
 1. Ask AI
 2. Weather
-3. Tools
-4. My Farm
-5. Knowledge/help
+3. Price hub or Tools
+4. Tools
+5. My Farm compact
 
 Do not re-expand My Farm on Home.
 

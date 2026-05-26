@@ -6,9 +6,9 @@ M22 adds a local-first crop watch and price alert preference foundation. It is U
 
 - Watches are stored only in the current browser.
 - Alert preferences are mock preferences, not active push notifications.
-- Mock alerts in `/app/notifications` are sample/demo rows.
-- Prices remain `ราคาอ้างอิง`.
-- Required disclaimer stays visible: `ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ`
+- M108.2 keeps price/watch surfaces source-pending until a real source is connected.
+- Alerts in `/app/notifications` must not show fake numeric commodity prices.
+- Required non-guarantee copy remains required once real source prices are displayed: `ราคาจริงขึ้นกับพื้นที่ เกรดสินค้า ความชื้น ฤดูกาล และผู้รับซื้อ`
 
 ## Local Files
 
@@ -26,7 +26,7 @@ The service uses a versioned localStorage key and safe migration fallback. Scree
 - crop key and crop name
 - linked price fixture ID
 - preferred market and region
-- latest demo/reference price label
+- source-pending price status for normal UI
 - source label
 - reliability level
 - enabled/disabled status
@@ -53,26 +53,24 @@ The service uses a versioned localStorage key and safe migration fallback. Scree
 
 `/app/prices/:priceId`:
 
-- shows a crop watch card
-- shows an alert preference card
-- includes target price input for demo preference testing
-- keeps the AI price explanation CTA safety-labeled
-- repeats the strong `ราคาอ้างอิง` disclaimer
+- remains available as a legacy deep link
+- renders the source-pending price hub while no real source is connected
+- does not show sample price values, fake trends, or target-price testing controls in the normal UI
 
 `/app/crop-watch`:
 
 - shows followed crops
 - shows enabled alert preferences
-- shows latest mock price, market, region, and source
+- shows source-pending price status, market, region, and source context
 - supports enabling/disabling and removing watches
-- links back to price detail pages
+- links back to `/app/prices`
 - explains local-only storage and no real push
 
 `/app/notifications`:
 
 - is upgraded in M35 into the unified local Notification Center
-- includes crop price alert examples from Crop Watch or fixture fallback
-- labels them as `ราคาอ้างอิง` demo/sample
+- includes crop price alert entries from Crop Watch or fixture fallback
+- uses source-pending wording until a real price source is connected
 - does not claim any push delivery occurred
 
 ## Guest Memory Relationship

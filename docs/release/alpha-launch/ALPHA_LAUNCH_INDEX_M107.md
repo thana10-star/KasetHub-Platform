@@ -69,3 +69,7 @@ Alternative:
 - `YOUTUBE_COMMUNITY_POST_DRAFT_M107.md`
 - `ALPHA_KNOWN_LIMITATIONS_M107.md`
 - `ALPHA_FEEDBACK_TRIAGE_PLAN_M107.md`
+
+## M108 Feedback Intake Link
+
+After launch, use `docs/release/alpha-feedback/ALPHA_FEEDBACK_INTAKE_INDEX_M108.md` to track responses, summarize feedback, classify blockers, and decide what to fix or defer.

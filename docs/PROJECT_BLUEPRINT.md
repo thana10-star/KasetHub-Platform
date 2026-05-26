@@ -73,6 +73,20 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - Keeps the V1 alpha path on Cloudflare/PWA preview and focuses the first feedback loop on usability, mobile readability, AI/Weather usefulness, simple Farm Records clarity, and privacy/support trust.
 - Defers new feature expansion, AI provider enablement, Supabase writes, cloud sync, GPS/geolocation, OCR, notifications, receipt upload, and Android/iOS wrapper work until after feedback review.
 
+## M108 Alpha Feedback Intake And Blocker Triage
+
+- Creates `docs/release/alpha-feedback/` with the response tracker, summary template, blocker triage board, fix-only policy, and Android wrapper decision framework.
+- Seeds only known owner-pending blockers and placeholder feedback rows because no real alpha responses were provided in M108.
+- Keeps the first response loop constrained to blockers, important confusing UX, safety/privacy clarity, and evidence-based wrapper timing.
+
+## M108.2 Bottom Nav Market Price Replacement
+
+- Bottom navigation now uses `หน้าแรก`, `ราคาเกษตร`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`.
+- `/app/prices` is the main price entry and shows source-pending commodity cards for rice, corn, cassava, sugarcane, rubber, palm oil, chili, and vegetables/fruit.
+- `/app/prices` and legacy `/app/prices/:priceId` deep links do not show fake numeric prices while no real source is connected.
+- My Farm remains a basic local notebook reachable from Home, Profile/Help, `/app/my-farm`, and Farm Records links.
+- No Supabase writes, cloud sync, GPS/geolocation, AI provider enablement, API keys, or backend price system is added.
+
 ## M53 Calculator Export/Share And Rewarded Ads Planning
 
 - Adds structured `CalculatorResultSummary` models for copy/share/save flows.
@@ -365,18 +379,18 @@ Phone OTP should become the primary account creation path for non-tech farmers. 
 ## M21 Crop Price Data Source Foundation
 
 - `src/services/crop-prices` defines crop price source, snapshot, item, market, region, unit, quality grade, reliability, and source status models.
-- `/app/prices` shows local demo/reference price cards with search, filters, badges, save/share/follow, and strong `ราคาอ้างอิง` disclaimers.
-- `/app/prices/:priceId` shows detail, latest reference price, source/date, market/region, unit, grade, mock trend, related content, and AI CTA safety copy.
+- M108.2 supersedes the old sample-price UI: `/app/prices` now shows a source-pending `ราคาเกษตร` hub until a real source is connected.
+- `/app/prices/:priceId` remains a legacy deep-link route, but it falls back to the source-pending price hub instead of showing sample values.
 - Future sources include OAE, DIT, ตลาดไท, local market manual reports, and community reports, but no source is connected in M21.
 - Docs: `docs/CROP_PRICE_DATA_SOURCE_FOUNDATION.md` and `docs/CROP_PRICE_SOURCE_INTEGRATION_PLAN.md`.
 
 ## M22 Crop Watch + Price Alert UX Foundation
 
 - `crop-watch.types.ts`, `crop-watch-service.ts`, and `useCropWatch.ts` add versioned localStorage crop watch state.
-- Watches store followed crop, preferred market/region, latest mock reference price, enabled status, and alert preferences.
+- Watches store followed crop, preferred market/region, enabled status, and alert preferences; normal M108.2 UI avoids showing old sample price values while source is pending.
 - Alert preferences support `price_up`, `price_down`, `target_price`, and `weekly_summary`.
-- `/app/crop-watch` shows followed crops, alert preferences, latest mock price, enable/disable, remove, and links back to price details.
-- `/app/notifications` includes mock crop price alert examples with demo/sample labels.
+- `/app/crop-watch` shows followed crops, alert preferences, source-pending status, enable/disable, remove, and links back to `/app/prices`.
+- `/app/notifications` price alerts use source-pending wording until a real source is connected.
 - No real price API, push notification, backend job, Supabase write, or production price claim is enabled.
 
 ## M22.5 Real Owner YouTube Channel Link
@@ -644,7 +658,7 @@ M49-M60 keep calculator behavior local-only. Future production calculators can s
 
 ### Notification Center Future
 
-M35 keeps notifications as a local/mock in-app center. Future production delivery should use backend-generated `notification_events`, per-channel preferences, quiet hours, rate limits, digest jobs, and delivery logs. Browser local preferences are not production consent. Price/weather notifications must cite source context and stay clear about `ราคาอ้างอิง` or forecast uncertainty before push, LINE, SMS, or email delivery is enabled.
+M35 keeps notifications as a local/mock in-app center. Future production delivery should use backend-generated `notification_events`, per-channel preferences, quiet hours, rate limits, digest jobs, and delivery logs. Browser local preferences are not production consent. Price notifications must cite source context and must not invent commodity prices; weather notifications must stay clear about forecast uncertainty before push, LINE, SMS, or email delivery is enabled.
 
 ### LINE Login and Account Linking Boundary
 
@@ -1103,7 +1117,7 @@ M92 remains UX/navigation only: no Supabase schema/read/write, no sync queue, no
 
 ## M93 Elder-Friendly Navigation Cleanup
 
-M93 reduces profile/menu clutter and makes My Farm easier to discover without relying on hidden settings. Bottom navigation now uses the farmer-facing hierarchy `หน้าแรก`, `ฟาร์มของฉัน`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`.
+M93 reduces profile/menu clutter and made My Farm easier to discover without relying on hidden settings. M108.2 supersedes the M93 bottom-nav slot: bottom navigation now uses the farmer-facing hierarchy `หน้าแรก`, `ราคาเกษตร`, `เครื่องมือ`, `ถาม AI`, and `โปรไฟล์`. My Farm remains a basic local notebook from Home, Profile/Help, and direct routes.
 
 The Profile page now groups navigation into `บัญชีของฉัน`, `ข้อมูลและความเป็นส่วนตัว`, `ช่วยเหลือ`, and `สำหรับทีมงานหรือทดสอบ`. Admin, QA, Supabase readiness, staging, and internal tools remain accessible, but they are separated from the main farmer-facing links.
 

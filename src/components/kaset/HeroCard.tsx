@@ -11,7 +11,7 @@ export function HeroCard() {
         <div className="relative">
           <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1 text-xs font-semibold">
             <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
-            ตัวอย่างแพลตฟอร์ม M01
+            KasetHub
           </span>
           <h2 className="max-w-[18rem] text-2xl font-extrabold leading-snug">
             แหล่งความรู้เพื่อเกษตรกรไทย ครบ จบ ในที่เดียว

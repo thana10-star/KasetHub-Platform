@@ -66,10 +66,10 @@ describe('M89 farm records sync consent prototype state', () => {
     expect(readiness.canEnableCloudSync).toBe(false);
   });
 
-  test('warnings clearly state prototype-only and not legal consent boundaries', () => {
+  test('warnings clearly state local-only and not legal consent boundaries', () => {
     const warnings = getSyncConsentPrototypeWarnings().join(' ');
 
-    expect(warnings).toContain('local prototype');
+    expect(warnings).toContain('local planning state');
     expect(warnings).toContain('not legal consent');
     expect(warnings).toContain('Cloud sync is not available');
     expect(warnings).toContain('no farm records are uploaded');

@@ -4,7 +4,6 @@ import {
   BookOpenCheck,
   Bot,
   Calculator,
-  ChevronDown,
   ChevronRight,
   ClipboardCheck,
   CloudOff,
@@ -402,33 +401,6 @@ function ProfileMenuGroupCard({ group }: { group: ProfileMenuGroup }) {
   );
 }
 
-function ProfileAdvancedGroupCard({ group }: { group: ProfileMenuGroup }) {
-  return (
-    <Card className="overflow-hidden border-slate-200 bg-slate-50/80 shadow-none">
-      <details className="group" data-testid="profile-advanced-section">
-        <summary className="flex min-h-[76px] cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
-          <span className={`mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg ${groupToneClass[group.tone]}`}>
-            <ClipboardCheck aria-hidden="true" className="h-5 w-5" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-extrabold leading-7 text-slate-800">{group.title}</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">{group.subtitle}</p>
-          </div>
-          <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" />
-        </summary>
-        <div className="border-t border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-sm leading-6 text-slate-600">ส่วนนี้สำหรับทีมพัฒนา ไม่จำเป็นต้องใช้ในการใช้งานทั่วไป</p>
-        </div>
-        <div className="bg-white/80">
-          {group.items.map((item) => (
-            <ProfileMenuRow item={item} key={`${group.title}-${item.label}`} tone={group.tone} />
-          ))}
-        </div>
-      </details>
-    </Card>
-  );
-}
-
 export function ProfilePage() {
   const { savedCount } = useSavedArticles();
   const { savedCount: savedVideoCount } = useSavedVideos();
@@ -437,7 +409,6 @@ export function ProfilePage() {
   const accountStatus = getAccountStatus(state);
 
   const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
-  const advancedMenuGroup = profileMenuGroups.find((group) => group.tone === 'advanced');
 
   return (
     <div>
@@ -510,8 +481,6 @@ export function ProfilePage() {
         {primaryMenuGroups.map((group) => (
           <ProfileMenuGroupCard group={group} key={group.title} />
         ))}
-
-        {advancedMenuGroup ? <ProfileAdvancedGroupCard group={advancedMenuGroup} /> : null}
 
         <Card className="p-4">
           <div className="flex gap-3">

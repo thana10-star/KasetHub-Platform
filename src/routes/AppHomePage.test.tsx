@@ -21,6 +21,21 @@ describe('M92.1 compact home Farm Hub launcher', () => {
     expect(html).toContain('บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต');
   });
 
+  test('links to the production price hub without rendering fixture prices on Home', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <AppHomePage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('ราคาเกษตร');
+    expect(html).toContain('/app/prices');
+    expect(html).toContain('ดูรายการสินค้าที่เตรียมเชื่อมแหล่งข้อมูลราคา');
+    expect(html).not.toContain('15,150');
+    expect(html).not.toContain('3.15');
+    expect(html).not.toContain('ราคาอ้างอิง');
+  });
+
   test('renders a prominent AI-first farmer entry without crowding Home', () => {
     const html = renderToString(
       <MemoryRouter>

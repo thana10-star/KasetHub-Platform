@@ -1,11 +1,11 @@
-import { Bot, Calculator, Home, Sprout, UserRound } from 'lucide-react';
+import { Bot, Calculator, Home, Tags, UserRound } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cx } from '@/components/ui/classNames';
 import type { AppRoute } from '@/types/kaset';
 
 const items: Array<{ label: string; href: AppRoute; icon: typeof Home }> = [
   { label: 'หน้าแรก', href: '/app', icon: Home },
-  { label: 'ฟาร์มของฉัน', href: '/app/my-farm', icon: Sprout },
+  { label: 'ราคาเกษตร', href: '/app/prices', icon: Tags },
   { label: 'เครื่องมือ', href: '/app/calculators', icon: Calculator },
   { label: 'ถาม AI', href: '/app/ai', icon: Bot },
   { label: 'โปรไฟล์', href: '/app/profile', icon: UserRound },
@@ -26,14 +26,14 @@ export function BottomNav() {
             <NavLink
               aria-label={item.label}
               className={cx(
-                'flex min-h-[64px] flex-col items-center justify-center gap-1.5 rounded-lg px-1 text-[12px] font-bold transition',
+                'flex min-h-[64px] flex-col items-center justify-center gap-1.5 rounded-lg px-1 text-center text-[11px] font-bold leading-4 transition',
                 isActive ? 'bg-kaset-mint text-kaset-deep' : 'text-slate-500 hover:bg-kaset-mint/70',
               )}
               key={item.href}
               to={item.href}
             >
               <Icon aria-hidden="true" className="h-5 w-5" strokeWidth={2.2} />
-              <span>{item.label}</span>
+              <span className="break-words">{item.label}</span>
             </NavLink>
           );
         })}

@@ -4,7 +4,7 @@ KasetHub Platform is a premium agriculture knowledge, community, and AI assistan
 
 M35-M44 continue the safe staging path with local notifications, real backend phase planning, the `staging/supabase` branch workflow, local env safety checks, manual Supabase project/SQL prep, the M41 real staging setup walkthrough, the successful M42 manual execution review, the M43 read-only public table probe, and the M44 public read/RLS review checkpoint. M49-M60 return to farmer utility by adding, hardening, planning, testing, polishing, QA-hardening, AI-boundary planning, backend architecture review, a no-network adapter contract, staging endpoint checklists, an Edge Function contract draft, and a no-fetch dry-run plan for crop-aware calculator foundations while keeping all storage and summaries local. M61-M64 return to the production-readiness roadmap with Phone Auth staging planning, a controlled staging auth boundary, an ownership/RLS sync gate, and a local-only Guest Memory sync dry-run payload builder. M65-M74 build offline article/CMS readiness, M75 adds the first flag-gated real Open-Meteo weather API integration, M76-M77 harden weather cache/source UX, M78 adds planning-only agriculture weather risk readiness, M79 adds expert-review readiness for those weather risk rules, M80 adds release audit/governance readiness, M81-M82 add controlled AI text proxy readiness without provider calls by default, M83 adds local farm records and ledger storage, M84 adds the local farmer-facing records UI, M85 adds local edit/timeline/My Farm integration, M86 adds local export/data-control readiness, M87 adds validated local restore plus sync consent gating, M88 adds restore recovery plus sync architecture review, M89 adds the non-writing sync consent UX prototype, M90 adds the local Farm Cost Dashboard, M91 adds local harvest/yield and cost-per-kg readiness, M92 adds a Home-first Farm Hub entry, M93 cleans up elderly-friendly navigation, M94 polishes settings, M95 adds start-guide/field-test readiness, M96 simplifies the first-use Farm Records flow, M97 polishes the first Add Plot/Add Activity flow, M97.1 makes Farm Records basic-first, M97.2 reduces test/prototype wording on normal user-facing pages without enabling backend behavior, M98 keeps that basic flow visually calmer on mobile, M98.1 makes calculators more mobile-safe and useful without adding risky chemical recommendations, M99 verifies the merged `main` branch with lint/build/test plus route smoke, M100 documents Weather Open-Meteo env/Cloudflare readiness for V1 Store Release Mode, M100.1 sets the AI-first V1 release plan, M101 makes Home and `/app/ai` more farmer-facing with prompt examples, fallback copy, and safety notes, and M102 documents the Cloudflare live Weather enable steps plus V1 release gate. The project still must not commit real keys, expose service-role keys, enable production auth/cloud sync, run SQL automatically, write Supabase data, run real ads, call AI APIs, request GPS/geolocation, store personal precise location, or change production behavior.
 
-M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Records finance data. M91 adds local harvest records, yield summaries, cost per kg, income per kg, profit per kg, and recorded-harvest break-even metrics. M92 brings My Farm onto Home, M92.1 compacts it into a simple launcher, M93 adds the dedicated My Farm bottom-nav slot, M94 makes Profile a calmer settings page, M95 adds `/app/help` plus `/app/field-test-feedback`, M96 adds a clearer first-use path, M97 makes the first Add Plot/Add Activity forms calmer, M97.1 makes the default Farm Records presentation basic-first with advanced content lower, M97.2 treats Farm Records as real local user data in normal app copy, M98 keeps My Farm details secondary while tightening Thai-first Farm Records labels, M98.1 fixes calculator mobile affordance/overflow and shifts the weak chemical-mix surface toward a safer label-only tool plus fertilizer/fertigation planning, and M100 clarifies that Weather can use Open-Meteo when Cloudflare/frontend flags are enabled while staying backup-data safe by default. These remain local estimates/navigation/settings/help surfaces without AI, Supabase reads/writes, cloud sync, GPS, receipt upload, tax filing, backend feedback submission, or official accounting/loan claims.
+M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Records finance data. M91 adds local harvest records, yield summaries, cost per kg, income per kg, profit per kg, and recorded-harvest break-even metrics. M92 brings My Farm onto Home, M92.1 compacts it into a simple launcher, M93 temporarily added the dedicated My Farm bottom-nav slot, M108.2 replaces that slot with `ราคาเกษตร`, M94 makes Profile a calmer settings page, M95 adds `/app/help` plus `/app/field-test-feedback`, M96 adds a clearer first-use path, M97 makes the first Add Plot/Add Activity forms calmer, M97.1 makes the default Farm Records presentation basic-first with advanced content lower, M97.2 treats Farm Records as real local user data in normal app copy, M98 keeps My Farm details secondary while tightening Thai-first Farm Records labels, M98.1 fixes calculator mobile affordance/overflow and shifts the weak chemical-mix surface toward a safer label-only tool plus fertilizer/fertigation planning, and M100 clarifies that Weather can use Open-Meteo when Cloudflare/frontend flags are enabled while staying backup-data safe by default. These remain local estimates/navigation/settings/help surfaces without AI, Supabase reads/writes, cloud sync, GPS, receipt upload, tax filing, backend feedback submission, or official accounting/loan claims.
 
 ## Tech Stack
 
@@ -102,6 +102,23 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Includes an owner launch checklist, Thai-first tester route guide, Google Form-style feedback draft, YouTube community post drafts, known limitations, and a feedback triage plan.
 - Keeps first feedback focused on Home, AI, Weather, Tools, My Farm, Farm Records, Help/Profile, mobile readability, and trust/privacy clarity.
 - Defers broad new features, AI provider enablement, Supabase writes, cloud sync, GPS, OCR, receipt upload, notifications, and wrapper implementation until after feedback is reviewed.
+
+## M108 Alpha Feedback Intake + Blocker Triage
+
+- Adds `docs/release/alpha-feedback/` for first-response intake, response tracking, summary templating, blocker triage, fix-only policy, and Android wrapper decision timing.
+- Seeds the triage board with known owner-pending blockers: privacy URL, support contact, app icon, screenshots, accepted-disabled AI provider, and Android wrapper timing.
+- Keeps the first alpha response loop focused on blockers, confusing UX, safety/privacy clarity, and mobile readability.
+- Does not invent feedback, collect sensitive data, enable AI/provider paths, write Supabase data, add GPS, add sync, or implement a wrapper.
+
+## M108.2 Bottom Nav Market Price Replacement
+
+- Replaces the persistent bottom-nav `ฟาร์มของฉัน` tab with `ราคาเกษตร` linking to `/app/prices`.
+- Keeps `/app/my-farm`, `/app/farm-records`, and My Farm local data/storage intact, with compact My Farm access still on Home and secondary access from Profile/Help.
+- Changes `/app/prices` into a production-facing source-pending price hub for key Thai commodity categories.
+- Keeps `/app/prices/:priceId` deep links available, but they render the same safe price hub while a real source is pending.
+- Shows no fake numeric commodity prices, fake trends, random updates, or invented source timestamps.
+- Documents the real price source requirements in `docs/prices/AGRICULTURE_PRICE_SOURCE_READINESS_M108_2.md`.
+- Adds no Supabase writes, cloud sync, GPS/geolocation, AI provider enablement, API keys, or broad backend system.
 
 ## M76 Weather QA Cache And Coarse Location
 
@@ -388,8 +405,8 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 ## M21 Crop Price Data Source Foundation
 
 - Adds typed crop price sources, snapshots, markets, regions, units, grades, reliability levels, and source statuses in `src/services/crop-prices`
-- Upgrades `/app/prices` with search, filters, source/reliability badges, save/share/follow actions, and demo/reference disclaimers
-- Adds `/app/prices/:priceId` for detail, mock trends, related content, AI CTA, and strong `ราคาอ้างอิง` safety copy
+- M108.2 supersedes the old sample-price UI: `/app/prices` is now a source-pending `ราคาเกษตร` hub until a real price source is connected
+- Keeps `/app/prices/:priceId` as a legacy deep-link fallback to the same safe price hub
 - Plans OAE, DIT, ตลาดไท, local market manual reports, and future community reports without calling any real source
 - Docs: `docs/CROP_PRICE_DATA_SOURCE_FOUNDATION.md` and `docs/CROP_PRICE_SOURCE_INTEGRATION_PLAN.md`
 
@@ -398,8 +415,8 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Adds versioned local crop watch state in `src/services/crop-prices/crop-watch-service.ts`
 - Adds `useCropWatch()` for local followed crops, preferred market/region, enabled status, and alert preferences
 - Supports `price_up`, `price_down`, `target_price`, and `weekly_summary` preferences
-- Adds `/app/crop-watch` for followed crops, latest mock price, alert preferences, enable/disable, and remove actions
-- Updates `/app/prices`, `/app/prices/:priceId`, `/app/profile`, and `/app/notifications` with local-only crop watch and mock alert UX
+- M108.2 keeps `/app/crop-watch` local, but normal price/watch surfaces now show source-pending status instead of sample price values
+- Updates `/app/prices`, `/app/prices/:priceId`, `/app/profile`, and `/app/notifications` with local-only crop watch and source-pending price UX
 - Docs: `docs/CROP_WATCH_PRICE_ALERT_UX.md`
 
 ## M22.5 Real Owner YouTube Channel Link
@@ -596,9 +613,9 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - `/app/community` - farmer community feed
 - `/app/community-rules` - local community rules and safety policy
 - `/app/moderation-center` - local/mock community moderation center
-- `/app/prices` - crop price tracking
-- `/app/prices/:priceId` - crop price detail and watch preferences
-- `/app/crop-watch` - local crop watch and demo alert preferences
+- `/app/prices` - agriculture price hub with source-pending commodity categories and no fake numeric prices
+- `/app/prices/:priceId` - legacy price detail deep-link fallback to the source-pending price hub
+- `/app/crop-watch` - local crop watch preferences with source-pending price status
 - `/app/articles` - blog/news list
 - `/app/articles/:articleId` - article detail and offline body cache preview
 - `/app/content-admin-preview` - local content admin preview
@@ -696,7 +713,7 @@ M20 adds content planning screens and services only. It does not add a productio
 
 ## Crop Price and Alert Boundary
 
-M21-M22 price and watch features are local-only. They do not call OAE, DIT, ตลาดไท, market websites, push notification services, Supabase, or backend jobs. All prices and alerts are demo/reference samples and must use `ราคาอ้างอิง` language.
+M21-M22 price and watch foundations remain local-only. M108.2 changes the normal farmer-facing price surface to a source-pending `ราคาเกษตร` hub. The app does not call OAE, DIT, ตลาดไท, market websites, push notification services, Supabase, or backend jobs. Until a real source is connected, normal price surfaces must say source pending and must not show fake numeric commodity prices, fake trends, or invented update times.
 
 ## Farm Area Measurement Boundary
 
@@ -720,7 +737,7 @@ M90 adds local deterministic cost analytics, category breakdowns, My Farm cost s
 
 M91 adds local harvest/yield modeling, demo harvest data, Harvest & Yield UI, cost-per-kg/profit-per-kg/yield-per-rai analytics, and export/restore/snapshot compatibility for the new slice. These outputs are still local estimates from user-entered records and are not official accounting, tax, loan, legal, yield guarantee, or financial advice.
 
-M92 adds Home-first discovery for My Farm and Farm Records. M92.1 compacts the Home Farm Hub so it links only to My Farm from Home; detailed Farm Records summaries, cost/yield views, export/restore, and sync status remain inside `/app/my-farm` and `/app/farm-records`. M93 adds the dedicated My Farm bottom-nav slot. M94 makes `/app/profile` a calmer settings page with Farm Records export/restore/sync status links and cloud sync clearly marked off. M95 adds `/app/help`, a compact Home help entry, and a small My Farm helper card that links to Farm Records and the guide. M96 refines that helper and `/app/farm-records` around the first-use path. M97 polishes the first `เพิ่มแปลง` and `บันทึกงานในฟาร์ม` forms. M97.1 makes the default Farm Records screen `สมุดฟาร์มแบบง่าย` with three main actions: `เพิ่มแปลง`, `บันทึกรายรับ/รายจ่าย`, and `บันทึกผลผลิต`; advanced analytics, export/restore, sync planning, and detailed records sit lower under `ข้อมูลเพิ่มเติม / ขั้นสูง`. M98 keeps that journey calmer by collapsing secondary My Farm details and tightening Thai-first labels. It does not add backend calls, sync, GPS, AI processing, or Farm Records storage/schema changes.
+M92 adds Home-first discovery for My Farm and Farm Records. M92.1 compacts the Home Farm Hub so it links only to My Farm from Home; detailed Farm Records summaries, cost/yield views, export/restore, and sync status remain inside `/app/my-farm` and `/app/farm-records`. M93 originally added a dedicated My Farm bottom-nav slot, and M108.2 supersedes that slot with `ราคาเกษตร` because price checking is a higher-frequency farmer need. My Farm remains a basic notebook reachable from Home, Profile/Help, and direct routes. M94 makes `/app/profile` a calmer settings page with Farm Records export/restore/sync status links and cloud sync clearly marked off. M95 adds `/app/help`, a compact Home help entry, and a small My Farm helper card that links to Farm Records and the guide. M96 refines that helper and `/app/farm-records` around the first-use path. M97 polishes the first `เพิ่มแปลง` and `บันทึกงานในฟาร์ม` forms. M97.1 makes the default Farm Records screen `สมุดฟาร์มแบบง่าย` with three main actions: `เพิ่มแปลง`, `บันทึกรายรับ/รายจ่าย`, and `บันทึกผลผลิต`; advanced analytics, export/restore, sync planning, and detailed records sit lower under `ข้อมูลเพิ่มเติม / ขั้นสูง`. M98 keeps that journey calmer by collapsing secondary My Farm details and tightening Thai-first labels. It does not add backend calls, sync, GPS, AI processing, or Farm Records storage/schema changes.
 
 ## Notification Center Boundary
 
@@ -991,7 +1008,7 @@ Open-Meteo is still disabled unless explicit local flags enable it. No GPS, prec
 
 ## M93 Elder-Friendly Navigation Cleanup
 
-- Adds a dedicated bottom-nav slot for `ฟาร์มของฉัน` and renames calculator access to `เครื่องมือ`.
+- Originally added a dedicated bottom-nav slot for `ฟาร์มของฉัน` and renamed calculator access to `เครื่องมือ`; M108.2 supersedes that slot with `ราคาเกษตร` while preserving My Farm access from Home and secondary locations.
 - Refactors Profile from a long flat route list into grouped cards: `บัญชีของฉัน`, `ข้อมูลและความเป็นส่วนตัว`, `ช่วยเหลือ`, and `สำหรับทีมงานหรือทดสอบ`.
 - Keeps Admin, QA, readiness, Supabase staging, and other internal tools accessible under the Advanced group instead of mixing them into the main farmer-facing menu.
 - Keeps the compact M92.1 Home Farm Hub unchanged and preserves `/app/my-farm`, `/app/farm-records`, and all existing deep links.

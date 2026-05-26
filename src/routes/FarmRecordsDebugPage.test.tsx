@@ -78,8 +78,8 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).toContain('Restore recovery guidance');
     expect(html).toContain('Download current local backup before restore');
     expect(html).toContain('RESTORE FARM RECORDS');
-    expect(html).toContain('Cloud Sync Readiness');
-    expect(html).toContain('Cloud Sync Consent Prototype');
+    expect(html).toContain('Cloud Sync Planning');
+    expect(html).toContain('Cloud Sync Consent Plan');
     expect(html).toContain('Farm plots');
     expect(html).toContain('Raw image files');
     expect(html).toContain('Cloud sync consent');
@@ -88,14 +88,16 @@ describe('M90 farm records farmer-facing page', () => {
     expect(html).toContain('Image/receipt upload consent');
     expect(html).toContain('Enable Cloud Sync');
     expect(html).toContain('Cloud sync is not available yet');
-    expect(html).toContain('ownership tests');
-    expect(html).toContain('Sync readiness checklist');
-    expect(html).toContain('Prototype only');
-    expect(html).toContain('Documented only');
+    expect(html).toContain('ownership checks');
+    expect(html).toContain('Sync checklist');
+    expect(html).toContain('Planned only');
+    expect(html).toContain('Documented');
     expect(html).toContain('Cloud sync remains disabled');
     expect(html).toContain('Supabase writes');
     expect(html).toContain('disabled=""');
     expect(html).not.toContain('Cloud sync is active');
+    expect(html.toLowerCase()).not.toContain('prototype');
+    expect(html.toLowerCase()).not.toContain('readiness');
   });
 
   test('builds summary cards, activity records, finance entries, and ledger summary from demo state', () => {
