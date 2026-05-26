@@ -1,4 +1,4 @@
-import { Bot, Calculator, CloudSun, ClipboardList, HelpCircle, Sprout, Tags, WalletCards } from 'lucide-react';
+import { Bot, Calculator, CloudSun, ClipboardList, HelpCircle, Sprout, Tags, UsersRound, WalletCards } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -37,6 +37,15 @@ const guideSections = [
     title: 'ใช้เครื่องมือ / ถาม AI / เช็กอากาศ',
     icon: HelpCircle,
     lines: ['เครื่องมือช่วยคำนวณ', 'ถาม AI เกษตรสำหรับคำถามทั่วไป', 'เช็กอากาศและความเสี่ยงเกษตร'],
+  },
+  {
+    title: 'ชุมชนเกษตร',
+    icon: UsersRound,
+    lines: [
+      'อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์กับคนทำเกษตร',
+      'โพสต์ คอมเมนต์ ไลก์ รายงาน และแนบรูป 1 รูปจะเปิดหลังระบบบัญชีพร้อม',
+      'อย่าใส่เบอร์โทร ที่อยู่ หรือข้อมูลส่วนตัวสำคัญในโพสต์',
+    ],
   },
 ];
 
@@ -137,6 +146,7 @@ export function HelpPage() {
             <LargeActionButton description="เปิดศูนย์รวมข้อมูลฟาร์มและสมุดบันทึก" icon={Sprout} label="เปิดฟาร์มของฉัน" to="/app/my-farm" variant="soft" />
             <LargeActionButton description="เพิ่มแปลง บันทึกรายรับรายจ่าย และผลผลิต" icon={ClipboardList} label="เปิดสมุดฟาร์ม" to="/app/farm-records" variant="white" />
             <LargeActionButton description="ดูแหล่งข้อมูลราคาสินค้าเกษตร เมื่อระบบเชื่อมข้อมูลจริงแล้ว" icon={Tags} label="เช็กราคาเกษตร" to="/app/prices" variant="white" />
+            <LargeActionButton description="อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์" icon={UsersRound} label="ชุมชนเกษตร" to="/app/community" variant="white" />
             <LargeActionButton description="คำนวณปุ๋ย ระยะปลูก ต้นทุน และผลผลิต" icon={Calculator} label="เปิดเครื่องมือ" to="/app/calculators" variant="white" />
             <LargeActionButton description="ถามเรื่องพืช ดิน ปุ๋ย โรค แมลง อากาศ และการจัดการฟาร์ม" icon={Bot} label="ถาม AI เกษตร" to="/app/ai" variant="white" />
             <LargeActionButton description="ดูอากาศและความเสี่ยงเกษตร" icon={CloudSun} label="เช็กอากาศ" to="/app/weather" variant="white" />

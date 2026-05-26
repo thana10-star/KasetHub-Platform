@@ -129,7 +129,7 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('ข้อมูลนี้ไม่ถูกส่งไป backend');
   });
 
-  test('bottom navigation uses agriculture prices instead of My Farm as the main tab', () => {
+  test('bottom navigation uses Community instead of Tools as the main tab', () => {
     const html = renderToString(
       <MemoryRouter initialEntries={['/app/prices']}>
         <BottomNav />
@@ -139,10 +139,12 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('หน้าแรก');
     expect(html).toContain('ราคาเกษตร');
     expect(html).toContain('/app/prices');
+    expect(html).toContain('ชุมชน');
+    expect(html).toContain('/app/community');
     expect(html).not.toContain('ฟาร์มของฉัน');
     expect(html).not.toContain('/app/my-farm');
-    expect(html).toContain('เครื่องมือ');
-    expect(html).toContain('/app/calculators');
+    expect(html).not.toContain('เครื่องมือ');
+    expect(html).not.toContain('/app/calculators');
     expect(html).toContain('ถาม AI');
     expect(html).toContain('โปรไฟล์');
   });

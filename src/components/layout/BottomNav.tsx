@@ -1,4 +1,4 @@
-import { Bot, Calculator, Home, Tags, UserRound } from 'lucide-react';
+import { Bot, Home, Tags, UserRound, UsersRound } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cx } from '@/components/ui/classNames';
 import type { AppRoute } from '@/types/kaset';
@@ -6,7 +6,7 @@ import type { AppRoute } from '@/types/kaset';
 const items: Array<{ label: string; href: AppRoute; icon: typeof Home }> = [
   { label: 'หน้าแรก', href: '/app', icon: Home },
   { label: 'ราคาเกษตร', href: '/app/prices', icon: Tags },
-  { label: 'เครื่องมือ', href: '/app/calculators', icon: Calculator },
+  { label: 'ชุมชน', href: '/app/community', icon: UsersRound },
   { label: 'ถาม AI', href: '/app/ai', icon: Bot },
   { label: 'โปรไฟล์', href: '/app/profile', icon: UserRound },
 ];

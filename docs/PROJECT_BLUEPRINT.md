@@ -87,6 +87,22 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - My Farm remains a basic local notebook reachable from Home, Profile/Help, `/app/my-farm`, and Farm Records links.
 - No Supabase writes, cloud sync, GPS/geolocation, AI provider enablement, API keys, or backend price system is added.
 
+## M109 Real Community Feed V1 Foundation
+
+- Bottom navigation now uses `หน้าแรก`, `ราคาเกษตร`, `ชุมชน`, `ถาม AI`, and `โปรไฟล์`.
+- `/app/community` is the Community V1 surface for real posts, comments, likes, share, report, own hide/delete, one image, and in-app notifications, but all write paths are honestly gated.
+- The feed does not show fake posts, fake farmers, fake likes, fake comments, fake reply counts, or fake recent activity.
+- Tools and calculators remain reachable from Home/Help/Profile and `/app/calculators`.
+- The M109 implementation is Path B because auth ownership, RLS application, storage policy, and backend notification creation were not verified for public writes.
+
+## M110 Community Staging Backend Enablement
+
+- Adds the default-off `VITE_ENABLE_COMMUNITY_WRITES` feature flag.
+- Adds `supabase/sql/community_v1_schema_m110.sql` as the staging schema/RLS/storage policy pack for `community_posts`, `community_comments`, `community_likes`, `community_reports`, `community_notifications`, and `community-post-images`.
+- Documents the staging verification checklist and in-app notification strategy in `docs/community/`.
+- Keeps public community writes disabled until owner-side staging checks prove real `auth.uid()` ownership, RLS denial of cross-user writes, storage owner folders, and safe backend-created notifications.
+- Does not add push notifications, chat, follow/friend graph, algorithmic ranking, multiple images, AI image diagnosis, GPS/geolocation, service-role frontend access, anonymous writes, or Farm Records schema changes.
+
 ## M53 Calculator Export/Share And Rewarded Ads Planning
 
 - Adds structured `CalculatorResultSummary` models for copy/share/save flows.

@@ -7,6 +7,7 @@ export type PublicRuntimeEnv = {
   enableSupabase: boolean;
   enableAuth: boolean;
   enableCloudSync: boolean;
+  enableCommunityWrites: boolean;
   enableSupabaseDryRunNetworkCheck: boolean;
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
@@ -77,6 +78,7 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   enableSupabase: readBooleanEnv('VITE_ENABLE_SUPABASE', false),
   enableAuth: readBooleanEnv('VITE_ENABLE_AUTH', false),
   enableCloudSync: readBooleanEnv('VITE_ENABLE_CLOUD_SYNC', false),
+  enableCommunityWrites: readBooleanEnv('VITE_ENABLE_COMMUNITY_WRITES', false),
   enableSupabaseDryRunNetworkCheck: readBooleanEnv('VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK', false),
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),

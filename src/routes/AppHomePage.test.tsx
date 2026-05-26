@@ -36,6 +36,22 @@ describe('M92.1 compact home Farm Hub launcher', () => {
     expect(html).not.toContain('ราคาอ้างอิง');
   });
 
+  test('links to Community without rendering fake community engagement on Home', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <AppHomePage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('ชุมชนเกษตร');
+    expect(html).toContain('อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์');
+    expect(html).toContain('เปิดชุมชน');
+    expect(html).toContain('/app/community');
+    expect(html).toContain('/app/calculators');
+    expect(html).not.toContain('คุณสายฝน');
+    expect(html).not.toContain('คำถามล่าสุดในชุมชน');
+  });
+
   test('renders a prominent AI-first farmer entry without crowding Home', () => {
     const html = renderToString(
       <MemoryRouter>

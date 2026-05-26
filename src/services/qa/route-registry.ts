@@ -22,7 +22,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Core app',
     description: 'หน้าหลัก โปรไฟล์ การแจ้งเตือน และหน่วยความจำในเครื่อง',
     routes: [
-      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93-M96/M108.2', notes: 'mobile-first home surfaces AI, Weather, price hub, tools, and a compact My Farm launcher; bottom nav now prioritizes agriculture prices while My Farm remains a secondary route', manualCheckPath: '/app' },
+      { route: '/app', label: 'App home', milestone: 'M01-M15/M92.1/M93-M96/M108.2/M109', notes: 'mobile-first home surfaces AI, Weather, price hub, tools, Community entry, and a compact My Farm launcher; bottom nav now prioritizes agriculture prices and Community while My Farm remains a secondary route', manualCheckPath: '/app' },
       { route: '/app/help', label: 'Farmer start guide', milestone: 'M95-M97.1', notes: 'คู่มือเริ่มใช้ KasetHub แบบสั้นสำหรับเกษตรกร พร้อม basic flow 3 ขั้นตอนและตัวอย่างชื่อแปลง/งานในฟาร์ม; no backend', manualCheckPath: '/app/help' },
       { route: '/app/field-test-feedback', label: 'Field-test feedback checklist', milestone: 'M95-M97.1', notes: 'เช็กลิสต์ภาคสนามแบบ static/local สำหรับสังเกตผู้ใช้จริง เพิ่มคำถาม basic mode, first-use, and first add plot/activity ไม่มี backend submit และเตือนห้ามใส่ข้อมูลส่วนตัว', manualCheckPath: '/app/field-test-feedback' },
       { route: '/app/profile', label: 'Profile / Settings', milestone: 'M02-M29/M93-M95', notes: 'โปรไฟล์และการตั้งค่าจัดกลุ่มบัญชี ข้อมูล/ความเป็นส่วนตัว ช่วยเหลือ ลิงก์วิธีใช้แอพไป /app/help แสดง cloud sync ปิดอยู่ และยุบ Advanced สำหรับทีมงาน/QA เป็นค่าเริ่มต้น', manualCheckPath: '/app/profile' },
@@ -40,7 +40,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
       { route: '/app/farm-area', label: 'Farm area planner', milestone: 'M33', notes: 'คำนวณพื้นที่แปลงและแปลงหน่วยที่ดินไทยแบบ local-only', manualCheckPath: '/app/farm-area' },
       { route: '/app/farm-area-guide', label: 'Farm area guide', milestone: 'M33', notes: 'คู่มือวัดพื้นที่ด้วยสายวัด สูตรพื้นที่ และคำเตือนเรื่องรังวัด', manualCheckPath: '/app/farm-area-guide' },
       { route: '/app/farm-records', label: 'Farm Records basic mode', milestone: 'M91/M92.1/M96/M97/M97.1', notes: 'farmer-facing local-first records UI with Basic Farm Records Mode, 3 main actions, secondary activity recording, advanced grouping, harvest/yield records, local cost summaries, export/restore/recovery, disabled sync consent prototype; no cloud/GPS/AI/tax-accounting claims', manualCheckPath: '/app/farm-records' },
-      { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery', manualCheckPath: '/app/notifications' },
+      { route: '/app/notifications', label: 'Notification Center', milestone: 'M02-M35/M109', notes: 'ศูนย์แจ้งเตือน local/mock ไม่มี push, LINE, SMS, email หรือ backend delivery; community like/reply notifications remain gated until backend writes are safe', manualCheckPath: '/app/notifications' },
       { route: '/app/notification-settings', label: 'Notification settings', milestone: 'M35', notes: 'ตั้งค่า preference แจ้งเตือนแบบ localStorage เท่านั้น', manualCheckPath: '/app/notification-settings' },
       { route: '/app/saved-articles', label: 'Saved articles', milestone: 'M02/M04', notes: 'รายการบันทึกในเครื่อง', manualCheckPath: '/app/saved-articles' },
       { route: '/app/saved-videos', label: 'Saved videos', milestone: 'M03/M04', notes: 'วิดีโอที่บันทึกใน Guest Memory', manualCheckPath: '/app/saved-videos' },
@@ -120,9 +120,9 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
   {
     id: 'community_moderation',
     label: 'Community / Moderation',
-    description: 'ชุมชน กติกา report/hide ในเครื่อง และ moderation center mock',
+    description: 'ชุมชน กติกา report/hide และแผน moderation โดย M109 ใช้ gated UI ไม่มีโพสต์ ไลก์ หรือคอมเมนต์ปลอม',
     routes: [
-      { route: '/app/community', label: 'Community', milestone: 'M01/M23', notes: 'โพสต์ตัวอย่าง report/hide local-only', manualCheckPath: '/app/community' },
+      { route: '/app/community', label: 'Community', milestone: 'M01/M23/M109', notes: 'Community Feed V1 contract + gated UI: composer, categories, share, report reasons, own hide/delete controls, image and notification policy; no fake public feed or engagement', manualCheckPath: '/app/community' },
       { route: '/app/community-rules', label: 'Community rules', milestone: 'M23', notes: 'กติกาและ safety policy สำหรับชุมชน', manualCheckPath: '/app/community-rules' },
       { route: '/app/moderation-center', label: 'Moderation center', milestone: 'M23', notes: 'ศูนย์รายงาน mock/local ไม่มี admin action จริง', manualCheckPath: '/app/moderation-center' },
     ],

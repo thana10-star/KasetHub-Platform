@@ -120,6 +120,22 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Documents the real price source requirements in `docs/prices/AGRICULTURE_PRICE_SOURCE_READINESS_M108_2.md`.
 - Adds no Supabase writes, cloud sync, GPS/geolocation, AI provider enablement, API keys, or broad backend system.
 
+## M109 Real Community Feed V1 Foundation
+
+- Updates bottom navigation to `หน้าแรก`, `ราคาเกษตร`, `ชุมชน`, `ถาม AI`, and `โปรไฟล์`.
+- Adds `/app/community` with composer, categories, empty real-feed state, share actions, report reasons, safety copy, image/write/notification gates, and no fake engagement.
+- Keeps `/app/calculators`, `/app/my-farm`, Farm Records, Tools cards, Help, and Profile routes available outside the bottom nav.
+- Adds community service/storage/notification contracts plus M109 docs and report.
+- Keeps real posts, comments, likes, reports, image upload, and like/reply notifications gated until auth ownership, RLS, storage policy, and backend notification creation are verified.
+
+## M110 Community Staging Backend Enablement
+
+- Adds `VITE_ENABLE_COMMUNITY_WRITES=false` as the default feature flag for community write UI.
+- Adds `supabase/sql/community_v1_schema_m110.sql` with staging draft tables, constraints, indexes, RLS policies, and `community-post-images` storage bucket policy.
+- Adds staging verification and notification strategy docs under `docs/community/`.
+- Keeps community writes disabled by default; the SQL pack is drafted for owner-side staging application and verification, not applied by the app.
+- Adds no service-role exposure, anonymous writes, fake community data, push notifications, private chat, follow graph, GPS/geolocation, or Farm Records schema changes.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.

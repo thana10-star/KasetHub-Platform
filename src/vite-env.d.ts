@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_SUPABASE?: string;
   readonly VITE_ENABLE_AUTH?: string;
   readonly VITE_ENABLE_CLOUD_SYNC?: string;
+  readonly VITE_ENABLE_COMMUNITY_WRITES?: string;
   readonly VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK?: string;
   readonly VITE_AI_PROXY_MODE?: string;
   readonly VITE_ENABLE_AI_BACKEND_PROXY?: string;

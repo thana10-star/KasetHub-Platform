@@ -26,6 +26,7 @@ import {
   Settings,
   Sprout,
   UserRound,
+  UsersRound,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -208,6 +209,12 @@ const profileMenuGroups: ProfileMenuGroup[] = [
         description: 'อ่านบทความที่เตรียมไว้ในแอป',
         icon: BookOpenCheck,
         href: '/app/articles/offline',
+      },
+      {
+        label: 'ชุมชนเกษตร',
+        description: 'อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์',
+        icon: UsersRound,
+        href: '/app/community',
       },
       {
         label: 'กติกาชุมชน',

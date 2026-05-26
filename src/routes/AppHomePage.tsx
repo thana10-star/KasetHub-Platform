@@ -1,5 +1,4 @@
 import { ArticleCard } from '@/components/kaset/ArticleCard';
-import { CommunityPostCard } from '@/components/kaset/CommunityPostCard';
 import { HeroCard } from '@/components/kaset/HeroCard';
 import { QuickActionGrid } from '@/components/kaset/QuickActionGrid';
 import { VideoCard } from '@/components/kaset/VideoCard';
@@ -8,11 +7,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { articles, communityPosts, videos } from '@/data/mockData';
+import { articles, videos } from '@/data/mockData';
 import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 import { AI_HOME_PROMPT_EXAMPLES } from '@/services/ai/ai-farmer-assistant-copy';
-import { Bell, Bot, CloudSun, HelpCircle, Sprout, Tags } from 'lucide-react';
+import { Bell, Bot, CloudSun, HelpCircle, Sprout, Tags, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AppHomePage() {
@@ -164,9 +163,28 @@ export function AppHomePage() {
           <VideoCard featured video={featuredVideo} />
         </section>
 
-        <section className="grid gap-3">
-          <SectionHeader actionHref="/app/community" actionLabel="เปิดชุมชน" title="คำถามล่าสุดในชุมชน" />
-          <CommunityPostCard compact post={communityPosts[0]} />
+        <section aria-labelledby="home-community-title">
+          <Card className="p-4">
+            <div className="flex gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+                <UsersRound aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 id="home-community-title" className="font-extrabold leading-6 text-kaset-ink">
+                  ชุมชนเกษตร
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์
+                </p>
+                <Link
+                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"
+                  to="/app/community"
+                >
+                  เปิดชุมชน
+                </Link>
+              </div>
+            </div>
+          </Card>
         </section>
 
         <section className="grid gap-3">
