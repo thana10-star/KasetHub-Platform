@@ -28,8 +28,11 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import { publicEnv } from '@/config/env';
 import {
   applyCommunityLikeUiState,
+  getCommunityCommentSubmitText,
+  getCommunityTextInputValue,
   getSafeCommunityComments,
   reconcileCommunityPostsAfterLikeRefresh,
+  updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
 import {
   getCachedSupabaseAuthSessionSnapshot,
@@ -105,11 +108,6 @@ function formatCommunityTime(value: string) {
 
 function getActionMessage(result: CommunityActionResult, fallback: string) {
   return result.ok ? fallback : result.message;
-}
-
-function getTextInputValue(event: Pick<FormEvent<HTMLTextAreaElement>, 'target'>) {
-  const target = event.target as HTMLTextAreaElement | null;
-  return typeof target?.value === 'string' ? target.value : '';
 }
 
 export function CommunityPage({ readinessOverride, serviceOverride }: CommunityPageProps = {}) {
@@ -343,7 +341,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       return;
     }
 
-    const contentText = (commentTextByPost[postId] ?? '').trim();
+    const contentText = getCommunityCommentSubmitText(commentTextByPost, postId);
     if (!contentText) {
       setActionStatus('กรุณาเขียนคอมเมนต์');
       return;
@@ -410,10 +408,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       return;
     }
 
-    setCommentTextByPost((current) => ({
-      ...current,
-      [postId]: value,
-    }));
+    setCommentTextByPost((current) => updateCommunityCommentDraft(current, postId, value));
   }
 
   async function handleReportPost(postId: string) {
@@ -787,8 +782,8 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                       <textarea
                         className="min-h-20 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
                         disabled={!canWrite || !post.id}
-                        onChange={(event) => handleCommentTextChange(post.id, getTextInputValue(event))}
-                        onInput={(event) => handleCommentTextChange(post.id, getTextInputValue(event))}
+                        onChange={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
+                        onInput={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
                         placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
                         value={commentTextByPost[post.id] ?? ''}
                       />

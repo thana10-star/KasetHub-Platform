@@ -1,7 +1,36 @@
 import type { CommunityComment, CommunityPost } from '@/services/community/community.types';
 
+type TextInputEventLike = {
+  target?: unknown;
+};
+
 export function getSafeCommunityComments(comments: CommunityComment[] | undefined | null) {
   return Array.isArray(comments) ? comments : [];
+}
+
+export function getCommunityTextInputValue(event: TextInputEventLike) {
+  const target = event.target as { value?: unknown } | null | undefined;
+  return typeof target?.value === 'string' ? target.value : '';
+}
+
+export function updateCommunityCommentDraft(
+  drafts: Record<string, string> | undefined | null,
+  postId: string,
+  value: string,
+) {
+  if (!postId) return drafts ?? {};
+
+  return {
+    ...(drafts ?? {}),
+    [postId]: value,
+  };
+}
+
+export function getCommunityCommentSubmitText(
+  drafts: Record<string, string> | undefined | null,
+  postId: string,
+) {
+  return (drafts?.[postId] ?? '').trim();
 }
 
 export function applyCommunityLikeUiState(posts: CommunityPost[], postId: string, nextLiked: boolean) {
