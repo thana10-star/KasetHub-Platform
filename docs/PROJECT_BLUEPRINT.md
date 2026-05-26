@@ -67,6 +67,12 @@ M35-M44 extend the safe path toward real staging by adding local notifications, 
 - Locks package docs for store listing copy, public privacy draft, support copy, screenshot status, icon approval status, release channel decision, and final owner actions.
 - Keeps release blockers honest: icon, privacy URL, support contact, and screenshots remain owner-pending until real assets/URLs/captures exist.
 
+## M107 Owner Publication And Alpha Feedback Launch
+
+- Creates `docs/release/alpha-launch/` with the owner launch checklist, tester route guide, feedback form draft, YouTube community post drafts, known limitations, and feedback triage plan.
+- Keeps the V1 alpha path on Cloudflare/PWA preview and focuses the first feedback loop on usability, mobile readability, AI/Weather usefulness, simple Farm Records clarity, and privacy/support trust.
+- Defers new feature expansion, AI provider enablement, Supabase writes, cloud sync, GPS/geolocation, OCR, notifications, receipt upload, and Android/iOS wrapper work until after feedback review.
+
 ## M53 Calculator Export/Share And Rewarded Ads Planning
 
 - Adds structured `CalculatorResultSummary` models for copy/share/save flows.

@@ -37,6 +37,8 @@ M105 note: Store-readiness decision docs were created for icon direction, privac
 
 M106 note: The final V1 package lock was created under `docs/release/v1-package/` for owner approval. Remaining open/in-progress items require owner-published URLs, files, or captures.
 
+M107 note: The owner publication and alpha feedback launch pack was created under `docs/release/alpha-launch/`. This prepares sharing and feedback collection but does not close owner-pending URL, support, icon, or screenshot blockers.
+
 | ID | Route / screen | Blocker type | Severity | Screenshot reference | Fix owner | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | M104-B001 | `/app/weather` production | weather/env | blocker | Owner production screenshots | Owner | resolved | Owner confirmed Cloudflare Weather env is working with live Open-Meteo data after production env setup. |

@@ -32,6 +32,10 @@ This is the final owner checklist before sharing the V1 Cloudflare/PWA preview w
 - First feedback audience: TBD
 - Feedback collection method: TBD
 
+## M107 Alpha Launch Pack
+
+Use `docs/release/alpha-launch/ALPHA_LAUNCH_INDEX_M107.md` to prepare the first public/YouTube alpha share, tester guide, feedback form, known limitations, and triage process.
+
 ## Recommended Feedback Questions
 
 - Is the first screen clear?

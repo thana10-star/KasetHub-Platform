@@ -96,6 +96,13 @@ M90 adds a local Farm Cost Dashboard and break-even estimate on top of Farm Reco
 - Keeps the release channel locked to Cloudflare/PWA preview first, with Android wrapper after the first feedback round.
 - Leaves remaining owner actions as publishing privacy/support URLs, approving icon assets, capturing screenshots, confirming production Weather, and sharing with testers.
 
+## M107 Owner Publication + Alpha Feedback Launch
+
+- Adds `docs/release/alpha-launch/` as the owner-facing launch pack for Cloudflare/PWA alpha sharing.
+- Includes an owner launch checklist, Thai-first tester route guide, Google Form-style feedback draft, YouTube community post drafts, known limitations, and a feedback triage plan.
+- Keeps first feedback focused on Home, AI, Weather, Tools, My Farm, Farm Records, Help/Profile, mobile readability, and trust/privacy clarity.
+- Defers broad new features, AI provider enablement, Supabase writes, cloud sync, GPS, OCR, receipt upload, notifications, and wrapper implementation until after feedback is reviewed.
+
 ## M76 Weather QA Cache And Coarse Location
 
 - Adds local-only weather cache services and stale/fresh status.

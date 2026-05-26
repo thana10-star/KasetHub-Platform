@@ -49,6 +49,10 @@ This package does not submit to any store, implement a wrapper, enable AI provid
 - `RELEASE_CHANNEL_DECISION_LOCK_M106.md`: V1 release-channel lock and rationale.
 - `FINAL_OWNER_ACTIONS_M106.md`: final owner checklist before sharing V1 alpha.
 
+## M107 Alpha Launch Link
+
+Use `docs/release/alpha-launch/ALPHA_LAUNCH_INDEX_M107.md` for the owner publication checklist, tester route guide, feedback form draft, YouTube community post draft, known limitations, and feedback triage plan.
+
 ## Remaining Owner Actions
 
 - Choose and publish support contact.
