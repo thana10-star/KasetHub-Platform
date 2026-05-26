@@ -166,7 +166,7 @@ describe('M114 gated community staging service contract', () => {
           image_width: null,
           image_height: null,
           status: 'published',
-          like_count: 1,
+          like_count: 0,
           comment_count: 0,
           report_count: 0,
           created_at: '2026-05-26T00:00:00.000Z',
@@ -175,8 +175,14 @@ describe('M114 gated community staging service contract', () => {
       ],
       error: null,
     });
-    const likeQuery = createQueryMock({ data: [{ post_id: 'post-1' }], error: null });
-    const from = vi.fn((table: string) => (table === 'community_likes' ? likeQuery : postQuery));
+    const allLikesQuery = createQueryMock({ data: [{ post_id: 'post-1' }, { post_id: 'post-1' }], error: null });
+    const ownLikesQuery = createQueryMock({ data: [{ post_id: 'post-1' }], error: null });
+    let likeQueryCount = 0;
+    const from = vi.fn((table: string) => {
+      if (table !== 'community_likes') return postQuery;
+      likeQueryCount += 1;
+      return likeQueryCount === 1 ? allLikesQuery : ownLikesQuery;
+    });
     const client = {
       from,
       auth: {
@@ -195,14 +201,16 @@ describe('M114 gated community staging service contract', () => {
       posts: [
         {
           id: 'post-1',
+          likeCount: 2,
           likedByCurrentUser: true,
         },
       ],
     });
     expect(from).toHaveBeenCalledWith('community_posts');
     expect(from).toHaveBeenCalledWith('community_likes');
-    expect(likeQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
-    expect(likeQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
+    expect(allLikesQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
+    expect(ownLikesQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
+    expect(ownLikesQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
   });
 
   test('creates a post through the Supabase adapter when flag and auth are ready', async () => {

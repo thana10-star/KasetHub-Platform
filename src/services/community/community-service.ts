@@ -20,6 +20,7 @@ import type {
   CreateCommunityPostInput,
   ReportCommunityInput,
 } from '@/services/community/community.types';
+import { communityPostCategories } from '@/services/community/community.types';
 import { getSupabaseClient } from '@/services/supabase/supabase-client';
 import { getSupabaseStatus } from '@/services/supabase/supabase-status';
 
@@ -134,13 +135,27 @@ function supabaseFailure(error: SupabaseFailure | null | undefined, fallback: st
   return failure('supabase_write_failed', error?.message ? `${fallback}: ${error.message}` : fallback);
 }
 
+function toCommunityPostCategory(value: string | null | undefined): CommunityPostCategory {
+  return communityPostCategories.includes(value as CommunityPostCategory)
+    ? value as CommunityPostCategory
+    : communityPostCategories[6];
+}
+
+function toPublishedPostStatus(value: CommunityPost['status'] | null | undefined): CommunityPost['status'] {
+  return value ?? 'published';
+}
+
+function toPublishedCommentStatus(value: CommunityComment['status'] | null | undefined): CommunityComment['status'] {
+  return value ?? 'published';
+}
+
 function mapPostRow(row: CommunityPostRow, currentUserId?: string): CommunityPost {
   return {
-    id: row.id,
-    authorUserId: row.author_user_id,
+    id: row.id ?? '',
+    authorUserId: row.author_user_id ?? '',
     authorDisplayName: row.author_display_name ?? undefined,
-    contentText: row.content_text,
-    category: row.category as CommunityPostCategory,
+    contentText: row.content_text ?? '',
+    category: toCommunityPostCategory(row.category),
     image: row.image_path && row.image_mime_type && row.image_size_bytes
       ? {
           imagePath: row.image_path,
@@ -150,27 +165,27 @@ function mapPostRow(row: CommunityPostRow, currentUserId?: string): CommunityPos
           height: row.image_height ?? undefined,
         }
       : undefined,
-    status: row.status,
+    status: toPublishedPostStatus(row.status),
     likeCount: row.like_count ?? 0,
     commentCount: row.comment_count ?? 0,
     reportCount: row.report_count ?? 0,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: row.created_at ?? '',
+    updatedAt: row.updated_at ?? row.created_at ?? '',
     ownedByCurrentUser: currentUserId ? row.author_user_id === currentUserId : undefined,
   };
 }
 
 function mapCommentRow(row: CommunityCommentRow, currentUserId?: string): CommunityComment {
   return {
-    id: row.id,
-    postId: row.post_id,
-    authorUserId: row.author_user_id,
+    id: row.id ?? '',
+    postId: row.post_id ?? '',
+    authorUserId: row.author_user_id ?? '',
     authorDisplayName: row.author_display_name ?? undefined,
-    contentText: row.content_text,
-    status: row.status,
+    contentText: row.content_text ?? '',
+    status: toPublishedCommentStatus(row.status),
     reportCount: row.report_count ?? 0,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: row.created_at ?? '',
+    updatedAt: row.updated_at ?? row.created_at ?? '',
     ownedByCurrentUser: currentUserId ? row.author_user_id === currentUserId : undefined,
   };
 }
@@ -319,7 +334,8 @@ export function createCommunityService(
         };
       }
 
-      const posts = (data ?? []).map((row) => mapPostRow(row as CommunityPostRow, currentUser?.id));
+      const postRows = Array.isArray(data) ? data : [];
+      const posts = postRows.map((row) => mapPostRow(row as CommunityPostRow, currentUser?.id));
       if (!currentUser || posts.length === 0) {
         return {
           posts,
@@ -327,16 +343,35 @@ export function createCommunityService(
         };
       }
 
+      const postIds = posts.map((post) => post.id).filter(Boolean);
+      const likeCountsByPost = new Map<string, number>();
+      const { data: allLikeRows, error: allLikeError } = await client
+        .from('community_likes')
+        .select('post_id')
+        .in('post_id', postIds);
+
+      if (!allLikeError && Array.isArray(allLikeRows)) {
+        for (const row of allLikeRows) {
+          const postId = (row as { post_id?: string }).post_id;
+          if (postId) {
+            likeCountsByPost.set(postId, (likeCountsByPost.get(postId) ?? 0) + 1);
+          }
+        }
+      }
+
       const { data: likedRows } = await client
         .from('community_likes')
         .select('post_id')
         .eq('user_id', currentUser.id)
-        .in('post_id', posts.map((post) => post.id));
-      const likedPostIds = new Set((likedRows ?? []).map((row) => (row as { post_id: string }).post_id));
+        .in('post_id', postIds);
+      const likedPostIds = new Set(
+        (Array.isArray(likedRows) ? likedRows : []).map((row) => (row as { post_id: string }).post_id),
+      );
 
       return {
         posts: posts.map((post) => ({
           ...post,
+          likeCount: likeCountsByPost.has(post.id) ? likeCountsByPost.get(post.id) ?? 0 : post.likeCount,
           likedByCurrentUser: likedPostIds.has(post.id),
         })),
         readiness,
@@ -429,7 +464,7 @@ export function createCommunityService(
 
       return {
         ok: true,
-        data: (data ?? []).map((row) => mapCommentRow(row as CommunityCommentRow, currentUser?.id)),
+        data: (Array.isArray(data) ? data : []).map((row) => mapCommentRow(row as CommunityCommentRow, currentUser?.id)),
       };
     },
 

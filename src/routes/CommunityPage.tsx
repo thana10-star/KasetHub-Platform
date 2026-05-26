@@ -27,6 +27,11 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import { publicEnv } from '@/config/env';
 import {
+  applyCommunityLikeUiState,
+  getSafeCommunityComments,
+  reconcileCommunityPostsAfterLikeRefresh,
+} from '@/routes/community-page-helpers';
+import {
   getCachedSupabaseAuthSessionSnapshot,
   getCurrentSupabaseAuthSession,
   subscribeToSupabaseAuthSession,
@@ -151,12 +156,21 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
 
+  const fetchPosts = useCallback(async () => {
+    const result = await service.listPosts();
+    return Array.isArray(result.posts) ? result.posts : [];
+  }, [service]);
+
   const loadPosts = useCallback(async () => {
     setIsLoadingFeed(true);
-    const result = await service.listPosts();
-    setPosts(result.posts);
-    setIsLoadingFeed(false);
-  }, [service]);
+    try {
+      setPosts(await fetchPosts());
+    } catch {
+      setActionStatus('โหลดโพสต์ไม่สำเร็จ ลองรีเฟรชอีกครั้ง');
+    } finally {
+      setIsLoadingFeed(false);
+    }
+  }, [fetchPosts]);
 
   useEffect(() => {
     void loadPosts();
@@ -248,11 +262,18 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     setIsSubmittingPost(true);
-    const result = await service.createPost({
-      contentText: postText,
-      category: selectedCategory,
-      image: selectedImage ?? undefined,
-    });
+    let result: Awaited<ReturnType<CommunityService['createPost']>>;
+    try {
+      result = await service.createPost({
+        contentText: postText,
+        category: selectedCategory,
+        image: selectedImage ?? undefined,
+      });
+    } catch {
+      setIsSubmittingPost(false);
+      setActionStatus('โพสต์ไม่สำเร็จ ลองอีกครั้ง');
+      return;
+    }
     setIsSubmittingPost(false);
 
     if (result.ok) {
@@ -268,19 +289,31 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   }
 
   async function loadComments(postId: string) {
-    const result = await service.listComments(postId);
-    if (result.ok) {
-      setCommentsByPost((current) => ({ ...current, [postId]: result.data }));
-    } else {
-      setActionStatus(result.message);
+    try {
+      const result = await service.listComments(postId);
+      if (result.ok) {
+        setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(result.data) }));
+      } else {
+        setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(current[postId]) }));
+        setActionStatus(result.message);
+      }
+    } catch {
+      setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(current[postId]) }));
+      setActionStatus('โหลดคอมเมนต์ไม่สำเร็จ แต่หน้านี้ยังใช้งานได้');
     }
   }
 
   async function handleToggleComments(postId: string) {
-    const willOpen = !openCommentsByPost[postId];
-    setOpenCommentsByPost((current) => ({ ...current, [postId]: willOpen }));
-    if (willOpen && !commentsByPost[postId]) {
-      await loadComments(postId);
+    try {
+      const willOpen = !openCommentsByPost[postId];
+      setOpenCommentsByPost((current) => ({ ...current, [postId]: willOpen }));
+      if (willOpen && !commentsByPost[postId]) {
+        await loadComments(postId);
+      }
+    } catch {
+      setOpenCommentsByPost((current) => ({ ...current, [postId]: true }));
+      setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(current[postId]) }));
+      setActionStatus('เปิดคอมเมนต์ไม่สำเร็จ แต่หน้านี้ยังใช้งานได้');
     }
   }
 
@@ -290,30 +323,60 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       return;
     }
 
-    const result = await service.createComment(postId, {
-      contentText: commentTextByPost[postId] ?? '',
-    });
-    if (result.ok) {
-      setCommentTextByPost((current) => ({ ...current, [postId]: '' }));
-      setCommentsByPost((current) => ({
-        ...current,
-        [postId]: [...(current[postId] ?? []), result.data],
-      }));
-      setActionStatus('ส่งคอมเมนต์แล้ว');
-      await loadPosts();
+    const contentText = (commentTextByPost[postId] ?? '').trim();
+    if (!contentText) {
+      setActionStatus('กรุณาเขียนคอมเมนต์');
       return;
     }
 
-    setActionStatus(result.message);
+    try {
+      const result = await service.createComment(postId, {
+        contentText,
+      });
+      if (result.ok) {
+        setCommentTextByPost((current) => ({ ...current, [postId]: '' }));
+        setCommentsByPost((current) => ({
+          ...current,
+          [postId]: [...getSafeCommunityComments(current[postId]), result.data],
+        }));
+        setPosts((currentPosts) =>
+          currentPosts.map((post) =>
+            post.id === postId
+              ? { ...post, commentCount: Math.max(0, post.commentCount ?? 0) + 1 }
+              : post,
+          ),
+        );
+        setActionStatus('ส่งคอมเมนต์แล้ว');
+        void loadPosts();
+        return;
+      }
+
+      setActionStatus(result.message);
+    } catch {
+      setActionStatus('ส่งคอมเมนต์ไม่สำเร็จ ลองอีกครั้ง');
+    }
   }
 
   async function handleLike(post: CommunityPost) {
-    const result = post.likedByCurrentUser
-      ? await service.unlikePost(post.id)
-      : await service.likePost(post.id);
-    setActionStatus(getActionMessage(result, post.likedByCurrentUser ? 'ยกเลิกไลก์แล้ว' : 'กดไลก์แล้ว'));
-    if (result.ok) {
-      await loadPosts();
+    try {
+      const nextLiked = !post.likedByCurrentUser;
+      const result = post.likedByCurrentUser
+        ? await service.unlikePost(post.id)
+        : await service.likePost(post.id);
+      setActionStatus(getActionMessage(result, post.likedByCurrentUser ? 'ยกเลิกไลก์แล้ว' : 'กดไลก์แล้ว'));
+      if (result.ok) {
+        setPosts((currentPosts) => applyCommunityLikeUiState(currentPosts, post.id, nextLiked));
+        try {
+          const refreshedPosts = await fetchPosts();
+          setPosts((currentPosts) =>
+            reconcileCommunityPostsAfterLikeRefresh(currentPosts, refreshedPosts, post.id, nextLiked),
+          );
+        } catch {
+          setActionStatus(nextLiked ? 'กดไลก์แล้ว' : 'ยกเลิกไลก์แล้ว');
+        }
+      }
+    } catch {
+      setActionStatus('อัปเดตไลก์ไม่สำเร็จ ลองอีกครั้ง');
     }
   }
 
@@ -345,7 +408,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     if (result.ok) {
       setCommentsByPost((current) => ({
         ...current,
-        [postId]: (current[postId] ?? []).filter((comment) => comment.id !== commentId),
+        [postId]: getSafeCommunityComments(current[postId]).filter((comment) => comment.id !== commentId),
       }));
     }
   }
@@ -563,7 +626,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
           ) : null}
 
           {filteredPosts.map((post) => {
-            const comments = commentsByPost[post.id] ?? [];
+            const comments = getSafeCommunityComments(commentsByPost[post.id]);
             const imageUrl = getCommunityImagePublicUrl(post.image?.imagePath);
 
             return (
@@ -637,12 +700,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                     className="min-h-11 rounded-lg border border-kaset-deep/10 bg-white px-3 text-sm font-semibold text-kaset-ink"
                     disabled={!canWrite}
                     id={`report-${post.id}`}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const nextReason = event.currentTarget.value as CommunityReportReason;
                       setReportReasonByPost((current) => ({
                         ...current,
-                        [post.id]: event.currentTarget.value as CommunityReportReason,
-                      }))
-                    }
+                        [post.id]: nextReason,
+                      }));
+                    }}
                     value={reportReasonByPost[post.id] ?? 'spam'}
                   >
                     {communityReportReasons.map((reason) => (
@@ -687,12 +751,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                       <textarea
                         className="min-h-20 w-full rounded-lg border border-kaset-deep/10 bg-white p-3 text-sm leading-6 text-kaset-ink outline-none disabled:text-slate-500"
                         disabled={!canWrite}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          const nextCommentText = event.currentTarget.value;
                           setCommentTextByPost((current) => ({
                             ...current,
-                            [post.id]: event.currentTarget.value,
-                          }))
-                        }
+                            [post.id]: nextCommentText,
+                          }));
+                        }}
                         placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
                         value={commentTextByPost[post.id] ?? ''}
                       />
