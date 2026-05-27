@@ -99,3 +99,15 @@ Manual source is safer for V1 because:
 ## Fertilizer Status
 
 Fertilizer remains source-pending in M118. Types and empty manual data hooks exist, but the UI does not show fertilizer price numbers until a source is verified and validation rules are expanded for fertilizer rows.
+
+## M119 Owner Entry Note
+
+M119 keeps live manual rows empty because no verified owner price values were supplied. It adds owner-entry templates and checklists for later use.
+
+Use:
+
+- `docs/prices/OWNER_MANUAL_PRICE_ENTRY_TEMPLATE_M119.md`
+- `docs/prices/OWNER_PRICE_ROW_VERIFICATION_CHECKLIST_M119.md`
+- `docs/prices/OWNER_CURATED_PRICE_ROWS_M119.md`
+
+The first prepared commodity codes are `rice`, `rubber`, `cassava`, and `sugarcane`.

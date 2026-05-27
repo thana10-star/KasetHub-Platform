@@ -74,6 +74,45 @@ describe('M108.2 production agriculture price hub', () => {
     expect(html).toContain('อัปเดตแล้ว');
   });
 
+  test('hides invalid manual rows and keeps the source-pending state', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: [{ ...validManualPriceRow, sourceName: undefined }],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const html = renderToString(
+      <MemoryRouter>
+        <PricesPage priceSnapshot={priceSnapshot} />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล');
+    expect(html).not.toContain('ราคาจากแหล่งข้อมูลที่ตรวจสอบแล้ว');
+    expect(html).not.toContain('12,500');
+    expect(html).not.toContain('แหล่งข้อมูลเจ้าของระบบ');
+  });
+
+  test('shows stale label when a validated manual row is older than its freshness window', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: [
+        {
+          ...validManualPriceRow,
+          fetchedAt: '2026-05-24T01:00:00.000Z',
+          updatedAt: '2026-05-24T00:00:00.000Z',
+        },
+      ],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const html = renderToString(
+      <MemoryRouter>
+        <PricesPage priceSnapshot={priceSnapshot} />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('ข้อมูลเก่า');
+    expect(html).toContain('12,500');
+    expect(html).toContain('บาท/ตัน');
+  });
+
   test('keeps fertilizer source-pending without fake values', () => {
     const html = renderToString(
       <MemoryRouter>

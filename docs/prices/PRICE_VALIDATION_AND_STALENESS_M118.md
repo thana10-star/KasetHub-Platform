@@ -67,3 +67,13 @@ The adapter does not convert unknown units. Owner-entered rows must provide the 
 ## Fertilizer Guard
 
 Fertilizer validation/display remains source-pending. Fertilizer will need formula, package size, unit, source, updated date, and fetched date before numbers can be shown.
+
+## M119 Guard Confirmation
+
+M119 adds tests that confirm:
+
+- invalid manual rows are hidden from `/app/prices`
+- stale validated rows show stale copy
+- Home uses sample rows when no validated rows exist
+- Home switches to real rows without mixing sample rows when validated rows exist
+- fertilizer remains source-pending

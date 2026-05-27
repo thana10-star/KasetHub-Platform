@@ -79,3 +79,14 @@ M118 connects `/app/prices` and the Home price card to a read-only adapter snaps
 - When validated rows exist, `/app/prices` shows price, unit, source, updated date, and stale label.
 - When validated rows exist, Home shows up to 4 real rows and does not render the sample rows in that card.
 - Fertilizer remains source-pending with no fake values.
+
+## M119 Owner-Curated Row Note
+
+M119 keeps manual live rows empty until the owner supplies verified values. The UI integration is ready for `rice`, `rubber`, `cassava`, and `sugarcane`, but unsupported or missing commodities continue to display source-pending copy.
+
+Home must continue to use a single mode:
+
+- sample/source-pending mode when no validated real rows exist
+- real-row mode when at least one row validates
+
+It must never mix the two modes in the same price card.

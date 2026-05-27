@@ -113,6 +113,57 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('58.50');
   });
 
+  test('keeps Home sample rows when only invalid manual rows exist', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: [
+        {
+          commodityCode: 'rice',
+          commodityNameTh: 'ข้าว',
+          fetchedAt: '2026-05-27T01:00:00.000Z',
+          id: 'invalid-home-rice',
+          marketName: 'ตลาดกลางทดสอบ',
+          price: 12500,
+          unit: 'บาท/ตัน',
+          updatedAt: '2026-05-27T00:00:00.000Z',
+        },
+      ],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const text = visibleText(renderHome({ priceSnapshot }));
+
+    expect(text).toContain('ข้อมูลตัวอย่าง');
+    expect(text).toContain('ยังไม่ใช่ราคาจริง');
+    expect(text).toContain('12,800');
+    expect(text).not.toContain('แหล่งข้อมูลจริง');
+    expect(text).not.toContain('ราคาที่ตรวจสอบแล้ว');
+  });
+
+  test('shows stale copy for stale validated Home price rows', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: [
+        {
+          commodityCode: 'rice',
+          commodityNameTh: 'ข้าว',
+          fetchedAt: '2026-05-24T01:00:00.000Z',
+          id: 'stale-home-rice',
+          marketName: 'ตลาดกลางทดสอบ',
+          price: 12500,
+          sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
+          unit: 'บาท/ตัน',
+          updatedAt: '2026-05-24T00:00:00.000Z',
+        },
+      ],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const text = visibleText(renderHome({ priceSnapshot }));
+
+    expect(text).toContain('ข้าว');
+    expect(text).toContain('12,500');
+    expect(text).toContain('บาท/ตัน');
+    expect(text).toContain('ข้อมูลเก่า');
+    expect(text).not.toContain('58.50');
+  });
+
   test('renders the requested quick action cards', () => {
     const html = renderHome();
 
