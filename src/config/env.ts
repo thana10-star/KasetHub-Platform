@@ -8,6 +8,7 @@ export type PublicRuntimeEnv = {
   enableAuth: boolean;
   enableCloudSync: boolean;
   enableCommunityWrites: boolean;
+  adminEmails: string[];
   enableSupabaseDryRunNetworkCheck: boolean;
   aiProxyMode: string;
   enableAIBackendProxy: boolean;
@@ -69,6 +70,13 @@ function readNumberEnv(key: keyof ImportMetaEnv, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function readStringListEnv(key: keyof ImportMetaEnv): string[] {
+  return readStringEnv(key)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export const publicEnv: PublicRuntimeEnv = Object.freeze({
   mode: import.meta.env.MODE,
   isDev: import.meta.env.DEV,
@@ -79,6 +87,7 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   enableAuth: readBooleanEnv('VITE_ENABLE_AUTH', false),
   enableCloudSync: readBooleanEnv('VITE_ENABLE_CLOUD_SYNC', false),
   enableCommunityWrites: readBooleanEnv('VITE_ENABLE_COMMUNITY_WRITES', false),
+  adminEmails: readStringListEnv('VITE_ADMIN_EMAILS'),
   enableSupabaseDryRunNetworkCheck: readBooleanEnv('VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK', false),
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),

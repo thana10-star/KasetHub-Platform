@@ -45,6 +45,7 @@ import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { isCommunityModerationAdminEmail } from '@/services/community/community-admin-access';
 import { getCommunityAuthorDisplayName } from '@/services/community/community-author-display';
 import {
   getCachedSupabaseAuthSessionSnapshot,
@@ -307,6 +308,12 @@ const profileMenuGroups: ProfileMenuGroup[] = [
         href: '/app/image-preflight',
       },
       {
+        label: 'ตรวจรายงานชุมชน',
+        description: 'ดูรายงานโพสต์และคอมเมนต์สำหรับผู้ดูแลที่ได้รับสิทธิ์',
+        icon: ClipboardCheck,
+        href: '/app/community-moderation',
+      },
+      {
         label: 'ศูนย์รายงานชุมชน',
         description: 'moderation center แบบ local/mock',
         icon: ClipboardCheck,
@@ -421,9 +428,10 @@ function ProfileMenuGroupCard({ group }: { group: ProfileMenuGroup }) {
 
 type ProfilePageProps = {
   authSessionOverride?: SupabaseAuthSessionSnapshot;
+  adminEmailsOverride?: string[];
 };
 
-export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
+export function ProfilePage({ authSessionOverride, adminEmailsOverride }: ProfilePageProps = {}) {
   const { savedCount } = useSavedArticles();
   const { savedCount: savedVideoCount } = useSavedVideos();
   const { counts, state } = useGuestMemory();
@@ -434,7 +442,9 @@ export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
   );
   const [authStatusMessage, setAuthStatusMessage] = useState('');
 
-  const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
+  const canSeeTeamMenu =
+    authSession.isSignedIn && isCommunityModerationAdminEmail(authSession.email, adminEmailsOverride);
+  const visibleMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced' || canSeeTeamMenu);
   const communityDisplayName = getCommunityAuthorDisplayName({
     currentUserEmail: authSession.email,
     ownedByCurrentUser: authSession.isSignedIn,
@@ -592,7 +602,7 @@ export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
           </div>
         </Card>
 
-        {primaryMenuGroups.map((group) => (
+        {visibleMenuGroups.map((group) => (
           <ProfileMenuGroupCard group={group} key={group.title} />
         ))}
 

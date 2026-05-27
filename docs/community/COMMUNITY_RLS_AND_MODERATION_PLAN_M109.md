@@ -62,6 +62,8 @@ Reports do not automatically delete content. Future moderator/admin tooling can 
 
 M116.12 report reason codes are database-safe values only: `spam`, `dangerous_information`, `personal_information`, `inappropriate`, and `other`. Thai labels stay in the UI, but the database receives only these codes. Duplicate reports are guarded in the app and can be guarded in SQL with `supabase/sql/community_report_unique_guard_m116_12.sql`.
 
+M116.13 adds a minimal admin review surface at `/app/community-moderation` plus a SQL/RPC draft at `supabase/sql/community_admin_moderation_m116_13.sql`. The dashboard must read reports through admin-checked RPC, not direct broad table reads from normal users.
+
 ## Notification Ownership
 
 Community notifications target `recipient_user_id`. RLS must restrict reads and mark-read updates to `recipient_user_id = auth.uid()`.
@@ -83,10 +85,10 @@ M116.12 intentionally does not add CAPTCHA. Use authenticated-only reports, dupl
 
 ## Admin/Moderator Future Role
 
-Use a reviewed role model before enabling broad moderation access. Suggested future role sources:
-- `profiles.role`
+M116.13 uses a narrow `admin_moderators` SQL draft for report review. Suggested future role sources for broader admin work:
 - Dedicated `app_roles`
 - Backend-only claims
+- A reviewed profile role only if it is protected from self-editing
 
 Moderators should only see data needed for report review, not private farm records, phone numbers, precise identity, or unrelated user data.
 

@@ -123,6 +123,7 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     description: 'ชุมชน กติกา report/hide และแผน moderation โดย M109 ใช้ gated UI ไม่มีโพสต์ ไลก์ หรือคอมเมนต์ปลอม',
     routes: [
       { route: '/app/community', label: 'Community', milestone: 'M01/M23/M109', notes: 'Community Feed V1 contract + gated UI: composer, categories, share, report reasons, own hide/delete controls, image and notification policy; no fake public feed or engagement', manualCheckPath: '/app/community' },
+      { route: '/app/community-moderation', label: 'Community moderation review dashboard', milestone: 'M116.13', notes: 'admin-only report review surface; UI allowlist plus RLS/RPC-backed queue, no service-role key in frontend, no fake reports', manualCheckPath: '/app/community-moderation' },
       { route: '/app/community-rules', label: 'Community rules', milestone: 'M23', notes: 'กติกาและ safety policy สำหรับชุมชน', manualCheckPath: '/app/community-rules' },
       { route: '/app/moderation-center', label: 'Moderation center', milestone: 'M23', notes: 'ศูนย์รายงาน mock/local ไม่มี admin action จริง', manualCheckPath: '/app/moderation-center' },
     ],

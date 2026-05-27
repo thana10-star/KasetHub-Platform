@@ -87,6 +87,46 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     expect(html).toContain('ออกจากระบบ');
   });
 
+  test('shows the Community moderation link only for an allowlisted admin', () => {
+    const adminHtml = renderToString(
+      <MemoryRouter>
+        <ProfilePage
+          adminEmailsOverride={['owner@example.com']}
+          authSessionOverride={{
+            isConfigured: true,
+            canUseAuth: true,
+            isSignedIn: true,
+            userId: '00000000-0000-4000-8000-00000000000a',
+            userIdMasked: '000000...000a',
+            email: 'owner@example.com',
+            message: 'เข้าสู่ระบบแล้ว',
+          }}
+        />
+      </MemoryRouter>,
+    );
+    const nonAdminHtml = renderToString(
+      <MemoryRouter>
+        <ProfilePage
+          adminEmailsOverride={['owner@example.com']}
+          authSessionOverride={{
+            isConfigured: true,
+            canUseAuth: true,
+            isSignedIn: true,
+            userId: '00000000-0000-4000-8000-00000000000b',
+            userIdMasked: '000000...000b',
+            email: 'farmer@example.com',
+            message: 'เข้าสู่ระบบแล้ว',
+          }}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(adminHtml).toContain('ตรวจรายงานชุมชน');
+    expect(adminHtml).toContain('/app/community-moderation');
+    expect(nonAdminHtml).not.toContain('ตรวจรายงานชุมชน');
+    expect(nonAdminHtml).not.toContain('/app/community-moderation');
+  });
+
   test('hides internal links from the production Profile menu', () => {
     const html = renderToString(
       <MemoryRouter>
@@ -97,6 +137,7 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
 
     expect(html).not.toContain('data-testid="profile-advanced-section"');
     expect(html).not.toContain('/app/admin');
+    expect(html).not.toContain('/app/community-moderation');
     expect(html).not.toContain('/app/qa');
     expect(html).not.toContain('/app/field-test-feedback');
     expect(html).not.toContain('/app/supabase-readiness');

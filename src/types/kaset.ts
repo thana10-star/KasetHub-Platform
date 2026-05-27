@@ -51,6 +51,7 @@ export type AppRoute =
   | '/app/image-privacy'
   | '/app/image-preflight'
   | '/app/community'
+  | '/app/community-moderation'
   | '/app/community-rules'
   | '/app/moderation-center'
   | '/app/prices'

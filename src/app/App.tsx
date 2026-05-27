@@ -32,6 +32,7 @@ import { CalculatorSafetyPage } from '@/routes/CalculatorSafetyPage';
 import { CalculatorSavedResultsPage } from '@/routes/CalculatorSavedResultsPage';
 import { CalculatorsPage } from '@/routes/CalculatorsPage';
 import { CommunityPage } from '@/routes/CommunityPage';
+import { CommunityModerationPage } from '@/routes/CommunityModerationPage';
 import { CommunityRulesPage } from '@/routes/CommunityRulesPage';
 import { ArticleDetailPage } from '@/routes/ArticleDetailPage';
 import { CostCalculatorPage } from '@/routes/CostCalculatorPage';
@@ -148,6 +149,7 @@ export default function App() {
         <Route path="image-privacy" element={<ImagePrivacyPage />} />
         <Route path="image-preflight" element={<ImagePreflightPage />} />
         <Route path="community" element={<CommunityPage />} />
+        <Route path="community-moderation" element={<CommunityModerationPage />} />
         <Route path="community-rules" element={<CommunityRulesPage />} />
         <Route path="moderation-center" element={<ModerationCenterPage />} />
         <Route path="prices" element={<PricesPage />} />

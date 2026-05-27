@@ -18,6 +18,10 @@ M116.3 update: comment polish is drafted and wired for staging with one-level re
 
 M116.7 update: `น้ำและระบบน้ำ` is now a Community category for irrigation, drip systems, sprinklers, ponds, water shortage, flooding, brackish/saline water, pumps, pipes, and filters. This is a UI/category config update only and does not change write security.
 
+M116.12 update: report reasons now submit database-safe codes (`spam`, `dangerous_information`, `personal_information`, `inappropriate`, `other`) while keeping Thai labels in the UI. Reports require login, block double-submit, remember locally reported targets during the session, and handle duplicate database errors safely. No CAPTCHA is added in V1.
+
+M116.13 update: an admin-only report review route now exists at `/app/community-moderation`, gated by `VITE_ADMIN_EMAILS` in the UI and backed by a draft SQL/RPC admin allowlist at `supabase/sql/community_admin_moderation_m116_13.sql`. The frontend still uses the anon Supabase client and does not expose service-role keys.
+
 ## 3. Behavior
 
 - Composer renders with category selection and safety copy.
@@ -26,7 +30,7 @@ M116.7 update: `น้ำและระบบน้ำ` is now a Community cate
 - Feed renders an empty state and explicitly avoids fake posts, fake likes, fake comments, and fake names.
 - Comment/reply, comment-like, post-like, report, own hide, and own delete controls are shown as gated V1 capabilities.
 - Replies are one-level only: users can reply to a top-level comment, but replies do not show another reply action.
-- Report reasons are visible, but report submission is disabled until auth/RLS/moderation persistence is safe.
+- Report reasons use Thai labels with database-safe codes, and report submission is allowed only when auth/RLS/write gates are ready.
 - Share is implemented for `/app/community` using Web Share API with clipboard fallback. LINE and Facebook share links are plain URL sharers only.
 
 ## 4. One Image Policy
@@ -63,7 +67,7 @@ Allowed:
 - Storage bucket creation and policy verification
 - Real auth/session ownership surfaced safely to the write service
 - Server-side notification creation
-- Moderator/admin review queue
+- Broader moderation audit workflow and rate limits beyond the M116.13 review dashboard
 - Rate limiting
 - Individual post URLs
 
