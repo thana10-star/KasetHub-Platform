@@ -144,3 +144,24 @@ Home remains compact and shows only eligible, non-stale rows. It never backfills
 - updated/reference date and fetched/check time
 
 `/app/prices` also includes `อ่านราคานี้อย่างไร` with short farmer-facing guidance that ranges depend on market, quality, and area, and seasonal/reference prices are not daily market prices.
+
+## M123 Fertilizer UI Rules
+
+Fertilizer remains source-pending until verified fertilizer rows exist.
+
+When no verified fertilizer rows exist:
+
+- show `ราคาปุ๋ย`
+- show `ยังไม่แสดงราคา`
+- do not show numeric fertilizer prices
+- do not show formula rows such as `46-0-0` or `15-15-15`
+- do not show package sizes or fake charts
+- do not show fertilizer on Home
+
+When verified fertilizer rows exist later, each row must show formula, package size, price/unit, source, updated date, stale label, and province/shop/market context when relevant.
+
+See:
+
+- `docs/prices/FERTILIZER_SOURCE_MATRIX_M123.md`
+- `docs/prices/FERTILIZER_V1_DATA_RULES_M123.md`
+- `docs/prices/FERTILIZER_UI_RULES_M123.md`

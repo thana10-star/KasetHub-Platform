@@ -63,9 +63,13 @@ type FertilizerPrice = {
   currency: "THB";
   region?: string;
   province?: string;
+  marketName?: string;
+  shopName?: string;
   sourceName: string;
+  sourceDisplayName?: string;
   sourceUrl?: string;
   sourceType: "api" | "csv" | "webpage" | "pdf" | "manual" | "unknown";
+  sourceAttribution: string;
   updatedAt: string;
   fetchedAt: string;
   isStale: boolean;
@@ -73,7 +77,16 @@ type FertilizerPrice = {
 };
 ```
 
-Fertilizer must not be displayed without `formula`, `packageSize` or `unit`, `sourceName`, and `updatedAt`.
+Fertilizer must not be displayed without `formula`, `packageSize`, `unit`, `sourceName`, `sourceAttribution`, `updatedAt`, and `fetchedAt`.
+
+M123 adds stricter fertilizer planning rules:
+
+- `formula` must be visible, such as `46-0-0`.
+- `packageSize` must be explicit, such as `50 กก.`.
+- `unit` must be explicit, such as `บาท/กระสอบ`.
+- `marketName`, `shopName`, `province`, or `region` must be kept when the source is local, shop-specific, wholesale, retail, event-specific, or province-average.
+- Do not display rows where retail/wholesale/reference context is unclear.
+- Annual/province-average fertilizer datasets should be reference-only, not Home/live prices.
 
 ## PriceSourceStatus
 

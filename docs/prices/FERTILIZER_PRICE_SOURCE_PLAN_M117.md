@@ -60,3 +60,22 @@ Do not convert sack price to kg price unless the package size is explicit and ve
 - Define source-specific freshness windows.
 - Add a small fertilizer section after crop price validation is live.
 - Add regional/shop comparison only after source coverage and permission are confirmed.
+
+## M123 Verification Update
+
+M123 reviewed fertilizer source candidates and keeps fertilizer source-pending.
+
+Findings:
+
+- data.go.th dataset `dataset_11_431` is verified as a public catalog entry for average chemical fertilizer sale price per sack, but it is annual, Yasothon-focused, and not formula-specific. It is reference/history only, not a V1 live fertilizer source.
+- OAE article `https://oae.go.th/home/article/469` appears promising for monthly wholesale/retail fertilizer formulas, but direct table/export, unit, formula list, and reuse details still need verification before rows can be added.
+- DIT FAQ and press releases verify fertilizer price-control and monitoring context, but they are not structured fertilizer price feeds.
+- Owner-curated manual rows remain the safest first V1 path if each row includes formula, package size, unit, source, updated date, fetched date, and local/market context.
+
+New M123 docs:
+
+- `docs/prices/FERTILIZER_SOURCE_MATRIX_M123.md`
+- `docs/prices/FERTILIZER_V1_DATA_RULES_M123.md`
+- `docs/prices/FERTILIZER_UI_RULES_M123.md`
+
+No fertilizer rows were added in M123.
