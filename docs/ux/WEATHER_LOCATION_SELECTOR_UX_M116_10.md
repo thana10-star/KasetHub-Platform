@@ -2,7 +2,7 @@
 
 ## Summary
 
-M116.10 polishes the `/app/weather` page so farmers can choose an approximate province/city before reading the forecast. The selector now appears directly under the Weather page header and before the main current-weather card.
+M116.10 polishes the `/app/weather` page so farmers can choose an approximate province before reading the forecast. The selector now appears directly under the Weather page header and before the main current-weather card.
 
 ## Owner Feedback Addressed
 
@@ -15,14 +15,21 @@ The previous Weather page exposed location choices, but the controls could feel 
 
 ## Selector Behavior
 
-The primary selector is a simple province/city dropdown with a large confirm button:
+The primary selector is a simple province dropdown with a compact premium confirm button:
 
-- Label: `จังหวัด/เมืองใกล้เคียง`
+- Label: `จังหวัด`
 - Button: `ยืนยันพื้นที่ของคุณ`
 - Current state: `พื้นที่ปัจจุบัน: ...`
 - Pending state: shows the selected area and asks the user to confirm before updating the forecast.
 
-Shortcut chips are retained for the first few common areas, but they now update the pending selection instead of immediately switching the forecast. The confirm button runs the existing `selectLocation` flow.
+The dropdown is sourced from the shared weather province configuration and includes all 77 Thai provinces grouped by region. Shortcut chips are retained for common areas, but they update the pending selection instead of immediately switching the forecast. The confirm button runs the existing `selectLocation` flow.
+
+## Follow-Up Polish
+
+The M116.10 follow-up addressed two owner review items:
+
+- Province coverage expanded from the original common presets to all 77 provinces of Thailand.
+- The confirm button was reduced from a large block-style CTA to a smaller rounded green action with subtle shadow, icon support, and mobile-safe tap sizing.
 
 ## Privacy Boundary
 
@@ -32,17 +39,17 @@ This polish keeps the existing privacy model:
 - No browser geolocation prompt.
 - No exact farm pin.
 - No precise personal location storage.
-- Area selection remains province/city-center level.
+- Area selection remains province-level using approximate province/city-center coordinates.
 
 Primary page copy says `ไม่ใช้ GPS` and `ไม่เก็บตำแหน่งละเอียด` in farmer-facing language. Technical source/cache details stay lower in the `ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล` section.
 
 ## Province/City vs Amphoe
 
-V1 remains province/city-level because that data already exists and is safe for approximate forecasts. District/amphoe selection can be added later with a vetted lat/lon mapping table, but this milestone does not invent district data or add precise location capture.
+V1 remains province-level because it is broad enough for privacy-safe approximate forecasts and now covers every Thai province. District/amphoe selection can be added later with a vetted lat/lon mapping table, but this milestone does not invent district data or add precise location capture.
 
 ## Mobile Notes
 
-At mobile width, the selector card uses a full-width dropdown and confirm button with large touch targets. The main weather card remains immediately below the selector, keeping the flow clear without horizontal scrolling.
+At mobile width, the selector card uses a full-width native dropdown with a compact confirm button beneath it. Common-province chips scroll inside their own row, so the page avoids horizontal overflow. The main weather card remains immediately below the selector.
 
 ## Non-Goals Preserved
 

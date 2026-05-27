@@ -6,8 +6,101 @@ import {
   weatherAgriRiskLevelCardClass,
   weatherAgriRiskLevelNoteClass,
 } from '@/services/weather/weather-agri-risk-boundary';
+import {
+  THAI_WEATHER_PROVINCE_COUNT,
+  weatherCoarseLocations,
+  weatherCommonProvinceLocationIds,
+} from '@/services/weather/weather-location-fixtures';
 
 describe('M104.1 weather UI priority polish', () => {
+  test('uses a complete shared Thailand province source', () => {
+    const provinceLabels = weatherCoarseLocations.map((location) => location.label);
+    const expectedProvinceLabels = [
+      'กรุงเทพฯ',
+      'กระบี่',
+      'กาญจนบุรี',
+      'กาฬสินธุ์',
+      'กำแพงเพชร',
+      'ขอนแก่น',
+      'จันทบุรี',
+      'ฉะเชิงเทรา',
+      'ชลบุรี',
+      'ชัยนาท',
+      'ชัยภูมิ',
+      'ชุมพร',
+      'เชียงราย',
+      'เชียงใหม่',
+      'ตรัง',
+      'ตราด',
+      'ตาก',
+      'นครนายก',
+      'นครปฐม',
+      'นครพนม',
+      'นครราชสีมา',
+      'นครศรีธรรมราช',
+      'นครสวรรค์',
+      'นนทบุรี',
+      'นราธิวาส',
+      'น่าน',
+      'บึงกาฬ',
+      'บุรีรัมย์',
+      'ปทุมธานี',
+      'ประจวบคีรีขันธ์',
+      'ปราจีนบุรี',
+      'ปัตตานี',
+      'พระนครศรีอยุธยา',
+      'พะเยา',
+      'พังงา',
+      'พัทลุง',
+      'พิจิตร',
+      'พิษณุโลก',
+      'เพชรบุรี',
+      'เพชรบูรณ์',
+      'แพร่',
+      'ภูเก็ต',
+      'มหาสารคาม',
+      'มุกดาหาร',
+      'แม่ฮ่องสอน',
+      'ยโสธร',
+      'ยะลา',
+      'ร้อยเอ็ด',
+      'ระนอง',
+      'ระยอง',
+      'ราชบุรี',
+      'ลพบุรี',
+      'ลำปาง',
+      'ลำพูน',
+      'เลย',
+      'ศรีสะเกษ',
+      'สกลนคร',
+      'สงขลา',
+      'สตูล',
+      'สมุทรปราการ',
+      'สมุทรสงคราม',
+      'สมุทรสาคร',
+      'สระแก้ว',
+      'สระบุรี',
+      'สิงห์บุรี',
+      'สุโขทัย',
+      'สุพรรณบุรี',
+      'สุราษฎร์ธานี',
+      'สุรินทร์',
+      'หนองคาย',
+      'หนองบัวลำภู',
+      'อ่างทอง',
+      'อำนาจเจริญ',
+      'อุดรธานี',
+      'อุตรดิตถ์',
+      'อุทัยธานี',
+      'อุบลราชธานี',
+    ];
+
+    expect(weatherCoarseLocations).toHaveLength(THAI_WEATHER_PROVINCE_COUNT);
+    expect(new Set(provinceLabels)).toHaveLength(THAI_WEATHER_PROVINCE_COUNT);
+    expect(provinceLabels).toEqual(expect.arrayContaining(expectedProvinceLabels));
+    expect(weatherCommonProvinceLocationIds.every((id) => weatherCoarseLocations.some((location) => location.id === id))).toBe(true);
+  });
+
   test('renders weather-first page order before source details', () => {
     const html = renderToString(
       <MemoryRouter>
@@ -46,13 +139,29 @@ describe('M104.1 weather UI priority polish', () => {
     expect(selectorIndex).toBeGreaterThan(-1);
     expect(currentIndex).toBeGreaterThan(selectorIndex);
     expect(sourceDetailsIndex).toBeGreaterThan(currentIndex);
-    expect(html).toContain('เลือกจังหวัด/เมืองใกล้เคียงเพื่อดูพยากรณ์แบบหยาบ');
-    expect(html).toContain('จังหวัด/เมืองใกล้เคียง');
+    expect(html).toContain('เลือกจังหวัดใกล้พื้นที่เพาะปลูกเพื่อดูพยากรณ์แบบหยาบ');
+    expect(html).toContain('จังหวัด');
     expect(html).toContain('ยืนยันพื้นที่ของคุณ');
     expect(html).toContain('พื้นที่ปัจจุบัน:');
     expect(html).toContain('กรุงเทพฯ');
     expect(html).toContain('นครราชสีมา');
     expect(html).toContain('ขอนแก่น');
+    expect(html.match(/<option /g) ?? []).toHaveLength(THAI_WEATHER_PROVINCE_COUNT);
+  });
+
+  test('renders a compact premium confirm button instead of an oversized block CTA', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WeatherPage />
+      </MemoryRouter>,
+    );
+    const confirmButton = html.match(/<button[^>]*data-testid="weather-location-confirm"[^>]*>/)?.[0] ?? '';
+
+    expect(confirmButton).toContain('min-h-10');
+    expect(confirmButton).toContain('w-fit');
+    expect(confirmButton).toContain('rounded-full');
+    expect(confirmButton).not.toContain('min-h-12');
+    expect(confirmButton).not.toContain('w-full');
   });
 
   test('keeps GPS and source details out of the primary weather flow', () => {

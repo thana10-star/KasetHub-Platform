@@ -36,6 +36,7 @@ import { computeWeatherStaleAgeLabel } from '@/services/weather/weather-cache-qa
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
+import { weatherCommonProvinceLocationIds } from '@/services/weather/weather-location-fixtures';
 import { buildWeatherSourceReadiness } from '@/services/weather/weather-source-readiness';
 import type { WeatherForecastDay } from '@/services/weather/weather.types';
 
@@ -136,6 +137,20 @@ export function WeatherPage() {
   const selectedLocation = locations.find((location) => location.id === selectedLocationId) ?? forecast.location;
   const pendingLocation = locations.find((location) => location.id === pendingLocationId) ?? selectedLocation;
   const hasPendingLocationChange = pendingLocation.id !== selectedLocation.id;
+  const locationGroups = locations.reduce<Array<{ region: string; locations: typeof locations }>>((groups, location) => {
+    const group = groups.find((item) => item.region === location.region);
+
+    if (group) {
+      group.locations.push(location);
+    } else {
+      groups.push({ region: location.region, locations: [location] });
+    }
+
+    return groups;
+  }, []);
+  const quickLocations = weatherCommonProvinceLocationIds
+    .map((locationId) => locations.find((location) => location.id === locationId))
+    .filter((location): location is (typeof locations)[number] => Boolean(location));
 
   useEffect(() => {
     setPendingLocationId(selectedLocationId);
@@ -151,51 +166,62 @@ export function WeatherPage() {
               <div className="min-w-0">
                 <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่ของคุณ</h2>
                 <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">
-                  เลือกจังหวัด/เมืองใกล้เคียงเพื่อดูพยากรณ์แบบหยาบ ไม่ใช้ GPS และไม่เก็บตำแหน่งละเอียด
+                  เลือกจังหวัดใกล้พื้นที่เพาะปลูกเพื่อดูพยากรณ์แบบหยาบ ไม่ใช้ GPS
                 </p>
               </div>
               <StatusPill tone="info">ไม่ใช้ GPS</StatusPill>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
               <label className="grid gap-2 text-sm font-extrabold text-kaset-ink" htmlFor="weather-location-select">
-                จังหวัด/เมืองใกล้เคียง
+                จังหวัด
                 <select
-                  className="min-h-12 w-full rounded-lg border border-kaset-deep/15 bg-white px-3 text-base font-bold text-kaset-ink outline-none ring-kaset-deep/20 focus:border-kaset-deep focus:ring-2"
+                  className="min-h-11 w-full rounded-lg border border-kaset-deep/15 bg-white px-3 text-base font-bold text-kaset-ink shadow-inner outline-none ring-kaset-deep/20 focus:border-kaset-deep focus:ring-2"
                   id="weather-location-select"
                   onChange={(event) => setPendingLocationId(event.target.value)}
                   value={pendingLocationId}
                 >
-                  {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.label}
-                    </option>
+                  {locationGroups.map((group) => (
+                    <optgroup key={group.region} label={group.region}>
+                      {group.locations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                          {location.label}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </label>
               <button
-                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white shadow-soft hover:bg-kaset-ink"
+                className="inline-flex min-h-10 w-fit min-w-[148px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-kaset-deep px-3.5 text-xs font-extrabold text-white shadow-[0_8px_18px_rgba(20,83,45,0.18)] ring-1 ring-emerald-950/10 transition hover:bg-kaset-ink sm:min-h-11 sm:px-4 sm:text-sm"
+                data-testid="weather-location-confirm"
                 onClick={() => selectLocation(pendingLocationId)}
                 type="button"
               >
+                <MapPin aria-hidden="true" className="h-4 w-4" />
                 ยืนยันพื้นที่ของคุณ
               </button>
             </div>
 
-            <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
-              <p>พื้นที่ปัจจุบัน: {selectedLocation.label}</p>
+            <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep ring-1 ring-kaset-deep/5">
+              <p>
+                พื้นที่ปัจจุบัน:{' '}
+                <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-kaset-deep shadow-soft">
+                  {selectedLocation.label}
+                </span>
+              </p>
               <p>
                 {hasPendingLocationChange
                   ? `เลือกไว้: ${pendingLocation.label} กดยืนยันเพื่ออัปเดตพยากรณ์`
                   : 'เลือกพื้นที่แล้วพร้อมดูพยากรณ์ด้านล่าง'}
               </p>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2" aria-label="ทางลัดเลือกพื้นที่">
-              {locations.slice(0, 5).map((location) => (
+            <div className="mt-3 flex max-w-full gap-2 overflow-x-auto pb-1" aria-label="จังหวัดยอดนิยม">
+              {quickLocations.map((location) => (
                 <button
                   aria-pressed={pendingLocationId === location.id}
                   className={cx(
-                    'min-h-10 rounded-full px-3 text-xs font-extrabold ring-1 ring-kaset-deep/10',
+                    'min-h-9 shrink-0 rounded-full px-3 text-xs font-extrabold ring-1 ring-kaset-deep/10',
                     pendingLocationId === location.id
                       ? 'bg-kaset-deep text-white'
                       : 'bg-white text-kaset-deep hover:bg-kaset-mint',
