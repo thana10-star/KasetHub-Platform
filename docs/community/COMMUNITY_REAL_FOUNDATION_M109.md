@@ -22,6 +22,8 @@ M116.12 update: report reasons now submit database-safe codes (`spam`, `dangerou
 
 M116.13 update: an admin-only report review route now exists at `/app/community-moderation`, gated by `VITE_ADMIN_EMAILS` in the UI and backed by a draft SQL/RPC admin allowlist at `supabase/sql/community_admin_moderation_m116_13.sql`. The frontend still uses the anon Supabase client and does not expose service-role keys.
 
+M116.14 update: moderation setup is implemented but not owner-activated. Applying the SQL/RPC draft, adding the owner to `admin_moderators`, setting `VITE_ADMIN_EMAILS`, and verifying the real report queue are deferred. This is not blocking private/staging app exploration, but it is required before public Community write launch.
+
 ## 3. Behavior
 
 - Composer renders with category selection and safety copy.

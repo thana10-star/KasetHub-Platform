@@ -15,6 +15,7 @@ Status guide:
 - `open`
 - `in progress`
 - `blocked`
+- `deferred / owner setup pending`
 - `resolved`
 - `closed`
 - `accepted`
@@ -48,6 +49,8 @@ M116 note: Community staging writes remain staging-only. M113 RLS/storage eviden
 
 M116.1 note: Owner app-level retest found Community like count still stale and comment typing still crashing. Codex applied a narrow UI fix and added typing/stale-like regression tests; owner redeploy/retest is still required.
 
+M116.14 note: Community moderation dashboard code exists, but owner-side activation is deferred while the next focus moves to real agriculture crop/product prices and fertilizer prices. This deferral is not blocking private/staging app exploration, but it is required before public Community write launch.
+
 | ID | Route / screen | Blocker type | Severity | Screenshot reference | Fix owner | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | M104-B001 | `/app/weather` production | weather/env | blocker | Owner production screenshots | Owner | resolved | Owner confirmed Cloudflare Weather env is working with live Open-Meteo data after production env setup. |
@@ -71,7 +74,7 @@ M116.1 note: Owner app-level retest found Community like count still stale and c
 | M104-B014 | `/app/community` staging writes | community | important | M116.1 retest doc | Owner | blocked | M116.1 fixed stale-like and comment-typing crash paths in code; owner staging redeploy/retest is still pending before this can move to passed. |
 | M104-B015 | Community production writes | community | blocker | M116 launch decision | Owner / Codex | blocked | Production writes must stay disabled until app-level staging retest, moderation/report handling, rate limiting, privacy/support readiness, and owner approval pass. |
 | M104-B016 | Community like/reply notifications | notifications | important | M116 notification decision | Codex | blocked | Backend-created in-app notifications are not implemented. Browser-created notifications remain unsafe and gated. |
-| M104-B017 | Community moderation/rate limiting | moderation | blocker | M116 launch decision | Owner / Codex | open | Public launch needs moderation/admin queue, report handling ownership, and rate limiting or accepted operational controls. |
+| M104-B017 | Community moderation setup | moderation | blocker | M116.14 deferral note | Owner | deferred / owner setup pending | Community moderation dashboard code exists, but admin SQL/RPC setup is not applied. Owner is not inserted into `admin_moderators`, `VITE_ADMIN_EMAILS` is not configured, and the real report queue is not verified in-app. Must complete before public Community write launch. |
 
 ## Release Rule
 

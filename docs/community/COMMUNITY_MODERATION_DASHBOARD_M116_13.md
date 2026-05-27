@@ -71,6 +71,21 @@ The owner still needs to:
 - set `VITE_ADMIN_EMAILS` for the staging frontend
 - verify non-admin accounts cannot read report queue data
 
+## M116.14 Deferral Status
+
+Implemented but not owner-activated.
+
+The owner decided to defer:
+
+- applying `supabase/sql/community_admin_moderation_m116_13.sql`
+- adding the owner to `admin_moderators`
+- setting `VITE_ADMIN_EMAILS`
+- verifying the real report queue in-app
+
+This is not blocking private/staging app exploration. It is required before public Community write launch.
+
+Reports can be created, but dashboard queue requires admin SQL/RPC setup before real in-app review.
+
 ## Future Plan
 
 Recommended next steps:

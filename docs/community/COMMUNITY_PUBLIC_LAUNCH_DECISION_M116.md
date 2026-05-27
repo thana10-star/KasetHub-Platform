@@ -14,6 +14,7 @@ Community remains a staging write adapter only.
 - M116.3 adds staging-ready comment likes and one-level replies, pending owner staging retest after the SQL draft is applied.
 - M116.12 fixes report reason mapping so Thai UI labels submit database-safe reason codes, and adds simple report anti-abuse guards without CAPTCHA.
 - M116.13 adds an admin-only moderation review dashboard and SQL/RPC draft, pending owner application and staging verification.
+- M116.14 defers owner-side moderation activation so the next focus can move to real crop/product prices and fertilizer prices.
 
 ## What Passed So Far
 
@@ -27,7 +28,7 @@ Community remains a staging write adapter only.
 ## What Is Still Missing
 
 - Owner app-level staging retest after M115 deployment.
-- Owner application and verification of the M116.13 moderation dashboard SQL/RPC/admin allowlist.
+- Owner application and verification of the M116.13 moderation dashboard SQL/RPC/admin allowlist. M116.14 status: deferred / owner setup pending.
 - Rate limiting for posts, comments, likes, and reports.
 - Backend-created like/reply in-app notifications, or an explicit owner decision to launch without them.
 - Owner staging verification for comment likes and one-level replies.
@@ -63,3 +64,5 @@ Continue staging testing with `VITE_ENABLE_COMMUNITY_WRITES=true` only in stagin
 M116.12 should also be retested in staging before any public write decision: report `สแปม`, report `เนื้อหาไม่เหมาะสม`, retry the same target, and confirm signed-out users cannot submit reports.
 
 M116.13 should be applied and retested before public write enablement: add the owner to `admin_moderators`, set `VITE_ADMIN_EMAILS`, confirm `/app/community-moderation` loads for the owner, and confirm normal users cannot access report data.
+
+M116.14 owner decision: do not perform the owner-side moderation setup right now. This is not blocking private/staging app exploration, but it is required before public Community write launch. Reports can be created, but dashboard queue requires admin SQL/RPC setup before real in-app review.
