@@ -16,9 +16,12 @@ M110 update: a staging SQL/RLS/storage pack now exists at `supabase/sql/communit
 
 M116.3 update: comment polish is drafted and wired for staging with one-level replies and comment likes. SQL lives at `supabase/sql/community_comment_replies_likes_m116_3.sql`. Production writes still stay disabled by default.
 
+M116.7 update: `น้ำและระบบน้ำ` is now a Community category for irrigation, drip systems, sprinklers, ponds, water shortage, flooding, brackish/saline water, pumps, pipes, and filters. This is a UI/category config update only and does not change write security.
+
 ## 3. Behavior
 
 - Composer renders with category selection and safety copy.
+- Categories include `ปัญหาพืช`, `ดินและปุ๋ย`, `น้ำและระบบน้ำ`, `อากาศ`, `ราคาเกษตร`, `เครื่องมือ/แอพ`, `เรื่องเล่าจากฟาร์ม`, and `อื่น ๆ`.
 - Post submit is disabled with: "เข้าสู่ระบบก่อนโพสต์ คอมเมนต์ หรือกดไลก์".
 - Feed renders an empty state and explicitly avoids fake posts, fake likes, fake comments, and fake names.
 - Comment/reply, comment-like, post-like, report, own hide, and own delete controls are shown as gated V1 capabilities.

@@ -13,7 +13,10 @@ import {
   validateCommunityImageFile,
 } from '@/services/community/community-storage-service';
 import type { CommunityReadiness } from '@/services/community/community.types';
-import { communityPostCategories } from '@/services/community/community.types';
+import {
+  communityFallbackPostCategory,
+  communityPostCategories,
+} from '@/services/community/community.types';
 import { mvpRouteGroups } from '@/services/qa/route-registry';
 
 type MockQueryResult = {
@@ -80,6 +83,10 @@ function createClientMock(query: MockQuery) {
 }
 
 const userA = { id: '00000000-0000-4000-8000-00000000000a', displayName: 'User A' };
+const userAWithEmailOnly = {
+  id: '00000000-0000-4000-8000-00000000000a',
+  email: 'community-user-a@test.local',
+};
 
 describe('M114 gated community staging service contract', () => {
   test('exposes the V1 categories without fake engagement data', async () => {
@@ -88,8 +95,17 @@ describe('M114 gated community staging service contract', () => {
     });
     const result = await service.listPosts();
 
-    expect(communityPostCategories).toContain('ปัญหาพืช');
-    expect(communityPostCategories).toContain('เรื่องเล่าจากฟาร์ม');
+    expect(communityPostCategories).toEqual([
+      'ปัญหาพืช',
+      'ดินและปุ๋ย',
+      'น้ำและระบบน้ำ',
+      'อากาศ',
+      'ราคาเกษตร',
+      'เครื่องมือ/แอพ',
+      'เรื่องเล่าจากฟาร์ม',
+      'อื่น ๆ',
+    ]);
+    expect(communityFallbackPostCategory).toBe('อื่น ๆ');
     expect(result.posts).toEqual([]);
     expect(result.readiness.path).toBe('gated');
     expect(result.readiness.canWrite).toBe(false);
@@ -142,7 +158,7 @@ describe('M114 gated community staging service contract', () => {
       getCurrentUser: async () => null,
     });
 
-    await expect(service.createPost({ contentText: 'hello', category: communityPostCategories[6] })).resolves.toMatchObject({
+    await expect(service.createPost({ contentText: 'hello', category: communityFallbackPostCategory })).resolves.toMatchObject({
       ok: false,
       code: 'auth_session_required',
     });
@@ -171,6 +187,46 @@ describe('M114 gated community staging service contract', () => {
     expect(query.eq).toHaveBeenCalledWith('status', 'published');
   });
 
+  test('maps the water category from Supabase rows', async () => {
+    const query = createQueryMock({
+      data: [
+        {
+          id: 'post-water-1',
+          author_user_id: userA.id,
+          author_display_name: 'User A',
+          content_text: 'ระบบน้ำหยดในแปลงผัก',
+          category: 'น้ำและระบบน้ำ',
+          image_path: null,
+          image_mime_type: null,
+          image_size_bytes: null,
+          image_width: null,
+          image_height: null,
+          status: 'published',
+          like_count: 0,
+          comment_count: 0,
+          report_count: 0,
+          created_at: '2026-05-26T00:00:00.000Z',
+          updated_at: '2026-05-26T00:00:00.000Z',
+        },
+      ],
+      error: null,
+    });
+    const { client } = createClientMock(query);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => null,
+    });
+
+    await expect(service.listPosts()).resolves.toMatchObject({
+      posts: [
+        {
+          id: 'post-water-1',
+          category: 'น้ำและระบบน้ำ',
+        },
+      ],
+    });
+  });
+
   test('marks posts liked by the current user for staging unlike tests', async () => {
     const postQuery = createQueryMock({
       data: [
@@ -179,7 +235,7 @@ describe('M114 gated community staging service contract', () => {
           author_user_id: '00000000-0000-4000-8000-00000000000b',
           author_display_name: 'User B',
           content_text: 'real staging post',
-          category: communityPostCategories[6],
+          category: communityFallbackPostCategory,
           image_path: null,
           image_mime_type: null,
           image_size_bytes: null,
@@ -319,7 +375,7 @@ describe('M114 gated community staging service contract', () => {
         author_user_id: userA.id,
         author_display_name: 'User A',
         content_text: 'hello community',
-        category: communityPostCategories[6],
+        category: communityFallbackPostCategory,
         image_path: null,
         image_mime_type: null,
         image_size_bytes: null,
@@ -341,7 +397,7 @@ describe('M114 gated community staging service contract', () => {
       createPostId: () => 'post-1',
     });
 
-    await expect(service.createPost({ contentText: ' hello community ', category: communityPostCategories[6] })).resolves.toMatchObject({
+    await expect(service.createPost({ contentText: ' hello community ', category: communityFallbackPostCategory })).resolves.toMatchObject({
       ok: true,
       data: {
         id: 'post-1',
@@ -353,8 +409,158 @@ describe('M114 gated community staging service contract', () => {
     expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
       id: 'post-1',
       author_user_id: userA.id,
+      author_display_name: 'User A',
       content_text: 'hello community',
-      category: communityPostCategories[6],
+      category: communityFallbackPostCategory,
+    }));
+  });
+
+  test('creates posts and comments with a sanitized email local-part display name when no profile name exists', async () => {
+    const postQuery = createQueryMock({
+      data: {
+        id: 'post-1',
+        author_user_id: userAWithEmailOnly.id,
+        author_display_name: 'community-user-a',
+        content_text: 'hello community',
+        category: communityFallbackPostCategory,
+        image_path: null,
+        image_mime_type: null,
+        image_size_bytes: null,
+        image_width: null,
+        image_height: null,
+        status: 'published',
+        like_count: 0,
+        comment_count: 0,
+        report_count: 0,
+        created_at: '2026-05-26T00:00:00.000Z',
+        updated_at: '2026-05-26T00:00:00.000Z',
+      },
+      error: null,
+    });
+    const commentQuery = createQueryMock({
+      data: {
+        id: 'comment-1',
+        post_id: 'post-1',
+        parent_comment_id: null,
+        author_user_id: userAWithEmailOnly.id,
+        author_display_name: 'community-user-a',
+        content_text: 'reply',
+        status: 'published',
+        report_count: 0,
+        created_at: '2026-05-26T00:00:00.000Z',
+        updated_at: '2026-05-26T00:00:00.000Z',
+      },
+      error: null,
+    });
+    let queryCount = 0;
+    const from = vi.fn((table: string) => {
+      if (table !== 'community_comments') return postQuery;
+      queryCount += 1;
+      return queryCount === 1 ? commentQuery : commentQuery;
+    });
+    const client = {
+      from,
+      auth: {
+        getUser: vi.fn(),
+      },
+      storage: {
+        from: vi.fn(),
+      },
+    } as unknown as SupabaseClient;
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userAWithEmailOnly,
+      createPostId: () => 'post-1',
+    });
+
+    await expect(service.createPost({ contentText: 'hello community', category: communityFallbackPostCategory })).resolves.toMatchObject({
+      ok: true,
+      data: {
+        authorDisplayName: 'community-user-a',
+      },
+    });
+    expect(postQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+      author_display_name: 'community-user-a',
+    }));
+
+    await expect(service.createComment('post-1', { contentText: 'reply' })).resolves.toMatchObject({
+      ok: true,
+      data: {
+        authorDisplayName: 'community-user-a',
+      },
+    });
+    expect(commentQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+      author_display_name: 'community-user-a',
+    }));
+    expect(JSON.stringify(postQuery.insert.mock.calls)).not.toContain('community-user-a@test.local');
+    expect(JSON.stringify(commentQuery.insert.mock.calls)).not.toContain('community-user-a@test.local');
+  });
+
+  test('prefers an owned profile display_name over auth metadata and email when creating a post', async () => {
+    const profileQuery = createQueryMock({
+      data: {
+        display_name: 'สวนลุงสมชาย',
+      },
+      error: null,
+    });
+    const postQuery = createQueryMock({
+      data: {
+        id: 'post-1',
+        author_user_id: userA.id,
+        author_display_name: 'สวนลุงสมชาย',
+        content_text: 'hello community',
+        category: communityFallbackPostCategory,
+        image_path: null,
+        image_mime_type: null,
+        image_size_bytes: null,
+        image_width: null,
+        image_height: null,
+        status: 'published',
+        like_count: 0,
+        comment_count: 0,
+        report_count: 0,
+        created_at: '2026-05-26T00:00:00.000Z',
+        updated_at: '2026-05-26T00:00:00.000Z',
+      },
+      error: null,
+    });
+    const from = vi.fn((table: string) => (table === 'profiles' ? profileQuery : postQuery));
+    const client = {
+      from,
+      auth: {
+        getUser: vi.fn(async () => ({
+          data: {
+            user: {
+              id: userA.id,
+              email: 'community-user-a@test.local',
+              user_metadata: {
+                display_name: 'Metadata Name',
+              },
+            },
+          },
+          error: null,
+        })),
+      },
+      storage: {
+        from: vi.fn(),
+      },
+    } as unknown as SupabaseClient;
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      createPostId: () => 'post-1',
+    });
+
+    await expect(service.createPost({ contentText: 'hello community', category: communityFallbackPostCategory })).resolves.toMatchObject({
+      ok: true,
+      data: {
+        authorDisplayName: 'สวนลุงสมชาย',
+      },
+    });
+    expect(from).toHaveBeenCalledWith('profiles');
+    expect(profileQuery.select).toHaveBeenCalledWith('display_name');
+    expect(profileQuery.eq).toHaveBeenCalledWith('id', userA.id);
+    expect(postQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+      author_display_name: 'สวนลุงสมชาย',
     }));
   });
 
@@ -557,6 +763,23 @@ describe('M114 gated community staging service contract', () => {
     }));
   });
 
+  test('keeps spam report reason mapped to the spam database code', async () => {
+    const query = createQueryMock({ data: null, error: null });
+    const { client } = createClientMock(query);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.reportPost('post-1', { reason: 'spam', note: 'spam note' })).resolves.toMatchObject({ ok: true });
+    expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
+      post_id: 'post-1',
+      reporter_user_id: userA.id,
+      reason: 'spam',
+      note: 'spam note',
+    }));
+  });
+
   test('documents one-image policy while upload remains disabled', async () => {
     expect(communityImagePolicy.bucketName).toBe('community-post-images');
     expect(communityImagePolicy.maxImagesPerPost).toBe(1);
@@ -670,6 +893,7 @@ describe('M114 gated community staging service contract', () => {
     const uiChecklistPath = join(root, 'docs/community/COMMUNITY_STAGING_UI_WRITE_TEST_CHECKLIST_M114.md');
     const commentReplyLikeSqlPath = join(root, 'supabase/sql/community_comment_replies_likes_m116_3.sql');
     const commentReplyLikeDocPath = join(root, 'docs/community/COMMUNITY_COMMENT_REPLY_LIKE_M116_3.md');
+    const authorDisplayDocPath = join(root, 'docs/community/COMMUNITY_AUTHOR_DISPLAY_NAME_M116_6.md');
     const envExample = readFileSync(join(root, '.env.example'), 'utf8');
     const envSource = readFileSync(join(root, 'src/config/env.ts'), 'utf8');
     const sql = readFileSync(sqlPath, 'utf8');
@@ -685,6 +909,7 @@ describe('M114 gated community staging service contract', () => {
     expect(existsSync(uiChecklistPath)).toBe(true);
     expect(existsSync(commentReplyLikeSqlPath)).toBe(true);
     expect(existsSync(commentReplyLikeDocPath)).toBe(true);
+    expect(existsSync(authorDisplayDocPath)).toBe(true);
     expect(sql).toContain('community_posts');
     expect(sql).toContain('community_notifications');
     expect(sql).toContain('community-post-images');

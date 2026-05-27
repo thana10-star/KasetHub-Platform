@@ -45,6 +45,7 @@ import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { useSavedVideos } from '@/hooks/useSavedVideos';
 import { getAccountStatus } from '@/services/account/account-status-service';
+import { getCommunityAuthorDisplayName } from '@/services/community/community-author-display';
 import {
   getCachedSupabaseAuthSessionSnapshot,
   getCurrentSupabaseAuthSession,
@@ -434,6 +435,10 @@ export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
   const [authStatusMessage, setAuthStatusMessage] = useState('');
 
   const primaryMenuGroups = profileMenuGroups.filter((group) => group.tone !== 'advanced');
+  const communityDisplayName = getCommunityAuthorDisplayName({
+    currentUserEmail: authSession.email,
+    ownedByCurrentUser: authSession.isSignedIn,
+  });
 
   useEffect(() => {
     if (authSessionOverride) {
@@ -536,6 +541,15 @@ export function ProfilePage({ authSessionOverride }: ProfilePageProps = {}) {
                   ? authSession.email ?? 'ใช้บัญชีนี้สำหรับชุมชนและฟีเจอร์ที่ต้องมีบัญชี'
                   : 'ใช้สำหรับชุมชนและฟีเจอร์ที่ต้องมีบัญชี'}
               </p>
+              {authSession.isSignedIn ? (
+                <div className="mt-3 rounded-lg border border-kaset-deep/10 bg-kaset-mist p-3">
+                  <p className="text-xs font-bold text-slate-500">ชื่อที่แสดงในชุมชน</p>
+                  <p className="mt-1 break-words text-sm font-extrabold text-kaset-ink">{communityDisplayName}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    ใช้ชื่อนี้ในชุมชนจนกว่าจะมีการตั้งชื่อโปรไฟล์
+                  </p>
+                </div>
+              ) : null}
               {authSession.isSignedIn ? (
                 <Button className="mt-3 w-full" onClick={handleSignOut} variant="secondary">
                   <LogOut aria-hidden="true" className="h-4 w-4" />

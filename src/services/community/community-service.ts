@@ -2,6 +2,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { publicEnv } from '@/config/env';
 import { getAuthOwnershipStatus } from '@/services/auth/auth-ownership-status';
 import {
+  getCommunityAuthorDisplayName,
+  getCommunityWriteAuthorDisplayName,
+  sanitizeCommunityAuthorDisplayName,
+} from '@/services/community/community-author-display';
+import {
   communityStorageGateMessage,
   uploadCommunityPostImage,
 } from '@/services/community/community-storage-service';
@@ -20,7 +25,10 @@ import type {
   CreateCommunityPostInput,
   ReportCommunityInput,
 } from '@/services/community/community.types';
-import { communityPostCategories } from '@/services/community/community.types';
+import {
+  communityFallbackPostCategory,
+  communityPostCategories,
+} from '@/services/community/community.types';
 import { getSupabaseClient } from '@/services/supabase/supabase-client';
 import { getSupabaseStatus } from '@/services/supabase/supabase-status';
 
@@ -34,6 +42,7 @@ const backendNotVerifiedGateMessage =
 type CommunityAuthenticatedUser = {
   id: string;
   displayName?: string;
+  email?: string;
 };
 
 type CommunityPostRow = {
@@ -147,7 +156,7 @@ function isMissingReplyColumnError(error: SupabaseFailure | null | undefined) {
 function toCommunityPostCategory(value: string | null | undefined): CommunityPostCategory {
   return communityPostCategories.includes(value as CommunityPostCategory)
     ? value as CommunityPostCategory
-    : communityPostCategories[6];
+    : communityFallbackPostCategory;
 }
 
 function toPublishedPostStatus(value: CommunityPost['status'] | null | undefined): CommunityPost['status'] {
@@ -158,11 +167,17 @@ function toPublishedCommentStatus(value: CommunityComment['status'] | null | und
   return value ?? 'published';
 }
 
-function mapPostRow(row: CommunityPostRow, currentUserId?: string): CommunityPost {
+function mapPostRow(row: CommunityPostRow, currentUser?: CommunityAuthenticatedUser | null): CommunityPost {
+  const ownedByCurrentUser = currentUser?.id ? row.author_user_id === currentUser.id : undefined;
+
   return {
     id: row.id ?? '',
     authorUserId: row.author_user_id ?? '',
-    authorDisplayName: row.author_display_name ?? undefined,
+    authorDisplayName: getCommunityAuthorDisplayName({
+      authorDisplayName: row.author_display_name,
+      currentUserEmail: currentUser?.email,
+      ownedByCurrentUser,
+    }),
     contentText: row.content_text ?? '',
     category: toCommunityPostCategory(row.category),
     image: row.image_path && row.image_mime_type && row.image_size_bytes
@@ -180,17 +195,23 @@ function mapPostRow(row: CommunityPostRow, currentUserId?: string): CommunityPos
     reportCount: row.report_count ?? 0,
     createdAt: row.created_at ?? '',
     updatedAt: row.updated_at ?? row.created_at ?? '',
-    ownedByCurrentUser: currentUserId ? row.author_user_id === currentUserId : undefined,
+    ownedByCurrentUser,
   };
 }
 
-function mapCommentRow(row: CommunityCommentRow, currentUserId?: string): CommunityComment {
+function mapCommentRow(row: CommunityCommentRow, currentUser?: CommunityAuthenticatedUser | null): CommunityComment {
+  const ownedByCurrentUser = currentUser?.id ? row.author_user_id === currentUser.id : undefined;
+
   return {
     id: row.id ?? '',
     postId: row.post_id ?? '',
     parentCommentId: row.parent_comment_id ?? undefined,
     authorUserId: row.author_user_id ?? '',
-    authorDisplayName: row.author_display_name ?? undefined,
+    authorDisplayName: getCommunityAuthorDisplayName({
+      authorDisplayName: row.author_display_name,
+      currentUserEmail: currentUser?.email,
+      ownedByCurrentUser,
+    }),
     contentText: row.content_text ?? '',
     status: toPublishedCommentStatus(row.status),
     likeCount: 0,
@@ -198,7 +219,7 @@ function mapCommentRow(row: CommunityCommentRow, currentUserId?: string): Commun
     reportCount: row.report_count ?? 0,
     createdAt: row.created_at ?? '',
     updatedAt: row.updated_at ?? row.created_at ?? '',
-    ownedByCurrentUser: currentUserId ? row.author_user_id === currentUserId : undefined,
+    ownedByCurrentUser,
   };
 }
 
@@ -213,14 +234,28 @@ async function getDefaultCurrentUser(client: SupabaseClient): Promise<CommunityA
     return null;
   }
 
-  const displayName =
+  const authDisplayName =
     typeof data.user.user_metadata?.display_name === 'string'
       ? data.user.user_metadata.display_name
       : undefined;
+  let profileDisplayName: string | undefined;
+
+  try {
+    const { data: profile } = await client
+      .from('profiles')
+      .select('display_name')
+      .eq('id', data.user.id)
+      .single();
+    const profileRow = profile as { display_name?: string | null } | null;
+    profileDisplayName = sanitizeCommunityAuthorDisplayName(profileRow?.display_name);
+  } catch {
+    profileDisplayName = undefined;
+  }
 
   return {
     id: data.user.id,
-    displayName,
+    displayName: profileDisplayName ?? sanitizeCommunityAuthorDisplayName(authDisplayName),
+    email: data.user.email ?? undefined,
   };
 }
 
@@ -347,7 +382,7 @@ export function createCommunityService(
       }
 
       const postRows = Array.isArray(data) ? data : [];
-      const posts = postRows.map((row) => mapPostRow(row as CommunityPostRow, currentUser?.id));
+      const posts = postRows.map((row) => mapPostRow(row as CommunityPostRow, currentUser));
       if (!currentUser || posts.length === 0) {
         return {
           posts,
@@ -426,7 +461,11 @@ export function createCommunityService(
         .insert({
           id: postId,
           author_user_id: context.user.id,
-          author_display_name: input.authorDisplayName ?? context.user.displayName ?? null,
+          author_display_name: getCommunityWriteAuthorDisplayName({
+            displayName: context.user.displayName,
+            email: context.user.email,
+            inputDisplayName: input.authorDisplayName,
+          }),
           content_text: contentText,
           category: input.category,
           image_path: imageData?.imagePath ?? null,
@@ -445,7 +484,7 @@ export function createCommunityService(
 
       return {
         ok: true,
-        data: mapPostRow(data as CommunityPostRow, context.user.id),
+        data: mapPostRow(data as CommunityPostRow, context.user),
       };
     },
 
@@ -495,7 +534,7 @@ export function createCommunityService(
       }
 
       const comments = (Array.isArray(data) ? data : []).map((row) =>
-        mapCommentRow(row as CommunityCommentRow, currentUser?.id),
+        mapCommentRow(row as CommunityCommentRow, currentUser),
       );
 
       const replyCountsByComment = new Map<string, number>();
@@ -578,7 +617,10 @@ export function createCommunityService(
         post_id: postId,
         parent_comment_id: null,
         author_user_id: context.user.id,
-        author_display_name: context.user.displayName ?? null,
+        author_display_name: getCommunityWriteAuthorDisplayName({
+          displayName: context.user.displayName,
+          email: context.user.email,
+        }),
         content_text: contentText,
         status: 'published',
       };
@@ -611,7 +653,7 @@ export function createCommunityService(
 
       return {
         ok: true,
-        data: mapCommentRow(data as CommunityCommentRow, context.user.id),
+        data: mapCommentRow(data as CommunityCommentRow, context.user),
       };
     },
 
@@ -652,7 +694,10 @@ export function createCommunityService(
           post_id: postId,
           parent_comment_id: parentCommentId,
           author_user_id: context.user.id,
-          author_display_name: context.user.displayName ?? null,
+          author_display_name: getCommunityWriteAuthorDisplayName({
+            displayName: context.user.displayName,
+            email: context.user.email,
+          }),
           content_text: contentText,
           status: 'published',
         })
@@ -665,7 +710,7 @@ export function createCommunityService(
 
       return {
         ok: true,
-        data: mapCommentRow(data as CommunityCommentRow, context.user.id),
+        data: mapCommentRow(data as CommunityCommentRow, context.user),
       };
     },
 

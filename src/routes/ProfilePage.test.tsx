@@ -82,6 +82,8 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
 
     expect(html).toContain('เข้าสู่ระบบแล้ว');
     expect(html).toContain('farmer@example.com');
+    expect(html).toContain('ชื่อที่แสดงในชุมชน');
+    expect(html).toContain('ใช้ชื่อนี้ในชุมชนจนกว่าจะมีการตั้งชื่อโปรไฟล์');
     expect(html).toContain('ออกจากระบบ');
   });
 

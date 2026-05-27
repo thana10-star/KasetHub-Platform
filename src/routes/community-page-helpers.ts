@@ -1,4 +1,11 @@
 import type { CommunityComment, CommunityPost, CommunityReadiness } from '@/services/community/community.types';
+export {
+  communityFallbackAuthorDisplayName,
+  getCommunityAuthorDisplayName,
+  getCommunityEmailLocalPart,
+  getCommunityWriteAuthorDisplayName,
+  sanitizeCommunityAuthorDisplayName,
+} from '@/services/community/community-author-display';
 
 export const communityCompactActionButtonClass = 'min-h-9 gap-1.5 px-3 text-xs';
 export const communityCompactActionIconClass = 'h-3.5 w-3.5';

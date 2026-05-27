@@ -1,6 +1,7 @@
 export const communityPostCategories = [
   'ปัญหาพืช',
   'ดินและปุ๋ย',
+  'น้ำและระบบน้ำ',
   'อากาศ',
   'ราคาเกษตร',
   'เครื่องมือ/แอพ',
@@ -9,16 +10,17 @@ export const communityPostCategories = [
 ] as const;
 
 export type CommunityPostCategory = (typeof communityPostCategories)[number];
+export const communityFallbackPostCategory: CommunityPostCategory = 'อื่น ๆ';
 
 export const communityReportReasons = [
   'spam',
   'dangerous_information',
   'personal_information',
-  'inappropriate_content',
+  'inappropriate',
   'other',
 ] as const;
 
-export type CommunityReportReason = (typeof communityReportReasons)[number] | 'inappropriate';
+export type CommunityReportReason = (typeof communityReportReasons)[number] | 'inappropriate_content';
 
 export const communityReportReasonLabels: Record<CommunityReportReason, string> = {
   spam: 'สแปม',

@@ -5,8 +5,10 @@ import { CommunityPage } from '@/routes/CommunityPage';
 import {
   applyCommunityLikeUiState,
   formatCommunityTime,
+  getCommunityAuthorDisplayName,
   getCommunityComposerStatusLabel,
   getCommunityComposerSubmitLabel,
+  getCommunityEmailLocalPart,
   getCommunityWriteStatusCopy,
   getSafeCommunityComments,
   reconcileCommunityPostsAfterLikeRefresh,
@@ -20,7 +22,7 @@ import type {
   CommunityReadiness,
   CommunityService,
 } from '@/services/community/community.types';
-import { communityPostCategories } from '@/services/community/community.types';
+import { communityFallbackPostCategory } from '@/services/community/community.types';
 
 function readinessForTest(overrides: Partial<CommunityReadiness> = {}): CommunityReadiness {
   return {
@@ -72,7 +74,7 @@ describe('M114 Community route', () => {
     id: 'post-1',
     authorUserId: 'user-a',
     contentText: 'real staging post',
-    category: communityPostCategories[6],
+    category: communityFallbackPostCategory,
     status: 'published',
     likeCount: 0,
     commentCount: 0,
@@ -135,7 +137,7 @@ describe('M114 Community route', () => {
     expect(html).not.toContain('ตัวอย่าง 18 นาที');
   });
 
-  test('renders categories, safety copy, share options, report reasons, and notification gate', () => {
+  test('renders categories, safety copy, share options, report summary, and notification gate', () => {
     const html = renderToString(
       <MemoryRouter>
         <CommunityPage />
@@ -144,17 +146,22 @@ describe('M114 Community route', () => {
 
     expect(html).toContain('ปัญหาพืช');
     expect(html).toContain('ดินและปุ๋ย');
+    expect(html).toContain('น้ำและระบบน้ำ');
+    expect(html).toContain('อากาศ');
+    expect(html).toContain('ราคาเกษตร');
+    expect(html).toContain('เครื่องมือ/แอพ');
     expect(html).toContain('เรื่องเล่าจากฟาร์ม');
+    expect(html).toContain('อื่น ๆ');
+    expect((html.match(/น้ำและระบบน้ำ/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect(html).toContain('flex flex-wrap gap-2');
     expect(html).toContain('อย่าใส่เบอร์โทร ที่อยู่ หรือข้อมูลส่วนตัวสำคัญ');
     expect(html).toContain('ข้อมูลจากชุมชนควรตรวจสอบก่อนนำไปใช้จริง');
     expect(html).toContain('เรื่องสารเคมีควรตรวจฉลากและคำแนะนำเจ้าหน้าที่ก่อนใช้');
     expect(html).toContain('แชร์ชุมชน');
     expect(html).toContain('LINE');
     expect(html).toContain('Facebook');
-    expect(html).toContain('สแปม');
-    expect(html).toContain('ข้อมูลอันตราย');
-    expect(html).toContain('ข้อมูลส่วนตัว');
-    expect(html).toContain('เนื้อหาไม่เหมาะสม');
+    expect(html).toContain('รายงานโพสต์หรือคอมเมนต์');
+    expect(html).toContain('ปุ่มรายงานในแต่ละโพสต์จะเปิดหน้าต่างเลือกเหตุผลแยกต่างหาก');
     expect(html).toContain('แจ้งเตือนในแอป');
     expect(html).toContain('/app/notifications');
   });
@@ -232,6 +239,115 @@ describe('M114 Community route', () => {
     expect(html).toContain(formatCommunityTime(baseReply.createdAt));
     expect(html).not.toContain(post.createdAt);
     expect(html).not.toContain(baseComment.createdAt);
+    expect(html).not.toContain('เหตุผลรายงาน</label>');
+    expect(html).not.toContain('<select');
+  });
+
+  test('renders privacy-safe author display names without public full emails', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          authSessionOverride={{
+            isConfigured: true,
+            canUseAuth: true,
+            isSignedIn: true,
+            userId: 'user-a',
+            email: 'community-user-a@test.local',
+            message: 'signed in',
+          }}
+          initialPosts={[
+            {
+              ...basePost,
+              authorDisplayName: undefined,
+              ownedByCurrentUser: true,
+            },
+            {
+              ...basePost,
+              id: 'post-2',
+              authorUserId: 'user-b',
+              authorDisplayName: undefined,
+              ownedByCurrentUser: false,
+            },
+          ]}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(getCommunityEmailLocalPart('community-user-a@test.local')).toBe('community-user-a');
+    expect(getCommunityAuthorDisplayName({ authorDisplayName: 'Somchai', ownedByCurrentUser: false })).toBe('Somchai');
+    expect(getCommunityAuthorDisplayName({ ownedByCurrentUser: false })).toBe('สมาชิก KasetHub');
+    expect(html).toContain('community-user-a');
+    expect(html).toContain('สมาชิก KasetHub');
+    expect(html).not.toContain('community-user-a@test.local');
+    expect(html).not.toContain('ผู้ใช้ KasetHub');
+  });
+
+  test('renders the report dialog with reasons, note, and submit button when opened', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('รายงานโพสต์');
+    expect(html).toContain('เลือกเหตุผลที่ต้องการแจ้ง ทีมงานจะตรวจสอบ');
+    expect(html).toContain('สแปม');
+    expect(html).toContain('ข้อมูลอันตราย');
+    expect(html).toContain('ข้อมูลส่วนตัว');
+    expect(html).toContain('เนื้อหาไม่เหมาะสม');
+    expect(html).toContain('value="inappropriate"');
+    expect(html).not.toContain('value="inappropriate_content"');
+    expect(html).toContain('อื่น ๆ');
+    expect(html).toContain('รายละเอียดเพิ่มเติม (ถ้ามี)');
+    expect(html).toContain('ส่งรายงาน');
+    expect(html).toContain('ยกเลิก');
+  });
+
+  test('renders a friendly gated message inside the report dialog when reports cannot write yet', () => {
+    const readiness = readinessForTest();
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('รายงานโพสต์');
+    expect(html).toContain('ตอนนี้อ่านและแชร์ได้ก่อน ระบบเขียนโพสต์จะเปิดหลังตั้งค่าบัญชี');
+    expect(html).toContain('disabled=""');
   });
 
   test('renders composer submit/status copy by write state without technical gate language', () => {

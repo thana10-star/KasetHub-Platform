@@ -33,6 +33,7 @@ import {
   communityCompactActionButtonClass,
   communityCompactActionIconClass,
   communityDisabledImageCopy,
+  getCommunityAuthorDisplayName,
   getCommunityCommentSubmitText,
   getCommunityComposerBadgeTone,
   getCommunityComposerStatusLabel,
@@ -87,9 +88,16 @@ const successReportMessage = 'ขอบคุณที่แจ้ง ทีม�
 type CommunityPageProps = {
   readinessOverride?: CommunityReadiness;
   serviceOverride?: CommunityService;
+  authSessionOverride?: SupabaseAuthSessionSnapshot;
   initialPosts?: CommunityPost[];
   initialCommentsByPost?: Record<string, CommunityComment[]>;
   initialOpenCommentsByPost?: Record<string, boolean>;
+  initialReportDialogTarget?: CommunityReportDialogTarget | null;
+};
+
+type CommunityReportDialogTarget = {
+  type: 'post' | 'comment';
+  id: string;
 };
 
 function getCommunityShareUrl() {
@@ -116,13 +124,15 @@ function getActionMessage(result: CommunityActionResult, fallback: string) {
 export function CommunityPage({
   readinessOverride,
   serviceOverride,
+  authSessionOverride,
   initialPosts = [],
   initialCommentsByPost = {},
   initialOpenCommentsByPost = {},
+  initialReportDialogTarget = null,
 }: CommunityPageProps = {}) {
   const baseReadiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
   const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
-    () => getCachedSupabaseAuthSessionSnapshot(),
+    () => authSessionOverride ?? getCachedSupabaseAuthSessionSnapshot(),
   );
   const readiness = useMemo(() => {
     if (readinessOverride) return readinessOverride;
@@ -165,7 +175,13 @@ export function CommunityPage({
   const [submittingCommentByPost, setSubmittingCommentByPost] = useState<Record<string, boolean>>({});
   const [replyTextByComment, setReplyTextByComment] = useState<Record<string, string>>({});
   const [replyingToByPost, setReplyingToByPost] = useState<Record<string, string | undefined>>({});
-  const [reportReasonByPost, setReportReasonByPost] = useState<Record<string, CommunityReportReason>>({});
+  const [reportDialogTarget, setReportDialogTarget] = useState<CommunityReportDialogTarget | null>(
+    () => initialReportDialogTarget,
+  );
+  const [reportReason, setReportReason] = useState<CommunityReportReason>('spam');
+  const [reportNote, setReportNote] = useState('');
+  const [reportStatus, setReportStatus] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CommunityPostCategory>('ปัญหาพืช');
   const [activeFilter, setActiveFilter] = useState<CommunityPostCategory | 'ทั้งหมด'>('ทั้งหมด');
   const [postText, setPostText] = useState('');
@@ -197,6 +213,11 @@ export function CommunityPage({
   }, [loadPosts]);
 
   useEffect(() => {
+    if (authSessionOverride) {
+      setAuthSession(authSessionOverride);
+      return undefined;
+    }
+
     if (readinessOverride) return undefined;
 
     let active = true;
@@ -211,7 +232,7 @@ export function CommunityPage({
       active = false;
       unsubscribe();
     };
-  }, [readinessOverride]);
+  }, [authSessionOverride, readinessOverride]);
 
   const filteredPosts = useMemo(
     () => (activeFilter === 'ทั้งหมด' ? posts : posts.filter((post) => post.category === activeFilter)),
@@ -576,10 +597,72 @@ export function CommunityPage({
     }
   }
 
-  async function handleReportPost(postId: string) {
-    const reason = reportReasonByPost[postId] ?? 'spam';
-    const result = await service.reportPost(postId, { reason });
-    setActionStatus(getActionMessage(result, successReportMessage));
+  function getPostAuthorName(post: CommunityPost) {
+    return getCommunityAuthorDisplayName({
+      authorDisplayName: post.authorDisplayName,
+      currentUserEmail: authSession.email,
+      ownedByCurrentUser: post.ownedByCurrentUser,
+    });
+  }
+
+  function getCommentAuthorName(comment: CommunityComment) {
+    return getCommunityAuthorDisplayName({
+      authorDisplayName: comment.authorDisplayName,
+      currentUserEmail: authSession.email,
+      ownedByCurrentUser: comment.ownedByCurrentUser,
+    });
+  }
+
+  function handleOpenReportDialog(target: CommunityReportDialogTarget) {
+    if (!target.id) {
+      setActionStatus('เปิดรายงานไม่สำเร็จ ลองรีเฟรชโพสต์อีกครั้ง');
+      return;
+    }
+
+    setReportDialogTarget(target);
+    setReportReason('spam');
+    setReportNote('');
+    setReportStatus(canWrite ? '' : writeStatusCopy);
+  }
+
+  function handleCloseReportDialog() {
+    setReportDialogTarget(null);
+    setReportReason('spam');
+    setReportNote('');
+    setReportStatus('');
+    setIsSubmittingReport(false);
+  }
+
+  async function handleSubmitReport(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!reportDialogTarget) return;
+
+    if (!canWrite) {
+      setReportStatus(writeStatusCopy);
+      setActionStatus(writeStatusCopy);
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    try {
+      const result = reportDialogTarget.type === 'post'
+        ? await service.reportPost(reportDialogTarget.id, { reason: reportReason, note: reportNote })
+        : await service.reportComment(reportDialogTarget.id, { reason: reportReason, note: reportNote });
+
+      if (result.ok) {
+        setActionStatus(successReportMessage);
+        handleCloseReportDialog();
+        return;
+      }
+
+      setReportStatus(result.message);
+      setActionStatus(result.message);
+    } catch {
+      setReportStatus('ส่งรายงานไม่สำเร็จ ลองอีกครั้ง');
+      setActionStatus('ส่งรายงานไม่สำเร็จ ลองอีกครั้ง');
+    } finally {
+      setIsSubmittingReport(false);
+    }
   }
 
   async function handleHidePost(postId: string) {
@@ -659,7 +742,10 @@ export function CommunityPage({
               <div className="min-w-0">
                 <p className="font-extrabold text-kaset-ink">เข้าสู่ระบบแล้ว</p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {authSession.email ?? 'พร้อมเขียนโพสต์ คอมเมนต์ และกดถูกใจในชุมชน'}
+                  ชื่อชุมชน: {getCommunityAuthorDisplayName({
+                    currentUserEmail: authSession.email,
+                    ownedByCurrentUser: true,
+                  })}
                 </p>
               </div>
             </div>
@@ -831,7 +917,7 @@ export function CommunityPage({
                     <div className="min-w-0">
                       <Badge tone="green">{post.category}</Badge>
                       <h3 className="mt-2 text-base font-extrabold text-kaset-ink">
-                        {post.authorDisplayName || 'ผู้ใช้ KasetHub'}
+                        {getPostAuthorName(post)}
                       </h3>
                       <p className="text-xs font-semibold text-slate-500">{formatCommunityTime(post.createdAt)}</p>
                     </div>
@@ -893,38 +979,13 @@ export function CommunityPage({
                     </Button>
                     <Button
                       className={communityCompactActionButtonClass}
-                      disabled={!canWrite || !post.id}
-                      onClick={() => handleReportPost(post.id)}
+                      disabled={!post.id}
+                      onClick={() => handleOpenReportDialog({ type: 'post', id: post.id })}
                       variant="secondary"
                     >
                       <Flag aria-hidden="true" className={communityCompactActionIconClass} />
                       รายงาน
                     </Button>
-                  </div>
-
-                  <div className="grid max-w-sm gap-1">
-                    <label className="text-xs font-extrabold text-slate-600" htmlFor={`report-${post.id}`}>
-                      เหตุผลรายงาน
-                    </label>
-                    <select
-                      className="min-h-10 rounded-lg border border-kaset-deep/10 bg-white px-3 text-xs font-semibold text-kaset-ink"
-                      disabled={!canWrite || !post.id}
-                      id={`report-${post.id}`}
-                      onChange={(event) => {
-                        const nextReason = event.currentTarget.value as CommunityReportReason;
-                        setReportReasonByPost((current) => ({
-                          ...current,
-                          [post.id]: nextReason,
-                        }));
-                      }}
-                      value={reportReasonByPost[post.id] ?? 'spam'}
-                    >
-                      {communityReportReasons.map((reason) => (
-                        <option key={reason} value={reason}>
-                          {communityReportReasonLabels[reason]}
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
                   {openCommentsByPost[post.id] ? (
@@ -935,7 +996,7 @@ export function CommunityPage({
                         topLevelComments.map((comment) => {
                           const replies = getCommunityRepliesForComment(comments, comment.id);
                           const isReplying = replyingToByPost[post.id] === comment.id;
-                          const replyTargetName = comment.authorDisplayName || 'ผู้ใช้ KasetHub';
+                          const replyTargetName = getCommentAuthorName(comment);
 
                           return (
                             <div className="grid gap-2 rounded-lg bg-white p-3" key={comment.id}>
@@ -983,6 +1044,17 @@ export function CommunityPage({
                                   <Reply aria-hidden="true" className={communityCompactActionIconClass} />
                                   ตอบกลับ
                                 </Button>
+                                {!comment.ownedByCurrentUser ? (
+                                  <Button
+                                    className={communityCompactActionButtonClass}
+                                    disabled={!comment.id}
+                                    onClick={() => handleOpenReportDialog({ type: 'comment', id: comment.id })}
+                                    variant="secondary"
+                                  >
+                                    <Flag aria-hidden="true" className={communityCompactActionIconClass} />
+                                    รายงาน
+                                  </Button>
+                                ) : null}
                               </div>
 
                               {replies.length === 0 && isReplying ? (
@@ -998,7 +1070,7 @@ export function CommunityPage({
                                       <div className="flex flex-wrap items-start justify-between gap-2">
                                         <div>
                                           <p className="text-sm font-extrabold text-kaset-ink">
-                                            {reply.authorDisplayName || 'ผู้ใช้ KasetHub'}
+                                            {getCommentAuthorName(reply)}
                                           </p>
                                           <p className="text-xs font-semibold text-slate-500">
                                             {formatCommunityTime(reply.createdAt)}
@@ -1030,6 +1102,17 @@ export function CommunityPage({
                                         />
                                         ถูกใจ {reply.likeCount ?? 0}
                                       </Button>
+                                      {!reply.ownedByCurrentUser ? (
+                                        <Button
+                                          className={`ml-2 mt-2 ${communityCompactActionButtonClass}`}
+                                          disabled={!reply.id}
+                                          onClick={() => handleOpenReportDialog({ type: 'comment', id: reply.id })}
+                                          variant="secondary"
+                                        >
+                                          <Flag aria-hidden="true" className={communityCompactActionIconClass} />
+                                          รายงาน
+                                        </Button>
+                                      ) : null}
                                     </div>
                                   ))}
                                 </div>
@@ -1177,15 +1260,8 @@ export function CommunityPage({
                 รายงานโพสต์หรือคอมเมนต์
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                เหตุผลรายงานแสดงเป็นภาษาไทย และส่งเป็นตัวเลือกที่ระบบรองรับ
+                ปุ่มรายงานในแต่ละโพสต์จะเปิดหน้าต่างเลือกเหตุผลแยกต่างหาก เพื่อลดความรกในฟีด
               </p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {communityReportReasons.map((reason) => (
-                  <div className="rounded-lg bg-kaset-mist p-3 text-sm font-bold text-kaset-ink" key={reason}>
-                    {communityReportReasonLabels[reason]}
-                  </div>
-                ))}
-              </div>
               <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
                 ข้อความยืนยันเมื่อเปิดใช้จริง: “{successReportMessage}”
               </p>
@@ -1247,6 +1323,79 @@ export function CommunityPage({
           </div>
         </Card>
       </div>
+
+      {reportDialogTarget ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end bg-kaset-ink/45 px-4 pb-4 pt-10 sm:items-center sm:justify-center"
+          role="presentation"
+        >
+          <form
+            aria-labelledby="community-report-dialog-title"
+            aria-modal="true"
+            className="grid max-h-[88vh] w-full gap-4 overflow-y-auto rounded-lg bg-white p-4 shadow-card sm:max-w-md"
+            onSubmit={handleSubmitReport}
+            role="dialog"
+          >
+            <div>
+              <h2 id="community-report-dialog-title" className="text-lg font-extrabold text-kaset-ink">
+                {reportDialogTarget.type === 'post' ? 'รายงานโพสต์' : 'รายงานคอมเมนต์'}
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                เลือกเหตุผลที่ต้องการแจ้ง ทีมงานจะตรวจสอบ
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              {communityReportReasons.map((reason) => (
+                <label
+                  className={
+                    reportReason === reason
+                      ? 'flex min-h-11 items-center gap-2 rounded-lg bg-kaset-mint px-3 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10'
+                      : 'flex min-h-11 items-center gap-2 rounded-lg bg-slate-50 px-3 text-sm font-bold text-kaset-ink ring-1 ring-kaset-deep/10'
+                  }
+                  key={reason}
+                >
+                  <input
+                    checked={reportReason === reason}
+                    className="h-4 w-4 accent-kaset-deep"
+                    name="community-report-reason"
+                    onChange={() => setReportReason(reason)}
+                    type="radio"
+                    value={reason}
+                  />
+                  {communityReportReasonLabels[reason]}
+                </label>
+              ))}
+            </div>
+
+            <label className="grid gap-2 text-sm font-extrabold text-kaset-ink" htmlFor="community-report-note">
+              รายละเอียดเพิ่มเติม (ถ้ามี)
+              <textarea
+                className="min-h-20 rounded-lg border border-kaset-deep/10 bg-slate-50 p-3 text-sm font-semibold leading-6 text-kaset-ink outline-none"
+                id="community-report-note"
+                onChange={(event) => setReportNote(event.currentTarget.value)}
+                value={reportNote}
+              />
+            </label>
+
+            {reportStatus ? (
+              <p className="rounded-lg bg-kaset-mist p-3 text-xs font-semibold leading-5 text-kaset-ink">
+                {reportStatus}
+              </p>
+            ) : null}
+
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button className="min-h-10 px-4 text-sm" onClick={handleCloseReportDialog} variant="secondary">
+                ยกเลิก
+              </Button>
+              <Button className="min-h-10 px-4 text-sm" disabled={!canWrite || isSubmittingReport} type="submit">
+                <Flag aria-hidden="true" className="h-4 w-4" />
+                {isSubmittingReport ? 'กำลังส่ง' : 'ส่งรายงาน'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }

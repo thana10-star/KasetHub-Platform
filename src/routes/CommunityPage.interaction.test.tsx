@@ -13,13 +13,13 @@ import {
   updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
 import type { CommunityComment, CommunityPost } from '@/services/community/community.types';
-import { communityPostCategories } from '@/services/community/community.types';
+import { communityFallbackPostCategory } from '@/services/community/community.types';
 
 const basePost: CommunityPost = {
   id: 'post-1',
   authorUserId: 'user-a',
   contentText: 'real staging post',
-  category: communityPostCategories[6],
+  category: communityFallbackPostCategory,
   image: {
     imagePath: 'user-a/post-1/photo.jpg',
     mimeType: 'image/jpeg',
