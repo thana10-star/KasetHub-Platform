@@ -18,7 +18,7 @@ import {
   UsersRound,
 } from 'lucide-react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -29,6 +29,7 @@ import { publicEnv } from '@/config/env';
 import {
   applyCommunityLikeUiState,
   applyCommunityCommentLikeUiState,
+  applyCommunityPostCommentCount,
   canUseTopLevelCommunityCommentSubmit,
   communityCompactActionButtonClass,
   communityCompactActionIconClass,
@@ -41,11 +42,13 @@ import {
   getCommunityDisabledInputCopy,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
+  getCommunityVisibleCommentCount,
   getCommunityWriteStatusCopy,
   getSafeCommunityComments,
   getTopLevelCommunityComments,
   formatCommunityTime,
   reconcileCommunityCommentsAfterLikeRefresh,
+  reconcileCommunityPostsAfterCommentCountRefresh,
   reconcileCommunityPostsAfterLikeRefresh,
   updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
@@ -191,16 +194,56 @@ export function CommunityPage({
   const [shareStatus, setShareStatus] = useState<string>('');
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const localCommentCountsByPostRef = useRef<Record<string, number>>({});
 
   const fetchPosts = useCallback(async () => {
     const result = await service.listPosts();
     return Array.isArray(result.posts) ? result.posts : [];
   }, [service]);
 
+  function rememberLocalCommentCount(postId: string, nextCount: number) {
+    localCommentCountsByPostRef.current = {
+      ...localCommentCountsByPostRef.current,
+      [postId]: Math.max(0, nextCount),
+    };
+  }
+
+  function getCurrentPostVisibleCommentCount(postId: string) {
+    const post = posts.find((currentPost) => currentPost.id === postId);
+    if (!post) return 0;
+    return getCommunityVisibleCommentCount(post, commentsByPost[postId]);
+  }
+
+  function setPostVisibleCommentCount(postId: string, nextCount: number) {
+    rememberLocalCommentCount(postId, nextCount);
+    setPosts((currentPosts) => applyCommunityPostCommentCount(currentPosts, postId, nextCount));
+  }
+
+  function refreshPostsPreservingLocalCommentCounts() {
+    void fetchPosts().then((refreshedPosts) => {
+      setPosts((currentPosts) =>
+        reconcileCommunityPostsAfterCommentCountRefresh(
+          currentPosts,
+          refreshedPosts,
+          localCommentCountsByPostRef.current,
+        ),
+      );
+    }).catch(() => {
+      setActionStatus('โหลดโพสต์ไม่สำเร็จ แต่จำนวนคอมเมนต์ล่าสุดยังแสดงอยู่');
+    });
+  }
+
   const loadPosts = useCallback(async () => {
     setIsLoadingFeed(true);
     try {
-      setPosts(await fetchPosts());
+      const refreshedPosts = await fetchPosts();
+      setPosts((currentPosts) =>
+        reconcileCommunityPostsAfterCommentCountRefresh(
+          currentPosts,
+          refreshedPosts,
+          localCommentCountsByPostRef.current,
+        ),
+      );
     } catch {
       setActionStatus('โหลดโพสต์ไม่สำเร็จ ลองรีเฟรชอีกครั้ง');
     } finally {
@@ -340,7 +383,9 @@ export function CommunityPage({
     try {
       const result = await service.listComments(postId);
       if (result.ok) {
-        setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(result.data) }));
+        const comments = getSafeCommunityComments(result.data);
+        setCommentsByPost((current) => ({ ...current, [postId]: comments }));
+        setPostVisibleCommentCount(postId, comments.length);
       } else {
         setCommentsByPost((current) => ({ ...current, [postId]: getSafeCommunityComments(current[postId]) }));
         setActionStatus(result.message);
@@ -395,21 +440,16 @@ export function CommunityPage({
         contentText,
       });
       if (result.ok) {
+        const nextCommentCount = getCurrentPostVisibleCommentCount(postId) + 1;
         setCommentTextByPost((current) => ({ ...current, [postId]: '' }));
         setCommentStatusByPost((current) => ({ ...current, [postId]: 'ส่งคอมเมนต์แล้ว' }));
         setCommentsByPost((current) => ({
           ...current,
           [postId]: [...getSafeCommunityComments(current[postId]), result.data],
         }));
-        setPosts((currentPosts) =>
-          currentPosts.map((post) =>
-            post.id === postId
-              ? { ...post, commentCount: Math.max(0, post.commentCount ?? 0) + 1 }
-              : post,
-          ),
-        );
+        setPostVisibleCommentCount(postId, nextCommentCount);
         setActionStatus('ส่งคอมเมนต์แล้ว');
-        void loadPosts();
+        refreshPostsPreservingLocalCommentCounts();
         return;
       }
 
@@ -456,6 +496,7 @@ export function CommunityPage({
         parentCommentId: parentComment.id,
       });
       if (result.ok) {
+        const nextCommentCount = getCurrentPostVisibleCommentCount(postId) + 1;
         setReplyTextByComment((current) => ({ ...current, [parentComment.id]: '' }));
         setReplyingToByPost((current) => ({ ...current, [postId]: undefined }));
         setCommentsByPost((current) => ({
@@ -469,15 +510,9 @@ export function CommunityPage({
             result.data,
           ],
         }));
-        setPosts((currentPosts) =>
-          currentPosts.map((post) =>
-            post.id === postId
-              ? { ...post, commentCount: Math.max(0, post.commentCount ?? 0) + 1 }
-              : post,
-          ),
-        );
+        setPostVisibleCommentCount(postId, nextCommentCount);
         setActionStatus('ส่งคำตอบแล้ว');
-        void loadPosts();
+        refreshPostsPreservingLocalCommentCounts();
         return;
       }
 
@@ -685,10 +720,12 @@ export function CommunityPage({
     const result = await service.hideOwnComment(commentId);
     setActionStatus(getActionMessage(result, 'ซ่อนคอมเมนต์แล้ว'));
     if (result.ok) {
+      const nextCommentCount = Math.max(0, getCurrentPostVisibleCommentCount(postId) - 1);
       setCommentsByPost((current) => ({
         ...current,
         [postId]: getSafeCommunityComments(current[postId]).filter((comment) => comment.id !== commentId),
       }));
+      setPostVisibleCommentCount(postId, nextCommentCount);
     }
   }
 
@@ -906,9 +943,11 @@ export function CommunityPage({
           ) : null}
 
           {filteredPosts.map((post) => {
-            const comments = getSafeCommunityComments(commentsByPost[post.id]);
+            const loadedComments = commentsByPost[post.id];
+            const comments = getSafeCommunityComments(loadedComments);
             const topLevelComments = getTopLevelCommunityComments(comments);
             const imageUrl = getCommunityImagePublicUrl(post.image?.imagePath);
+            const visibleCommentCount = getCommunityVisibleCommentCount(post, loadedComments);
 
             return (
               <Card className="p-4" key={post.id}>
@@ -965,13 +1004,26 @@ export function CommunityPage({
                       ถูกใจ {post.likeCount ?? 0}
                     </Button>
                     <Button
-                      className={communityCompactActionButtonClass}
+                      className={
+                        visibleCommentCount > 0
+                          ? `${communityCompactActionButtonClass} ring-1 ring-kaset-deep/20`
+                          : communityCompactActionButtonClass
+                      }
                       disabled={!post.id}
                       onClick={() => handleToggleComments(post.id)}
-                      variant="secondary"
+                      variant={visibleCommentCount > 0 ? 'soft' : 'secondary'}
                     >
                       <MessageCircle aria-hidden="true" className={communityCompactActionIconClass} />
-                      คอมเมนต์ {post.commentCount ?? 0}
+                      <span>คอมเมนต์</span>
+                      <span
+                        className={
+                          visibleCommentCount > 0
+                            ? 'rounded-full bg-kaset-deep px-1.5 text-[11px] font-extrabold leading-4 text-white'
+                            : ''
+                        }
+                      >
+                        {visibleCommentCount}
+                      </span>
                     </Button>
                     <Button className={communityCompactActionButtonClass} onClick={handleShare} variant="secondary">
                       <Share2 aria-hidden="true" className={communityCompactActionIconClass} />

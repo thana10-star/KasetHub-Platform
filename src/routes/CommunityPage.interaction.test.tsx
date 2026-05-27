@@ -2,13 +2,17 @@ import { describe, expect, test } from 'vitest';
 import {
   applyCommunityCommentLikeUiState,
   applyCommunityLikeUiState,
+  applyCommunityPostCommentCount,
+  applyCommunityPostCommentCountDelta,
   canUseTopLevelCommunityCommentSubmit,
   getCommunityCommentSubmitText,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
+  getCommunityVisibleCommentCount,
   getSafeCommunityComments,
   getTopLevelCommunityComments,
   reconcileCommunityCommentsAfterLikeRefresh,
+  reconcileCommunityPostsAfterCommentCountRefresh,
   reconcileCommunityPostsAfterLikeRefresh,
   updateCommunityCommentDraft,
 } from '@/routes/community-page-helpers';
@@ -180,6 +184,34 @@ describe('M116.2 Community interaction regressions without DOM dependency', () =
     expect(reconcileCommunityCommentsAfterLikeRefresh(currentComments, staleRefresh, 'comment-1', true)[0]).toMatchObject({
       likedByCurrentUser: true,
       likeCount: 1,
+    });
+  });
+
+  test('visible post comment count uses loaded top-level comments and replies when available', () => {
+    const stalePost = { ...basePost, commentCount: 0 };
+
+    expect(getCommunityVisibleCommentCount(stalePost)).toBe(0);
+    expect(getCommunityVisibleCommentCount(stalePost, [baseComment, baseReply])).toBe(2);
+  });
+
+  test('post comment count helpers increment, decrement, and reconcile stale refreshes', () => {
+    const withTwoComments = applyCommunityPostCommentCount([basePost], 'post-1', 2);
+    expect(withTwoComments[0]).toMatchObject({ commentCount: 2 });
+
+    const incremented = applyCommunityPostCommentCountDelta(withTwoComments, 'post-1', 1);
+    expect(incremented[0]).toMatchObject({ commentCount: 3 });
+
+    const decremented = applyCommunityPostCommentCountDelta(incremented, 'post-1', -1);
+    expect(decremented[0]).toMatchObject({ commentCount: 2 });
+
+    const staleRefresh: CommunityPost[] = [{ ...basePost, commentCount: 0 }];
+    expect(reconcileCommunityPostsAfterCommentCountRefresh(decremented, staleRefresh, { 'post-1': 2 })[0]).toMatchObject({
+      commentCount: 2,
+    });
+
+    const staleHighRefresh: CommunityPost[] = [{ ...basePost, commentCount: 4 }];
+    expect(reconcileCommunityPostsAfterCommentCountRefresh(decremented, staleHighRefresh, { 'post-1': 1 })[0]).toMatchObject({
+      commentCount: 1,
     });
   });
 });

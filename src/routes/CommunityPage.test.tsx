@@ -228,7 +228,8 @@ describe('M114 Community route', () => {
     expect(html).toContain('data-testid="community-post-actions"');
     expect(html).toContain('min-h-9 gap-1.5 px-3 text-xs');
     expect(html).toMatch(/ถูกใจ\s*(?:<!-- -->)?1/);
-    expect(html).toMatch(/คอมเมนต์\s*(?:<!-- -->)?2/);
+    expect(html).toContain('rounded-full bg-kaset-deep px-1.5 text-[11px] font-extrabold leading-4 text-white');
+    expect(html).toMatch(/คอมเมนต์(?:<\/span>)?<span[^>]*>2/);
     expect(html).toContain('แชร์');
     expect(html).toContain('รายงาน');
     expect(html).toContain('ตอบกลับ');
@@ -241,6 +242,37 @@ describe('M114 Community route', () => {
     expect(html).not.toContain(baseComment.createdAt);
     expect(html).not.toContain('เหตุผลรายงาน</label>');
     expect(html).not.toContain('<select');
+  });
+
+  test('shows backend comment count on a closed post card without opening comments first', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+    const post = {
+      ...basePost,
+      commentCount: 3,
+    };
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialOpenCommentsByPost={{}}
+          initialPosts={[post]}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('คอมเมนต์');
+    expect(html).toMatch(/คอมเมนต์(?:<\/span>)?<span[^>]*>3/);
+    expect(html).not.toContain('ยังไม่มีคอมเมนต์จริง');
   });
 
   test('renders privacy-safe author display names without public full emails', () => {

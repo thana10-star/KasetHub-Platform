@@ -227,6 +227,68 @@ describe('M114 gated community staging service contract', () => {
     });
   });
 
+  test('counts published top-level comments and replies for post cards before opening comments', async () => {
+    const postQuery = createQueryMock({
+      data: [
+        {
+          id: 'post-1',
+          author_user_id: userA.id,
+          author_display_name: 'User A',
+          content_text: 'real post with comments',
+          category: communityFallbackPostCategory,
+          image_path: null,
+          image_mime_type: null,
+          image_size_bytes: null,
+          image_width: null,
+          image_height: null,
+          status: 'published',
+          like_count: 0,
+          comment_count: 0,
+          report_count: 0,
+          created_at: '2026-05-26T00:00:00.000Z',
+          updated_at: '2026-05-26T00:00:00.000Z',
+        },
+      ],
+      error: null,
+    });
+    const commentQuery = createQueryMock({
+      data: [
+        { post_id: 'post-1' },
+        { post_id: 'post-1' },
+      ],
+      error: null,
+    });
+    const from = vi.fn((table: string) => {
+      if (table === 'community_comments') return commentQuery;
+      return postQuery;
+    });
+    const client = {
+      from,
+      auth: {
+        getUser: vi.fn(),
+      },
+      storage: {
+        from: vi.fn(),
+      },
+    } as unknown as SupabaseClient;
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => null,
+    });
+
+    await expect(service.listPosts()).resolves.toMatchObject({
+      posts: [
+        {
+          id: 'post-1',
+          commentCount: 2,
+        },
+      ],
+    });
+    expect(from).toHaveBeenCalledWith('community_comments');
+    expect(commentQuery.eq).toHaveBeenCalledWith('status', 'published');
+    expect(commentQuery.in).toHaveBeenCalledWith('post_id', ['post-1']);
+  });
+
   test('marks posts liked by the current user for staging unlike tests', async () => {
     const postQuery = createQueryMock({
       data: [

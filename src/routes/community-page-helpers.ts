@@ -66,6 +66,17 @@ export function canUseTopLevelCommunityCommentSubmit(
   return Boolean(canWrite && postId && !isSubmitting);
 }
 
+export function getCommunityVisibleCommentCount(
+  post: Pick<CommunityPost, 'commentCount'>,
+  comments?: CommunityComment[] | null,
+) {
+  if (Array.isArray(comments)) {
+    return comments.length;
+  }
+
+  return Math.max(0, post.commentCount ?? 0);
+}
+
 export function formatCommunityTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -164,6 +175,44 @@ export function applyCommunityCommentLikeUiState(
       likedByCurrentUser: nextLiked,
       likeCount: nextCount,
     };
+  });
+}
+
+export function applyCommunityPostCommentCount(
+  posts: CommunityPost[],
+  postId: string,
+  nextCount: number,
+) {
+  return posts.map((post) =>
+    post.id === postId
+      ? { ...post, commentCount: Math.max(0, nextCount) }
+      : post,
+  );
+}
+
+export function applyCommunityPostCommentCountDelta(
+  posts: CommunityPost[],
+  postId: string,
+  delta: number,
+) {
+  return posts.map((post) =>
+    post.id === postId
+      ? { ...post, commentCount: Math.max(0, (post.commentCount ?? 0) + delta) }
+      : post,
+  );
+}
+
+export function reconcileCommunityPostsAfterCommentCountRefresh(
+  _currentPosts: CommunityPost[],
+  refreshedPosts: CommunityPost[],
+  localCommentCountsByPost: Record<string, number> = {},
+) {
+  void _currentPosts;
+  return refreshedPosts.map((post) => {
+    const localCount = localCommentCountsByPost[post.id];
+    return typeof localCount === 'number'
+      ? { ...post, commentCount: Math.max(0, localCount) }
+      : post;
   });
 }
 

@@ -383,7 +383,7 @@ export function createCommunityService(
 
       const postRows = Array.isArray(data) ? data : [];
       const posts = postRows.map((row) => mapPostRow(row as CommunityPostRow, currentUser));
-      if (!currentUser || posts.length === 0) {
+      if (posts.length === 0) {
         return {
           posts,
           readiness,
@@ -394,6 +394,34 @@ export function createCommunityService(
       if (postIds.length === 0) {
         return {
           posts,
+          readiness,
+        };
+      }
+
+      const commentCountsByPost = new Map<string, number>();
+      const { data: commentRows, error: commentRowsError } = await client
+        .from('community_comments')
+        .select('post_id')
+        .eq('status', 'published')
+        .in('post_id', postIds);
+
+      if (!commentRowsError && Array.isArray(commentRows)) {
+        for (const row of commentRows) {
+          const postId = (row as { post_id?: string }).post_id;
+          if (postId) {
+            commentCountsByPost.set(postId, (commentCountsByPost.get(postId) ?? 0) + 1);
+          }
+        }
+      }
+
+      const postsWithCommentCounts = posts.map((post) => ({
+        ...post,
+        commentCount: commentCountsByPost.has(post.id) ? commentCountsByPost.get(post.id) ?? 0 : post.commentCount,
+      }));
+
+      if (!currentUser) {
+        return {
+          posts: postsWithCommentCounts,
           readiness,
         };
       }
@@ -423,7 +451,7 @@ export function createCommunityService(
       );
 
       return {
-        posts: posts.map((post) => ({
+        posts: postsWithCommentCounts.map((post) => ({
           ...post,
           likeCount: likeCountsByPost.has(post.id) ? likeCountsByPost.get(post.id) ?? 0 : post.likeCount,
           likedByCurrentUser: likedPostIds.has(post.id),
