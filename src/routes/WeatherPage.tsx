@@ -12,7 +12,7 @@ import {
   ThermometerSun,
   Wind,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -132,39 +132,86 @@ export function WeatherPage() {
       : offlineState.status === 'stale_cache'
         ? 'ใช้ข้อมูลล่าสุดในเครื่อง'
         : 'ใช้ข้อมูลสำรองในเครื่อง';
+  const [pendingLocationId, setPendingLocationId] = useState(selectedLocationId);
+  const selectedLocation = locations.find((location) => location.id === selectedLocationId) ?? forecast.location;
+  const pendingLocation = locations.find((location) => location.id === pendingLocationId) ?? selectedLocation;
+  const hasPendingLocationChange = pendingLocation.id !== selectedLocation.id;
+
+  useEffect(() => {
+    setPendingLocationId(selectedLocationId);
+  }, [selectedLocationId]);
 
   return (
     <div>
       <PageHeader title="สภาพอากาศเกษตร" subtitle="ดูอากาศวันนี้และความเสี่ยงเบื้องต้นก่อนวางแผนงานแปลง" showBack />
       <div className="grid gap-5 px-5 pb-6">
         {locations.length > 1 ? (
-          <section className="grid gap-3" data-testid="weather-location-selector">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่แบบหยาบ</h2>
+          <Card className="p-4" data-testid="weather-location-selector">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่ของคุณ</h2>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">
+                  เลือกจังหวัด/เมืองใกล้เคียงเพื่อดูพยากรณ์แบบหยาบ ไม่ใช้ GPS และไม่เก็บตำแหน่งละเอียด
+                </p>
+              </div>
               <StatusPill tone="info">ไม่ใช้ GPS</StatusPill>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {locations.map((location) => (
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <label className="grid gap-2 text-sm font-extrabold text-kaset-ink" htmlFor="weather-location-select">
+                จังหวัด/เมืองใกล้เคียง
+                <select
+                  className="min-h-12 w-full rounded-lg border border-kaset-deep/15 bg-white px-3 text-base font-bold text-kaset-ink outline-none ring-kaset-deep/20 focus:border-kaset-deep focus:ring-2"
+                  id="weather-location-select"
+                  onChange={(event) => setPendingLocationId(event.target.value)}
+                  value={pendingLocationId}
+                >
+                  {locations.map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {location.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white shadow-soft hover:bg-kaset-ink"
+                onClick={() => selectLocation(pendingLocationId)}
+                type="button"
+              >
+                ยืนยันพื้นที่ของคุณ
+              </button>
+            </div>
+
+            <div className="mt-3 grid gap-2 rounded-lg bg-kaset-mist p-3 text-xs font-bold leading-5 text-kaset-deep">
+              <p>พื้นที่ปัจจุบัน: {selectedLocation.label}</p>
+              <p>
+                {hasPendingLocationChange
+                  ? `เลือกไว้: ${pendingLocation.label} กดยืนยันเพื่ออัปเดตพยากรณ์`
+                  : 'เลือกพื้นที่แล้วพร้อมดูพยากรณ์ด้านล่าง'}
+              </p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2" aria-label="ทางลัดเลือกพื้นที่">
+              {locations.slice(0, 5).map((location) => (
                 <button
-                  aria-pressed={selectedLocationId === location.id}
+                  aria-pressed={pendingLocationId === location.id}
                   className={cx(
-                    'min-h-11 rounded-full px-4 text-sm font-extrabold ring-1 ring-kaset-deep/10',
-                    selectedLocationId === location.id
+                    'min-h-10 rounded-full px-3 text-xs font-extrabold ring-1 ring-kaset-deep/10',
+                    pendingLocationId === location.id
                       ? 'bg-kaset-deep text-white'
                       : 'bg-white text-kaset-deep hover:bg-kaset-mint',
                   )}
                   key={location.id}
-                  onClick={() => selectLocation(location.id)}
+                  onClick={() => setPendingLocationId(location.id)}
                   type="button"
                 >
                   {location.label}
                 </button>
               ))}
             </div>
-            <p className="text-xs font-bold leading-5 text-slate-500">
+            <p className="mt-3 text-xs font-bold leading-5 text-slate-500">
               {locationPrivacyStatus.summary}
             </p>
-          </section>
+          </Card>
         ) : null}
 
         <Card className="overflow-hidden p-0" data-testid="weather-current-card">

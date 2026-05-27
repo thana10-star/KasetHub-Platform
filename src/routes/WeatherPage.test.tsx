@@ -21,7 +21,7 @@ describe('M104.1 weather UI priority polish', () => {
     const sourceDetailsIndex = html.indexOf('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
 
     expect(html).toContain('สภาพอากาศเกษตร');
-    expect(html).toContain('เลือกพื้นที่แบบหยาบ');
+    expect(html).toContain('เลือกพื้นที่ของคุณ');
     expect(html).toContain('อากาศตอนนี้');
     expect(html).toContain('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
     expect(currentIndex).toBeGreaterThan(-1);
@@ -30,6 +30,49 @@ describe('M104.1 weather UI priority polish', () => {
     expect(sourceDetailsIndex).toBeGreaterThan(updateIndex);
     const openMeteoIndex = html.indexOf('Open-Meteo');
     expect(openMeteoIndex === -1 || openMeteoIndex > sourceDetailsIndex).toBe(true);
+  });
+
+  test('renders a clear privacy-safe location selector before current weather', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WeatherPage />
+      </MemoryRouter>,
+    );
+
+    const selectorIndex = html.indexOf('เลือกพื้นที่ของคุณ');
+    const currentIndex = html.indexOf('อากาศตอนนี้');
+    const sourceDetailsIndex = html.indexOf('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
+
+    expect(selectorIndex).toBeGreaterThan(-1);
+    expect(currentIndex).toBeGreaterThan(selectorIndex);
+    expect(sourceDetailsIndex).toBeGreaterThan(currentIndex);
+    expect(html).toContain('เลือกจังหวัด/เมืองใกล้เคียงเพื่อดูพยากรณ์แบบหยาบ');
+    expect(html).toContain('จังหวัด/เมืองใกล้เคียง');
+    expect(html).toContain('ยืนยันพื้นที่ของคุณ');
+    expect(html).toContain('พื้นที่ปัจจุบัน:');
+    expect(html).toContain('กรุงเทพฯ');
+    expect(html).toContain('นครราชสีมา');
+    expect(html).toContain('ขอนแก่น');
+  });
+
+  test('keeps GPS and source details out of the primary weather flow', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WeatherPage />
+      </MemoryRouter>,
+    );
+    const currentIndex = html.indexOf('อากาศตอนนี้');
+    const sourceDetailsIndex = html.indexOf('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
+    const openMeteoIndex = html.indexOf('Open-Meteo');
+    const cacheIndex = html.indexOf('cache');
+
+    expect(html).toContain('ไม่ใช้ GPS');
+    expect(html).toContain('ไม่เก็บตำแหน่งละเอียด');
+    expect(html).not.toContain('ขออนุญาตใช้ GPS');
+    expect(html).not.toContain('เปิด GPS');
+    expect(openMeteoIndex === -1 || openMeteoIndex > sourceDetailsIndex).toBe(true);
+    expect(cacheIndex === -1 || cacheIndex > sourceDetailsIndex).toBe(true);
+    expect(sourceDetailsIndex).toBeGreaterThan(currentIndex);
   });
 
   test('keeps source/cache/system wording inside the details section', () => {

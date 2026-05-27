@@ -24,6 +24,21 @@ function visibleText(html: string) {
 }
 
 describe('M116.9 home dashboard polish', () => {
+  test('renders a premium branded Home header with logo and controls', () => {
+    const html = renderHome();
+
+    expect(html).toContain('data-testid="home-premium-header"');
+    expect(html).toContain('โลโก้ KasetHub');
+    expect(html).toContain('KasetHub');
+    expect(html).toContain('ผู้ช่วยเกษตรในมือถือ');
+    expect(html).toContain('ศูนย์แจ้งเตือน');
+    expect(html).toContain('/app/notifications');
+    expect(html).toContain('โปรไฟล์');
+    expect(html).toContain('/app/profile');
+    expect(html).toContain('rounded-b-[2rem]');
+    expect(html).toContain('shadow-[0_18px_46px');
+  });
+
   test('renders a compact weather panel near the top without fake live status', () => {
     const html = renderHome();
     const headerIndex = html.indexOf('KasetHub');

@@ -138,34 +138,60 @@ export function AppHomePage() {
 
   return (
     <div className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-kaset-mist/70">
-      <div className="grid gap-5 px-4 pb-6 pt-4 sm:px-5">
-        <header className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-extrabold leading-8 text-kaset-ink">KasetHub</h1>
-            <p className="text-sm font-semibold leading-6 text-slate-600">ผู้ช่วยเกษตรในมือถือ</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Link
-              aria-label="ศูนย์แจ้งเตือน"
-              className="relative grid h-11 w-11 place-items-center rounded-lg bg-white text-kaset-deep shadow-card ring-1 ring-kaset-deep/10"
-              to="/app/notifications"
-            >
-              <Bell aria-hidden="true" className="h-5 w-5" />
-              {notificationCenter.digest.unreadCount > 0 ? (
-                <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-amber-500" />
-              ) : null}
-            </Link>
-            <Link
-              aria-label="โปรไฟล์"
-              className="grid h-11 w-11 place-items-center rounded-lg bg-white text-kaset-deep shadow-card ring-1 ring-kaset-deep/10"
-              to="/app/profile"
-            >
-              <UserRound aria-hidden="true" className="h-5 w-5" />
-            </Link>
+      <div className="grid pb-6">
+        <header
+          aria-labelledby="home-premium-header-title"
+          className="relative isolate overflow-hidden rounded-b-[2rem] bg-[radial-gradient(circle_at_18%_10%,rgba(180,244,207,0.24),transparent_30%),radial-gradient(circle_at_92%_6%,rgba(255,255,255,0.18),transparent_28%),linear-gradient(135deg,#064e3b_0%,#0b6b4a_52%,#073b2f_100%)] px-4 pb-10 pt-4 text-white shadow-[0_18px_46px_rgba(6,78,59,0.28)] sm:px-5"
+          data-testid="home-premium-header"
+        >
+          <span aria-hidden="true" className="absolute -right-16 -top-16 h-44 w-44 rounded-full border border-white/20 bg-white/10" />
+          <span aria-hidden="true" className="absolute -bottom-24 left-14 h-52 w-52 rounded-full border border-white/15" />
+          <span aria-hidden="true" className="absolute bottom-4 right-10 h-24 w-24 rounded-full border border-emerald-100/20" />
+          <span aria-hidden="true" className="absolute left-0 top-20 h-px w-full rotate-[-7deg] bg-white/18" />
+          <span aria-hidden="true" className="absolute -bottom-1 left-10 h-14 w-[120%] rounded-t-[50%] border-t border-white/20" />
+
+          <div className="relative z-10 flex items-center justify-between gap-3">
+            <div className="min-w-0 flex items-center gap-3">
+              <span
+                aria-label="โลโก้ KasetHub"
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/95 text-kaset-deep shadow-[0_10px_24px_rgba(0,0,0,0.16)] ring-1 ring-white/50"
+                role="img"
+              >
+                <Sprout aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0">
+                <h1 id="home-premium-header-title" className="text-2xl font-extrabold leading-8 text-white">
+                  KasetHub
+                </h1>
+                <p className="break-words text-sm font-semibold leading-6 text-emerald-50/90">
+                  ผู้ช่วยเกษตรในมือถือ
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                aria-label="ศูนย์แจ้งเตือน"
+                className="relative grid h-11 w-11 place-items-center rounded-xl bg-white/14 text-white shadow-[0_10px_22px_rgba(0,0,0,0.16)] ring-1 ring-white/20 backdrop-blur transition hover:bg-white/22"
+                to="/app/notifications"
+              >
+                <Bell aria-hidden="true" className="h-5 w-5" />
+                {notificationCenter.digest.unreadCount > 0 ? (
+                  <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-emerald-950/70" />
+                ) : null}
+              </Link>
+              <Link
+                aria-label="โปรไฟล์"
+                className="grid h-11 w-11 place-items-center rounded-xl bg-white/14 text-white shadow-[0_10px_22px_rgba(0,0,0,0.16)] ring-1 ring-white/20 backdrop-blur transition hover:bg-white/22"
+                to="/app/profile"
+              >
+                <UserRound aria-hidden="true" className="h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </header>
 
-        <section aria-labelledby="home-weather-title" className="grid gap-3">
+        <div className="-mt-6 grid gap-5 px-4 sm:px-5">
+        <section aria-labelledby="home-weather-title" className="relative z-10 grid gap-3">
           <Card className="overflow-hidden border border-sky-100 bg-white p-3 shadow-card">
             <div className="flex items-start gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
@@ -402,6 +428,7 @@ export function AppHomePage() {
             </div>
           </Card>
         </section>
+      </div>
       </div>
     </div>
   );
