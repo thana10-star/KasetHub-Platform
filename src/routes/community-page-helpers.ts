@@ -1,4 +1,9 @@
-import type { CommunityComment, CommunityPost, CommunityReadiness } from '@/services/community/community.types';
+import {
+  communityReportSignInRequiredMessage,
+  type CommunityComment,
+  type CommunityPost,
+  type CommunityReadiness,
+} from '@/services/community/community.types';
 export {
   communityFallbackAuthorDisplayName,
   getCommunityAuthorDisplayName,
@@ -66,6 +71,20 @@ export function canUseTopLevelCommunityCommentSubmit(
   return Boolean(canWrite && postId && !isSubmitting);
 }
 
+export function canSubmitCommunityReport({
+  alreadyReported,
+  canWrite,
+  hasAuthenticatedUser,
+  isSubmitting,
+}: {
+  alreadyReported: boolean;
+  canWrite: boolean;
+  hasAuthenticatedUser: boolean;
+  isSubmitting: boolean;
+}) {
+  return Boolean(canWrite && hasAuthenticatedUser && !isSubmitting && !alreadyReported);
+}
+
 export function getCommunityVisibleCommentCount(
   post: Pick<CommunityPost, 'commentCount'>,
   comments?: CommunityComment[] | null,
@@ -114,6 +133,14 @@ export function getCommunityWriteStatusCopy(readiness: CommunityReadiness) {
   }
 
   return `ตอนนี้อ่านและแชร์ได้ก่อน ${communityWriteDisabledCopy}`;
+}
+
+export function getCommunityReportGateCopy(readiness: CommunityReadiness) {
+  if (!readiness.hasAuthenticatedUser) {
+    return communityReportSignInRequiredMessage;
+  }
+
+  return getCommunityWriteStatusCopy(readiness);
 }
 
 export function getCommunityComposerSubmitLabel(readiness: CommunityReadiness, isSubmitting = false) {

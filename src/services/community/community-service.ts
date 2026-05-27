@@ -19,15 +19,19 @@ import type {
   CommunityPost,
   CommunityPostCategory,
   CommunityReadiness,
-  CommunityReportReason,
   CommunityService,
   CreateCommunityCommentInput,
   CreateCommunityPostInput,
   ReportCommunityInput,
 } from '@/services/community/community.types';
 import {
+  communityReportAlreadySubmittedMessage,
   communityFallbackPostCategory,
+  communityReportInvalidReasonMessage,
+  communityReportSignInRequiredMessage,
+  communityReportSubmitFailureMessage,
   communityPostCategories,
+  isCommunityReportReason,
 } from '@/services/community/community.types';
 import { getSupabaseClient } from '@/services/supabase/supabase-client';
 import { getSupabaseStatus } from '@/services/supabase/supabase-status';
@@ -223,8 +227,18 @@ function mapCommentRow(row: CommunityCommentRow, currentUser?: CommunityAuthenti
   };
 }
 
-function toReportReasonDbCode(reason: CommunityReportReason) {
-  return reason === 'inappropriate_content' ? 'inappropriate' : reason;
+function isDuplicateReportError(error: SupabaseFailure | null | undefined) {
+  const message = error?.message?.toLowerCase() ?? '';
+  return (
+    error?.code === '23505' ||
+    message.includes('duplicate') ||
+    message.includes('unique constraint') ||
+    message.includes('community_reports_unique')
+  );
+}
+
+function validateReportReason(input: ReportCommunityInput) {
+  return isCommunityReportReason(input.reason) ? input.reason : undefined;
 }
 
 async function getDefaultCurrentUser(client: SupabaseClient): Promise<CommunityAuthenticatedUser | null> {
@@ -812,40 +826,62 @@ export function createCommunityService(
 
     async reportPost(postId: string, input: ReportCommunityInput) {
       const context = await requireWriteContext(readiness, deps);
-      if (!context.ok) return context;
+      if (!context.ok) {
+        return context.code === 'auth_session_required'
+          ? failure('auth_session_required', communityReportSignInRequiredMessage)
+          : context;
+      }
 
-      if (!input.reason) {
-        return failure('invalid_input', 'กรุณาเลือกเหตุผลรายงาน');
+      const reason = validateReportReason(input);
+      if (!reason) {
+        return failure('invalid_input', communityReportInvalidReasonMessage);
       }
 
       const { error } = await context.client.from('community_reports').insert({
         post_id: postId,
         comment_id: null,
         reporter_user_id: context.user.id,
-        reason: toReportReasonDbCode(input.reason),
+        reason,
         note: input.note?.trim() || null,
       });
 
-      return error ? supabaseFailure(error, 'ส่งรายงานไม่สำเร็จ') : { ok: true, data: undefined };
+      if (error) {
+        return isDuplicateReportError(error)
+          ? failure('duplicate_report', communityReportAlreadySubmittedMessage)
+          : failure('supabase_write_failed', communityReportSubmitFailureMessage);
+      }
+
+      return { ok: true, data: undefined };
     },
 
     async reportComment(commentId: string, input: ReportCommunityInput) {
       const context = await requireWriteContext(readiness, deps);
-      if (!context.ok) return context;
+      if (!context.ok) {
+        return context.code === 'auth_session_required'
+          ? failure('auth_session_required', communityReportSignInRequiredMessage)
+          : context;
+      }
 
-      if (!input.reason) {
-        return failure('invalid_input', 'กรุณาเลือกเหตุผลรายงาน');
+      const reason = validateReportReason(input);
+      if (!reason) {
+        return failure('invalid_input', communityReportInvalidReasonMessage);
       }
 
       const { error } = await context.client.from('community_reports').insert({
         post_id: null,
         comment_id: commentId,
         reporter_user_id: context.user.id,
-        reason: toReportReasonDbCode(input.reason),
+        reason,
         note: input.note?.trim() || null,
       });
 
-      return error ? supabaseFailure(error, 'ส่งรายงานไม่สำเร็จ') : { ok: true, data: undefined };
+      if (error) {
+        return isDuplicateReportError(error)
+          ? failure('duplicate_report', communityReportAlreadySubmittedMessage)
+          : failure('supabase_write_failed', communityReportSubmitFailureMessage);
+      }
+
+      return { ok: true, data: undefined };
     },
 
     async listNotifications() {

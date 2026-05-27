@@ -14,8 +14,13 @@ import {
 } from '@/services/community/community-storage-service';
 import type { CommunityReadiness } from '@/services/community/community.types';
 import {
+  communityReportAlreadySubmittedMessage,
   communityFallbackPostCategory,
   communityPostCategories,
+  communityReportInvalidReasonMessage,
+  communityReportReasons,
+  communityReportSignInRequiredMessage,
+  communityReportSubmitFailureMessage,
 } from '@/services/community/community.types';
 import { mvpRouteGroups } from '@/services/qa/route-registry';
 
@@ -169,6 +174,11 @@ describe('M114 gated community staging service contract', () => {
     await expect(service.likeComment('comment-1')).resolves.toMatchObject({
       ok: false,
       code: 'auth_session_required',
+    });
+    await expect(service.reportPost('post-1', { reason: 'spam' })).resolves.toMatchObject({
+      ok: false,
+      code: 'auth_session_required',
+      message: communityReportSignInRequiredMessage,
     });
   });
 
@@ -809,7 +819,7 @@ describe('M114 gated community staging service contract', () => {
     expect(unlikeQuery.eq).toHaveBeenCalledWith('user_id', userA.id);
   });
 
-  test('reports posts with database reason codes instead of Thai labels', async () => {
+  test.each(communityReportReasons)('reports posts with the database-safe %s reason code', async (reason) => {
     const query = createQueryMock({ data: null, error: null });
     const { client } = createClientMock(query);
     const service = createCommunityService(enabledReadiness(), {
@@ -817,15 +827,17 @@ describe('M114 gated community staging service contract', () => {
       getCurrentUser: async () => userA,
     });
 
-    await expect(service.reportPost('post-1', { reason: 'inappropriate_content' })).resolves.toMatchObject({ ok: true });
+    await expect(service.reportPost('post-1', { reason, note: ' report note ' })).resolves.toMatchObject({ ok: true });
     expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
       post_id: 'post-1',
+      comment_id: null,
       reporter_user_id: userA.id,
-      reason: 'inappropriate',
+      reason,
+      note: 'report note',
     }));
   });
 
-  test('keeps spam report reason mapped to the spam database code', async () => {
+  test.each(communityReportReasons)('reports comments with the database-safe %s reason code', async (reason) => {
     const query = createQueryMock({ data: null, error: null });
     const { client } = createClientMock(query);
     const service = createCommunityService(enabledReadiness(), {
@@ -833,13 +845,70 @@ describe('M114 gated community staging service contract', () => {
       getCurrentUser: async () => userA,
     });
 
-    await expect(service.reportPost('post-1', { reason: 'spam', note: 'spam note' })).resolves.toMatchObject({ ok: true });
+    await expect(service.reportComment('comment-1', { reason })).resolves.toMatchObject({ ok: true });
     expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
-      post_id: 'post-1',
+      post_id: null,
+      comment_id: 'comment-1',
       reporter_user_id: userA.id,
-      reason: 'spam',
-      note: 'spam note',
+      reason,
     }));
+  });
+
+  test('rejects unknown report reasons before attempting insert', async () => {
+    const query = createQueryMock({ data: null, error: null });
+    const { client } = createClientMock(query);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.reportPost('post-1', { reason: 'เนื้อหาไม่เหมาะสม' as never })).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_input',
+      message: communityReportInvalidReasonMessage,
+    });
+    await expect(service.reportComment('comment-1', { reason: 'inappropriate_content' as never })).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_input',
+      message: communityReportInvalidReasonMessage,
+    });
+    expect(query.insert).not.toHaveBeenCalled();
+  });
+
+  test('maps duplicate report database errors to already-reported copy', async () => {
+    const query = createQueryMock({
+      data: null,
+      error: { code: '23505', message: 'duplicate key value violates unique constraint "community_reports_unique_post_report"' },
+    });
+    const { client } = createClientMock(query);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.reportPost('post-1', { reason: 'spam' })).resolves.toMatchObject({
+      ok: false,
+      code: 'duplicate_report',
+      message: communityReportAlreadySubmittedMessage,
+    });
+  });
+
+  test('maps Supabase report insert failures to friendly retry copy', async () => {
+    const query = createQueryMock({
+      data: null,
+      error: { code: '23514', message: 'violates check constraint "community_reports_reason_check"' },
+    });
+    const { client } = createClientMock(query);
+    const service = createCommunityService(enabledReadiness(), {
+      getClient: () => client,
+      getCurrentUser: async () => userA,
+    });
+
+    await expect(service.reportPost('post-1', { reason: 'spam' })).resolves.toMatchObject({
+      ok: false,
+      code: 'supabase_write_failed',
+      message: communityReportSubmitFailureMessage,
+    });
   });
 
   test('documents one-image policy while upload remains disabled', async () => {

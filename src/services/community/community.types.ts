@@ -20,16 +20,25 @@ export const communityReportReasons = [
   'other',
 ] as const;
 
-export type CommunityReportReason = (typeof communityReportReasons)[number] | 'inappropriate_content';
+export type CommunityReportReason = (typeof communityReportReasons)[number];
 
 export const communityReportReasonLabels: Record<CommunityReportReason, string> = {
   spam: 'สแปม',
   dangerous_information: 'ข้อมูลอันตราย',
   personal_information: 'ข้อมูลส่วนตัว',
-  inappropriate_content: 'เนื้อหาไม่เหมาะสม',
   inappropriate: 'เนื้อหาไม่เหมาะสม',
   other: 'อื่น ๆ',
 };
+
+export const communityReportSuccessMessage = 'ขอบคุณที่แจ้ง ทีมงานจะตรวจสอบ';
+export const communityReportAlreadySubmittedMessage = 'คุณแจ้งรายงานนี้แล้ว';
+export const communityReportSignInRequiredMessage = 'เข้าสู่ระบบก่อนรายงาน';
+export const communityReportSubmitFailureMessage = 'ส่งรายงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+export const communityReportInvalidReasonMessage = 'กรุณาเลือกเหตุผลรายงานที่ถูกต้อง';
+
+export function isCommunityReportReason(value: unknown): value is CommunityReportReason {
+  return typeof value === 'string' && communityReportReasons.includes(value as CommunityReportReason);
+}
 
 export type CommunityPostStatus = 'published' | 'hidden' | 'deleted' | 'reported' | 'pending_review';
 export type CommunityCommentStatus = 'published' | 'hidden' | 'deleted' | 'reported';
@@ -113,6 +122,7 @@ export type CommunityGateCode =
   | 'backend_not_verified'
   | 'feature_flag_disabled'
   | 'invalid_input'
+  | 'duplicate_report'
   | 'rls_not_applied'
   | 'supabase_not_ready'
   | 'supabase_write_failed'

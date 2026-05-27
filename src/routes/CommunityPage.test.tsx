@@ -4,10 +4,12 @@ import { describe, expect, test } from 'vitest';
 import { CommunityPage } from '@/routes/CommunityPage';
 import {
   applyCommunityLikeUiState,
+  canSubmitCommunityReport,
   formatCommunityTime,
   getCommunityAuthorDisplayName,
   getCommunityComposerStatusLabel,
   getCommunityComposerSubmitLabel,
+  getCommunityReportGateCopy,
   getCommunityEmailLocalPart,
   getCommunityWriteStatusCopy,
   getSafeCommunityComments,
@@ -22,7 +24,12 @@ import type {
   CommunityReadiness,
   CommunityService,
 } from '@/services/community/community.types';
-import { communityFallbackPostCategory } from '@/services/community/community.types';
+import {
+  communityFallbackPostCategory,
+  communityReportAlreadySubmittedMessage,
+  communityReportSignInRequiredMessage,
+  communityReportSuccessMessage,
+} from '@/services/community/community.types';
 
 function readinessForTest(overrides: Partial<CommunityReadiness> = {}): CommunityReadiness {
   return {
@@ -352,19 +359,113 @@ describe('M114 Community route', () => {
     expect(html).toContain('รายงานโพสต์');
     expect(html).toContain('เลือกเหตุผลที่ต้องการแจ้ง ทีมงานจะตรวจสอบ');
     expect(html).toContain('สแปม');
+    expect(html).toContain('value="spam"');
     expect(html).toContain('ข้อมูลอันตราย');
+    expect(html).toContain('value="dangerous_information"');
     expect(html).toContain('ข้อมูลส่วนตัว');
+    expect(html).toContain('value="personal_information"');
     expect(html).toContain('เนื้อหาไม่เหมาะสม');
     expect(html).toContain('value="inappropriate"');
     expect(html).not.toContain('value="inappropriate_content"');
     expect(html).toContain('อื่น ๆ');
+    expect(html).toContain('value="other"');
     expect(html).toContain('รายละเอียดเพิ่มเติม (ถ้ามี)');
     expect(html).toContain('ส่งรายงาน');
     expect(html).toContain('ยกเลิก');
   });
 
+  test('shows report success copy inside the dialog without cluttering post cards', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          initialReportStatus={communityReportSuccessMessage}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain(communityReportSuccessMessage);
+    expect(html).not.toContain('เหตุผลรายงาน</label>');
+    expect(html).not.toContain('<select');
+  });
+
+  test('shows already-reported copy and disables submit for a locally reported target', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          initialReportedTargetKeys={['post:post-1']}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain(communityReportAlreadySubmittedMessage);
+    expect(html).toContain('disabled=""');
+  });
+
+  test('disables report submit while a report is sending', () => {
+    const readiness = readinessForTest({
+      path: 'real',
+      canWrite: true,
+      canUploadImage: true,
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: true,
+      writeGateMessage: 'ready',
+      imageGateMessage: 'ready',
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          initialSubmittingReport
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('กำลังส่ง');
+    expect(html).toContain('disabled=""');
+    expect(canSubmitCommunityReport({
+      alreadyReported: false,
+      canWrite: true,
+      hasAuthenticatedUser: true,
+      isSubmitting: true,
+    })).toBe(false);
+  });
+
   test('renders a friendly gated message inside the report dialog when reports cannot write yet', () => {
-    const readiness = readinessForTest();
+    const readiness = readinessForTest({
+      hasAuthenticatedUser: true,
+    });
 
     const html = renderToString(
       <MemoryRouter>
@@ -379,6 +480,29 @@ describe('M114 Community route', () => {
 
     expect(html).toContain('รายงานโพสต์');
     expect(html).toContain('ตอนนี้อ่านและแชร์ได้ก่อน ระบบเขียนโพสต์จะเปิดหลังตั้งค่าบัญชี');
+    expect(html).toContain('disabled=""');
+  });
+
+  test('requires sign-in before report submission when no real user is signed in', () => {
+    const readiness = readinessForTest({
+      writesFeatureFlagEnabled: true,
+      hasAuthenticatedUser: false,
+      writeGateMessage: communitySignInGateMessage,
+    });
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CommunityPage
+          initialPosts={[basePost]}
+          initialReportDialogTarget={{ type: 'post', id: 'post-1' }}
+          readinessOverride={readiness}
+          serviceOverride={createNoopCommunityService(readiness)}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(getCommunityReportGateCopy(readiness)).toBe(communityReportSignInRequiredMessage);
+    expect(html).toContain(communityReportSignInRequiredMessage);
     expect(html).toContain('disabled=""');
   });
 

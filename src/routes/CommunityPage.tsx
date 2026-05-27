@@ -30,6 +30,7 @@ import {
   applyCommunityLikeUiState,
   applyCommunityCommentLikeUiState,
   applyCommunityPostCommentCount,
+  canSubmitCommunityReport,
   canUseTopLevelCommunityCommentSubmit,
   communityCompactActionButtonClass,
   communityCompactActionIconClass,
@@ -40,6 +41,7 @@ import {
   getCommunityComposerStatusLabel,
   getCommunityComposerSubmitLabel,
   getCommunityDisabledInputCopy,
+  getCommunityReportGateCopy,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
   getCommunityVisibleCommentCount,
@@ -69,8 +71,11 @@ import {
 } from '@/services/community/community-storage-service';
 import {
   communityPostCategories,
+  communityReportAlreadySubmittedMessage,
   communityReportReasonLabels,
   communityReportReasons,
+  communityReportSubmitFailureMessage,
+  communityReportSuccessMessage,
   type CommunityActionResult,
   type CommunityComment,
   type CommunityPost,
@@ -86,8 +91,6 @@ const safetyNotes = [
   'เรื่องสารเคมีควรตรวจฉลากและคำแนะนำเจ้าหน้าที่ก่อนใช้',
 ];
 
-const successReportMessage = 'ขอบคุณที่แจ้ง ทีมงานจะตรวจสอบ';
-
 type CommunityPageProps = {
   readinessOverride?: CommunityReadiness;
   serviceOverride?: CommunityService;
@@ -96,12 +99,19 @@ type CommunityPageProps = {
   initialCommentsByPost?: Record<string, CommunityComment[]>;
   initialOpenCommentsByPost?: Record<string, boolean>;
   initialReportDialogTarget?: CommunityReportDialogTarget | null;
+  initialReportedTargetKeys?: string[];
+  initialReportStatus?: string;
+  initialSubmittingReport?: boolean;
 };
 
 type CommunityReportDialogTarget = {
   type: 'post' | 'comment';
   id: string;
 };
+
+function getCommunityReportTargetKey(target: CommunityReportDialogTarget) {
+  return `${target.type}:${target.id}`;
+}
 
 function getCommunityShareUrl() {
   if (typeof window === 'undefined') {
@@ -132,6 +142,9 @@ export function CommunityPage({
   initialCommentsByPost = {},
   initialOpenCommentsByPost = {},
   initialReportDialogTarget = null,
+  initialReportedTargetKeys = [],
+  initialReportStatus = '',
+  initialSubmittingReport = false,
 }: CommunityPageProps = {}) {
   const baseReadiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
   const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
@@ -166,6 +179,7 @@ export function CommunityPage({
     [readiness, serviceOverride],
   );
   const canWrite = readiness.canWrite;
+  const initialReportGateCopy = getCommunityReportGateCopy(readiness);
   const [posts, setPosts] = useState<CommunityPost[]>(() => initialPosts);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, CommunityComment[]>>(
     () => initialCommentsByPost,
@@ -183,8 +197,16 @@ export function CommunityPage({
   );
   const [reportReason, setReportReason] = useState<CommunityReportReason>('spam');
   const [reportNote, setReportNote] = useState('');
-  const [reportStatus, setReportStatus] = useState('');
-  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportedTargetKeys, setReportedTargetKeys] = useState<Record<string, true>>(() =>
+    initialReportedTargetKeys.reduce<Record<string, true>>((targets, key) => {
+      targets[key] = true;
+      return targets;
+    }, {}),
+  );
+  const [reportStatus, setReportStatus] = useState(() =>
+    initialReportStatus || (!initialReportDialogTarget || canWrite ? '' : initialReportGateCopy),
+  );
+  const [isSubmittingReport, setIsSubmittingReport] = useState(initialSubmittingReport);
   const [selectedCategory, setSelectedCategory] = useState<CommunityPostCategory>('ปัญหาพืช');
   const [activeFilter, setActiveFilter] = useState<CommunityPostCategory | 'ทั้งหมด'>('ทั้งหมด');
   const [postText, setPostText] = useState('');
@@ -287,12 +309,22 @@ export function CommunityPage({
   const encodedShareText = encodeURIComponent(`${shareText} ${shareUrl}`);
   const encodedShareUrl = encodeURIComponent(shareUrl);
   const writeStatusCopy = getCommunityWriteStatusCopy(readiness);
+  const reportGateCopy = getCommunityReportGateCopy(readiness);
   const writeStatusTitle = canWrite
     ? 'พร้อมเขียนโพสต์'
     : readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser
       ? 'เข้าสู่ระบบเพื่อเขียนโพสต์'
       : 'ยังไม่เปิดเขียนโพสต์';
   const disabledInputCopy = getCommunityDisabledInputCopy(readiness);
+  const currentReportTargetKey = reportDialogTarget ? getCommunityReportTargetKey(reportDialogTarget) : '';
+  const hasReportedCurrentTarget = Boolean(currentReportTargetKey && reportedTargetKeys[currentReportTargetKey]);
+  const reportFeedbackMessage = reportStatus || (hasReportedCurrentTarget ? communityReportAlreadySubmittedMessage : '');
+  const canSubmitReport = canSubmitCommunityReport({
+    alreadyReported: hasReportedCurrentTarget,
+    canWrite,
+    hasAuthenticatedUser: readiness.hasAuthenticatedUser,
+    isSubmitting: isSubmittingReport,
+  });
 
   async function handleShare() {
     const payload = {
@@ -654,10 +686,13 @@ export function CommunityPage({
       return;
     }
 
+    const targetKey = getCommunityReportTargetKey(target);
+    const alreadyReported = Boolean(reportedTargetKeys[targetKey]);
+
     setReportDialogTarget(target);
     setReportReason('spam');
     setReportNote('');
-    setReportStatus(canWrite ? '' : writeStatusCopy);
+    setReportStatus(alreadyReported ? communityReportAlreadySubmittedMessage : canWrite ? '' : reportGateCopy);
   }
 
   function handleCloseReportDialog() {
@@ -672,9 +707,18 @@ export function CommunityPage({
     event.preventDefault();
     if (!reportDialogTarget) return;
 
+    if (isSubmittingReport) return;
+
+    const targetKey = getCommunityReportTargetKey(reportDialogTarget);
+    if (reportedTargetKeys[targetKey]) {
+      setReportStatus(communityReportAlreadySubmittedMessage);
+      setActionStatus(communityReportAlreadySubmittedMessage);
+      return;
+    }
+
     if (!canWrite) {
-      setReportStatus(writeStatusCopy);
-      setActionStatus(writeStatusCopy);
+      setReportStatus(reportGateCopy);
+      setActionStatus(reportGateCopy);
       return;
     }
 
@@ -685,16 +729,20 @@ export function CommunityPage({
         : await service.reportComment(reportDialogTarget.id, { reason: reportReason, note: reportNote });
 
       if (result.ok) {
-        setActionStatus(successReportMessage);
-        handleCloseReportDialog();
+        setReportedTargetKeys((current) => ({ ...current, [targetKey]: true }));
+        setReportStatus(communityReportSuccessMessage);
+        setActionStatus(communityReportSuccessMessage);
         return;
       }
 
+      if (result.code === 'duplicate_report') {
+        setReportedTargetKeys((current) => ({ ...current, [targetKey]: true }));
+      }
       setReportStatus(result.message);
       setActionStatus(result.message);
     } catch {
-      setReportStatus('ส่งรายงานไม่สำเร็จ ลองอีกครั้ง');
-      setActionStatus('ส่งรายงานไม่สำเร็จ ลองอีกครั้ง');
+      setReportStatus(communityReportSubmitFailureMessage);
+      setActionStatus(communityReportSubmitFailureMessage);
     } finally {
       setIsSubmittingReport(false);
     }
@@ -1315,7 +1363,7 @@ export function CommunityPage({
                 ปุ่มรายงานในแต่ละโพสต์จะเปิดหน้าต่างเลือกเหตุผลแยกต่างหาก เพื่อลดความรกในฟีด
               </p>
               <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
-                ข้อความยืนยันเมื่อเปิดใช้จริง: “{successReportMessage}”
+                ข้อความยืนยันเมื่อเปิดใช้จริง: “{communityReportSuccessMessage}”
               </p>
             </div>
           </div>
@@ -1430,9 +1478,9 @@ export function CommunityPage({
               />
             </label>
 
-            {reportStatus ? (
+            {reportFeedbackMessage ? (
               <p className="rounded-lg bg-kaset-mist p-3 text-xs font-semibold leading-5 text-kaset-ink">
-                {reportStatus}
+                {reportFeedbackMessage}
               </p>
             ) : null}
 
@@ -1440,7 +1488,7 @@ export function CommunityPage({
               <Button className="min-h-10 px-4 text-sm" onClick={handleCloseReportDialog} variant="secondary">
                 ยกเลิก
               </Button>
-              <Button className="min-h-10 px-4 text-sm" disabled={!canWrite || isSubmittingReport} type="submit">
+              <Button className="min-h-10 px-4 text-sm" disabled={!canSubmitReport} type="submit">
                 <Flag aria-hidden="true" className="h-4 w-4" />
                 {isSubmittingReport ? 'กำลังส่ง' : 'ส่งรายงาน'}
               </Button>

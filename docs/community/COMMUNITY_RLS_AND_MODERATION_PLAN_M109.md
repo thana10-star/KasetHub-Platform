@@ -60,6 +60,8 @@ Reports create rows in `community_reports` with reason and optional note. Normal
 
 Reports do not automatically delete content. Future moderator/admin tooling can move posts/comments to `reported`, `hidden`, or `deleted`.
 
+M116.12 report reason codes are database-safe values only: `spam`, `dangerous_information`, `personal_information`, `inappropriate`, and `other`. Thai labels stay in the UI, but the database receives only these codes. Duplicate reports are guarded in the app and can be guarded in SQL with `supabase/sql/community_report_unique_guard_m116_12.sql`.
+
 ## Notification Ownership
 
 Community notifications target `recipient_user_id`. RLS must restrict reads and mark-read updates to `recipient_user_id = auth.uid()`.
@@ -76,6 +78,8 @@ Add rate limits before public launch:
 - Comment likes per user per minute
 - Reports per user per day
 - Uploads per user per day
+
+M116.12 intentionally does not add CAPTCHA. Use authenticated-only reports, duplicate guards, and future backend rate limits first; consider CAPTCHA only if real abuse requires it.
 
 ## Admin/Moderator Future Role
 

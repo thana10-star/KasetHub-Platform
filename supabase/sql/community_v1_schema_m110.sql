@@ -101,7 +101,7 @@ create table if not exists public.community_reports (
     ((post_id is not null)::integer + (comment_id is not null)::integer) = 1
   ),
   constraint community_reports_reason_check check (
-    reason in ('spam', 'dangerous_information', 'personal_information', 'inappropriate_content', 'other')
+    reason in ('spam', 'dangerous_information', 'personal_information', 'inappropriate', 'other')
   )
 );
 
