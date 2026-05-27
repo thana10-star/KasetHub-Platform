@@ -131,6 +131,14 @@ function formatHomePrice(price: number) {
   }).format(price);
 }
 
+function formatHomePriceValue(row: CommodityPrice) {
+  if (typeof row.priceMax === 'number' && row.priceMax > row.price) {
+    return `${formatHomePrice(row.price)}-${formatHomePrice(row.priceMax)}`;
+  }
+
+  return formatHomePrice(row.price);
+}
+
 function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
   const latestUpdatedAt = rows
     .map((row) => row.updatedAt)
@@ -295,9 +303,10 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
                       <p className="break-words text-xs font-semibold leading-5 text-slate-500">{item.sourceName}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePrice(item.price)}</p>
+                      <p className="text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePriceValue(item)}</p>
                       <p className="text-xs font-extrabold leading-5 text-slate-600">
                         {item.unit}
+                        {item.freshnessPolicy === 'seasonal_reference' ? ' · อ้างอิง' : ''}
                         {item.isStale ? ' · ข้อมูลเก่า' : ''}
                       </p>
                     </div>

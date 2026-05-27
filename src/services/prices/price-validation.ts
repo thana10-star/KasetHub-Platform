@@ -100,6 +100,13 @@ export function validateCommodityPriceRows(
       addIssue(rowErrors, rowId, 'invalid_price', 'Price must be a number greater than zero.');
     }
 
+    if (
+      row.priceMax != null &&
+      (typeof row.priceMax !== 'number' || !Number.isFinite(row.priceMax) || row.priceMax < (row.price ?? 0))
+    ) {
+      addIssue(rowErrors, rowId, 'invalid_price_range', 'Maximum price must be greater than or equal to price.');
+    }
+
     if (row.isEstimated === true) {
       addIssue(rowErrors, rowId, 'estimated_not_allowed', 'Estimated prices are not allowed for V1 display.');
     }
@@ -131,6 +138,7 @@ export function validateCommodityPriceRows(
       marketName,
       notes: row.notes,
       price: row.price,
+      priceMax: row.priceMax ?? undefined,
       province: row.province,
       sourceAttribution: row.sourceAttribution?.trim() || sourceName,
       sourceName,

@@ -25,6 +25,7 @@ export type CommodityPrice = {
   province?: string;
   unit: string;
   price: number;
+  priceMax?: number;
   currency: 'THB';
   changeAmount?: number;
   changePercent?: number;
@@ -80,6 +81,7 @@ export type ManualCommodityPriceRow = {
   province?: string;
   unit?: string;
   price?: number | null;
+  priceMax?: number | null;
   currency?: 'THB';
   changeAmount?: number;
   changePercent?: number;
@@ -125,6 +127,7 @@ export type PriceValidationErrorCode =
   | 'missing_name'
   | 'missing_market'
   | 'invalid_price'
+  | 'invalid_price_range'
   | 'invalid_updated_at'
   | 'invalid_fetched_at'
   | 'estimated_not_allowed';

@@ -49,6 +49,25 @@ describe('price validation', () => {
     );
   });
 
+  test('rejects invalid price range', () => {
+    const result = validateCommodityPriceRows([{ ...validManualRow, price: 12500, priceMax: 12000 }], {
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+
+    expect(result.acceptedRows).toHaveLength(0);
+    expect(result.errors).toEqual(
+      expect.arrayContaining([expect.objectContaining({ code: 'invalid_price_range', rowId: 'rice-bangkok' })]),
+    );
+  });
+
+  test('accepts valid source-provided price range', () => {
+    const result = validateCommodityPriceRows([{ ...validManualRow, price: 12000, priceMax: 12500 }], {
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+
+    expect(result.acceptedRows).toEqual([expect.objectContaining({ price: 12000, priceMax: 12500 })]);
+  });
+
   test('marks stale rows using the freshness window', () => {
     const result = validateCommodityPriceRows(
       [

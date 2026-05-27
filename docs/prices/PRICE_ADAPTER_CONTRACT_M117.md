@@ -24,6 +24,7 @@ type PriceAdapter = {
 - Reject rows without `updatedAt`, unless the source explicitly provides same-day context and the adapter documents that rule.
 - Reject rows without `unit`.
 - Reject rows without `price` or with non-positive numeric price.
+- Reject rows where `priceMax` exists and is lower than `price`.
 - Reject rows where source attribution is missing.
 - Never silently convert unknown units.
 - Mark rows stale if older than the source freshness threshold.
@@ -56,6 +57,7 @@ type ValidationResult = {
       | "missing_updated_at"
       | "missing_unit"
       | "invalid_price"
+      | "invalid_price_range"
       | "stale"
       | "unknown_unit"
       | "permission_unverified"

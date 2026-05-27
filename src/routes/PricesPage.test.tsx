@@ -19,31 +19,36 @@ const validManualPriceRow: ManualCommodityPriceRow = {
 };
 
 describe('M108.2 production agriculture price hub', () => {
-  test('renders the price hub with source-pending commodity categories', () => {
+  test('renders verified M120 rows and keeps unsupported commodities source-pending', () => {
     const html = renderToString(
       <MemoryRouter>
         <PricesPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('ราคาเกษตร');
-    expect(html).toContain('เช็กราคาสินค้าเกษตรและแนวโน้มเบื้องต้น');
-    expect(html).toContain('ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล');
-    expect(html).toContain('เตรียมเชื่อมแหล่งข้อมูลราคา');
-    expect(html).toContain('ข้าว');
-    expect(html).toContain('ข้าวโพด');
+    expect(html).toContain('ราคาจากแหล่งข้อมูลที่ตรวจสอบแล้ว');
+    expect(html).toContain('ข้าวเปลือกหอมมะลิ');
+    expect(html).toContain('16,200-18,600');
+    expect(html).toContain('ยางแผ่นดิบชั้น 3');
+    expect(html).toContain('79');
     expect(html).toContain('มันสำปะหลัง');
+    expect(html).toContain('3-3.55');
     expect(html).toContain('อ้อย');
-    expect(html).toContain('ยางพารา');
+    expect(html).toContain('890');
+    expect(html).toContain('ราคาอ้างอิงตามฤดูกาล');
+    expect(html).toContain('MOC Open Data / กรมการค้าภายใน');
+    expect(html).toContain('ข้าวโพด');
     expect(html).toContain('ปาล์มน้ำมัน');
     expect(html).toContain('พริก');
     expect(html).toContain('ผัก/ผลไม้');
+    expect(html).not.toContain('ยังไม่ใช่ราคาจริง');
   });
 
   test('does not render fake numeric commodity prices while the source is pending', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({ commodityRows: [] });
     const html = renderToString(
       <MemoryRouter>
-        <PricesPage />
+        <PricesPage priceSnapshot={priceSnapshot} />
       </MemoryRouter>,
     );
 

@@ -111,3 +111,16 @@ Use:
 - `docs/prices/OWNER_CURATED_PRICE_ROWS_M119.md`
 
 The first prepared commodity codes are `rice`, `rubber`, `cassava`, and `sugarcane`.
+
+## M120 First Real Rows
+
+M120 adds verified manual rows for `rice`, `rubber`, `cassava`, and `sugarcane`.
+
+The rows remain read-only frontend data. They do not add backend writes or Supabase price writes.
+
+Source rules added in M120:
+
+- Use MOC/DIT Open Data values only when product ID, unit, date, and source context are clear.
+- Preserve source min/max ranges instead of inventing a single midpoint.
+- Mark sugarcane as seasonal/reference, not daily market price.
+- Keep fertilizer source-pending until formula, package size, unit, and freshness are verified.

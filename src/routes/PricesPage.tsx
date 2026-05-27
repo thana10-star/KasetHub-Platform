@@ -12,14 +12,14 @@ import {
 import type { CommodityPrice } from '@/services/prices/price.types';
 
 const priceCommodityCards = [
-  'ข้าว',
-  'ข้าวโพด',
-  'มันสำปะหลัง',
-  'อ้อย',
-  'ยางพารา',
-  'ปาล์มน้ำมัน',
-  'พริก',
-  'ผัก/ผลไม้',
+  { code: 'rice', name: 'ข้าว' },
+  { code: 'corn', name: 'ข้าวโพด' },
+  { code: 'cassava', name: 'มันสำปะหลัง' },
+  { code: 'sugarcane', name: 'อ้อย' },
+  { code: 'rubber', name: 'ยางพารา' },
+  { code: 'palm', name: 'ปาล์มน้ำมัน' },
+  { code: 'chili', name: 'พริก' },
+  { code: 'fruit-vegetable', name: 'ผัก/ผลไม้' },
 ];
 
 const sourceRequirements = [
@@ -36,6 +36,14 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
+function formatPriceValue(row: CommodityPrice) {
+  if (typeof row.priceMax === 'number' && row.priceMax > row.price) {
+    return `${formatPrice(row.price)}-${formatPrice(row.priceMax)}`;
+  }
+
+  return formatPrice(row.price);
+}
+
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat('th-TH', {
     dateStyle: 'medium',
@@ -45,9 +53,9 @@ function formatDateTime(value: string) {
 }
 
 function getCommodityCardsWithoutValidatedRows(rows: CommodityPrice[]) {
-  const realCommodityNames = new Set(rows.map((row) => row.commodityNameTh));
+  const realCommodityCodes = new Set(rows.map((row) => row.commodityCode));
 
-  return priceCommodityCards.filter((commodity) => !realCommodityNames.has(commodity));
+  return priceCommodityCards.filter((commodity) => !realCommodityCodes.has(commodity.code));
 }
 
 type PricesPageProps = {
@@ -126,14 +134,18 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
                           </p>
                         </div>
                         {row.isStale ? <Badge tone="gold">ข้อมูลเก่า</Badge> : <Badge tone="green">อัปเดตแล้ว</Badge>}
+                        {row.freshnessPolicy === 'seasonal_reference' ? (
+                          <Badge tone="sky">ราคาอ้างอิงตามฤดูกาล</Badge>
+                        ) : null}
                       </div>
                       <p className="mt-3 text-2xl font-extrabold leading-8 text-kaset-ink">
-                        {formatPrice(row.price)}
+                        {formatPriceValue(row)}
                         <span className="ml-2 text-sm font-bold text-slate-600">{row.unit}</span>
                       </p>
                       <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-500">
                         แหล่งข้อมูล: {row.sourceName} · อัปเดต {formatDateTime(row.updatedAt)}
                       </p>
+                      {row.notes ? <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-500">{row.notes}</p> : null}
                     </div>
                   </div>
                 </Card>
@@ -152,13 +164,13 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
 
           <div className="grid gap-3 sm:grid-cols-2">
             {pendingCommodityCards.map((commodity) => (
-              <Card className="p-4" key={commodity}>
+              <Card className="p-4" key={commodity.code}>
                 <div className="flex items-start gap-3">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
                     <ChartNoAxesColumn aria-hidden="true" className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-extrabold leading-7 text-kaset-ink">{commodity}</h3>
+                    <h3 className="text-lg font-extrabold leading-7 text-kaset-ink">{commodity.name}</h3>
                     <p className="mt-1 text-sm font-semibold leading-6 text-kaset-deep">เตรียมเชื่อมแหล่งข้อมูลราคา</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล</p>
                   </div>

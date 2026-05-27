@@ -59,7 +59,7 @@ describe('M116.9 home dashboard polish', () => {
   });
 
   test('renders a clearly labeled source-pending crop price snapshot', () => {
-    const html = renderHome();
+    const html = renderHome({ priceSnapshot: getPriceAdapterSnapshot({ commodityRows: [] }) });
     const text = visibleText(html);
 
     expect(text).toContain('ราคาวันนี้');
@@ -111,6 +111,7 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('ข้อมูลตัวอย่าง');
     expect(text).not.toContain('ยังไม่ใช่ราคาจริง');
     expect(text).not.toContain('58.50');
+    expect(text).not.toContain('กราฟเล็ก');
   });
 
   test('keeps Home sample rows when only invalid manual rows exist', () => {
@@ -202,7 +203,7 @@ describe('M116.9 home dashboard polish', () => {
   });
 
   test('keeps lower price preview source-pending and avoids unlabeled real-price claims', () => {
-    const html = renderHome();
+    const html = renderHome({ priceSnapshot: getPriceAdapterSnapshot({ commodityRows: [] }) });
     const text = visibleText(html);
 
     expect(text).toContain('กำลังเตรียมเชื่อมแหล่งข้อมูลราคาจริง');

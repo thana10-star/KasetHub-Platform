@@ -16,6 +16,7 @@ type CommodityPrice = {
   province?: string;
   unit: string;
   price: number;
+  priceMax?: number;
   currency: "THB";
   changeAmount?: number;
   changePercent?: number;
@@ -38,6 +39,7 @@ Required fields for display:
 - `marketName`
 - `unit`
 - `price`
+- `priceMax` when a source provides a min/max range
 - `currency`
 - `sourceName`
 - `updatedAt`

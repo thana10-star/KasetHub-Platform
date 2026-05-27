@@ -19,6 +19,7 @@ Each row must provide:
 - `province`: optional when the source is regional
 - `unit`: exact source unit, for example `บาท/ตัน` or `บาท/กก.`
 - `price`: numeric value copied from the source
+- `priceMax`: optional, only when the source provides a min/max range
 - `currency`: `THB`
 - `trend`: optional, `up`, `down`, `flat`, or `unknown`
 - `changeAmount`: optional, only if source provides it
@@ -54,6 +55,7 @@ Do not use this as live data.
   province: 'จังหวัดถ้ามี',
   unit: 'บาท/ตัน',
   price: 0,
+  priceMax: undefined,
   currency: 'THB',
   trend: 'unknown',
   sourceName: 'ชื่อแหล่งข้อมูลจริง',
@@ -71,6 +73,7 @@ Do not use this as live data.
 - Do not enter a row without opening and checking the source.
 - Do not enter sample, guessed, averaged, or remembered prices.
 - Do not change units unless the source explicitly provides the converted unit.
+- If the source provides a price range, enter `price` as the source minimum and `priceMax` as the source maximum.
 - Do not mix source types in one row.
 - Use one row per commodity, market, grade, and unit.
 - Leave unsupported commodities source-pending.

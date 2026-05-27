@@ -90,3 +90,16 @@ Home must continue to use a single mode:
 - real-row mode when at least one row validates
 
 It must never mix the two modes in the same price card.
+
+## M120 First Real Rows
+
+M120 introduces real-row mode in normal app usage.
+
+Rules now active:
+
+- `/app/prices` shows verified rows with source, unit, updated date, and stale/reference labels.
+- Home shows real rows and no longer shows sample rows in the same price card.
+- Rice and cassava display source-provided ranges.
+- Sugarcane displays a seasonal/reference label.
+- Unsupported commodities remain source-pending.
+- No chart or sparkline is shown because historical data is not connected.

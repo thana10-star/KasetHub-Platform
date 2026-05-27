@@ -58,3 +58,13 @@ This prevents mixing real and sample values.
 ## Fertilizer Status
 
 Fertilizer remains guarded. Do not add fertilizer rows until source, formula, package size, unit, price, `updatedAt`, and `fetchedAt` are verified.
+
+## M120 Update
+
+M120 added the first verified manual rows for rice, rubber, cassava, and sugarcane.
+
+- Rice, rubber, and cassava use MOC/DIT Open Data rows with source dates on 2026-05-27.
+- Sugarcane uses an official government seasonal/reference source dated 2026-02-10.
+- Rice and cassava show ranges because the source provides `price_min` and `price_max`.
+- Home switches to real-row mode because validated rows now exist.
+- Fertilizer remains source-pending.
