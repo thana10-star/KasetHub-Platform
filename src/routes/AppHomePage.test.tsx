@@ -115,6 +115,22 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('กราฟเล็ก');
   });
 
+  test('shows concise market context labels on real Home price rows', () => {
+    const text = visibleText(renderHome());
+
+    expect(text).toContain('ข้าวเปลือกหอมมะลิ');
+    expect(text).toContain('ช่วงราคา');
+    expect(text).toContain('ยางแผ่นดิบชั้น 3');
+    expect(text).toContain('สุราษฎร์ธานี');
+    expect(text).toContain('มันสำปะหลัง');
+    expect(text).toContain('นครราชสีมา');
+    expect(text).toContain('แป้ง 25%');
+    expect(text).toContain('กรมการค้าภายใน กระทรวงพาณิชย์');
+    expect(text).not.toContain('ข้อมูลตัวอย่าง');
+    expect(text).not.toContain('58.50');
+    expect(text).not.toContain('อ้อย');
+  });
+
   test('keeps Home sample rows when only invalid manual rows exist', () => {
     const priceSnapshot = getPriceAdapterSnapshot({
       commodityRows: [

@@ -81,3 +81,13 @@ Home eligibility:
 - Sugarcane: `showOnHome: false`
 
 Home excludes stale rows and does not backfill missing real rows with sample values. Sugarcane remains visible on `/app/prices` as seasonal/reference data.
+
+## M122 Market Context Update
+
+M122 does not change owner-entered values or add new rows. It clarifies how existing verified rows should be read:
+
+- Home eligible rows show concise market context and source/update text.
+- Range rows must keep the `ช่วงราคา` label.
+- Sugarcane remains labeled as `ราคาอ้างอิงตามฤดูกาล` and stays off Home by default.
+- `/app/prices` shows source display name, updated/reference date, fetched/check time, and `อ่านราคานี้อย่างไร`.
+- Owner-entered rows should keep `marketName`, `province`, `notes`, and `sourceDisplayName` accurate because these fields feed the farmer-facing context.

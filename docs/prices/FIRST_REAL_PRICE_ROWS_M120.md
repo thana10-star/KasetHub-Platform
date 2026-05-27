@@ -65,3 +65,13 @@ M121 keeps the M120 rows but adds Home eligibility and cleaner labels:
 - MOC/DIT rows display source label `กรมการค้าภายใน กระทรวงพาณิชย์`.
 - PRD / ThaiGov row displays source label `ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์`.
 - Range rows show `ช่วงราคา`.
+
+## M122 Market Context Polish
+
+M122 keeps the same M120 price values and sources. It only improves how context is presented:
+
+- Home shows compact context labels for eligible rows: `ช่วงราคา`, `สุราษฎร์ธานี`, and `นครราชสีมา · แป้ง 25% · ช่วงราคา`.
+- Home shows per-row source and updated date, while staying compact.
+- `/app/prices` shows market/province context, source display name, updated/reference date, and fetched/check time.
+- `/app/prices` adds `อ่านราคานี้อย่างไร` so farmers see that ranges vary by market, quality, and area, and that seasonal/reference rows are not daily market prices.
+- Sugarcane remains hidden from Home and visible on `/app/prices` as `ราคาอ้างอิงตามฤดูกาล`.

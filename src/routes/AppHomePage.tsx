@@ -143,6 +143,18 @@ function hasHomePriceRange(row: CommodityPrice) {
   return typeof row.priceMax === 'number' && row.priceMax > row.price;
 }
 
+function getHomeContextLabel(row: CommodityPrice) {
+  if (row.freshnessPolicy === 'seasonal_reference') return 'ราคาอ้างอิงตามฤดูกาล';
+
+  const contextParts = [
+    row.province,
+    row.marketName.includes('แป้ง 25%') ? 'แป้ง 25%' : undefined,
+    hasHomePriceRange(row) ? 'ช่วงราคา' : undefined,
+  ].filter(Boolean);
+
+  return contextParts.length > 0 ? contextParts.join(' · ') : row.marketName;
+}
+
 function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
   const latestUpdatedAt = rows
     .map((row) => row.updatedAt)
@@ -308,10 +320,13 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
                     <span className={`h-2.5 w-2.5 rounded-full ${item.isStale ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                     <div className="min-w-0">
                       <p className="break-words text-sm font-extrabold leading-5 text-kaset-ink">{item.commodityNameTh}</p>
-                      <p className="break-words text-xs font-semibold leading-5 text-slate-500">{item.sourceDisplayName}</p>
+                      <p className="break-words text-xs font-extrabold leading-5 text-slate-600">{getHomeContextLabel(item)}</p>
+                      <p className="break-words text-[11px] font-semibold leading-4 text-slate-500">
+                        {item.sourceDisplayName} · อัปเดต {formatHomePriceUpdatedLabel([item])}
+                      </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePriceValue(item)}</p>
+                    <div className="min-w-0 text-right">
+                      <p className="whitespace-nowrap text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePriceValue(item)}</p>
                       <p className="text-xs font-extrabold leading-5 text-slate-600">
                         {item.unit}
                         {hasHomePriceRange(item) ? ' · ช่วงราคา' : ''}

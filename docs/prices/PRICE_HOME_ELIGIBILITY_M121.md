@@ -74,3 +74,15 @@ Labels:
 ## Fertilizer
 
 Fertilizer remains source-pending and guarded. M121 does not add fertilizer rows.
+
+## M122 Context Polish
+
+M122 keeps the same Home eligibility rules and adds clearer farmer-facing context:
+
+- Home eligible rows show a concise context line instead of relying only on the source name.
+- Rice shows `ช่วงราคา`.
+- Rubber shows `สุราษฎร์ธานี`.
+- Cassava shows `นครราชสีมา · แป้ง 25% · ช่วงราคา`.
+- Each Home row still shows `sourceDisplayName` and the updated date in small text.
+- Seasonal/reference rows remain off Home unless explicitly allowed in a later milestone.
+- Home still does not backfill missing real rows with sample rows.

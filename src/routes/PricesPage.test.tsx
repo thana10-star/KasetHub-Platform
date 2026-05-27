@@ -37,8 +37,18 @@ describe('M108.2 production agriculture price hub', () => {
     expect(html).toContain('890');
     expect(html).toContain('ราคาอ้างอิงตามฤดูกาล');
     expect(html).toContain('ช่วงราคา');
+    expect(html).toContain('ราคาล่าสุด');
+    expect(html).toContain('สุราษฎร์ธานี');
+    expect(html).toContain('นครราชสีมา');
+    expect(html).toContain('แป้ง 25%');
+    expect(html).toContain('10 CCS');
     expect(html).toContain('กรมการค้าภายใน กระทรวงพาณิชย์');
     expect(html).toContain('ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์');
+    expect(html).toContain('ตรวจเมื่อ');
+    expect(html).toContain('อ่านราคานี้อย่างไร');
+    expect(html).toContain('ราคาบางรายการเป็นช่วงราคา');
+    expect(html).toContain('ราคาอ้างอิงตามฤดูกาลไม่ใช่ราคาตลาดรายวัน');
+    expect(html).toContain('ควรตรวจสอบแหล่งข้อมูลและพื้นที่จริง');
     expect(html).toContain('ข้าวโพด');
     expect(html).toContain('ปาล์มน้ำมัน');
     expect(html).toContain('พริก');
@@ -78,7 +88,8 @@ describe('M108.2 production agriculture price hub', () => {
     expect(html).toContain('12,500');
     expect(html).toContain('บาท/ตัน');
     expect(html).toContain('แหล่งข้อมูลเจ้าของระบบ');
-    expect(html).toContain('อัปเดตแล้ว');
+    expect(html).toContain('ราคาล่าสุด');
+    expect(html).toContain('อ่านราคานี้อย่างไร');
   });
 
   test('hides invalid manual rows and keeps the source-pending state', () => {
@@ -116,6 +127,7 @@ describe('M108.2 production agriculture price hub', () => {
     );
 
     expect(html).toContain('ข้อมูลเก่า');
+    expect(html).toContain('ควรตรวจสอบอีกครั้ง');
     expect(html).toContain('12,500');
     expect(html).toContain('บาท/ตัน');
   });

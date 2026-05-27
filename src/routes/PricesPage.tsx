@@ -48,6 +48,26 @@ function hasPriceRange(row: CommodityPrice) {
   return typeof row.priceMax === 'number' && row.priceMax > row.price;
 }
 
+function getPriceMarketContextLabel(row: CommodityPrice) {
+  if (row.freshnessPolicy === 'seasonal_reference') {
+    return row.marketName.includes('10 CCS')
+      ? 'ราคาอ้างอิงตามฤดูกาล · 10 CCS'
+      : 'ราคาอ้างอิงตามฤดูกาล';
+  }
+
+  const contextParts = [
+    row.province,
+    row.marketName.includes('แป้ง 25%') ? 'แป้ง 25%' : row.marketName,
+    hasPriceRange(row) ? 'ช่วงราคา' : undefined,
+  ].filter(Boolean);
+
+  return contextParts.join(' · ');
+}
+
+function getUpdatedDateLabel(row: CommodityPrice) {
+  return row.freshnessPolicy === 'seasonal_reference' ? 'วันที่อ้างอิง' : 'อัปเดต';
+}
+
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat('th-TH', {
     dateStyle: 'medium',
@@ -132,12 +152,15 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
                           <h3 className="break-words text-lg font-extrabold leading-7 text-kaset-ink">
                             {row.commodityNameTh}
                           </h3>
-                          <p className="mt-1 break-words text-sm font-semibold leading-6 text-slate-600">
+                          <p className="mt-1 break-words text-sm font-extrabold leading-6 text-slate-700">
+                            {getPriceMarketContextLabel(row)}
+                          </p>
+                          <p className="mt-0.5 break-words text-xs font-semibold leading-5 text-slate-500">
                             {row.marketName}
                             {row.province ? ` · ${row.province}` : ''}
                           </p>
                         </div>
-                        {row.isStale ? <Badge tone="gold">ข้อมูลเก่า</Badge> : <Badge tone="green">อัปเดตแล้ว</Badge>}
+                        {row.isStale ? <Badge tone="gold">ข้อมูลเก่า / ควรตรวจสอบอีกครั้ง</Badge> : <Badge tone="green">ราคาล่าสุด</Badge>}
                         {hasPriceRange(row) ? <Badge tone="sky">ช่วงราคา</Badge> : null}
                         {row.freshnessPolicy === 'seasonal_reference' ? (
                           <Badge tone="sky">ราคาอ้างอิงตามฤดูกาล</Badge>
@@ -148,7 +171,10 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
                         <span className="ml-2 text-sm font-bold text-slate-600">{row.unit}</span>
                       </p>
                       <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-500">
-                        แหล่งข้อมูล: {row.sourceDisplayName} · อัปเดต {formatDateTime(row.updatedAt)}
+                        แหล่งข้อมูล: {row.sourceDisplayName} · {getUpdatedDateLabel(row)} {formatDateTime(row.updatedAt)}
+                      </p>
+                      <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-500">
+                        ตรวจเมื่อ {formatDateTime(row.fetchedAt)}
                       </p>
                       {row.notes ? <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-500">{row.notes}</p> : null}
                     </div>
@@ -157,6 +183,24 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
               ))}
             </div>
           </section>
+        ) : null}
+
+        {hasValidatedRealRows ? (
+          <Card className="p-4">
+            <div className="flex gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                <ClipboardCheck aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-extrabold text-kaset-ink">อ่านราคานี้อย่างไร</h2>
+                <ul className="mt-2 grid gap-2 text-sm leading-6 text-slate-700">
+                  <li>ราคาบางรายการเป็นช่วงราคา เพราะขึ้นกับตลาด คุณภาพ และพื้นที่</li>
+                  <li>ราคาอ้างอิงตามฤดูกาลไม่ใช่ราคาตลาดรายวัน</li>
+                  <li>ควรตรวจสอบแหล่งข้อมูลและพื้นที่จริงก่อนตัดสินใจขาย/ซื้อ</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
         ) : null}
 
         <section className="grid gap-3" aria-labelledby="price-commodity-title">
@@ -218,7 +262,9 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
             <div className="min-w-0 flex-1">
               <h2 className="font-extrabold text-kaset-ink">สถานะแหล่งข้อมูลราคา</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                ยังไม่ได้เชื่อมแหล่งข้อมูลราคาที่ใช้ในงานจริง จึงแสดงเฉพาะรายการสินค้าที่เตรียมรองรับ และไม่แสดงตัวเลขราคา
+                {hasValidatedRealRows
+                  ? 'ขณะนี้แสดงเฉพาะแถวราคาที่ตรวจสอบแหล่งข้อมูล หน่วย และวันที่แล้ว ส่วนสินค้าอื่นยังรอแหล่งข้อมูลที่เชื่อถือได้'
+                  : 'ยังไม่ได้เชื่อมแหล่งข้อมูลราคาที่ใช้ในงานจริง จึงแสดงเฉพาะรายการสินค้าที่เตรียมรองรับ และไม่แสดงตัวเลขราคา'}
               </p>
               <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-700">
                 {sourceRequirements.map((requirement) => (

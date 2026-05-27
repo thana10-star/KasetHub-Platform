@@ -120,3 +120,27 @@ Range rows display with an en dash and `ช่วงราคา`, for example `
 Sugarcane is labeled `ราคาอ้างอิงตามฤดูกาล` and is hidden from Home by default.
 
 Concise source labels are shown in UI while detailed source metadata remains stored on the row.
+
+## M122 Market Context Polish
+
+Home real-row mode now shows:
+
+- commodity name
+- price or range
+- unit
+- concise market/context label
+- source display name
+- updated date
+
+Home remains compact and shows only eligible, non-stale rows. It never backfills missing real rows with sample rows.
+
+`/app/prices` now shows fuller context:
+
+- market/province context
+- `ราคาล่าสุด`
+- `ช่วงราคา` for ranges
+- `ราคาอ้างอิงตามฤดูกาล` for seasonal/reference rows
+- `ข้อมูลเก่า / ควรตรวจสอบอีกครั้ง` when stale
+- updated/reference date and fetched/check time
+
+`/app/prices` also includes `อ่านราคานี้อย่างไร` with short farmer-facing guidance that ranges depend on market, quality, and area, and seasonal/reference prices are not daily market prices.
