@@ -10,10 +10,10 @@ M116.8 redesigns `/app` into a cleaner mobile dashboard for V1 use. The page now
    - Shows `KasetHub` and `ผู้ช่วยเกษตรในมือถือ`.
    - Keeps notification and profile entry points visible.
 
-2. Weather / Daily Insight hero
+2. Weather / price top stack
    - Links to `/app/weather`.
    - Uses the existing weather state when a live weather summary is available.
-   - Adds a compact `ข้อมูลวันนี้` block with color-coded rows for `อากาศ`, `งานเกษตร`, and `ราคา`.
+   - M116.9 replaces the larger Daily Insight block with a compact weather strip and a separate `ราคาวันนี้` card.
    - Adds explicit CTAs for `ดูพยากรณ์` (`/app/weather`) and `เช็กราคา` (`/app/prices`).
    - Avoids API/source/debug wording on Home.
 
@@ -52,16 +52,15 @@ M116.8 redesigns `/app` into a cleaner mobile dashboard for V1 use. The page now
 - No fake Community posts, likes, comments, or engagement added.
 - Existing route links and bottom navigation are preserved.
 
-## Daily Insight Hero
+## M116.9 Hero Polish
 
-The Home hero now includes a denser daily insight block:
+M116.9 supersedes the M116.8 Daily Insight block with a cleaner top stack:
 
-- Weather row: soft blue, uses live weather values only when the existing weather hook has ready non-fallback data. Otherwise it uses `เปิดดูพยากรณ์เพื่อวางแผนวันนี้`.
-- Farm work row: soft yellow for normal planning advice. It switches to soft red only when the available weather values cross high-risk thresholds such as high rain chance, high heat, or strong wind.
-- Hero status badge: soft red when Home needs the user to check the Weather page for usable forecast values, or when weather values cross high-risk thresholds.
-- Price row: soft orange, uses `ข้าว / มัน / ยาง / ปาล์ม กำลังเตรียมเชื่อมข้อมูลจริง` without numeric prices, trend arrows, or charts.
+- Compact weather strip: shows location, weather summary, temperature, rain chance, and a `LIVE` badge only when ready non-fallback weather mode is available. Otherwise it shows `อัปเดตล่าสุด`.
+- Separate `ราคาวันนี้` card: shows clearly labeled sample/source-pending crop rows for ข้าวเปลือกหอมมะลิ, ยางพารา, มันสำปะหลัง, and อ้อย.
+- Latest video card: shows a safe channel-video placeholder without fake views or engagement.
 
-Future price/chart readiness is documented separately in `docs/ux/HOME_DAILY_INSIGHT_HERO_M116_8.md`. No fake chart or fake price UI is implemented in M116.8.
+Future price/chart readiness is documented separately in `docs/ux/HOME_HERO_PRICE_VIDEO_POLISH_M116_9.md`. No real-price claim, fake chart, or fake engagement is implemented in M116.9.
 
 ## Restart Verification Notes
 

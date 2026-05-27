@@ -3,14 +3,13 @@ import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useWeather } from '@/hooks/useWeather';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 import {
-  AlertTriangle,
   Bell,
   BookOpenCheck,
   Bot,
   Calculator,
   ChevronRight,
-  CloudRain,
   CloudSun,
+  PlaySquare,
   Sprout,
   Tags,
   UserRound,
@@ -64,7 +63,43 @@ const quickActions = [
 ] as const;
 
 const priceCategories = ['ข้าว', 'มันสำปะหลัง', 'ยางพารา', 'ปาล์มน้ำมัน'] as const;
-const dailyInsightPriceCopy = 'ข้าว / มัน / ยาง / ปาล์ม กำลังเตรียมเชื่อมข้อมูลจริง';
+const priceSnapshotItems = [
+  {
+    change: '1.2%',
+    direction: 'up',
+    dotTone: 'bg-emerald-500',
+    name: 'ข้าวเปลือกหอมมะลิ',
+    value: '12,800',
+  },
+  {
+    change: '0.8%',
+    direction: 'down',
+    dotTone: 'bg-rose-500',
+    name: 'ยางพารา',
+    value: '58.50',
+  },
+  {
+    change: '2.1%',
+    direction: 'up',
+    dotTone: 'bg-orange-500',
+    name: 'มันสำปะหลัง',
+    value: '3.20',
+  },
+  {
+    change: '0.6%',
+    direction: 'up',
+    dotTone: 'bg-yellow-500',
+    name: 'อ้อย',
+    value: '1,120',
+  },
+] as const;
+
+const latestVideoPreview = {
+  ctaHref: '/app/youtube',
+  description: 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง',
+  subtitle: 'วิดีโอจากช่อง KasetHub',
+  title: 'วิดีโอล่าสุดจากช่อง',
+} as const;
 
 function getWeatherSummary(input: { rainChancePercent: number; temperatureC: number; windKph: number }) {
   if (input.rainChancePercent >= 70) return 'ฝนมีโอกาสสูง วางแผนงานกลางแจ้งอย่างระวัง';
@@ -73,29 +108,14 @@ function getWeatherSummary(input: { rainChancePercent: number; temperatureC: num
   return 'เหมาะสำหรับเช็กงานในไร่ก่อนเริ่มวัน';
 }
 
-function getWeatherInsightText(input: {
+function getWeatherStripSummary(input: {
   conditionLabel?: string;
-  hasWeatherValues: boolean;
+  hasWeatherDisplayValues: boolean;
   rainChancePercent: number;
-  temperatureC: number;
 }) {
-  if (!input.hasWeatherValues) return 'เปิดดูพยากรณ์เพื่อวางแผนวันนี้';
+  if (!input.hasWeatherDisplayValues) return 'เปิดดูพยากรณ์เพื่อวางแผนวันนี้';
 
-  const conditionLabel = input.temperatureC >= 35 ? 'ร้อน' : (input.conditionLabel ?? 'อากาศวันนี้');
-  return `${conditionLabel} มีโอกาสฝน ${input.rainChancePercent}%`;
-}
-
-function getFarmWorkInsight(input: {
-  hasWeatherValues: boolean;
-  rainChancePercent: number;
-  temperatureC: number;
-  windKph: number;
-}) {
-  if (!input.hasWeatherValues) return 'เช็กฝนก่อนพ่นยา/ให้น้ำ';
-  if (input.rainChancePercent >= 70) return 'เลี่ยงพ่นยาและงานกลางแจ้งหนัก';
-  if (input.windKph >= 24) return 'ลมแรง เช็กก่อนพ่นยา';
-  if (input.temperatureC >= 35) return 'จัดน้ำและพักงานหนักช่วงร้อน';
-  return 'เช็กฝนก่อนพ่นยา/ให้น้ำ';
+  return `${input.conditionLabel ?? 'อากาศวันนี้'} · โอกาสฝน ${input.rainChancePercent}%`;
 }
 
 export function AppHomePage() {
@@ -107,57 +127,14 @@ export function AppHomePage() {
   const temperatureC = Math.round(currentWeather?.temperatureC ?? todayWeather.maxTempC);
   const windKph = Math.round(currentWeather?.windKph ?? todayWeather.windKph);
   const rainChancePercent = todayWeather.rainChancePercent;
-  const hasLiveWeatherSummary = forecast.apiStatus === 'ready' && !forecast.isFallback;
-  const hasWeatherValues =
-    hasLiveWeatherSummary && Number.isFinite(temperatureC) && Number.isFinite(rainChancePercent);
-  const hasHighRiskWeather =
-    hasWeatherValues && (rainChancePercent >= 70 || temperatureC >= 35 || windKph >= 24);
-  const needsWeatherCheck = !hasWeatherValues;
+  const hasLiveWeatherMode = forecast.apiStatus === 'ready' && !forecast.isFallback;
+  const hasWeatherDisplayValues = Number.isFinite(temperatureC) && Number.isFinite(rainChancePercent);
   const weatherSummary = getWeatherSummary({ rainChancePercent, temperatureC, windKph });
-  const weatherInsightText = getWeatherInsightText({
+  const weatherStripSummary = getWeatherStripSummary({
     conditionLabel: currentWeather?.conditionLabel ?? todayWeather.conditionLabel,
-    hasWeatherValues,
+    hasWeatherDisplayValues,
     rainChancePercent,
-    temperatureC,
   });
-  const farmWorkInsight = getFarmWorkInsight({
-    hasWeatherValues,
-    rainChancePercent,
-    temperatureC,
-    windKph,
-  });
-  const WeatherInsightIcon = hasWeatherValues && rainChancePercent >= 50 ? CloudRain : CloudSun;
-  const FarmInsightIcon = hasHighRiskWeather ? AlertTriangle : Sprout;
-  const heroStatusLabel = hasHighRiskWeather ? 'ควรระวัง' : needsWeatherCheck ? 'ตรวจพยากรณ์' : 'พร้อมวางแผน';
-  const heroStatusTone =
-    hasHighRiskWeather || needsWeatherCheck ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800';
-  const farmInsightTone = hasHighRiskWeather
-    ? 'bg-red-50 text-red-950 ring-red-200'
-    : 'bg-yellow-50 text-yellow-950 ring-yellow-200';
-  const farmInsightIconTone = hasHighRiskWeather ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700';
-  const dailyInsights = [
-    {
-      icon: WeatherInsightIcon,
-      iconTone: 'bg-sky-100 text-sky-700',
-      label: 'อากาศ',
-      text: weatherInsightText,
-      tone: 'bg-sky-50 text-sky-950 ring-sky-200',
-    },
-    {
-      icon: FarmInsightIcon,
-      iconTone: farmInsightIconTone,
-      label: 'งานเกษตร',
-      text: farmWorkInsight,
-      tone: farmInsightTone,
-    },
-    {
-      icon: Tags,
-      iconTone: 'bg-orange-100 text-orange-700',
-      label: 'ราคา',
-      text: dailyInsightPriceCopy,
-      tone: 'bg-orange-50 text-orange-950 ring-orange-200',
-    },
-  ] as const;
 
   return (
     <div className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-kaset-mist/70">
@@ -188,86 +165,131 @@ export function AppHomePage() {
           </div>
         </header>
 
-        <section aria-labelledby="home-weather-title">
-          <Card className="overflow-hidden bg-kaset-deep text-white">
-            <div className="grid gap-4 p-4">
-              <div className="flex items-start gap-3">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white/95 text-kaset-deep">
-                  <CloudSun aria-hidden="true" className="h-6 w-6" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold leading-6 text-emerald-50/85">พื้นที่ล่าสุด</p>
-                  <h2 id="home-weather-title" className="text-xl font-extrabold leading-7">
-                    สภาพอากาศวันนี้
-                  </h2>
-                  <p className="mt-1 break-words text-sm font-semibold leading-6 text-emerald-50/90">
-                    {forecast.location.label}
-                  </p>
-                </div>
-              </div>
-
-              {hasWeatherValues ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-white/12 p-3">
-                    <p className="text-xs font-bold leading-5 text-emerald-50/80">อุณหภูมิ</p>
-                    <p className="text-2xl font-extrabold leading-8">{temperatureC}°C</p>
+        <section aria-labelledby="home-weather-title" className="grid gap-3">
+          <Card className="overflow-hidden border border-sky-100 bg-white p-3 shadow-card">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-100 text-sky-800">
+                <CloudSun aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="break-words text-xs font-extrabold leading-5 text-sky-800">
+                      {forecast.location.label}
+                    </p>
+                    <h2 id="home-weather-title" className="text-base font-extrabold leading-6 text-kaset-ink">
+                      สภาพอากาศวันนี้
+                    </h2>
                   </div>
-                  <div className="rounded-lg bg-white/12 p-3">
-                    <p className="text-xs font-bold leading-5 text-emerald-50/80">โอกาสฝน</p>
-                    <p className="text-2xl font-extrabold leading-8">{rainChancePercent}%</p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm font-semibold leading-6 text-emerald-50/90">
-                  เปิดหน้าสภาพอากาศเพื่อดูฝน อุณหภูมิ และความเสี่ยงก่อนวางแผนงานวันนี้
-                </p>
-              )}
-
-              <div className="rounded-xl bg-white p-3 text-kaset-ink">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-base font-extrabold leading-6">ข้อมูลวันนี้</h3>
-                  <span className={`rounded-lg px-2.5 py-1 text-xs font-extrabold ${heroStatusTone}`}>
-                    {heroStatusLabel}
+                  <span
+                    className={`inline-flex min-h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold ${
+                      hasLiveWeatherMode ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {hasLiveWeatherMode ? <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> : null}
+                    {hasLiveWeatherMode ? 'LIVE' : 'อัปเดตล่าสุด'}
                   </span>
                 </div>
-                <div className="mt-3 grid gap-2">
-                  {dailyInsights.map((insight) => {
-                    const Icon = insight.icon;
-
-                    return (
-                      <div className={`flex items-start gap-2 rounded-lg p-2.5 ring-1 ${insight.tone}`} key={insight.label}>
-                        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${insight.iconTone}`}>
-                          <Icon aria-hidden="true" className="h-4 w-4" />
-                        </span>
-                        <div className="min-w-0">
-                          <p className="text-xs font-extrabold leading-5">{insight.label}</p>
-                          <p className="break-words text-sm font-semibold leading-5">{insight.text}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <p className="mt-2 break-words text-sm font-semibold leading-5 text-slate-600">
+                  {weatherStripSummary}
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-sky-50 p-2.5">
+                    <p className="text-xs font-extrabold leading-5 text-sky-800">อุณหภูมิ</p>
+                    <p className="text-xl font-extrabold leading-7 text-kaset-ink">
+                      {hasWeatherDisplayValues ? `${temperatureC}°C` : '--'}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-blue-50 p-2.5">
+                    <p className="text-xs font-extrabold leading-5 text-blue-800">โอกาสฝน</p>
+                    <p className="text-xl font-extrabold leading-7 text-kaset-ink">
+                      {hasWeatherDisplayValues ? `${rainChancePercent}%` : '--'}
+                    </p>
+                  </div>
                 </div>
               </div>
+            </div>
+          </Card>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="min-w-0 flex-1 text-sm font-semibold leading-6 text-emerald-50/90">
-                  {hasWeatherValues ? weatherSummary : 'ดูข้อมูลอากาศที่พร้อมใช้งานสำหรับพื้นที่ของคุณ'}
+          <Card className="overflow-hidden border border-orange-100 bg-white p-3 shadow-card">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 id="home-price-snapshot-title" className="text-base font-extrabold leading-6 text-kaset-ink">
+                  ราคาวันนี้
+                </h2>
+                <p className="mt-0.5 text-xs font-semibold leading-5 text-slate-500">
+                  ข้อมูลตัวอย่าง · รอเชื่อมแหล่งราคาจริง
                 </p>
               </div>
+              <span className="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-extrabold text-orange-800">
+                ยังไม่ใช่ราคาจริง
+              </span>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {priceSnapshotItems.map((item) => {
+                const isUp = item.direction === 'up';
 
-              <div className="grid grid-cols-2 gap-2">
+                return (
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg bg-orange-50/70 px-2.5 py-2" key={item.name}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${item.dotTone}`} />
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-extrabold leading-5 text-kaset-ink">{item.name}</p>
+                      <p className="text-xs font-semibold leading-5 text-slate-500">ตัวอย่างราคา</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-extrabold leading-5 text-kaset-ink">{item.value}</p>
+                      <p className={`text-xs font-extrabold leading-5 ${isUp ? 'text-emerald-700' : 'text-red-700'}`}>
+                        {isUp ? '▲' : '▼'} {item.change}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-3 rounded-lg bg-yellow-50 px-3 py-2 text-xs font-semibold leading-5 text-yellow-900">
+              โครงสร้างนี้เตรียมไว้สำหรับแหล่งราคาจริงและกราฟเล็กในอนาคต
+            </p>
+          </Card>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+              to="/app/weather"
+            >
+              ดูพยากรณ์
+              <ChevronRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-300 px-3 text-sm font-extrabold text-kaset-ink"
+              to="/app/prices"
+            >
+              เช็กราคา
+              <ChevronRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <p className="sr-only">{weatherSummary}</p>
+        </section>
+
+        <section aria-labelledby="home-video-title">
+          <Card className="overflow-hidden p-0">
+            <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 p-3">
+              <div className="grid min-h-[116px] place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
+                <PlaySquare aria-hidden="true" className="h-10 w-10" />
+              </div>
+              <div className="min-w-0 self-center">
+                <p className="text-xs font-extrabold leading-5 text-sky-800">{latestVideoPreview.subtitle}</p>
+                <h2 id="home-video-title" className="break-words text-base font-extrabold leading-6 text-kaset-ink">
+                  {latestVideoPreview.title}
+                </h2>
+                <p className="mt-1 break-words text-sm font-semibold leading-5 text-slate-600">
+                  {latestVideoPreview.description}
+                </p>
                 <Link
-                  className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-white px-3 text-sm font-extrabold text-kaset-deep"
-                  to="/app/weather"
+                  className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+                  to={latestVideoPreview.ctaHref}
                 >
-                  ดูพยากรณ์
-                  <ChevronRight aria-hidden="true" className="h-4 w-4" />
-                </Link>
-                <Link
-                  className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-300 px-3 text-sm font-extrabold text-kaset-ink"
-                  to="/app/prices"
-                >
-                  เช็กราคา
+                  ดูวิดีโอ
                   <ChevronRight aria-hidden="true" className="h-4 w-4" />
                 </Link>
               </div>

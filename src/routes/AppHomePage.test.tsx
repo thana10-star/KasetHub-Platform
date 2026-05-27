@@ -15,25 +15,53 @@ function renderHome() {
 }
 
 function visibleText(html: string) {
-  return html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-describe('M116.8 home dashboard redesign', () => {
-  test('renders a weather and daily insight hero near the top', () => {
+describe('M116.9 home dashboard polish', () => {
+  test('renders a compact weather panel near the top without fake live status', () => {
     const html = renderHome();
     const headerIndex = html.indexOf('KasetHub');
     const weatherIndex = html.indexOf('สภาพอากาศวันนี้');
 
     expect(headerIndex).toBeGreaterThan(-1);
     expect(weatherIndex).toBeGreaterThan(headerIndex);
-    expect(html).toContain('พื้นที่ล่าสุด');
-    expect(html).toContain('ข้อมูลวันนี้');
-    expect(html).toContain('อากาศ');
-    expect(html).toContain('งานเกษตร');
-    expect(html).toContain('ราคา');
+    expect(html).toContain('กรุงเทพฯ');
+    expect(html).toContain('อัปเดตล่าสุด');
+    expect(html).toContain('อุณหภูมิ');
+    expect(html).toContain('โอกาสฝน');
     expect(html).toContain('ดูพยากรณ์');
-    expect(html).toContain('เช็กราคา');
     expect(html).toContain('/app/weather');
+    expect(html).not.toContain('LIVE');
+    expect(html).not.toContain('งานเกษตร');
+  });
+
+  test('renders a clearly labeled source-pending crop price snapshot', () => {
+    const html = renderHome();
+    const text = visibleText(html);
+
+    expect(text).toContain('ราคาวันนี้');
+    expect(text).toContain('ข้อมูลตัวอย่าง');
+    expect(text).toContain('รอเชื่อมแหล่งราคาจริง');
+    expect(text).toContain('ยังไม่ใช่ราคาจริง');
+    expect(text).toContain('ข้าวเปลือกหอมมะลิ');
+    expect(text).toContain('12,800');
+    expect(text).toContain('▲ 1.2%');
+    expect(text).toContain('ยางพารา');
+    expect(text).toContain('58.50');
+    expect(text).toContain('▼ 0.8%');
+    expect(text).toContain('มันสำปะหลัง');
+    expect(text).toContain('3.20');
+    expect(text).toContain('▲ 2.1%');
+    expect(text).toContain('อ้อย');
+    expect(text).toContain('1,120');
+    expect(text).toContain('▲ 0.6%');
+    expect(html).toContain('เช็กราคา');
     expect(html).toContain('/app/prices');
   });
 
@@ -46,6 +74,19 @@ describe('M116.8 home dashboard redesign', () => {
     expect(html).toContain('เครื่องมือเกษตร');
     expect(html).toContain('ฟาร์มของฉัน');
     expect(html).toContain('ความรู้/บทความ');
+  });
+
+  test('renders latest channel video placeholder without fake engagement', () => {
+    const html = renderHome();
+    const text = visibleText(html);
+
+    expect(text).toContain('วิดีโอล่าสุดจากช่อง');
+    expect(text).toContain('กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง');
+    expect(text).toContain('ดูวิดีโอ');
+    expect(html).toContain('/app/youtube');
+    expect(text).not.toContain('24K');
+    expect(text).not.toContain('ยอดดู');
+    expect(text).not.toContain('views');
   });
 
   test('keeps all primary home links available', () => {
@@ -61,24 +102,18 @@ describe('M116.8 home dashboard redesign', () => {
     expect(html).toContain('/app/profile');
   });
 
-  test('renders price preview without fake price numbers', () => {
+  test('keeps lower price preview source-pending and avoids unlabeled real-price claims', () => {
     const html = renderHome();
     const text = visibleText(html);
 
     expect(text).toContain('กำลังเตรียมเชื่อมแหล่งข้อมูลราคาจริง');
-    expect(text).toContain('ข้าว / มัน / ยาง / ปาล์ม กำลังเตรียมเชื่อมข้อมูลจริง');
     expect(text).toContain('ข้าว');
     expect(text).toContain('มันสำปะหลัง');
     expect(text).toContain('ยางพารา');
     expect(text).toContain('ปาล์มน้ำมัน');
-    expect(text).not.toContain('15,150');
-    expect(text).not.toContain('3.15');
     expect(text).not.toContain('บาท/กก.');
     expect(text).not.toContain('ราคาล่าสุด');
-    expect(text).not.toContain('↗');
-    expect(text).not.toContain('↘');
-    expect(text).not.toContain('▲');
-    expect(text).not.toContain('▼');
+    expect(text).not.toContain('อัปเดต 10 นาทีที่แล้ว');
   });
 
   test('renders Community preview without fake engagement', () => {
