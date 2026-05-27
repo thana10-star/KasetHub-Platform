@@ -1,4 +1,9 @@
-import type { CommunityComment, CommunityPost } from '@/services/community/community.types';
+import type { CommunityComment, CommunityPost, CommunityReadiness } from '@/services/community/community.types';
+
+export const communityCompactActionButtonClass = 'min-h-9 gap-1.5 px-3 text-xs';
+export const communityCompactActionIconClass = 'h-3.5 w-3.5';
+export const communityWriteDisabledCopy = 'ระบบเขียนโพสต์จะเปิดหลังตั้งค่าบัญชี';
+export const communityDisabledImageCopy = 'แนบรูปได้เมื่อเปิดเขียนโพสต์';
 
 type TextInputEventLike = {
   target?: unknown;
@@ -52,6 +57,63 @@ export function canUseTopLevelCommunityCommentSubmit(
   isSubmitting = false,
 ) {
   return Boolean(canWrite && postId && !isSubmitting);
+}
+
+export function formatCommunityTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('th-TH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
+export function getCommunityComposerStatusLabel(readiness: CommunityReadiness) {
+  if (readiness.canWrite) return 'พร้อมใช้งาน';
+  if (readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser) return 'เข้าสู่ระบบก่อน';
+  return 'ยังไม่เปิดเขียนโพสต์';
+}
+
+export function getCommunityComposerBadgeTone(readiness: CommunityReadiness) {
+  if (readiness.canWrite) return 'green' as const;
+  if (readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser) return 'sky' as const;
+  return 'gold' as const;
+}
+
+export function getCommunityWriteStatusCopy(readiness: CommunityReadiness) {
+  if (readiness.canWrite) {
+    return 'พร้อมเขียนโพสต์ คอมเมนต์ กดถูกใจ และรายงานได้แล้ว';
+  }
+
+  if (readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser) {
+    return 'เข้าสู่ระบบเพื่อเขียนโพสต์';
+  }
+
+  return `ตอนนี้อ่านและแชร์ได้ก่อน ${communityWriteDisabledCopy}`;
+}
+
+export function getCommunityComposerSubmitLabel(readiness: CommunityReadiness, isSubmitting = false) {
+  if (isSubmitting) return 'กำลังส่ง';
+  if (readiness.canWrite) return 'ส่งโพสต์';
+  if (readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser) {
+    return 'เข้าสู่ระบบเพื่อเขียนโพสต์';
+  }
+
+  return 'เปิดใช้งานหลังตั้งค่าบัญชี';
+}
+
+export function getCommunityDisabledInputCopy(readiness: CommunityReadiness) {
+  if (readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser) {
+    return 'เข้าสู่ระบบเพื่อเขียนโพสต์';
+  }
+
+  return communityWriteDisabledCopy;
 }
 
 export function applyCommunityLikeUiState(posts: CommunityPost[], postId: string, nextLiked: boolean) {

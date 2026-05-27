@@ -8,8 +8,8 @@ import {
   Link as LinkIcon,
   LogIn,
   MessageCircle,
-  MoreHorizontal,
   RefreshCw,
+  Reply,
   Send,
   Share2,
   ShieldCheck,
@@ -30,11 +30,20 @@ import {
   applyCommunityLikeUiState,
   applyCommunityCommentLikeUiState,
   canUseTopLevelCommunityCommentSubmit,
+  communityCompactActionButtonClass,
+  communityCompactActionIconClass,
+  communityDisabledImageCopy,
   getCommunityCommentSubmitText,
+  getCommunityComposerBadgeTone,
+  getCommunityComposerStatusLabel,
+  getCommunityComposerSubmitLabel,
+  getCommunityDisabledInputCopy,
   getCommunityRepliesForComment,
   getCommunityTextInputValue,
+  getCommunityWriteStatusCopy,
   getSafeCommunityComments,
   getTopLevelCommunityComments,
+  formatCommunityTime,
   reconcileCommunityCommentsAfterLikeRefresh,
   reconcileCommunityPostsAfterLikeRefresh,
   updateCommunityCommentDraft,
@@ -46,14 +55,12 @@ import {
   type SupabaseAuthSessionSnapshot,
 } from '@/services/auth/supabase-auth-session';
 import {
-  communityReadOnlyGateMessage,
   communitySignInGateMessage,
   createCommunityService,
   getCommunityReadiness,
 } from '@/services/community/community-service';
 import {
   communityImagePolicy,
-  communityStorageGateMessage,
   validateCommunityImageFile,
 } from '@/services/community/community-storage-service';
 import {
@@ -80,6 +87,9 @@ const successReportMessage = 'ขอบคุณที่แจ้ง ทีม�
 type CommunityPageProps = {
   readinessOverride?: CommunityReadiness;
   serviceOverride?: CommunityService;
+  initialPosts?: CommunityPost[];
+  initialCommentsByPost?: Record<string, CommunityComment[]>;
+  initialOpenCommentsByPost?: Record<string, boolean>;
 };
 
 function getCommunityShareUrl() {
@@ -99,23 +109,17 @@ function getCommunityImagePublicUrl(imagePath?: string) {
   return `${publicEnv.supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/${communityImagePolicy.bucketName}/${encodedPath}`;
 }
 
-function formatCommunityTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat('th-TH', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date);
-}
-
 function getActionMessage(result: CommunityActionResult, fallback: string) {
   return result.ok ? fallback : result.message;
 }
 
-export function CommunityPage({ readinessOverride, serviceOverride }: CommunityPageProps = {}) {
+export function CommunityPage({
+  readinessOverride,
+  serviceOverride,
+  initialPosts = [],
+  initialCommentsByPost = {},
+  initialOpenCommentsByPost = {},
+}: CommunityPageProps = {}) {
   const baseReadiness = useMemo(() => readinessOverride ?? getCommunityReadiness(), [readinessOverride]);
   const [authSession, setAuthSession] = useState<SupabaseAuthSessionSnapshot>(
     () => getCachedSupabaseAuthSessionSnapshot(),
@@ -149,9 +153,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     [readiness, serviceOverride],
   );
   const canWrite = readiness.canWrite;
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [commentsByPost, setCommentsByPost] = useState<Record<string, CommunityComment[]>>({});
-  const [openCommentsByPost, setOpenCommentsByPost] = useState<Record<string, boolean>>({});
+  const [posts, setPosts] = useState<CommunityPost[]>(() => initialPosts);
+  const [commentsByPost, setCommentsByPost] = useState<Record<string, CommunityComment[]>>(
+    () => initialCommentsByPost,
+  );
+  const [openCommentsByPost, setOpenCommentsByPost] = useState<Record<string, boolean>>(
+    () => initialOpenCommentsByPost,
+  );
   const [commentTextByPost, setCommentTextByPost] = useState<Record<string, string>>({});
   const [commentStatusByPost, setCommentStatusByPost] = useState<Record<string, string>>({});
   const [submittingCommentByPost, setSubmittingCommentByPost] = useState<Record<string, boolean>>({});
@@ -214,11 +222,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   const shareUrl = getCommunityShareUrl();
   const encodedShareText = encodeURIComponent(`${shareText} ${shareUrl}`);
   const encodedShareUrl = encodeURIComponent(shareUrl);
-  const gateCopy = canWrite
-    ? 'โหมดทดสอบ staging เปิดเขียนโพสต์แล้ว ใช้เฉพาะบัญชีทดสอบและฐานข้อมูล staging'
+  const writeStatusCopy = getCommunityWriteStatusCopy(readiness);
+  const writeStatusTitle = canWrite
+    ? 'พร้อมเขียนโพสต์'
     : readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser
-      ? communitySignInGateMessage
-      : `${readiness.writeGateMessage} ${communityReadOnlyGateMessage}`;
+      ? 'เข้าสู่ระบบเพื่อเขียนโพสต์'
+      : 'ยังไม่เปิดเขียนโพสต์';
+  const disabledInputCopy = getCommunityDisabledInputCopy(readiness);
 
   async function handleShare() {
     const payload = {
@@ -269,7 +279,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
   async function handleCreatePost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canWrite) {
-      setActionStatus(gateCopy);
+      setActionStatus(writeStatusCopy);
       return;
     }
 
@@ -346,8 +356,8 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     if (!canWrite) {
-      setActionStatus(gateCopy);
-      setCommentStatusByPost((current) => ({ ...current, [postId]: gateCopy }));
+      setActionStatus(writeStatusCopy);
+      setCommentStatusByPost((current) => ({ ...current, [postId]: writeStatusCopy }));
       return;
     }
 
@@ -409,7 +419,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     if (!canWrite) {
-      setActionStatus(gateCopy);
+      setActionStatus(writeStatusCopy);
       return;
     }
 
@@ -467,7 +477,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       const result = post.likedByCurrentUser
         ? await service.unlikePost(post.id)
         : await service.likePost(post.id);
-      setActionStatus(getActionMessage(result, post.likedByCurrentUser ? 'ยกเลิกไลก์แล้ว' : 'กดไลก์แล้ว'));
+      setActionStatus(getActionMessage(result, post.likedByCurrentUser ? 'ยกเลิกถูกใจแล้ว' : 'ถูกใจแล้ว'));
       if (result.ok) {
         setPosts((currentPosts) => applyCommunityLikeUiState(currentPosts, post.id, nextLiked));
         void fetchPosts().then((refreshedPosts) => {
@@ -475,7 +485,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
             reconcileCommunityPostsAfterLikeRefresh(currentPosts, refreshedPosts, post.id, nextLiked),
           );
         }).catch(() => {
-          setActionStatus(nextLiked ? 'กดไลก์แล้ว' : 'ยกเลิกไลก์แล้ว');
+          setActionStatus(nextLiked ? 'ถูกใจแล้ว' : 'ยกเลิกถูกใจแล้ว');
         });
       }
     } catch {
@@ -523,7 +533,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
     }
 
     if (!canWrite) {
-      setActionStatus(gateCopy);
+      setActionStatus(writeStatusCopy);
       return;
     }
 
@@ -610,9 +620,9 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
       <div className="grid gap-5 px-5 pb-24">
         <NoticeBox
           tone={canWrite ? 'success' : 'info'}
-          title={canWrite ? 'เปิดทดสอบเขียนโพสต์เฉพาะ staging' : 'ชุมชนพร้อมเชื่อมต่อฐานข้อมูลแล้ว เหลือทดสอบบัญชีและสิทธิ์ก่อนเปิดโพสต์จริง'}
+          title={writeStatusTitle}
         >
-          {gateCopy}
+          {writeStatusCopy}
         </NoticeBox>
 
         {readiness.writesFeatureFlagEnabled && !readiness.hasAuthenticatedUser ? (
@@ -626,7 +636,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                   เข้าสู่ระบบก่อนใช้งานชุมชน
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  เข้าสู่ระบบเพื่อโพสต์ คอมเมนต์ กดไลก์ หรือรายงานเนื้อหา
+                  เข้าสู่ระบบเพื่อเขียนโพสต์ คอมเมนต์ กดถูกใจ หรือรายงานเนื้อหา
                 </p>
                 <Link
                   className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-full bg-kaset-deep px-5 text-[15px] font-bold leading-5 text-white"
@@ -649,7 +659,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
               <div className="min-w-0">
                 <p className="font-extrabold text-kaset-ink">เข้าสู่ระบบแล้ว</p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {authSession.email ?? 'พร้อมทดสอบโพสต์ คอมเมนต์ และกดไลก์ในชุมชน'}
+                  {authSession.email ?? 'พร้อมเขียนโพสต์ คอมเมนต์ และกดถูกใจในชุมชน'}
                 </p>
               </div>
             </div>
@@ -667,15 +677,15 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                   <h2 id="community-composer-title" className="text-lg font-extrabold leading-7 text-kaset-ink">
                     เขียนโพสต์
                   </h2>
-                  <Badge tone={canWrite ? 'green' : 'gold'}>
-                    {canWrite ? 'ทดสอบ staging' : 'อ่านและแชร์ได้ก่อน'}
+                  <Badge tone={getCommunityComposerBadgeTone(readiness)}>
+                    {getCommunityComposerStatusLabel(readiness)}
                   </Badge>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   เล่าเรื่องฟาร์ม ถามปัญหาพืช หรือแชร์ประสบการณ์
                 </p>
                 <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
-                  {canWrite ? 'เชื่อมต่อ staging ด้วย anon client และใช้ RLS เป็นตัวคุมสิทธิ์' : readiness.writeGateMessage}
+                  {canWrite ? 'เลือกหมวดหมู่ แนบรูปได้ 1 รูป แล้วส่งโพสต์' : writeStatusCopy}
                 </p>
               </div>
             </div>
@@ -688,7 +698,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
               disabled={!canWrite}
               id="community-post-text"
               onChange={(event) => setPostText(event.currentTarget.value)}
-              placeholder={canWrite ? 'เล่าเรื่องฟาร์ม ถามปัญหาพืช หรือแชร์ประสบการณ์' : readiness.writeGateMessage}
+              placeholder={canWrite ? 'เล่าเรื่องฟาร์ม ถามปัญหาพืช หรือแชร์ประสบการณ์' : disabledInputCopy}
               value={postText}
             />
 
@@ -722,7 +732,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                 htmlFor="community-image-input"
               >
                 <Camera aria-hidden="true" className="h-4 w-4" />
-                {canWrite ? 'แนบรูป 1 รูป' : communityStorageGateMessage}
+                {canWrite ? 'แนบรูป 1 รูป' : communityDisabledImageCopy}
               </label>
               <input
                 accept={communityImagePolicy.acceptedMimeTypes.join(',')}
@@ -734,7 +744,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
               />
               <Button disabled={!canWrite || isSubmittingPost} type="submit">
                 <Send aria-hidden="true" className="h-4 w-4" />
-                {isSubmittingPost ? 'กำลังโพสต์' : canWrite ? 'โพสต์' : 'เปิดเขียนหลังตรวจความปลอดภัย'}
+                {getCommunityComposerSubmitLabel(readiness, isSubmittingPost)}
               </Button>
             </div>
 
@@ -774,23 +784,21 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
             </div>
           </div>
 
-          <div className="-mx-5 overflow-x-auto px-5">
-            <div className="flex min-w-max gap-2">
-              {(['ทั้งหมด', ...communityPostCategories] as const).map((category) => (
-                <button
-                  className={
-                    activeFilter === category
-                      ? 'min-h-10 rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white'
-                      : 'min-h-10 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10'
-                  }
-                  key={category}
-                  onClick={() => setActiveFilter(category)}
-                  type="button"
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {(['ทั้งหมด', ...communityPostCategories] as const).map((category) => (
+              <button
+                className={
+                  activeFilter === category
+                    ? 'min-h-10 rounded-full bg-kaset-deep px-4 text-sm font-extrabold text-white'
+                    : 'min-h-10 rounded-full bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/10'
+                }
+                key={category}
+                onClick={() => setActiveFilter(category)}
+                type="button"
+              >
+                {category}
+              </button>
+            ))}
           </div>
 
           {isLoadingFeed ? (
@@ -806,7 +814,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
               </span>
               <h3 className="mt-3 text-lg font-extrabold text-kaset-ink">ยังไม่มีโพสต์ชุมชนจริง</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                เมื่อ staging เปิด flag และมีโพสต์ published จริง หน้านี้จะแสดงข้อมูลจากฐานข้อมูลเท่านั้น ไม่ใช้ชื่อคน ไลก์ หรือคอมเมนต์ปลอม
+                เมื่อมีโพสต์จริง หน้านี้จะแสดงข้อมูลจากฐานข้อมูลเท่านั้น ไม่ใช้ชื่อคน ถูกใจ หรือคอมเมนต์ปลอม
               </p>
             </Card>
           ) : null}
@@ -828,13 +836,13 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                       <p className="text-xs font-semibold text-slate-500">{formatCommunityTime(post.createdAt)}</p>
                     </div>
                     {post.ownedByCurrentUser ? (
-                      <div className="flex gap-2">
-                        <Button className="min-h-10 px-3 text-sm" onClick={() => handleHidePost(post.id)} variant="secondary">
-                          <EyeOff aria-hidden="true" className="h-4 w-4" />
+                      <div className="flex flex-wrap gap-2">
+                        <Button className={communityCompactActionButtonClass} onClick={() => handleHidePost(post.id)} variant="secondary">
+                          <EyeOff aria-hidden="true" className={communityCompactActionIconClass} />
                           ซ่อน
                         </Button>
-                        <Button className="min-h-10 px-3 text-sm" onClick={() => handleDeletePost(post.id)} variant="secondary">
-                          <Trash2 aria-hidden="true" className="h-4 w-4" />
+                        <Button className={communityCompactActionButtonClass} onClick={() => handleDeletePost(post.id)} variant="secondary">
+                          <Trash2 aria-hidden="true" className={communityCompactActionIconClass} />
                           ลบ
                         </Button>
                       </div>
@@ -847,7 +855,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                     imageUrl ? (
                       <img
                         alt="รูปประกอบโพสต์ชุมชน"
-                        className="max-h-80 w-full rounded-lg object-cover"
+                        className="max-h-64 w-full rounded-lg object-cover sm:max-h-80"
                         src={imageUrl}
                       />
                     ) : (
@@ -857,51 +865,67 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                     )
                   ) : null}
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={!canWrite || !post.id} onClick={() => handleLike(post)} variant="secondary">
-                      <Heart aria-hidden="true" className="h-4 w-4" />
-                      {post.likedByCurrentUser ? 'เลิกไลก์' : 'Like'} {post.likeCount}
+                  <div className="flex flex-wrap gap-1.5" data-testid="community-post-actions">
+                    <Button
+                      className={communityCompactActionButtonClass}
+                      disabled={!canWrite || !post.id}
+                      onClick={() => handleLike(post)}
+                      variant={post.likedByCurrentUser ? 'soft' : 'secondary'}
+                    >
+                      <Heart
+                        aria-hidden="true"
+                        className={post.likedByCurrentUser ? `${communityCompactActionIconClass} fill-current` : communityCompactActionIconClass}
+                      />
+                      ถูกใจ {post.likeCount ?? 0}
                     </Button>
-                    <Button disabled={!post.id} onClick={() => handleToggleComments(post.id)} variant="secondary">
-                      <MessageCircle aria-hidden="true" className="h-4 w-4" />
-                      คอมเมนต์ {post.commentCount}
+                    <Button
+                      className={communityCompactActionButtonClass}
+                      disabled={!post.id}
+                      onClick={() => handleToggleComments(post.id)}
+                      variant="secondary"
+                    >
+                      <MessageCircle aria-hidden="true" className={communityCompactActionIconClass} />
+                      คอมเมนต์ {post.commentCount ?? 0}
                     </Button>
-                    <Button onClick={handleShare} variant="secondary">
-                      <Share2 aria-hidden="true" className="h-4 w-4" />
+                    <Button className={communityCompactActionButtonClass} onClick={handleShare} variant="secondary">
+                      <Share2 aria-hidden="true" className={communityCompactActionIconClass} />
                       แชร์
                     </Button>
-                    <Button disabled={!canWrite || !post.id} onClick={() => handleReportPost(post.id)} variant="secondary">
-                      <Flag aria-hidden="true" className="h-4 w-4" />
+                    <Button
+                      className={communityCompactActionButtonClass}
+                      disabled={!canWrite || !post.id}
+                      onClick={() => handleReportPost(post.id)}
+                      variant="secondary"
+                    >
+                      <Flag aria-hidden="true" className={communityCompactActionIconClass} />
                       รายงาน
-                    </Button>
-                    <Button disabled variant="ghost">
-                      <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
-                      เพิ่มเติม
                     </Button>
                   </div>
 
-                  <label className="text-xs font-extrabold text-slate-600" htmlFor={`report-${post.id}`}>
-                    เหตุผลรายงาน
-                  </label>
-                  <select
-                    className="min-h-11 rounded-lg border border-kaset-deep/10 bg-white px-3 text-sm font-semibold text-kaset-ink"
-                    disabled={!canWrite || !post.id}
-                    id={`report-${post.id}`}
-                    onChange={(event) => {
-                      const nextReason = event.currentTarget.value as CommunityReportReason;
-                      setReportReasonByPost((current) => ({
-                        ...current,
-                        [post.id]: nextReason,
-                      }));
-                    }}
-                    value={reportReasonByPost[post.id] ?? 'spam'}
-                  >
-                    {communityReportReasons.map((reason) => (
-                      <option key={reason} value={reason}>
-                        {communityReportReasonLabels[reason]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="grid max-w-sm gap-1">
+                    <label className="text-xs font-extrabold text-slate-600" htmlFor={`report-${post.id}`}>
+                      เหตุผลรายงาน
+                    </label>
+                    <select
+                      className="min-h-10 rounded-lg border border-kaset-deep/10 bg-white px-3 text-xs font-semibold text-kaset-ink"
+                      disabled={!canWrite || !post.id}
+                      id={`report-${post.id}`}
+                      onChange={(event) => {
+                        const nextReason = event.currentTarget.value as CommunityReportReason;
+                        setReportReasonByPost((current) => ({
+                          ...current,
+                          [post.id]: nextReason,
+                        }));
+                      }}
+                      value={reportReasonByPost[post.id] ?? 'spam'}
+                    >
+                      {communityReportReasons.map((reason) => (
+                        <option key={reason} value={reason}>
+                          {communityReportReasonLabels[reason]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
                   {openCommentsByPost[post.id] ? (
                     <div className="grid gap-3 rounded-lg bg-slate-50 p-3">
@@ -926,35 +950,38 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                                 </div>
                                 {comment.ownedByCurrentUser ? (
                                   <Button
-                                    className="min-h-9 px-3 text-xs"
+                                    className={communityCompactActionButtonClass}
                                     onClick={() => handleHideComment(post.id, comment.id)}
                                     variant="secondary"
                                   >
-                                    <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+                                    <EyeOff aria-hidden="true" className={communityCompactActionIconClass} />
                                     ซ่อน
                                   </Button>
                                 ) : null}
                               </div>
                               <p className="whitespace-pre-wrap text-sm leading-6 text-kaset-ink">{comment.contentText}</p>
 
-                              <div className="flex flex-wrap gap-2">
+                              <div className="flex flex-wrap gap-1.5">
                                 <Button
-                                  className="min-h-9 px-3 text-xs"
+                                  className={communityCompactActionButtonClass}
                                   disabled={!canWrite || !comment.id}
                                   onClick={() => handleLikeComment(post.id, comment)}
-                                  variant="secondary"
+                                  variant={comment.likedByCurrentUser ? 'soft' : 'secondary'}
                                 >
-                                  <Heart aria-hidden="true" className="h-3.5 w-3.5" />
-                                  {comment.likedByCurrentUser ? 'เลิกถูกใจ' : 'ถูกใจ'} {comment.likeCount ?? 0}
+                                  <Heart
+                                    aria-hidden="true"
+                                    className={comment.likedByCurrentUser ? `${communityCompactActionIconClass} fill-current` : communityCompactActionIconClass}
+                                  />
+                                  ถูกใจ {comment.likeCount ?? 0}
                                 </Button>
                                 <Button
-                                  className="min-h-9 px-3 text-xs"
+                                  className={communityCompactActionButtonClass}
                                   disabled={!canWrite || !comment.id}
                                   onClick={() => handleStartReply(post.id, comment.id)}
                                   variant="secondary"
                                 >
-                                  <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
-                                  ตอบกลับ {comment.replyCount ?? replies.length}
+                                  <Reply aria-hidden="true" className={communityCompactActionIconClass} />
+                                  ตอบกลับ
                                 </Button>
                               </div>
 
@@ -965,7 +992,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                               ) : null}
 
                               {replies.length > 0 ? (
-                                <div className="ml-3 grid gap-2 border-l-2 border-kaset-deep/10 pl-3">
+                                <div className="ml-2 grid gap-2 border-l-2 border-kaset-deep/10 pl-3">
                                   {replies.map((reply) => (
                                     <div className="rounded-lg bg-slate-50 p-3" key={reply.id}>
                                       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -979,11 +1006,11 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                                         </div>
                                         {reply.ownedByCurrentUser ? (
                                           <Button
-                                            className="min-h-9 px-3 text-xs"
+                                            className={communityCompactActionButtonClass}
                                             onClick={() => handleHideComment(post.id, reply.id)}
                                             variant="secondary"
                                           >
-                                            <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+                                            <EyeOff aria-hidden="true" className={communityCompactActionIconClass} />
                                             ซ่อน
                                           </Button>
                                         ) : null}
@@ -992,13 +1019,16 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                                         {reply.contentText}
                                       </p>
                                       <Button
-                                        className="mt-2 min-h-9 px-3 text-xs"
+                                        className={`mt-2 ${communityCompactActionButtonClass}`}
                                         disabled={!canWrite || !reply.id}
                                         onClick={() => handleLikeComment(post.id, reply)}
-                                        variant="secondary"
+                                        variant={reply.likedByCurrentUser ? 'soft' : 'secondary'}
                                       >
-                                        <Heart aria-hidden="true" className="h-3.5 w-3.5" />
-                                        {reply.likedByCurrentUser ? 'เลิกถูกใจ' : 'ถูกใจ'} {reply.likeCount ?? 0}
+                                        <Heart
+                                          aria-hidden="true"
+                                          className={reply.likedByCurrentUser ? `${communityCompactActionIconClass} fill-current` : communityCompactActionIconClass}
+                                        />
+                                        ถูกใจ {reply.likeCount ?? 0}
                                       </Button>
                                     </div>
                                   ))}
@@ -1015,15 +1045,23 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                                     disabled={!canWrite}
                                     onChange={(event) => handleReplyTextChange(comment.id, getCommunityTextInputValue(event))}
                                     onInput={(event) => handleReplyTextChange(comment.id, getCommunityTextInputValue(event))}
-                                    placeholder={canWrite ? 'เขียนคำตอบ...' : readiness.writeGateMessage}
+                                    placeholder={canWrite ? 'เขียนคำตอบ...' : disabledInputCopy}
                                     value={replyTextByComment[comment.id] ?? ''}
                                   />
-                                  <div className="flex flex-wrap gap-2">
-                                    <Button disabled={!canWrite} onClick={() => handleCreateReply(post.id, comment)}>
-                                      <Send aria-hidden="true" className="h-4 w-4" />
+                                  <div className="flex flex-wrap gap-1.5">
+                                    <Button
+                                      className={communityCompactActionButtonClass}
+                                      disabled={!canWrite}
+                                      onClick={() => handleCreateReply(post.id, comment)}
+                                    >
+                                      <Send aria-hidden="true" className={communityCompactActionIconClass} />
                                       ส่งคำตอบ
                                     </Button>
-                                    <Button onClick={() => handleCancelReply(post.id, comment.id)} variant="secondary">
+                                    <Button
+                                      className={communityCompactActionButtonClass}
+                                      onClick={() => handleCancelReply(post.id, comment.id)}
+                                      variant="secondary"
+                                    >
                                       ยกเลิก
                                     </Button>
                                   </div>
@@ -1040,7 +1078,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                           disabled={!canWrite || !post.id}
                           onChange={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
                           onInput={(event) => handleCommentTextChange(post.id, getCommunityTextInputValue(event))}
-                          placeholder={canWrite ? 'เขียนคอมเมนต์' : readiness.writeGateMessage}
+                          placeholder={canWrite ? 'เขียนคอมเมนต์' : disabledInputCopy}
                           value={commentTextByPost[post.id] ?? ''}
                         />
                         {commentStatusByPost[post.id] ? (
@@ -1049,6 +1087,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                           </p>
                         ) : null}
                         <Button
+                          className="min-h-10 gap-1.5 px-4 text-sm"
                           disabled={!canUseTopLevelCommunityCommentSubmit(
                             canWrite,
                             post.id,
@@ -1075,10 +1114,10 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
             </span>
             <div className="min-w-0 flex-1">
               <h2 id="community-actions-title" className="font-extrabold text-kaset-ink">
-                การโต้ตอบที่ทดสอบได้บน staging
+                การโต้ตอบในชุมชน
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Like, คอมเมนต์, report, ซ่อน/ลบโพสต์ของตัวเอง และอัปโหลด 1 รูป จะทำงานเมื่อเปิด flag ใน staging และมี real Supabase session
+                ถูกใจ คอมเมนต์ รายงาน ซ่อน/ลบโพสต์ของตัวเอง และแนบรูป 1 รูป จะทำงานเมื่อบัญชีพร้อมเขียนโพสต์
               </p>
             </div>
           </div>
@@ -1138,7 +1177,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                 รายงานโพสต์หรือคอมเมนต์
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                เหตุผลรายงานใน UI เป็นภาษาไทย แต่ service ส่ง reason code ที่ฐานข้อมูลรองรับ
+                เหตุผลรายงานแสดงเป็นภาษาไทย และส่งเป็นตัวเลือกที่ระบบรองรับ
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {communityReportReasons.map((reason) => (
@@ -1164,7 +1203,7 @@ export function CommunityPage({ readinessOverride, serviceOverride }: CommunityP
                 แจ้งเตือนในแอป
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Like/reply notification ยังต้องสร้างจาก backend ที่ตรวจ ownership แล้ว ไม่มี push notification ใน V1
+                การแจ้งเตือนถูกใจและตอบกลับยังไม่เปิดส่งจริงใน V1 และไม่มี push notification
               </p>
               <Link
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"
