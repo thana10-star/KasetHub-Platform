@@ -203,7 +203,7 @@ describe('M97.1 farmer help, settings, and first-use readiness', () => {
     );
 
     expect(homeHtml).toContain('เปิดฟาร์มของฉัน');
-    expect(homeHtml).toContain('เริ่มใช้แอพ');
+    expect(homeHtml).toContain('ความรู้/บทความ');
     expect(homeHtml).toContain('/app/help');
     expect(homeHtml).not.toContain('ต้นทุนต่อกก.');
     expect(homeHtml).not.toContain('/app/farm-records#farm-cost-dashboard');

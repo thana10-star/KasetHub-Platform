@@ -8,9 +8,9 @@ export type HomeFarmHubViewModel = {
 
 export function buildHomeFarmHubViewModel(): HomeFarmHubViewModel {
   return {
-    eyebrow: 'My Farm',
+    eyebrow: 'ฟาร์มของฉัน',
     title: 'ฟาร์มของฉัน',
-    subtitle: 'บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต',
+    subtitle: 'บันทึกงาน รายรับรายจ่าย และผลผลิต',
     primaryRoute: '/app/my-farm',
     primaryLabel: 'เปิดฟาร์มของฉัน',
   };

@@ -6,93 +6,129 @@ import { FarmRecordsDebugPage } from '@/routes/FarmRecordsDebugPage';
 import { MyFarmPage } from '@/routes/MyFarmPage';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 
-describe('M92.1 compact home Farm Hub launcher', () => {
-  test('renders a compact My Farm launcher on the home page', () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <AppHomePage />
-      </MemoryRouter>,
-    );
+function renderHome() {
+  return renderToString(
+    <MemoryRouter>
+      <AppHomePage />
+    </MemoryRouter>,
+  );
+}
 
-    expect(html).toContain('My Farm');
-    expect(html).toContain('ฟาร์มของฉัน');
-    expect(html).toContain('เปิดฟาร์มของฉัน');
-    expect(html).toContain('/app/my-farm');
-    expect(html).toContain('บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต');
+function visibleText(html: string) {
+  return html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+}
+
+describe('M116.8 home dashboard redesign', () => {
+  test('renders a weather hero near the top with a weather route link', () => {
+    const html = renderHome();
+    const headerIndex = html.indexOf('KasetHub');
+    const weatherIndex = html.indexOf('สภาพอากาศวันนี้');
+
+    expect(headerIndex).toBeGreaterThan(-1);
+    expect(weatherIndex).toBeGreaterThan(headerIndex);
+    expect(html).toContain('พื้นที่ล่าสุด');
+    expect(html).toContain('ดูพยากรณ์');
+    expect(html).toContain('/app/weather');
   });
 
-  test('links to the production price hub without rendering fixture prices on Home', () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <AppHomePage />
-      </MemoryRouter>,
-    );
+  test('renders the requested quick action cards', () => {
+    const html = renderHome();
 
+    expect(html).toContain('ถาม AI เกษตร');
     expect(html).toContain('ราคาเกษตร');
-    expect(html).toContain('/app/prices');
-    expect(html).toContain('ดูรายการสินค้าที่เตรียมเชื่อมแหล่งข้อมูลราคา');
-    expect(html).not.toContain('15,150');
-    expect(html).not.toContain('3.15');
-    expect(html).not.toContain('ราคาอ้างอิง');
+    expect(html).toContain('ชุมชนเกษตร');
+    expect(html).toContain('เครื่องมือเกษตร');
+    expect(html).toContain('ฟาร์มของฉัน');
+    expect(html).toContain('ความรู้/บทความ');
   });
 
-  test('links to Community without rendering fake community engagement on Home', () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <AppHomePage />
-      </MemoryRouter>,
-    );
+  test('keeps all primary home links available', () => {
+    const html = renderHome();
 
-    expect(html).toContain('ชุมชนเกษตร');
-    expect(html).toContain('อ่านเรื่องเล่า ถามปัญหา และแบ่งปันประสบการณ์');
-    expect(html).toContain('เปิดชุมชน');
+    expect(html).toContain('/app/weather');
+    expect(html).toContain('/app/ai');
+    expect(html).toContain('/app/prices');
     expect(html).toContain('/app/community');
     expect(html).toContain('/app/calculators');
-    expect(html).not.toContain('คุณสายฝน');
-    expect(html).not.toContain('คำถามล่าสุดในชุมชน');
+    expect(html).toContain('/app/my-farm');
+    expect(html).toContain('/app/help');
+    expect(html).toContain('/app/profile');
   });
 
-  test('renders a prominent AI-first farmer entry without crowding Home', () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <AppHomePage />
-      </MemoryRouter>,
-    );
-    const aiEntryIndex = html.indexOf('data-testid="home-ai-primary-entry"');
-    const myFarmIndex = html.indexOf('home-farm-hub-title');
+  test('renders price preview without fake price numbers', () => {
+    const html = renderHome();
+    const text = visibleText(html);
 
-    expect(aiEntryIndex).toBeGreaterThan(-1);
-    expect(myFarmIndex).toBeGreaterThan(aiEntryIndex);
-    expect(html).toContain('ถาม AI เกษตร');
-    expect(html).toContain('ถาม AI ตอนนี้');
-    expect(html).toContain('/app/ai');
-    expect(html).toContain('ใบเหลืองเกิดจากอะไร');
-    expect(html).toContain('เตรียมดินก่อนปลูกยังไง');
-    expect(html).toContain('ฝนแบบนี้ควรพ่นยาไหม');
+    expect(text).toContain('กำลังเตรียมเชื่อมแหล่งข้อมูลราคาจริง');
+    expect(text).toContain('ข้าว');
+    expect(text).toContain('มันสำปะหลัง');
+    expect(text).toContain('ยางพารา');
+    expect(text).toContain('ปาล์มน้ำมัน');
+    expect(text).not.toContain('15,150');
+    expect(text).not.toContain('3.15');
+    expect(text).not.toContain('บาท/กก.');
+    expect(text).not.toContain('ราคาล่าสุด');
   });
 
-  test('does not render detailed Farm Records metrics on the home card', () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <AppHomePage />
-      </MemoryRouter>,
-    );
+  test('renders Community preview without fake engagement', () => {
+    const html = renderHome();
+    const text = visibleText(html);
 
+    expect(text).toContain('อ่าน ถาม และแบ่งปันเรื่องเกษตรกับชุมชน');
+    expect(text).toContain('เปิดชุมชน');
+    expect(text).not.toContain('ถูกใจ');
+    expect(text).not.toContain('คอมเมนต์ 0');
+    expect(text).not.toContain('คำถามล่าสุดในชุมชน');
+    expect(text).not.toContain('คุณสายฝน');
+  });
+
+  test('does not render internal milestone or prototype wording on Home', () => {
+    const text = visibleText(renderHome()).toLowerCase();
+    const forbiddenWords = [
+      'm116',
+      'milestone',
+      'readiness',
+      'qa',
+      'debug',
+      'prototype',
+      'staging',
+      'test',
+      'fake',
+      'mock',
+      'demo',
+      'route registry',
+      'internal',
+    ];
+
+    forbiddenWords.forEach((word) => {
+      expect(text).not.toContain(word);
+    });
+  });
+
+  test('keeps My Farm compact and below the quick actions', () => {
+    const html = renderHome();
+    const quickIndex = html.indexOf('ทางลัดวันนี้');
+    const farmSectionIndex = html.indexOf('home-farm-hub-title');
+
+    expect(quickIndex).toBeGreaterThan(-1);
+    expect(farmSectionIndex).toBeGreaterThan(quickIndex);
+    expect(html).toContain('บันทึกงาน รายรับรายจ่าย และผลผลิต');
+    expect(html).toContain('เปิดฟาร์มของฉัน');
     expect(html).not.toContain('กำไร/ขาดทุน');
     expect(html).not.toContain('ต้นทุนต่อกก.');
     expect(html).not.toContain('ผลผลิตล่าสุด');
-    expect(html).not.toContain('รายการล่าสุด');
     expect(html).not.toContain('/app/farm-records#farm-cost-dashboard');
-    expect(html).not.toContain('เช็กอากาศวันนี้');
   });
+});
 
-  test('builds only the compact launcher model for home', () => {
+describe('home farm hub launcher model', () => {
+  test('builds only the compact launcher model for Home', () => {
     const viewModel = buildHomeFarmHubViewModel();
 
     expect(viewModel).toEqual({
-      eyebrow: 'My Farm',
+      eyebrow: 'ฟาร์มของฉัน',
       title: 'ฟาร์มของฉัน',
-      subtitle: 'บันทึกงานในฟาร์ม รายรับรายจ่าย ต้นทุน และผลผลิต',
+      subtitle: 'บันทึกงาน รายรับรายจ่าย และผลผลิต',
       primaryRoute: '/app/my-farm',
       primaryLabel: 'เปิดฟาร์มของฉัน',
     });
