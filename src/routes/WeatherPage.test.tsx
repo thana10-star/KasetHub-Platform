@@ -109,6 +109,7 @@ describe('M104.1 weather UI priority polish', () => {
     );
 
     const currentIndex = html.indexOf('อากาศตอนนี้');
+    const forecastIndex = html.indexOf('พยากรณ์ 5-7 วัน');
     const riskIndex = html.indexOf('ความเสี่ยงอากาศเบื้องต้น');
     const updateIndex = html.indexOf('อัปเดตข้อมูล');
     const sourceDetailsIndex = html.indexOf('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
@@ -116,9 +117,11 @@ describe('M104.1 weather UI priority polish', () => {
     expect(html).toContain('สภาพอากาศเกษตร');
     expect(html).toContain('เลือกพื้นที่ของคุณ');
     expect(html).toContain('อากาศตอนนี้');
+    expect(html).toContain('พยากรณ์ 5-7 วัน');
     expect(html).toContain('ข้อมูลเพิ่มเติม / รายละเอียดแหล่งข้อมูล');
     expect(currentIndex).toBeGreaterThan(-1);
-    expect(riskIndex).toBeGreaterThan(currentIndex);
+    expect(forecastIndex).toBeGreaterThan(currentIndex);
+    expect(riskIndex).toBeGreaterThan(forecastIndex);
     expect(updateIndex).toBeGreaterThan(riskIndex);
     expect(sourceDetailsIndex).toBeGreaterThan(updateIndex);
     const openMeteoIndex = html.indexOf('Open-Meteo');
@@ -158,10 +161,35 @@ describe('M104.1 weather UI priority polish', () => {
     const confirmButton = html.match(/<button[^>]*data-testid="weather-location-confirm"[^>]*>/)?.[0] ?? '';
 
     expect(confirmButton).toContain('min-h-10');
-    expect(confirmButton).toContain('w-fit');
+    expect(confirmButton).toContain('w-full');
+    expect(confirmButton).toContain('sm:w-fit');
     expect(confirmButton).toContain('rounded-full');
     expect(confirmButton).not.toContain('min-h-12');
-    expect(confirmButton).not.toContain('w-full');
+  });
+
+  test('stacks selector controls on mobile instead of forcing a horizontal row', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WeatherPage />
+      </MemoryRouter>,
+    );
+    const controls = html.match(/<div[^>]*data-testid="weather-location-controls"[^>]*>/)?.[0] ?? '';
+
+    expect(controls).toContain('grid-cols-1');
+    expect(controls).toContain('sm:grid-cols-[minmax(0,1fr)_auto]');
+    expect(controls).not.toContain('flex-nowrap');
+  });
+
+  test('renders richer current weather summary from real forecast values', () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WeatherPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('data-testid="weather-current-rich-summary"');
+    expect(html).toContain('มีโอกาสฝนบางช่วง');
+    expect(html).toContain('ควรเผื่อแผนงานกลางแจ้ง');
   });
 
   test('keeps GPS and source details out of the primary weather flow', () => {

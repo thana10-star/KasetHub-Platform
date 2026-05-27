@@ -33,6 +33,7 @@ import {
 import { assessWeatherAgriRisk } from '@/services/weather/weather-agri-risk-rules';
 import type { WeatherAgriRiskCard } from '@/services/weather/weather-agri-risk.types';
 import { computeWeatherStaleAgeLabel } from '@/services/weather/weather-cache-qa';
+import { buildWeatherCurrentSummary } from '@/services/weather/weather-current-summary';
 import { weatherRiskLabels, weatherRiskTone } from '@/services/weather/weather-fixtures';
 import { formatWeatherRefreshCooldown } from '@/services/weather/weather-refresh-policy';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
@@ -151,6 +152,13 @@ export function WeatherPage() {
   const quickLocations = weatherCommonProvinceLocationIds
     .map((locationId) => locations.find((location) => location.id === locationId))
     .filter((location): location is (typeof locations)[number] => Boolean(location));
+  const currentConditionLabel = current?.conditionLabel ?? today.conditionLabel;
+  const currentWindKph = Math.round(current?.windKph ?? today.windKph);
+  const currentWeatherSummary = buildWeatherCurrentSummary({
+    conditionLabel: currentConditionLabel,
+    rainChancePercent: today.rainChancePercent,
+    windKph: currentWindKph,
+  });
 
   useEffect(() => {
     setPendingLocationId(selectedLocationId);
@@ -159,9 +167,9 @@ export function WeatherPage() {
   return (
     <div>
       <PageHeader title="สภาพอากาศเกษตร" subtitle="ดูอากาศวันนี้และความเสี่ยงเบื้องต้นก่อนวางแผนงานแปลง" showBack />
-      <div className="grid gap-5 px-5 pb-6">
+      <div className="grid min-w-0 gap-5 overflow-x-hidden px-5 pb-6">
         {locations.length > 1 ? (
-          <Card className="p-4" data-testid="weather-location-selector">
+          <Card className="min-w-0 overflow-hidden p-4" data-testid="weather-location-selector">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-lg font-extrabold text-kaset-ink">เลือกพื้นที่ของคุณ</h2>
@@ -172,11 +180,14 @@ export function WeatherPage() {
               <StatusPill tone="info">ไม่ใช้ GPS</StatusPill>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <label className="grid gap-2 text-sm font-extrabold text-kaset-ink" htmlFor="weather-location-select">
+            <div
+              className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+              data-testid="weather-location-controls"
+            >
+              <label className="grid min-w-0 gap-2 text-sm font-extrabold text-kaset-ink" htmlFor="weather-location-select">
                 จังหวัด
                 <select
-                  className="min-h-11 w-full rounded-lg border border-kaset-deep/15 bg-white px-3 text-base font-bold text-kaset-ink shadow-inner outline-none ring-kaset-deep/20 focus:border-kaset-deep focus:ring-2"
+                  className="min-h-11 w-full max-w-full rounded-lg border border-kaset-deep/15 bg-white px-3 text-base font-bold text-kaset-ink shadow-inner outline-none ring-kaset-deep/20 focus:border-kaset-deep focus:ring-2"
                   id="weather-location-select"
                   onChange={(event) => setPendingLocationId(event.target.value)}
                   value={pendingLocationId}
@@ -193,7 +204,7 @@ export function WeatherPage() {
                 </select>
               </label>
               <button
-                className="inline-flex min-h-10 w-fit min-w-[148px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-kaset-deep px-3.5 text-xs font-extrabold text-white shadow-[0_8px_18px_rgba(20,83,45,0.18)] ring-1 ring-emerald-950/10 transition hover:bg-kaset-ink sm:min-h-11 sm:px-4 sm:text-sm"
+                className="inline-flex min-h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-kaset-deep px-3.5 text-xs font-extrabold text-white shadow-[0_8px_18px_rgba(20,83,45,0.18)] ring-1 ring-emerald-950/10 transition hover:bg-kaset-ink sm:min-h-11 sm:w-fit sm:min-w-[148px] sm:px-4 sm:text-sm"
                 data-testid="weather-location-confirm"
                 onClick={() => selectLocation(pendingLocationId)}
                 type="button"
@@ -216,12 +227,12 @@ export function WeatherPage() {
                   : 'เลือกพื้นที่แล้วพร้อมดูพยากรณ์ด้านล่าง'}
               </p>
             </div>
-            <div className="mt-3 flex max-w-full gap-2 overflow-x-auto pb-1" aria-label="จังหวัดยอดนิยม">
+            <div className="mt-3 flex max-w-full flex-wrap gap-2 pb-1" aria-label="จังหวัดยอดนิยม">
               {quickLocations.map((location) => (
                 <button
                   aria-pressed={pendingLocationId === location.id}
                   className={cx(
-                    'min-h-9 shrink-0 rounded-full px-3 text-xs font-extrabold ring-1 ring-kaset-deep/10',
+                    'min-h-9 rounded-full px-3 text-xs font-extrabold ring-1 ring-kaset-deep/10',
                     pendingLocationId === location.id
                       ? 'bg-kaset-deep text-white'
                       : 'bg-white text-kaset-deep hover:bg-kaset-mint',
@@ -240,7 +251,7 @@ export function WeatherPage() {
           </Card>
         ) : null}
 
-        <Card className="overflow-hidden p-0" data-testid="weather-current-card">
+        <Card className="min-w-0 overflow-hidden p-0" data-testid="weather-current-card">
           <div className="bg-kaset-deep p-5 text-white">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -248,7 +259,10 @@ export function WeatherPage() {
                   {freshnessLabel}
                 </StatusPill>
                 <h2 className="mt-3 text-2xl font-extrabold leading-8">อากาศตอนนี้</h2>
-                <p className="mt-1 text-sm leading-6 text-emerald-50/90">{current?.conditionLabel ?? today.conditionLabel}</p>
+                <p className="mt-1 text-sm font-bold leading-6 text-emerald-50/90">{currentConditionLabel}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-emerald-50/90" data-testid="weather-current-rich-summary">
+                  {currentWeatherSummary}
+                </p>
               </div>
               <span className={cx('grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-white', conditionIconClass[today.iconTone])}>
                 <CloudSun aria-hidden="true" className="h-7 w-7" />
@@ -265,7 +279,7 @@ export function WeatherPage() {
               <MetricCard icon={ThermometerSun} label="อุณหภูมิปัจจุบัน" value={`${Math.round(current?.temperatureC ?? today.maxTempC)}°C`} />
               <MetricCard icon={CloudRain} label="โอกาสฝนสูงสุด" tone="sky" value={`${today.rainChancePercent}%`} />
               <MetricCard icon={Droplets} label="ความชื้น" tone="green" value={`${current?.humidityPercent ?? today.humidityPercent}%`} />
-              <MetricCard icon={Wind} label="กม./ชม. ความเร็วลม" value={`${Math.round(current?.windKph ?? today.windKph)}`} />
+              <MetricCard icon={Wind} label="กม./ชม. ความเร็วลม" value={`${currentWindKph}`} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -283,17 +297,35 @@ export function WeatherPage() {
           </div>
         </Card>
 
-        {forecast.isStale || cacheStatus.isStale ? (
-          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลอาจเก่า">
-            ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
-          </NoticeBox>
-        ) : null}
-
-        {forecast.isFallback ? (
-          <NoticeBox tone="warning" icon={ShieldAlert} title="ตอนนี้ใช้ข้อมูลสำรองในเครื่อง">
-            เมื่อเชื่อมต่อแหล่งพยากรณ์ออนไลน์แล้ว ระบบจะแสดงข้อมูลล่าสุด ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
-          </NoticeBox>
-        ) : null}
+        <section className="grid min-w-0 gap-3" data-testid="weather-daily-forecast">
+          <h2 className="text-lg font-extrabold text-kaset-ink">พยากรณ์ 5-7 วัน</h2>
+          {forecast.daily.slice(0, 7).map((day) => (
+            <Card className="min-w-0 p-4" key={day.id}>
+              <div className="flex min-w-0 gap-3">
+                <span className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-lg', conditionIconClass[day.iconTone])}>
+                  <CalendarDays aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-kaset-ink">{day.dayName}</h3>
+                      <p className="mt-1 text-xs font-bold text-slate-500">{day.dateLabel}</p>
+                    </div>
+                    <p className="shrink-0 text-right text-sm font-extrabold text-kaset-deep">
+                      {day.minTempC}-{day.maxTempC}°C
+                    </p>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {day.conditionLabel} · ฝน {day.rainChancePercent}% · ลม {day.windKph} กม./ชม. · น้ำฝน {day.precipitationMm ?? 0} มม.
+                  </p>
+                  <div className="mt-3">
+                    <RiskBadges risks={day.risks} />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </section>
 
         <section className="grid gap-3" data-testid="weather-risk-summary">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -335,6 +367,18 @@ export function WeatherPage() {
             ))}
           </div>
         </section>
+
+        {forecast.isStale || cacheStatus.isStale ? (
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ข้อมูลอาจเก่า">
+            ใช้ข้อมูลล่าสุดที่มีในเครื่อง ข้อมูลนี้อาจเก่ากว่า {cacheStatus.staleAfterMinutes} นาที ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
+          </NoticeBox>
+        ) : null}
+
+        {forecast.isFallback ? (
+          <NoticeBox tone="warning" icon={ShieldAlert} title="ตอนนี้ใช้ข้อมูลสำรองในเครื่อง">
+            เมื่อเชื่อมต่อแหล่งพยากรณ์ออนไลน์แล้ว ระบบจะแสดงข้อมูลล่าสุด ควรตรวจสอบสภาพจริงก่อนตัดสินใจ
+          </NoticeBox>
+        ) : null}
 
         <Card className="p-4" data-testid="weather-update-actions">
           <div className="flex items-center gap-2">
@@ -420,36 +464,6 @@ export function WeatherPage() {
               <h3 className="font-extrabold text-kaset-ink">{note.title}</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">{note.detail}</p>
               <p className="mt-2 text-xs font-bold leading-5 text-amber-800">{note.boundary}</p>
-            </Card>
-          ))}
-        </section>
-
-        <section className="grid gap-3">
-          <h2 className="text-lg font-extrabold text-kaset-ink">พยากรณ์ 5-7 วัน</h2>
-          {forecast.daily.slice(0, 7).map((day) => (
-            <Card className="p-4" key={day.id}>
-              <div className="flex gap-3">
-                <span className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-lg', conditionIconClass[day.iconTone])}>
-                  <CalendarDays aria-hidden="true" className="h-5 w-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-extrabold text-kaset-ink">{day.dayName}</h3>
-                      <p className="mt-1 text-xs font-bold text-slate-500">{day.dateLabel}</p>
-                    </div>
-                    <p className="text-right text-sm font-extrabold text-kaset-deep">
-                      {day.minTempC}-{day.maxTempC}°C
-                    </p>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {day.conditionLabel} · ฝน {day.rainChancePercent}% · ลม {day.windKph} กม./ชม. · น้ำฝน {day.precipitationMm ?? 0} มม.
-                  </p>
-                  <div className="mt-3">
-                    <RiskBadges risks={day.risks} />
-                  </div>
-                </div>
-              </div>
             </Card>
           ))}
         </section>

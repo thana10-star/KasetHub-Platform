@@ -31,6 +31,16 @@ The M116.10 follow-up addressed two owner review items:
 - Province coverage expanded from the original common presets to all 77 provinces of Thailand.
 - The confirm button was reduced from a large block-style CTA to a smaller rounded green action with subtle shadow, icon support, and mobile-safe tap sizing.
 
+## M116.11 Mobile Overflow Note
+
+M116.11 tightened the mobile selector layout after owner screenshots showed sideways scrolling on `/app/weather`:
+
+- The province dropdown and confirm button now use an explicit one-column mobile grid.
+- The dropdown is full width on mobile.
+- The confirm button sits below the dropdown on mobile and uses compact height with safe tap sizing.
+- Common province chips wrap instead of forcing a horizontal page overflow.
+- The page content wrapper clips accidental horizontal overflow without hiding normal vertical content.
+
 ## Privacy Boundary
 
 This polish keeps the existing privacy model:
@@ -49,7 +59,7 @@ V1 remains province-level because it is broad enough for privacy-safe approximat
 
 ## Mobile Notes
 
-At mobile width, the selector card uses a full-width native dropdown with a compact confirm button beneath it. Common-province chips scroll inside their own row, so the page avoids horizontal overflow. The main weather card remains immediately below the selector.
+At mobile width, the selector card uses a full-width native dropdown with a compact confirm button beneath it. Common-province chips wrap inside the selector card, so the page avoids horizontal overflow. The main weather card remains immediately below the selector.
 
 ## Non-Goals Preserved
 

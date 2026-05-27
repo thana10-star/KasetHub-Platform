@@ -14,7 +14,10 @@ import {
   createMemoryWeatherCacheStorage,
   getWeatherCacheStatus,
 } from '@/services/weather/weather-cache-service';
-import { weatherCoarseLocations } from '@/services/weather/weather-location-fixtures';
+import {
+  THAI_WEATHER_PROVINCE_COUNT,
+  weatherCoarseLocations,
+} from '@/services/weather/weather-location-fixtures';
 import { farmerWeatherRiskNotes } from '@/services/weather/weather-risk-notes';
 
 const readyEnv = {
@@ -294,9 +297,19 @@ describe('M75 real weather Open-Meteo adapter', () => {
   });
 
   test('coarse location fixtures do not store precise farm coordinates', () => {
-    expect(weatherCoarseLocations).toHaveLength(9);
+    expect(weatherCoarseLocations).toHaveLength(THAI_WEATHER_PROVINCE_COUNT);
     expect(weatherCoarseLocations.every((location) => location.precision === 'province_or_city_center')).toBe(true);
     expect(weatherCoarseLocations.every((location) => location.privacyNote.includes('ไม่ใช่ตำแหน่งแปลง'))).toBe(true);
+  });
+
+  test('province-level selection supports additional Thailand provinces', () => {
+    const chiangRai = getWeatherAdapterResult('chiang-rai');
+    const yala = getWeatherAdapterResult('yala');
+
+    expect(chiangRai.selectedLocationId).toBe('chiang-rai');
+    expect(chiangRai.forecast.location.label).toBe('เชียงราย');
+    expect(yala.selectedLocationId).toBe('yala');
+    expect(yala.forecast.location.label).toBe('ยะลา');
   });
 
   test('risk notes are general and disclaimer-bound', () => {
