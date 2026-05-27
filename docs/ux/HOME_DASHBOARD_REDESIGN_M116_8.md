@@ -10,9 +10,11 @@ M116.8 redesigns `/app` into a cleaner mobile dashboard for V1 use. The page now
    - Shows `KasetHub` and `ผู้ช่วยเกษตรในมือถือ`.
    - Keeps notification and profile entry points visible.
 
-2. Weather hero
+2. Weather / Daily Insight hero
    - Links to `/app/weather`.
    - Uses the existing weather state when a live weather summary is available.
+   - Adds a compact `ข้อมูลวันนี้` block with color-coded rows for `อากาศ`, `งานเกษตร`, and `ราคา`.
+   - Adds explicit CTAs for `ดูพยากรณ์` (`/app/weather`) and `เช็กราคา` (`/app/prices`).
    - Avoids API/source/debug wording on Home.
 
 3. Quick action grid
@@ -46,8 +48,20 @@ M116.8 redesigns `/app` into a cleaner mobile dashboard for V1 use. The page now
 - No production Community write setting changed.
 - No AI provider enabled.
 - No fake price data added.
+- No fake price trends or charts added.
 - No fake Community posts, likes, comments, or engagement added.
 - Existing route links and bottom navigation are preserved.
+
+## Daily Insight Hero
+
+The Home hero now includes a denser daily insight block:
+
+- Weather row: soft blue, uses live weather values only when the existing weather hook has ready non-fallback data. Otherwise it uses `เปิดดูพยากรณ์เพื่อวางแผนวันนี้`.
+- Farm work row: soft yellow for normal planning advice. It switches to soft red only when the available weather values cross high-risk thresholds such as high rain chance, high heat, or strong wind.
+- Hero status badge: soft red when Home needs the user to check the Weather page for usable forecast values, or when weather values cross high-risk thresholds.
+- Price row: soft orange, uses `ข้าว / มัน / ยาง / ปาล์ม กำลังเตรียมเชื่อมข้อมูลจริง` without numeric prices, trend arrows, or charts.
+
+Future price/chart readiness is documented separately in `docs/ux/HOME_DAILY_INSIGHT_HERO_M116_8.md`. No fake chart or fake price UI is implemented in M116.8.
 
 ## Restart Verification Notes
 

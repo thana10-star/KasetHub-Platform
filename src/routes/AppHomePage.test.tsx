@@ -19,7 +19,7 @@ function visibleText(html: string) {
 }
 
 describe('M116.8 home dashboard redesign', () => {
-  test('renders a weather hero near the top with a weather route link', () => {
+  test('renders a weather and daily insight hero near the top', () => {
     const html = renderHome();
     const headerIndex = html.indexOf('KasetHub');
     const weatherIndex = html.indexOf('สภาพอากาศวันนี้');
@@ -27,8 +27,14 @@ describe('M116.8 home dashboard redesign', () => {
     expect(headerIndex).toBeGreaterThan(-1);
     expect(weatherIndex).toBeGreaterThan(headerIndex);
     expect(html).toContain('พื้นที่ล่าสุด');
+    expect(html).toContain('ข้อมูลวันนี้');
+    expect(html).toContain('อากาศ');
+    expect(html).toContain('งานเกษตร');
+    expect(html).toContain('ราคา');
     expect(html).toContain('ดูพยากรณ์');
+    expect(html).toContain('เช็กราคา');
     expect(html).toContain('/app/weather');
+    expect(html).toContain('/app/prices');
   });
 
   test('renders the requested quick action cards', () => {
@@ -60,6 +66,7 @@ describe('M116.8 home dashboard redesign', () => {
     const text = visibleText(html);
 
     expect(text).toContain('กำลังเตรียมเชื่อมแหล่งข้อมูลราคาจริง');
+    expect(text).toContain('ข้าว / มัน / ยาง / ปาล์ม กำลังเตรียมเชื่อมข้อมูลจริง');
     expect(text).toContain('ข้าว');
     expect(text).toContain('มันสำปะหลัง');
     expect(text).toContain('ยางพารา');
@@ -68,6 +75,10 @@ describe('M116.8 home dashboard redesign', () => {
     expect(text).not.toContain('3.15');
     expect(text).not.toContain('บาท/กก.');
     expect(text).not.toContain('ราคาล่าสุด');
+    expect(text).not.toContain('↗');
+    expect(text).not.toContain('↘');
+    expect(text).not.toContain('▲');
+    expect(text).not.toContain('▼');
   });
 
   test('renders Community preview without fake engagement', () => {
