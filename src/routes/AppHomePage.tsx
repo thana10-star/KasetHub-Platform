@@ -3,6 +3,12 @@ import { useNotificationCenter } from '@/hooks/useNotificationCenter';
 import { useWeather } from '@/hooks/useWeather';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 import {
+  getHomeCommodityPrices,
+  getPriceAdapterSnapshot,
+  type PriceAdapterSnapshot,
+} from '@/services/prices/price-adapter-service';
+import type { CommodityPrice } from '@/services/prices/price.types';
+import {
   Bell,
   BookOpenCheck,
   Bot,
@@ -118,10 +124,36 @@ function getWeatherStripSummary(input: {
   return `${input.conditionLabel ?? 'อากาศวันนี้'} · โอกาสฝน ${input.rainChancePercent}%`;
 }
 
-export function AppHomePage() {
+function formatHomePrice(price: number) {
+  return new Intl.NumberFormat('th-TH', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
+  }).format(price);
+}
+
+function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
+  const latestUpdatedAt = rows
+    .map((row) => row.updatedAt)
+    .sort((left, right) => right.localeCompare(left))[0];
+
+  if (!latestUpdatedAt) return 'รอวันที่อัปเดต';
+
+  return new Intl.DateTimeFormat('th-TH', {
+    dateStyle: 'medium',
+    timeZone: 'Asia/Bangkok',
+  }).format(new Date(latestUpdatedAt));
+}
+
+type AppHomePageProps = {
+  priceSnapshot?: PriceAdapterSnapshot;
+};
+
+export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHomePageProps = {}) {
   const notificationCenter = useNotificationCenter();
   const farmHub = buildHomeFarmHubViewModel();
   const { forecast } = useWeather();
+  const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
+  const hasValidatedHomePrices = homeCommodityPrices.length > 0;
   const currentWeather = forecast.current;
   const todayWeather = forecast.today;
   const temperatureC = Math.round(currentWeather?.temperatureC ?? todayWeather.maxTempC);
@@ -244,15 +276,35 @@ export function AppHomePage() {
                   ราคาวันนี้
                 </h2>
                 <p className="mt-0.5 text-xs font-semibold leading-5 text-slate-500">
-                  ข้อมูลตัวอย่าง · รอเชื่อมแหล่งราคาจริง
+                  {hasValidatedHomePrices
+                    ? `แหล่งข้อมูลจริง · อัปเดต ${formatHomePriceUpdatedLabel(homeCommodityPrices)}`
+                    : 'ข้อมูลตัวอย่าง · รอเชื่อมแหล่งราคาจริง'}
                 </p>
               </div>
               <span className="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-extrabold text-orange-800">
-                ยังไม่ใช่ราคาจริง
+                {hasValidatedHomePrices ? 'ราคาที่ตรวจสอบแล้ว' : 'ยังไม่ใช่ราคาจริง'}
               </span>
             </div>
             <div className="mt-3 grid gap-2">
-              {priceSnapshotItems.map((item) => {
+              {hasValidatedHomePrices ? (
+                homeCommodityPrices.map((item) => (
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg bg-orange-50/70 px-2.5 py-2" key={item.id}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${item.isStale ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-extrabold leading-5 text-kaset-ink">{item.commodityNameTh}</p>
+                      <p className="break-words text-xs font-semibold leading-5 text-slate-500">{item.sourceName}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePrice(item.price)}</p>
+                      <p className="text-xs font-extrabold leading-5 text-slate-600">
+                        {item.unit}
+                        {item.isStale ? ' · ข้อมูลเก่า' : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                priceSnapshotItems.map((item) => {
                 const isUp = item.direction === 'up';
 
                 return (
@@ -270,10 +322,13 @@ export function AppHomePage() {
                     </div>
                   </div>
                 );
-              })}
+                })
+              )}
             </div>
             <p className="mt-3 rounded-lg bg-yellow-50 px-3 py-2 text-xs font-semibold leading-5 text-yellow-900">
-              โครงสร้างนี้เตรียมไว้สำหรับแหล่งราคาจริงและกราฟเล็กในอนาคต
+              {hasValidatedHomePrices
+                ? 'แสดงเฉพาะแถวที่มีแหล่งข้อมูล หน่วย และวันที่อัปเดตครบถ้วน สินค้าที่ไม่มีข้อมูลจะไม่ใช้ตัวเลขตัวอย่างแทน'
+                : 'โครงสร้างนี้เตรียมไว้สำหรับแหล่งราคาจริงและกราฟเล็กในอนาคต'}
             </p>
           </Card>
 

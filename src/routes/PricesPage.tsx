@@ -5,6 +5,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
+import {
+  getPriceAdapterSnapshot,
+  type PriceAdapterSnapshot,
+} from '@/services/prices/price-adapter-service';
+import type { CommodityPrice } from '@/services/prices/price.types';
 
 const priceCommodityCards = [
   'ข้าว',
@@ -24,7 +29,36 @@ const sourceRequirements = [
   'มีชื่อแหล่งข้อมูล วันที่ และสถานะข้อมูลทุกครั้ง',
 ];
 
-export function PricesPage() {
+function formatPrice(price: number) {
+  return new Intl.NumberFormat('th-TH', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: Number.isInteger(price) ? 0 : 2,
+  }).format(price);
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('th-TH', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Bangkok',
+  }).format(new Date(value));
+}
+
+function getCommodityCardsWithoutValidatedRows(rows: CommodityPrice[]) {
+  const realCommodityNames = new Set(rows.map((row) => row.commodityNameTh));
+
+  return priceCommodityCards.filter((commodity) => !realCommodityNames.has(commodity));
+}
+
+type PricesPageProps = {
+  priceSnapshot?: PriceAdapterSnapshot;
+};
+
+export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: PricesPageProps = {}) {
+  const realCommodityRows = priceSnapshot.commodityPrices;
+  const hasValidatedRealRows = realCommodityRows.length > 0;
+  const pendingCommodityCards = getCommodityCardsWithoutValidatedRows(realCommodityRows);
+
   return (
     <div>
       <PageHeader title="ราคาเกษตร" subtitle="เช็กราคาสินค้าเกษตรและแนวโน้มเบื้องต้น" showBack />
@@ -37,30 +71,87 @@ export function PricesPage() {
                 <Tags aria-hidden="true" className="h-6 w-6" />
               </span>
               <div className="min-w-0 flex-1">
-                <Badge tone="gold">รอเชื่อมแหล่งข้อมูลจริง</Badge>
-                <h2 className="mt-3 text-2xl font-extrabold leading-8">ดูสินค้าเกษตรที่ต้องการติดตาม</h2>
+                <Badge tone={hasValidatedRealRows ? 'green' : 'gold'}>
+                  {hasValidatedRealRows ? 'มีแหล่งข้อมูลที่ตรวจสอบแล้ว' : 'รอเชื่อมแหล่งข้อมูลจริง'}
+                </Badge>
+                <h2 className="mt-3 text-2xl font-extrabold leading-8">
+                  {hasValidatedRealRows ? 'ราคาสินค้าเกษตรจากแหล่งข้อมูลจริง' : 'ดูสินค้าเกษตรที่ต้องการติดตาม'}
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-                  หน้านี้เตรียมโครงสร้างสำหรับราคาเกษตรจริง แต่ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูลที่ตรวจสอบได้
+                  {hasValidatedRealRows
+                    ? 'แสดงเฉพาะรายการที่ผ่านการตรวจสอบแหล่งข้อมูล หน่วย ราคา และวันที่อัปเดตแล้ว'
+                    : 'หน้านี้เตรียมโครงสร้างสำหรับราคาเกษตรจริง แต่ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูลที่ตรวจสอบได้'}
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        <NoticeBox tone="warning" icon={ShieldCheck} title="ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล">
-          KasetHub จะไม่ใส่ราคาสินค้าเกษตรขึ้นมาเอง และจะไม่แสดงตัวเลขราคาจนกว่าจะมีแหล่งข้อมูลจริง พร้อมชื่อแหล่งข้อมูล วันที่ และเงื่อนไขการใช้งานที่ชัดเจน
-        </NoticeBox>
+        {hasValidatedRealRows ? (
+          <NoticeBox tone="success" icon={ShieldCheck} title="แสดงเฉพาะราคาที่ผ่านการตรวจสอบ">
+            รายการราคาที่แสดงต้องมีชื่อแหล่งข้อมูล หน่วย ราคา วันที่อัปเดต และสถานะข้อมูลเก่าเมื่อข้อมูลพ้นรอบความสดใหม่
+          </NoticeBox>
+        ) : (
+          <NoticeBox tone="warning" icon={ShieldCheck} title="ยังไม่แสดงราคาจริงจนกว่าจะเชื่อมแหล่งข้อมูล">
+            KasetHub จะไม่ใส่ราคาสินค้าเกษตรขึ้นมาเอง และจะไม่แสดงตัวเลขราคาจนกว่าจะมีแหล่งข้อมูลจริง พร้อมชื่อแหล่งข้อมูล วันที่ และเงื่อนไขการใช้งานที่ชัดเจน
+          </NoticeBox>
+        )}
+
+        {hasValidatedRealRows ? (
+          <section className="grid gap-3" aria-labelledby="real-price-title">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="real-price-title" className="text-lg font-extrabold text-kaset-ink">
+                ราคาจากแหล่งข้อมูลที่ตรวจสอบแล้ว
+              </h2>
+              <Badge tone={priceSnapshot.sourceStatus.status === 'stale' ? 'gold' : 'green'}>
+                {priceSnapshot.sourceStatus.status === 'stale' ? 'มีข้อมูลเก่า' : 'พร้อมแสดงราคา'}
+              </Badge>
+            </div>
+            <div className="grid gap-3">
+              {realCommodityRows.map((row) => (
+                <Card className="p-4" key={row.id}>
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-emerald-100 text-emerald-800">
+                      <ChartNoAxesColumn aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="break-words text-lg font-extrabold leading-7 text-kaset-ink">
+                            {row.commodityNameTh}
+                          </h3>
+                          <p className="mt-1 break-words text-sm font-semibold leading-6 text-slate-600">
+                            {row.marketName}
+                            {row.province ? ` · ${row.province}` : ''}
+                          </p>
+                        </div>
+                        {row.isStale ? <Badge tone="gold">ข้อมูลเก่า</Badge> : <Badge tone="green">อัปเดตแล้ว</Badge>}
+                      </div>
+                      <p className="mt-3 text-2xl font-extrabold leading-8 text-kaset-ink">
+                        {formatPrice(row.price)}
+                        <span className="ml-2 text-sm font-bold text-slate-600">{row.unit}</span>
+                      </p>
+                      <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-500">
+                        แหล่งข้อมูล: {row.sourceName} · อัปเดต {formatDateTime(row.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="grid gap-3" aria-labelledby="price-commodity-title">
           <div className="flex items-center justify-between gap-3">
             <h2 id="price-commodity-title" className="text-lg font-extrabold text-kaset-ink">
-              สินค้าที่เกษตรกรติดตามบ่อย
+              {hasValidatedRealRows ? 'รายการที่ยังรอแหล่งข้อมูล' : 'สินค้าที่เกษตรกรติดตามบ่อย'}
             </h2>
             <Badge tone="neutral">แหล่งข้อมูลรอเชื่อม</Badge>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            {priceCommodityCards.map((commodity) => (
+            {pendingCommodityCards.map((commodity) => (
               <Card className="p-4" key={commodity}>
                 <div className="flex items-start gap-3">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
@@ -84,6 +175,23 @@ export function PricesPage() {
             ))}
           </div>
         </section>
+
+        <Card className="p-4">
+          <div className="flex gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-lime-100 text-lime-800">
+              <Tags aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-extrabold text-kaset-ink">ราคาปุ๋ย</h2>
+                <Badge tone="neutral">ยังไม่แสดงราคา</Badge>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                ปุ๋ยยังรอแหล่งข้อมูลที่ตรวจสอบได้ จึงไม่แสดงตัวเลขราคา สูตร และขนาดกระสอบจนกว่าจะมีแหล่งข้อมูลพร้อมวันที่อัปเดตชัดเจน
+              </p>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-4">
           <div className="flex gap-3">

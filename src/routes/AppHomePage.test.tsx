@@ -5,11 +5,13 @@ import { AppHomePage } from '@/routes/AppHomePage';
 import { FarmRecordsDebugPage } from '@/routes/FarmRecordsDebugPage';
 import { MyFarmPage } from '@/routes/MyFarmPage';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
+import { getPriceAdapterSnapshot } from '@/services/prices/price-adapter-service';
+import type { ManualCommodityPriceRow } from '@/services/prices/price.types';
 
-function renderHome() {
+function renderHome(props?: Parameters<typeof AppHomePage>[0]) {
   return renderToString(
     <MemoryRouter>
-      <AppHomePage />
+      <AppHomePage {...(props ?? {})} />
     </MemoryRouter>,
   );
 }
@@ -78,6 +80,37 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).toContain('▲ 0.6%');
     expect(html).toContain('เช็กราคา');
     expect(html).toContain('/app/prices');
+  });
+
+  test('shows validated real Home price rows without mixing sample rows', () => {
+    const realPriceRows: ManualCommodityPriceRow[] = [
+      {
+        commodityCode: 'rice',
+        commodityNameTh: 'ข้าว',
+        fetchedAt: '2026-05-27T01:00:00.000Z',
+        id: 'home-rice',
+        marketName: 'ตลาดกลางทดสอบ',
+        price: 12500,
+        sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
+        unit: 'บาท/ตัน',
+        updatedAt: '2026-05-27T00:00:00.000Z',
+      },
+    ];
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: realPriceRows,
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const text = visibleText(renderHome({ priceSnapshot }));
+
+    expect(text).toContain('แหล่งข้อมูลจริง');
+    expect(text).toContain('ราคาที่ตรวจสอบแล้ว');
+    expect(text).toContain('ข้าว');
+    expect(text).toContain('12,500');
+    expect(text).toContain('บาท/ตัน');
+    expect(text).toContain('แหล่งข้อมูลเจ้าของระบบ');
+    expect(text).not.toContain('ข้อมูลตัวอย่าง');
+    expect(text).not.toContain('ยังไม่ใช่ราคาจริง');
+    expect(text).not.toContain('58.50');
   });
 
   test('renders the requested quick action cards', () => {
