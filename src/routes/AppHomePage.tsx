@@ -133,10 +133,14 @@ function formatHomePrice(price: number) {
 
 function formatHomePriceValue(row: CommodityPrice) {
   if (typeof row.priceMax === 'number' && row.priceMax > row.price) {
-    return `${formatHomePrice(row.price)}-${formatHomePrice(row.priceMax)}`;
+    return `${formatHomePrice(row.price)}–${formatHomePrice(row.priceMax)}`;
   }
 
   return formatHomePrice(row.price);
+}
+
+function hasHomePriceRange(row: CommodityPrice) {
+  return typeof row.priceMax === 'number' && row.priceMax > row.price;
 }
 
 function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
@@ -161,7 +165,9 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
   const farmHub = buildHomeFarmHubViewModel();
   const { forecast } = useWeather();
   const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
-  const hasValidatedHomePrices = homeCommodityPrices.length > 0;
+  const hasValidatedPriceRows = priceSnapshot.hasValidatedCommodityPrices;
+  const hasEligibleHomePrices = homeCommodityPrices.length > 0;
+  const shouldShowSamplePrices = !hasValidatedPriceRows;
   const currentWeather = forecast.current;
   const todayWeather = forecast.today;
   const temperatureC = Math.round(currentWeather?.temperatureC ?? todayWeather.maxTempC);
@@ -284,35 +290,38 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
                   ราคาวันนี้
                 </h2>
                 <p className="mt-0.5 text-xs font-semibold leading-5 text-slate-500">
-                  {hasValidatedHomePrices
+                  {hasEligibleHomePrices
                     ? `แหล่งข้อมูลจริง · อัปเดต ${formatHomePriceUpdatedLabel(homeCommodityPrices)}`
-                    : 'ข้อมูลตัวอย่าง · รอเชื่อมแหล่งราคาจริง'}
+                    : shouldShowSamplePrices
+                      ? 'ข้อมูลตัวอย่าง · รอเชื่อมแหล่งราคาจริง'
+                      : 'ยังไม่มีแถวที่เหมาะกับหน้าแรก · ดูทั้งหมดในหน้าราคา'}
                 </p>
               </div>
               <span className="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-extrabold text-orange-800">
-                {hasValidatedHomePrices ? 'ราคาที่ตรวจสอบแล้ว' : 'ยังไม่ใช่ราคาจริง'}
+                {hasEligibleHomePrices ? 'ราคาที่ตรวจสอบแล้ว' : shouldShowSamplePrices ? 'ยังไม่ใช่ราคาจริง' : 'ดูหน้าราคา'}
               </span>
             </div>
             <div className="mt-3 grid gap-2">
-              {hasValidatedHomePrices ? (
+              {hasEligibleHomePrices ? (
                 homeCommodityPrices.map((item) => (
                   <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg bg-orange-50/70 px-2.5 py-2" key={item.id}>
                     <span className={`h-2.5 w-2.5 rounded-full ${item.isStale ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                     <div className="min-w-0">
                       <p className="break-words text-sm font-extrabold leading-5 text-kaset-ink">{item.commodityNameTh}</p>
-                      <p className="break-words text-xs font-semibold leading-5 text-slate-500">{item.sourceName}</p>
+                      <p className="break-words text-xs font-semibold leading-5 text-slate-500">{item.sourceDisplayName}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-extrabold leading-5 text-kaset-ink">{formatHomePriceValue(item)}</p>
                       <p className="text-xs font-extrabold leading-5 text-slate-600">
                         {item.unit}
+                        {hasHomePriceRange(item) ? ' · ช่วงราคา' : ''}
                         {item.freshnessPolicy === 'seasonal_reference' ? ' · อ้างอิง' : ''}
                         {item.isStale ? ' · ข้อมูลเก่า' : ''}
                       </p>
                     </div>
                   </div>
                 ))
-              ) : (
+              ) : shouldShowSamplePrices ? (
                 priceSnapshotItems.map((item) => {
                 const isUp = item.direction === 'up';
 
@@ -332,12 +341,26 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
                   </div>
                 );
                 })
+              ) : (
+                <div className="rounded-lg bg-orange-50/70 px-3 py-3">
+                  <p className="text-sm font-extrabold leading-5 text-kaset-ink">ยังไม่มีราคาที่เหมาะกับหน้าแรก</p>
+                  <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                    แถวที่เป็นข้อมูลเก่าหรืออ้างอิงตามฤดูกาลยังดูได้ในหน้าราคาเกษตร
+                  </p>
+                </div>
               )}
             </div>
             <p className="mt-3 rounded-lg bg-yellow-50 px-3 py-2 text-xs font-semibold leading-5 text-yellow-900">
-              {hasValidatedHomePrices
-                ? 'แสดงเฉพาะแถวที่มีแหล่งข้อมูล หน่วย และวันที่อัปเดตครบถ้วน สินค้าที่ไม่มีข้อมูลจะไม่ใช้ตัวเลขตัวอย่างแทน'
-                : 'โครงสร้างนี้เตรียมไว้สำหรับแหล่งราคาจริงและกราฟเล็กในอนาคต'}
+              {hasEligibleHomePrices
+                ? 'แสดงเฉพาะแถวที่เหมาะกับหน้าแรก สินค้าที่ไม่มีข้อมูลจะไม่ใช้ตัวเลขตัวอย่างแทน'
+                : shouldShowSamplePrices
+                  ? 'โครงสร้างนี้เตรียมไว้สำหรับแหล่งราคาจริงและกราฟเล็กในอนาคต'
+                  : 'ดูรายการทั้งหมด รวมถึงราคาอ้างอิงหรือข้อมูลเก่า ได้ที่หน้าราคาเกษตร'}
+              {hasEligibleHomePrices && homeCommodityPrices.length < 4 ? (
+                <Link className="ml-1 font-extrabold text-kaset-deep" to="/app/prices">
+                  ดูทั้งหมด
+                </Link>
+              ) : null}
             </p>
           </Card>
 

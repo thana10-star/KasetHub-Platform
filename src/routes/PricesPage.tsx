@@ -38,10 +38,14 @@ function formatPrice(price: number) {
 
 function formatPriceValue(row: CommodityPrice) {
   if (typeof row.priceMax === 'number' && row.priceMax > row.price) {
-    return `${formatPrice(row.price)}-${formatPrice(row.priceMax)}`;
+    return `${formatPrice(row.price)}–${formatPrice(row.priceMax)}`;
   }
 
   return formatPrice(row.price);
+}
+
+function hasPriceRange(row: CommodityPrice) {
+  return typeof row.priceMax === 'number' && row.priceMax > row.price;
 }
 
 function formatDateTime(value: string) {
@@ -134,6 +138,7 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
                           </p>
                         </div>
                         {row.isStale ? <Badge tone="gold">ข้อมูลเก่า</Badge> : <Badge tone="green">อัปเดตแล้ว</Badge>}
+                        {hasPriceRange(row) ? <Badge tone="sky">ช่วงราคา</Badge> : null}
                         {row.freshnessPolicy === 'seasonal_reference' ? (
                           <Badge tone="sky">ราคาอ้างอิงตามฤดูกาล</Badge>
                         ) : null}
@@ -143,7 +148,7 @@ export function PricesPage({ priceSnapshot = getPriceAdapterSnapshot() }: Prices
                         <span className="ml-2 text-sm font-bold text-slate-600">{row.unit}</span>
                       </p>
                       <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-500">
-                        แหล่งข้อมูล: {row.sourceName} · อัปเดต {formatDateTime(row.updatedAt)}
+                        แหล่งข้อมูล: {row.sourceDisplayName} · อัปเดต {formatDateTime(row.updatedAt)}
                       </p>
                       {row.notes ? <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-500">{row.notes}</p> : null}
                     </div>

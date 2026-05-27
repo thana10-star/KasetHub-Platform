@@ -66,6 +66,7 @@ export function validateCommodityPriceRows(
     const commodityNameTh = row.commodityNameTh?.trim() ?? '';
     const marketName = row.marketName?.trim() ?? '';
     const sourceName = row.sourceName?.trim() ?? '';
+    const sourceDisplayName = row.sourceDisplayName?.trim() || sourceName;
     const unit = row.unit?.trim() ?? '';
 
     if (!hasText(commodityNameTh)) {
@@ -141,9 +142,11 @@ export function validateCommodityPriceRows(
       priceMax: row.priceMax ?? undefined,
       province: row.province,
       sourceAttribution: row.sourceAttribution?.trim() || sourceName,
+      sourceDisplayName,
       sourceName,
       sourceType: row.sourceType ?? 'manual',
       sourceUrl: row.sourceUrl,
+      showOnHome: row.showOnHome === true,
       trend: row.trend ?? 'unknown',
       unit,
       updatedAt: updatedAt.toISOString(),

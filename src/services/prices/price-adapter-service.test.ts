@@ -10,6 +10,7 @@ const validRows: ManualCommodityPriceRow[] = [
     id: 'cassava',
     marketName: 'ตลาดกลางทดสอบ',
     price: 3.2,
+    showOnHome: true,
     sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
     unit: 'บาท/กก.',
     updatedAt: '2026-05-27T00:00:00.000Z',
@@ -21,6 +22,7 @@ const validRows: ManualCommodityPriceRow[] = [
     id: 'rice',
     marketName: 'ตลาดกลางทดสอบ',
     price: 12500,
+    showOnHome: true,
     sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
     unit: 'บาท/ตัน',
     updatedAt: '2026-05-27T00:00:00.000Z',
@@ -61,5 +63,26 @@ describe('price adapter service', () => {
 
     expect(homeRows.map((row) => row.commodityCode)).toEqual(['rice', 'cassava']);
     expect(homeRows.every((row) => row.sourceType === 'manual')).toBe(true);
+  });
+
+  test('excludes non-home and stale rows from Home', () => {
+    const snapshot = getPriceAdapterSnapshot({
+      commodityRows: [
+        ...validRows,
+        { ...validRows[0], commodityCode: 'sugarcane', id: 'sugarcane', showOnHome: false },
+        {
+          ...validRows[1],
+          id: 'stale-rice',
+          fetchedAt: '2026-05-24T01:00:00.000Z',
+          updatedAt: '2026-05-24T00:00:00.000Z',
+        },
+      ],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+
+    const homeRows = getHomeCommodityPrices(snapshot);
+
+    expect(homeRows.map((row) => row.id)).toEqual(['rice', 'cassava']);
+    expect(homeRows.every((row) => row.showOnHome && !row.isStale)).toBe(true);
   });
 });

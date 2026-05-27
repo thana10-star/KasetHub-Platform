@@ -31,12 +31,14 @@ export type CommodityPrice = {
   changePercent?: number;
   trend: PriceTrend;
   sourceName: string;
+  sourceDisplayName: string;
   sourceUrl?: string;
   sourceType: PriceSourceType;
   sourceAttribution: string;
   updatedAt: string;
   fetchedAt: string;
   freshnessPolicy: PriceFreshnessPolicy;
+  showOnHome: boolean;
   isStale: boolean;
   isEstimated: false;
   notes?: string;
@@ -87,6 +89,7 @@ export type ManualCommodityPriceRow = {
   changePercent?: number;
   trend?: PriceTrend;
   sourceName?: string;
+  sourceDisplayName?: string;
   sourceUrl?: string;
   sourceType?: PriceSourceType;
   sourceAttribution?: string;
@@ -94,6 +97,7 @@ export type ManualCommodityPriceRow = {
   fetchedAt?: string;
   freshnessPolicy?: PriceFreshnessPolicy;
   freshnessWindowHours?: number;
+  showOnHome?: boolean;
   isEstimated?: boolean;
   notes?: string;
 };

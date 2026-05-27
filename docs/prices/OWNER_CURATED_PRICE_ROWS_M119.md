@@ -68,3 +68,16 @@ M120 added the first verified manual rows for rice, rubber, cassava, and sugarca
 - Rice and cassava show ranges because the source provides `price_min` and `price_max`.
 - Home switches to real-row mode because validated rows now exist.
 - Fertilizer remains source-pending.
+
+## M121 Home Eligibility Update
+
+M121 adds `showOnHome` and `sourceDisplayName` to manual rows.
+
+Home eligibility:
+
+- Rice: `showOnHome: true`
+- Rubber: `showOnHome: true`
+- Cassava: `showOnHome: true`
+- Sugarcane: `showOnHome: false`
+
+Home excludes stale rows and does not backfill missing real rows with sample values. Sugarcane remains visible on `/app/prices` as seasonal/reference data.

@@ -124,3 +124,17 @@ Source rules added in M120:
 - Preserve source min/max ranges instead of inventing a single midpoint.
 - Mark sugarcane as seasonal/reference, not daily market price.
 - Keep fertilizer source-pending until formula, package size, unit, and freshness are verified.
+
+## M121 Home Eligibility
+
+M121 adds:
+
+- `showOnHome`: controls whether a validated row can appear on Home.
+- `sourceDisplayName`: concise user-facing source label.
+
+Home now shows only eligible, non-stale rows. `/app/prices` still shows all valid rows with range/reference/stale labels.
+
+Current source display labels:
+
+- `กรมการค้าภายใน กระทรวงพาณิชย์`
+- `ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์`

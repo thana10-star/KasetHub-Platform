@@ -14,10 +14,10 @@ Fetched at: `2026-05-27T18:20:00+07:00`
 
 | Commodity | Source | Source URL | Price | Unit | Source context | Updated date | Frequency/type | Home suitability | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ข้าวเปลือกหอมมะลิ | MOC Open Data / กรมการค้าภายใน | `https://dataapi.moc.go.th/gis-product-prices?product_id=R11055&from_date=2026-05-01&to_date=2026-05-27` | 16,200-18,600 | บาท/ตัน | ราคาขายส่งข้าว ผลิตภัณฑ์ข้าวและกระสอบป่าน | 2026-05-27 | Daily market/API | Yes | Uses source-provided `price_min` and `price_max`; not collapsed into a fake single value. |
+| ข้าวเปลือกหอมมะลิ | MOC Open Data / กรมการค้าภายใน | `https://dataapi.moc.go.th/gis-product-prices?product_id=R11055&from_date=2026-05-01&to_date=2026-05-27` | 16,200–18,600 | บาท/ตัน | ราคาขายส่งข้าว ผลิตภัณฑ์ข้าวและกระสอบป่าน | 2026-05-27 | Daily market/API | Yes | Uses source-provided `price_min` and `price_max`; not collapsed into a fake single value. |
 | ยางแผ่นดิบชั้น 3 | MOC Open Data / กรมการค้าภายใน | `https://dataapi.moc.go.th/gis-product-prices?product_id=W16023&from_date=2026-05-01&to_date=2026-05-27` | 79 | บาท/ กก. | ราคาเกษตรกรขายได้ จ.สุราษฎร์ธานี | 2026-05-27 | Daily market/API | Yes | Source `price_min` and `price_max` were both 79. |
-| มันสำปะหลัง | MOC Open Data / กรมการค้าภายใน | `https://dataapi.moc.go.th/gis-product-prices?product_id=W16031&from_date=2026-05-01&to_date=2026-05-27` | 3-3.55 | บาท/กก. | ราคาเกษตรกรขายได้ นครราชสีมา แป้ง 25% | 2026-05-27 | Daily market/API | Yes | Uses source-provided range; not labeled as nationwide cassava. |
-| อ้อย | กรมประชาสัมพันธ์ / รัฐบาลไทย | `https://www.prd.go.th/th/content/category/detail/id/33/iid/475030` | 890 | บาท/ตันอ้อย | ราคาอ้อยขั้นต้น ฤดูการผลิตปี 2568/2569 ที่ความหวาน 10 CCS | 2026-02-10 | Seasonal/reference | Yes, with reference label | Not daily market price. Displayed as seasonal/reference. |
+| มันสำปะหลัง | MOC Open Data / กรมการค้าภายใน | `https://dataapi.moc.go.th/gis-product-prices?product_id=W16031&from_date=2026-05-01&to_date=2026-05-27` | 3–3.55 | บาท/กก. | ราคาเกษตรกรขายได้ นครราชสีมา แป้ง 25% | 2026-05-27 | Daily market/API | Yes | Uses source-provided range; not labeled as nationwide cassava. |
+| อ้อย | กรมประชาสัมพันธ์ / รัฐบาลไทย | `https://www.prd.go.th/th/content/category/detail/id/33/iid/475030` | 890 | บาท/ตันอ้อย | ราคาอ้อยขั้นต้น ฤดูการผลิตปี 2568/2569 ที่ความหวาน 10 CCS | 2026-02-10 | Seasonal/reference | No by default | Not daily market price. Displayed on `/app/prices` as seasonal/reference. |
 
 ## Source Evidence
 
@@ -55,3 +55,13 @@ No NABC/OAE rows were added because MOC/DIT had clearer product IDs, units, late
 - Rice and cassava display ranges because the source returned min/max values.
 - Sugarcane is explicitly reference/seasonal, not daily.
 - Unsupported commodities remain source-pending.
+
+## M121 Display Polish
+
+M121 keeps the M120 rows but adds Home eligibility and cleaner labels:
+
+- Home shows rice, rubber, and cassava only.
+- Sugarcane is hidden from Home by default because it is seasonal/reference.
+- MOC/DIT rows display source label `กรมการค้าภายใน กระทรวงพาณิชย์`.
+- PRD / ThaiGov row displays source label `ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์`.
+- Range rows show `ช่วงราคา`.

@@ -28,15 +28,17 @@ describe('M108.2 production agriculture price hub', () => {
 
     expect(html).toContain('ราคาจากแหล่งข้อมูลที่ตรวจสอบแล้ว');
     expect(html).toContain('ข้าวเปลือกหอมมะลิ');
-    expect(html).toContain('16,200-18,600');
+    expect(html).toContain('16,200–18,600');
     expect(html).toContain('ยางแผ่นดิบชั้น 3');
     expect(html).toContain('79');
     expect(html).toContain('มันสำปะหลัง');
-    expect(html).toContain('3-3.55');
+    expect(html).toContain('3–3.55');
     expect(html).toContain('อ้อย');
     expect(html).toContain('890');
     expect(html).toContain('ราคาอ้างอิงตามฤดูกาล');
-    expect(html).toContain('MOC Open Data / กรมการค้าภายใน');
+    expect(html).toContain('ช่วงราคา');
+    expect(html).toContain('กรมการค้าภายใน กระทรวงพาณิชย์');
+    expect(html).toContain('ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์');
     expect(html).toContain('ข้าวโพด');
     expect(html).toContain('ปาล์มน้ำมัน');
     expect(html).toContain('พริก');

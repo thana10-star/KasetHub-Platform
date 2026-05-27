@@ -103,3 +103,20 @@ Rules now active:
 - Sugarcane displays a seasonal/reference label.
 - Unsupported commodities remain source-pending.
 - No chart or sparkline is shown because historical data is not connected.
+
+## M121 Home Eligibility And Labels
+
+Home now uses explicit eligibility:
+
+- show only `showOnHome: true`
+- hide stale rows by default
+- hide seasonal/reference rows unless explicitly allowed
+- do not backfill fewer than 4 real rows with sample rows
+
+`/app/prices` remains the full review surface for daily, range, stale, and reference rows.
+
+Range rows display with an en dash and `ช่วงราคา`, for example `16,200–18,600 บาท/ตัน`.
+
+Sugarcane is labeled `ราคาอ้างอิงตามฤดูกาล` and is hidden from Home by default.
+
+Concise source labels are shown in UI while detailed source metadata remains stored on the row.

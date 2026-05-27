@@ -91,6 +91,7 @@ describe('M116.9 home dashboard polish', () => {
         id: 'home-rice',
         marketName: 'ตลาดกลางทดสอบ',
         price: 12500,
+        showOnHome: true,
         sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
         unit: 'บาท/ตัน',
         updatedAt: '2026-05-27T00:00:00.000Z',
@@ -139,7 +140,7 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('ราคาที่ตรวจสอบแล้ว');
   });
 
-  test('shows stale copy for stale validated Home price rows', () => {
+  test('excludes stale validated rows from Home without backfilling samples', () => {
     const priceSnapshot = getPriceAdapterSnapshot({
       commodityRows: [
         {
@@ -149,6 +150,7 @@ describe('M116.9 home dashboard polish', () => {
           id: 'stale-home-rice',
           marketName: 'ตลาดกลางทดสอบ',
           price: 12500,
+          showOnHome: true,
           sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
           unit: 'บาท/ตัน',
           updatedAt: '2026-05-24T00:00:00.000Z',
@@ -158,11 +160,50 @@ describe('M116.9 home dashboard polish', () => {
     });
     const text = visibleText(renderHome({ priceSnapshot }));
 
+    expect(text).toContain('ยังไม่มีราคาที่เหมาะกับหน้าแรก');
+    expect(text).not.toContain('12,500');
+    expect(text).not.toContain('ข้อมูลตัวอย่าง');
+    expect(text).not.toContain('58.50');
+  });
+
+  test('excludes showOnHome false reference rows from Home', () => {
+    const priceSnapshot = getPriceAdapterSnapshot({
+      commodityRows: [
+        {
+          commodityCode: 'rice',
+          commodityNameTh: 'ข้าว',
+          fetchedAt: '2026-05-27T01:00:00.000Z',
+          id: 'home-rice-visible',
+          marketName: 'ตลาดกลางทดสอบ',
+          price: 12500,
+          showOnHome: true,
+          sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
+          unit: 'บาท/ตัน',
+          updatedAt: '2026-05-27T00:00:00.000Z',
+        },
+        {
+          commodityCode: 'sugarcane',
+          commodityNameTh: 'อ้อย',
+          fetchedAt: '2026-05-27T01:00:00.000Z',
+          freshnessPolicy: 'seasonal_reference',
+          id: 'home-sugarcane-hidden',
+          marketName: 'ราคาอ้างอิงตามฤดูกาล',
+          price: 890,
+          showOnHome: false,
+          sourceName: 'ข้อมูลอ้างอิงจากรัฐบาลไทย / กรมประชาสัมพันธ์',
+          unit: 'บาท/ตันอ้อย',
+          updatedAt: '2026-02-10T00:00:00.000Z',
+        },
+      ],
+      now: new Date('2026-05-27T02:00:00.000Z'),
+    });
+    const text = visibleText(renderHome({ priceSnapshot }));
+
     expect(text).toContain('ข้าว');
     expect(text).toContain('12,500');
-    expect(text).toContain('บาท/ตัน');
-    expect(text).toContain('ข้อมูลเก่า');
-    expect(text).not.toContain('58.50');
+    expect(text).not.toContain('อ้อย');
+    expect(text).not.toContain('890');
+    expect(text).not.toContain('ข้อมูลตัวอย่าง');
   });
 
   test('renders the requested quick action cards', () => {

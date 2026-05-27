@@ -54,5 +54,7 @@ export function getPriceAdapterSnapshot(options: PriceAdapterSnapshotOptions = {
 }
 
 export function getHomeCommodityPrices(snapshot: PriceAdapterSnapshot = getPriceAdapterSnapshot()) {
-  return sortCommodityPricesForHome(snapshot.commodityPrices).slice(0, 4);
+  return sortCommodityPricesForHome(
+    snapshot.commodityPrices.filter((row) => row.showOnHome && !row.isStale),
+  ).slice(0, 4);
 }

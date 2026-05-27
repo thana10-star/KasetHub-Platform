@@ -98,6 +98,8 @@ describe('price validation', () => {
         isEstimated: false,
         isStale: false,
         price: 12500,
+        showOnHome: false,
+        sourceDisplayName: 'แหล่งข้อมูลเจ้าของระบบ',
         sourceName: 'แหล่งข้อมูลเจ้าของระบบ',
       }),
     ]);
