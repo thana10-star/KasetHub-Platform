@@ -12,3 +12,6 @@ dist/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+# Local AI/code-analysis artifacts
+graphify-out/
+.codex-vite-*.log
