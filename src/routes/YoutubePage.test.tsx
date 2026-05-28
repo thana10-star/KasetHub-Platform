@@ -26,7 +26,7 @@ function visibleText(html: string) {
     .trim();
 }
 
-function renderYoutubePage(videos?: ChannelVideo[]) {
+function renderYoutubePage(videos: ChannelVideo[] = []) {
   return renderToString(
     <MemoryRouter>
       <YoutubePage videos={videos} />
@@ -63,6 +63,17 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('กลับหน้าแรก');
     expect(html).toContain('/app');
     expect(html).toContain('https://www.youtube.com/@ruengkaset');
+  });
+
+  test('renders /app/youtube loading state before backend response', () => {
+    const html = renderYoutubePageWithProps({});
+    const text = visibleText(html);
+
+    expect(text).toContain('กำลังโหลดวิดีโอจากช่อง');
+    expect(text).toContain('กำลังเชื่อมวิดีโอจริงจากช่องเจ้าของระบบ');
+    expect(text).not.toContain('กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
   });
 
   test('does not surface legacy mock video data or fake engagement on /app/youtube', () => {
@@ -150,6 +161,63 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(html).toContain('grid-cols-[112px_minmax(0,1fr)]');
     expect(html).toContain('[-webkit-line-clamp:3]');
     expect(text).not.toContain('views');
+  });
+
+  test('renders stale /app/youtube backend videos with stale copy', () => {
+    const staleVideo: ChannelVideo = {
+      id: 'm129-stale-library-video',
+      videoId: 'm129-stale-library-video',
+      title: 'M129 stale library video',
+      url: 'https://www.youtube.com/watch?v=m129-stale-library-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m129-stale-library-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      description: 'M129 stale library description should stay hidden',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M129 Channel',
+      fetchedAt: '2026-05-28T02:00:00.000Z',
+    };
+    const html = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'stale',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M129 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [staleVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('แสดงข้อมูลล่าสุดที่เคยโหลดได้');
+    expect(text).toContain('ข้อมูลอาจไม่ล่าสุด');
+    expect(text).toContain('M129 stale library video');
+    expect(text).not.toContain('M129 stale library description should stay hidden');
+    expect(text).not.toContain('views');
+  });
+
+  test('renders friendly /app/youtube error state without raw backend errors', () => {
+    const html = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'error',
+        channel: {
+          handle: '@ruengkaset',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [],
+        errorMessage: 'Raw YouTube backend error should not render',
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('ยังโหลดวิดีโอจากช่องไม่ได้');
+    expect(text).toContain('กรุณาลองใหม่ภายหลัง');
+    expect(text).toContain('เปิดช่อง YouTube');
+    expect(html).toContain('https://www.youtube.com/@ruengkaset');
+    expect(text).not.toContain('Raw YouTube backend error should not render');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
   });
 
   test('keeps /app/youtube source-pending when provided entries are not real videos', () => {

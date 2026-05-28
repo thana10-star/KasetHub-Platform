@@ -235,7 +235,16 @@ describe('M116.9 home dashboard polish', () => {
   });
 
   test('renders latest channel video placeholder without fake engagement', () => {
-    const html = renderHome();
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'not_configured',
+        channel: {
+          handle: '@ruengkaset',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [],
+      },
+    });
     const text = visibleText(html);
 
     expect(text).toContain('วิดีโอล่าสุดจากช่อง');
@@ -246,6 +255,18 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('ยอดดู');
     expect(text).not.toContain('ไลก์');
     expect(text).not.toContain('คอมเมนต์');
+    expect(text).not.toContain('views');
+  });
+
+  test('renders Home latest video loading state before backend response', () => {
+    const html = renderHome();
+    const text = visibleText(html);
+
+    expect(text).toContain('กำลังโหลดวิดีโอล่าสุด');
+    expect(text).toContain('วิดีโอจากช่องจริง');
+    expect(text).not.toContain('วิดีโอล่าสุดจากช่อง');
+    expect(text).not.toContain('24K');
+    expect(text).not.toContain('ยอดดู');
     expect(text).not.toContain('views');
   });
 
@@ -332,6 +353,60 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('M128 full Home video description should not render in the compact latest card');
     expect(html).toContain('grid-cols-[88px_minmax(0,1fr)]');
     expect(html).toContain('[-webkit-line-clamp:2]');
+  });
+
+  test('renders stale Home backend video with a small stale copy', () => {
+    const staleVideo: ChannelVideo = {
+      id: 'm129-stale-home-video',
+      videoId: 'm129-stale-home-video',
+      title: 'M129 stale backend latest video',
+      url: 'https://www.youtube.com/watch?v=m129-stale-home-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m129-stale-home-video/hqdefault.jpg',
+      description: 'M129 stale Home description should stay hidden',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M129 Channel',
+      fetchedAt: '2026-05-28T02:00:00.000Z',
+    };
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'stale',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M129 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [staleVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('M129 stale backend latest video');
+    expect(text).toContain('ข้อมูลอาจไม่ล่าสุด');
+    expect(text).not.toContain('M129 stale Home description should stay hidden');
+    expect(text).not.toContain('views');
+  });
+
+  test('renders friendly Home error copy without raw backend errors or fake engagement', () => {
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'error',
+        channel: {
+          handle: '@ruengkaset',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [],
+        errorMessage: 'Raw YouTube API quota/backend failure should not render',
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('ยังโหลดวิดีโอจากช่องไม่ได้ กรุณาลองใหม่ภายหลัง');
+    expect(text).toContain('เปิดช่อง YouTube');
+    expect(html).toContain('https://www.youtube.com/@ruengkaset');
+    expect(text).not.toContain('Raw YouTube API quota/backend failure should not render');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
   });
 
   test('keeps source-pending video state when a provided entry is not real', () => {

@@ -25,10 +25,11 @@ Cards can show:
 
 - thumbnail
 - title
-- description
 - published date if provided by the backend
 - channel name if provided
 - `ดูวิดีโอ` link to the real YouTube URL
+
+After M128/M129, Home and the `/app/youtube` list intentionally do not render long description blocks. Descriptions may remain in normalized data for future detail surfaces, but list cards stay title-focused.
 
 Cards must not show:
 

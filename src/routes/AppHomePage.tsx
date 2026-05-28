@@ -177,6 +177,10 @@ function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
   }).format(new Date(latestUpdatedAt));
 }
 
+function getLatestVideoChannelUrl(response?: YouTubeLatestBackendResponse | null) {
+  return response?.channel.channelUrl ?? response?.channel.url;
+}
+
 type AppHomePageProps = {
   priceSnapshot?: PriceAdapterSnapshot;
   latestVideo?: ChannelVideo | null;
@@ -191,6 +195,7 @@ export function AppHomePage({
   priceSnapshot = getPriceAdapterSnapshot(),
 }: AppHomePageProps = {}) {
   const [backendLatestVideoResponse, setBackendLatestVideoResponse] = useState<YouTubeLatestBackendResponse | undefined>();
+  const [hasFetchedLatestVideoResponse, setHasFetchedLatestVideoResponse] = useState(false);
   const notificationCenter = useNotificationCenter();
   const farmHub = buildHomeFarmHubViewModel();
   const { forecast } = useWeather();
@@ -200,6 +205,12 @@ export function AppHomePage({
       ? getLatestVideo(listLatestVideosWithBackendFallback(effectiveLatestVideoResponse))
       : latestVideo ?? undefined;
   const realLatestVideo = configuredLatestVideo && isUsableChannelVideo(configuredLatestVideo) ? configuredLatestVideo : undefined;
+  const shouldFetchLatestVideo = latestVideo === undefined && latestVideoResponse === undefined;
+  const isLatestVideoLoading = shouldFetchLatestVideo && !hasFetchedLatestVideoResponse;
+  const latestVideoBackendStatus = effectiveLatestVideoResponse?.status;
+  const isLatestVideoStale = latestVideoBackendStatus === 'stale' && realLatestVideo?.source === 'youtube_api';
+  const isLatestVideoError = latestVideoBackendStatus === 'error' && !realLatestVideo;
+  const latestVideoChannelUrl = getLatestVideoChannelUrl(effectiveLatestVideoResponse);
   const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
   const hasValidatedPriceRows = priceSnapshot.hasValidatedCommodityPrices;
   const hasEligibleHomePrices = homeCommodityPrices.length > 0;
@@ -222,12 +233,16 @@ export function AppHomePage({
     if (latestVideo !== undefined || latestVideoResponse !== undefined) return undefined;
 
     let isActive = true;
+    setHasFetchedLatestVideoResponse(false);
 
     fetchLatestVideoResponse()
       .then((response) => {
         if (isActive) setBackendLatestVideoResponse(response);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (isActive) setHasFetchedLatestVideoResponse(true);
+      });
 
     return () => {
       isActive = false;
@@ -441,7 +456,52 @@ export function AppHomePage({
 
         <section aria-labelledby="home-video-title">
           <Card className="overflow-hidden p-0">
-            <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
+            {isLatestVideoLoading ? (
+              <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
+                <div aria-hidden="true" className="h-20 rounded-lg bg-slate-100 sm:h-24">
+                  <div className="h-full w-full animate-pulse rounded-lg bg-gradient-to-r from-slate-100 via-white to-slate-100" />
+                </div>
+                <div className="min-w-0 self-center">
+                  <p className="text-xs font-extrabold leading-5 text-sky-800">วิดีโอจากช่องจริง</p>
+                  <h2 id="home-video-title" className="break-words text-sm font-extrabold leading-5 text-kaset-ink sm:text-base sm:leading-6">
+                    กำลังโหลดวิดีโอล่าสุด
+                  </h2>
+                  <div aria-hidden="true" className="mt-2 h-8 w-24 animate-pulse rounded-lg bg-slate-100" />
+                </div>
+              </div>
+            ) : isLatestVideoError ? (
+              <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
+                <div className="grid h-20 place-items-center rounded-lg bg-amber-50 text-amber-800 sm:h-24">
+                  <PlaySquare aria-hidden="true" className="h-8 w-8" />
+                </div>
+                <div className="min-w-0 self-center">
+                  <p className="text-xs font-extrabold leading-5 text-amber-700">วิดีโอจากช่องจริง</p>
+                  <h2 id="home-video-title" className="break-words text-sm font-extrabold leading-5 text-kaset-ink sm:text-base sm:leading-6">
+                    ยังโหลดวิดีโอจากช่องไม่ได้ กรุณาลองใหม่ภายหลัง
+                  </h2>
+                  {latestVideoChannelUrl ? (
+                    <a
+                      className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-white px-3 text-xs font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12 sm:text-sm"
+                      href={latestVideoChannelUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      เปิดช่อง YouTube
+                      <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <Link
+                      className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                      to={latestVideoPlaceholder.ctaHref}
+                    >
+                      ดูวิดีโอ
+                      <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
               {realLatestVideo?.thumbnailUrl ? (
                 <img
                   alt=""
@@ -463,6 +523,9 @@ export function AppHomePage({
                 >
                   {realLatestVideo?.title ?? latestVideoPlaceholder.title}
                 </h2>
+                {isLatestVideoStale ? (
+                  <p className="mt-1 text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
+                ) : null}
                 {realLatestVideo ? (
                   <a
                     className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
@@ -483,7 +546,8 @@ export function AppHomePage({
                   </Link>
                 )}
               </div>
-            </div>
+              </div>
+            )}
           </Card>
         </section>
 

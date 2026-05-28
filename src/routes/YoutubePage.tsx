@@ -83,29 +83,44 @@ function getBackendChannelDisplayName(response?: YouTubeVideoLibraryBackendRespo
   return response?.channel.title ?? response?.channel.channelName ?? response?.channel.handle ?? response?.channel.channelHandle;
 }
 
+function getBackendChannelUrl(response?: YouTubeVideoLibraryBackendResponse | null) {
+  return response?.channel.channelUrl ?? response?.channel.url;
+}
+
 export function YoutubePage({
   backendResponse,
   fetchVideoLibraryResponse = fetchYouTubeVideoLibraryResponse,
   videos: videoInput,
 }: YoutubePageProps = {}) {
   const [fetchedBackendResponse, setFetchedBackendResponse] = useState<YouTubeVideoLibraryBackendResponse | undefined>();
+  const [hasFetchedVideoLibraryResponse, setHasFetchedVideoLibraryResponse] = useState(false);
   const effectiveBackendResponse = backendResponse ?? fetchedBackendResponse;
   const videos =
     videoInput === undefined ? listLatestVideosWithBackendFallback(effectiveBackendResponse) : listLatestVideos(videoInput);
   const sourceStatus = getYouTubeSourceStatus(videos);
   const hasVideos = videos.length > 0;
   const channelDisplayName = getBackendChannelDisplayName(effectiveBackendResponse) ?? videos[0]?.channelName;
+  const shouldFetchVideoLibrary = videoInput === undefined && backendResponse === undefined;
+  const isVideoLibraryLoading = shouldFetchVideoLibrary && !hasFetchedVideoLibraryResponse;
+  const backendStatus = effectiveBackendResponse?.status;
+  const isVideoLibraryStale = backendStatus === 'stale' && videos.some((video) => video.source === 'youtube_api');
+  const isVideoLibraryError = backendStatus === 'error' && !hasVideos;
+  const channelUrl = getBackendChannelUrl(effectiveBackendResponse) ?? sourceStatus.channelUrl;
 
   useEffect(() => {
     if (videoInput !== undefined || backendResponse !== undefined) return undefined;
 
     let isActive = true;
+    setHasFetchedVideoLibraryResponse(false);
 
     fetchVideoLibraryResponse()
       .then((response) => {
         if (isActive) setFetchedBackendResponse(response);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (isActive) setHasFetchedVideoLibraryResponse(true);
+      });
 
     return () => {
       isActive = false;
@@ -116,23 +131,50 @@ export function YoutubePage({
     <div>
       <PageHeader title="วิดีโอเกษตร" subtitle="วิดีโอจริงจากช่องเจ้าของระบบ" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        {hasVideos ? (
-          <NoticeBox tone="success" title="วิดีโอจากช่องจริง">
-            แสดงเฉพาะรายการที่มี URL วิดีโอจริงจากเจ้าของระบบ หรือจาก backend YouTube API ที่ปลอดภัยแล้วเท่านั้น
+        {isVideoLibraryLoading ? (
+          <NoticeBox tone="info" title="กำลังโหลดวิดีโอจากช่อง">
+            กำลังเชื่อมวิดีโอจริงจากช่องเจ้าของระบบ โดยยังไม่เติมรายการตัวอย่างแทนข้อมูลจริง
+          </NoticeBox>
+        ) : hasVideos ? (
+          <NoticeBox tone={isVideoLibraryStale ? 'warning' : 'success'} title={isVideoLibraryStale ? 'แสดงข้อมูลล่าสุดที่เคยโหลดได้' : 'วิดีโอจากช่องจริง'}>
+            {isVideoLibraryStale
+              ? 'ข้อมูลอาจไม่ล่าสุด แต่รายการที่แสดงยังเป็นวิดีโอจริงที่เคยโหลดได้จากช่อง'
+              : 'แสดงเฉพาะรายการที่มี URL วิดีโอจริงจากเจ้าของระบบ หรือจาก backend YouTube API ที่ปลอดภัยแล้วเท่านั้น'}
           </NoticeBox>
         ) : (
-          <NoticeBox tone="warning" title="กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง">
-            ยังไม่มีรายการวิดีโอจริงให้แสดง จึงไม่เติมข้อมูลตัวอย่างแทนข้อมูลจากช่องจริง
+          <NoticeBox tone={isVideoLibraryError ? 'danger' : 'warning'} title={isVideoLibraryError ? 'ยังโหลดวิดีโอจากช่องไม่ได้' : 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง'}>
+            {isVideoLibraryError
+              ? 'กรุณาลองใหม่ภายหลัง ระบบจะไม่แสดงข้อผิดพลาดดิบหรือเติมวิดีโอตัวอย่างแทน'
+              : 'ยังไม่มีรายการวิดีโอจริงให้แสดง จึงไม่เติมข้อมูลตัวอย่างแทนข้อมูลจากช่องจริง'}
           </NoticeBox>
         )}
 
-        {hasVideos ? (
+        {isVideoLibraryLoading ? (
+          <Card className="p-3" aria-label="กำลังโหลดวิดีโอจากช่อง">
+            <div className="grid gap-3">
+              {[0, 1].map((item) => (
+                <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-2.5 sm:grid-cols-[136px_minmax(0,1fr)] sm:gap-3" key={item}>
+                  <div aria-hidden="true" className="h-16 animate-pulse rounded-lg bg-slate-100 sm:h-20" />
+                  <div className="min-w-0 py-1">
+                    <div aria-hidden="true" className="h-4 w-24 animate-pulse rounded bg-slate-100" />
+                    <div aria-hidden="true" className="mt-2 h-4 w-full animate-pulse rounded bg-slate-100" />
+                    <div aria-hidden="true" className="mt-2 h-4 w-2/3 animate-pulse rounded bg-slate-100" />
+                    <div aria-hidden="true" className="mt-3 h-8 w-24 animate-pulse rounded-lg bg-slate-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : hasVideos ? (
           <section className="grid gap-3" aria-labelledby="youtube-video-list-title">
             <h2 id="youtube-video-list-title" className="text-lg font-extrabold leading-7 text-kaset-ink">
               วิดีโอล่าสุดจากช่อง
             </h2>
             {channelDisplayName ? (
               <p className="break-words text-sm font-semibold leading-6 text-slate-600">{channelDisplayName}</p>
+            ) : null}
+            {isVideoLibraryStale ? (
+              <p className="text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
             ) : null}
             <div className="grid gap-3">
               {videos.map((video) => (
@@ -145,9 +187,13 @@ export function YoutubePage({
             <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
               <PlaySquare aria-hidden="true" className="h-7 w-7" />
             </span>
-            <h2 className="mt-4 text-lg font-extrabold leading-7 text-kaset-ink">วิดีโอเกษตรกำลังเตรียมเชื่อมต่อ</h2>
+            <h2 className="mt-4 text-lg font-extrabold leading-7 text-kaset-ink">
+              {isVideoLibraryError ? 'ยังโหลดวิดีโอจากช่องไม่ได้' : 'วิดีโอเกษตรกำลังเตรียมเชื่อมต่อ'}
+            </h2>
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-              เจ้าของระบบสามารถเพิ่มวิดีโอจริงได้เมื่อเลือกคลิปแรกพร้อม URL และภาพหน้าปกแล้ว
+              {isVideoLibraryError
+                ? 'กรุณาลองใหม่ภายหลัง หรือเปิดช่อง YouTube ของเจ้าของระบบโดยตรง'
+                : 'เจ้าของระบบสามารถเพิ่มวิดีโอจริงได้เมื่อเลือกคลิปแรกพร้อม URL และภาพหน้าปกแล้ว'}
             </p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <Link
@@ -157,10 +203,10 @@ export function YoutubePage({
                 <Home aria-hidden="true" className="h-4 w-4" />
                 กลับหน้าแรก
               </Link>
-              {sourceStatus.channelUrl ? (
+              {channelUrl ? (
                 <a
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12"
-                  href={sourceStatus.channelUrl}
+                  href={channelUrl}
                   rel="noreferrer"
                   target="_blank"
                 >
