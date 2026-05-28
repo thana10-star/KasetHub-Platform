@@ -112,8 +112,7 @@ const priceSnapshotItems = [
 
 const latestVideoPlaceholder = {
   ctaHref: '/app/youtube',
-  description: 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง',
-  subtitle: 'วิดีโอจากช่อง KasetHub',
+  subtitle: 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง',
   title: 'วิดีโอล่าสุดจากช่อง',
 } as const;
 
@@ -442,31 +441,31 @@ export function AppHomePage({
 
         <section aria-labelledby="home-video-title">
           <Card className="overflow-hidden p-0">
-            <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 p-3">
+            <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
               {realLatestVideo?.thumbnailUrl ? (
                 <img
                   alt=""
-                  className="h-full min-h-[116px] w-full rounded-lg object-cover"
+                  className="h-20 w-full rounded-lg object-cover sm:h-24"
                   src={realLatestVideo.thumbnailUrl}
                 />
               ) : (
-                <div className="grid min-h-[116px] place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
-                  <PlaySquare aria-hidden="true" className="h-10 w-10" />
+                <div className="grid h-20 place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep sm:h-24">
+                  <PlaySquare aria-hidden="true" className="h-8 w-8" />
                 </div>
               )}
               <div className="min-w-0 self-center">
                 <p className="text-xs font-extrabold leading-5 text-sky-800">
                   {realLatestVideo?.channelName ?? latestVideoPlaceholder.subtitle}
                 </p>
-                <h2 id="home-video-title" className="break-words text-base font-extrabold leading-6 text-kaset-ink">
+                <h2
+                  id="home-video-title"
+                  className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6"
+                >
                   {realLatestVideo?.title ?? latestVideoPlaceholder.title}
                 </h2>
-                <p className="mt-1 break-words text-sm font-semibold leading-5 text-slate-600">
-                  {realLatestVideo?.description ?? latestVideoPlaceholder.description}
-                </p>
                 {realLatestVideo ? (
                   <a
-                    className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+                    className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
                     href={realLatestVideo.url}
                     rel="noreferrer"
                     target="_blank"
@@ -476,7 +475,7 @@ export function AppHomePage({
                   </a>
                 ) : (
                   <Link
-                    className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+                    className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
                     to={latestVideoPlaceholder.ctaHref}
                   >
                     ดูวิดีโอ

@@ -85,7 +85,7 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('วิดีโอล่าสุดจากช่อง');
     expect(text).toContain('เรื่องเกษตรที่คนไทยควรรู้');
     expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
-    expect(text).toContain('วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงในหน้าวิดีโอ');
+    expect(text).not.toContain('วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงในหน้าวิดีโอ');
     expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
     expect(text).toContain('ดูวิดีโอ');
     expect(html).toContain('https://www.youtube.com/watch?v=real-owner-video');
@@ -126,6 +126,30 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
     expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');
+  });
+
+  test('renders /app/youtube video items as compact title-only rows', () => {
+    const compactVideo: ChannelVideo = {
+      id: 'm128-compact-library-video',
+      title: 'M128 compact video list title that can wrap cleanly without a description block',
+      url: 'https://www.youtube.com/watch?v=m128-compact-library-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m128-compact-library-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      description: 'M128 library full description should not render in compact list cards',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M128 Channel',
+    };
+    const html = renderYoutubePage([compactVideo]);
+    const text = visibleText(html);
+
+    expect(text).toContain('M128 Channel');
+    expect(text).toContain('M128 compact video list title that can wrap cleanly without a description block');
+    expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
+    expect(text).not.toContain('M128 library full description should not render in compact list cards');
+    expect(html).toContain('grid-cols-[112px_minmax(0,1fr)]');
+    expect(html).toContain('[-webkit-line-clamp:3]');
+    expect(text).not.toContain('views');
   });
 
   test('keeps /app/youtube source-pending when provided entries are not real videos', () => {

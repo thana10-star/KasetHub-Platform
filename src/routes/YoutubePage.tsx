@@ -30,15 +30,15 @@ function VideoPreview({ video }: { video: ChannelVideo }) {
     return (
       <img
         alt=""
-        className="aspect-video w-full rounded-lg object-cover"
+        className="h-16 w-full rounded-lg object-cover sm:h-20"
         src={video.thumbnailUrl}
       />
     );
   }
 
   return (
-    <div className="grid aspect-video place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
-      <PlaySquare aria-hidden="true" className="h-12 w-12" />
+    <div className="grid h-16 place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep sm:h-20">
+      <PlaySquare aria-hidden="true" className="h-7 w-7" />
     </div>
   );
 }
@@ -47,20 +47,19 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
   const publishedAtLabel = formatPublishedAt(video.publishedAt);
 
   return (
-    <Card className="overflow-hidden p-3">
-      <div className="grid gap-3 sm:grid-cols-[168px_minmax(0,1fr)]">
+    <Card className="overflow-hidden p-2.5">
+      <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-2.5 sm:grid-cols-[136px_minmax(0,1fr)] sm:gap-3">
         <VideoPreview video={video} />
         <div className="min-w-0">
           <p className="text-xs font-extrabold leading-5 text-sky-800">{video.channelName ?? 'KasetHub'}</p>
-          <h2 className="break-words text-base font-extrabold leading-6 text-kaset-ink">{video.title}</h2>
-          {video.description ? (
-            <p className="mt-1 break-words text-sm font-semibold leading-6 text-slate-600">{video.description}</p>
-          ) : null}
+          <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden sm:text-base sm:leading-6">
+            {video.title}
+          </h2>
           {publishedAtLabel ? (
-            <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
+            <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
           ) : null}
           <a
-            className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+            className="mt-2 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
             href={video.url}
             rel="noreferrer"
             target="_blank"

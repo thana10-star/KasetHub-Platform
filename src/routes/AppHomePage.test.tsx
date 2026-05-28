@@ -266,7 +266,7 @@ describe('M116.9 home dashboard polish', () => {
 
     expect(text).toContain('ช่องเรื่องเกษตร');
     expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
-    expect(text).toContain('วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงบนหน้าแรก');
+    expect(text).not.toContain('วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงบนหน้าแรก');
     expect(text).toContain('ดูวิดีโอ');
     expect(html).toContain('https://www.youtube.com/watch?v=real-owner-video');
     expect(html).toContain('https://img.youtube.com/vi/real-owner-video/hqdefault.jpg');
@@ -305,12 +305,33 @@ describe('M116.9 home dashboard polish', () => {
     const text = visibleText(html);
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­à¸¥à¹ˆà¸²à¸ªà¸¸à¸”à¸ˆà¸²à¸ backend YouTube');
-    expect(text).toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
+    expect(text).not.toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
     expect(html).toContain('https://www.youtube.com/watch?v=backend-owner-video');
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
     expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');
     expect(text).not.toContain('views');
+  });
+
+  test('renders the Home latest video card as compact title-only content', () => {
+    const compactVideo: ChannelVideo = {
+      id: 'm128-compact-home-video',
+      title: 'M128 compact latest video title that should stay readable over two lines',
+      url: 'https://www.youtube.com/watch?v=m128-compact-home-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m128-compact-home-video/hqdefault.jpg',
+      description: 'M128 full Home video description should not render in the compact latest card',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M128 Channel',
+    };
+    const html = renderHome({ latestVideo: compactVideo });
+    const text = visibleText(html);
+
+    expect(text).toContain('M128 Channel');
+    expect(text).toContain('M128 compact latest video title that should stay readable over two lines');
+    expect(text).not.toContain('M128 full Home video description should not render in the compact latest card');
+    expect(html).toContain('grid-cols-[88px_minmax(0,1fr)]');
+    expect(html).toContain('[-webkit-line-clamp:2]');
   });
 
   test('keeps source-pending video state when a provided entry is not real', () => {
