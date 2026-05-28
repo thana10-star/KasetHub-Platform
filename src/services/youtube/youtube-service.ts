@@ -61,16 +61,22 @@ function formatCompactViewCount(value: number, divisor: number) {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-export function formatYouTubeViewCount(value?: number) {
+type FormatYouTubeViewCountOptions = {
+  includeViewedPrefix?: boolean;
+};
+
+export function formatYouTubeViewCount(value?: number, options: FormatYouTubeViewCountOptions = {}) {
   if (value === undefined || !Number.isFinite(value) || value < 0) return null;
 
   const viewCount = Math.floor(value);
+  let label: string;
 
-  if (viewCount < 1_000) return `${viewCount.toLocaleString('en-US')} ครั้ง`;
-  if (viewCount < 10_000) return `${formatCompactViewCount(viewCount, 1_000)} พันครั้ง`;
-  if (viewCount < 995_000) return `${formatCompactViewCount(viewCount, 10_000)} หมื่นครั้ง`;
+  if (viewCount < 1_000) label = `${viewCount.toLocaleString('en-US')} ครั้ง`;
+  else if (viewCount < 10_000) label = `${formatCompactViewCount(viewCount, 1_000)} พันครั้ง`;
+  else if (viewCount < 995_000) label = `${formatCompactViewCount(viewCount, 10_000)} หมื่นครั้ง`;
+  else label = `${formatCompactViewCount(viewCount, 1_000_000)} ล้านครั้ง`;
 
-  return `${formatCompactViewCount(viewCount, 1_000_000)} ล้านครั้ง`;
+  return options.includeViewedPrefix ? `มีคนดูแล้ว ${label}` : label;
 }
 
 export function isUsableChannelVideo(video: ChannelVideo) {

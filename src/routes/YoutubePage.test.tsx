@@ -137,7 +137,7 @@ describe('M124 YouTube latest video foundation route', () => {
     const text = visibleText(html);
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡');
-    expect(text).toContain('1.2 พันครั้ง');
+    expect(text).toContain('มีคนดูแล้ว 1.2 พันครั้ง');
     expect(text).toContain('à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰');
     expect(html).toContain('/app/youtube/backend-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-video"');
@@ -170,7 +170,13 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('M128 Channel');
     expect(text).toContain('M128 compact video list title that can wrap cleanly without a description block');
     expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
-    expect(text).toContain('1.2 หมื่นครั้ง');
+    expect(text).toContain('มีคนดูแล้ว 1.2 หมื่นครั้ง');
+    expect(html.indexOf('https://img.youtube.com/vi/m128-compact-library-video/hqdefault.jpg')).toBeLessThan(
+      html.indexOf('เผยแพร่ 20 พ.ค. 2569'),
+    );
+    expect(html.indexOf('มีคนดูแล้ว 1.2 หมื่นครั้ง')).toBeLessThan(
+      html.indexOf('M128 compact video list title that can wrap cleanly without a description block'),
+    );
     expect(html).toContain('/app/youtube/m128-compact-library-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=m128-compact-library-video"');
     expect(countText(text, 'ดูวิดีโอ')).toBe(1);
@@ -178,8 +184,34 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).not.toContain('เปิด YouTube');
     expect(text).not.toContain('M128 library full description should not render in compact list cards');
     expect(html).toContain('grid-cols-[112px_minmax(0,1fr)]');
-    expect(html).toContain('[-webkit-line-clamp:3]');
+    expect(html).toContain('[-webkit-line-clamp:2]');
     expect(text).not.toContain('views');
+  });
+
+  test('hides list card view count gracefully when viewCount is missing', () => {
+    const noViewCountVideo: ChannelVideo = {
+      id: 'm133-no-view-count-video',
+      videoId: 'm133-no-view-count-video',
+      title: 'M133 video without backend view count',
+      url: 'https://www.youtube.com/watch?v=m133-no-view-count-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m133-no-view-count-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M133 Channel',
+    };
+    const html = renderYoutubePage([noViewCountVideo]);
+    const text = visibleText(html);
+
+    expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
+    expect(text).toContain('M133 video without backend view count');
+    expect(text).not.toContain('มีคนดูแล้ว');
+    expect(text).not.toContain('0 ครั้ง');
+    expect(countText(text, 'ดูวิดีโอ')).toBe(1);
+    expect(html.indexOf('https://img.youtube.com/vi/m133-no-view-count-video/hqdefault.jpg')).toBeLessThan(
+      html.indexOf('เผยแพร่ 20 พ.ค. 2569'),
+    );
+    expect(html.indexOf('เผยแพร่ 20 พ.ค. 2569')).toBeLessThan(html.indexOf('M133 video without backend view count'));
   });
 
   test('renders compact in-channel search controls for loaded videos', () => {

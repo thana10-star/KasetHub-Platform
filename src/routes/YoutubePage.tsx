@@ -48,8 +48,8 @@ function VideoPreview({ video }: { video: ChannelVideo }) {
 
 function ChannelVideoCard({ video }: { video: ChannelVideo }) {
   const publishedAtLabel = formatPublishedAt(video.publishedAt);
-  const viewCountLabel = formatYouTubeViewCount(video.viewCount);
-  const metaParts = [
+  const viewCountLabel = formatYouTubeViewCount(video.viewCount, { includeViewedPrefix: true });
+  const thumbnailMetaRows = [
     publishedAtLabel ? `เผยแพร่ ${publishedAtLabel}` : undefined,
     viewCountLabel ?? undefined,
   ].filter((part): part is string => Boolean(part));
@@ -57,16 +57,24 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
 
   return (
     <Card className="overflow-hidden p-2.5">
-      <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-2.5 sm:grid-cols-[136px_minmax(0,1fr)] sm:gap-3">
-        <VideoPreview video={video} />
+      <div className="grid grid-cols-[112px_minmax(0,1fr)] items-start gap-2.5 sm:grid-cols-[136px_minmax(0,1fr)] sm:gap-3">
         <div className="min-w-0">
+          <VideoPreview video={video} />
+          {thumbnailMetaRows.length > 0 ? (
+            <div className="mt-1.5 grid gap-0.5 text-[11px] font-semibold leading-4 text-slate-500 sm:text-xs sm:leading-5">
+              {thumbnailMetaRows.map((row) => (
+                <p className="break-words" key={row}>
+                  {row}
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div className="min-w-0 pt-0.5">
           <p className="text-xs font-extrabold leading-5 text-sky-800">{video.channelName ?? 'KasetHub'}</p>
-          <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden sm:text-base sm:leading-6">
+          <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6">
             {video.title}
           </h2>
-          {metaParts.length > 0 ? (
-            <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{metaParts.join(' · ')}</p>
-          ) : null}
           <div className="mt-2 flex flex-wrap gap-2">
             {canOpenInApp ? (
               <Link

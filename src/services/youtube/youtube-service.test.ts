@@ -161,6 +161,7 @@ describe('YouTube latest video service', () => {
     expect(formatYouTubeViewCount(1200)).toBe('1.2 พันครั้ง');
     expect(formatYouTubeViewCount(12300)).toBe('1.2 หมื่นครั้ง');
     expect(formatYouTubeViewCount(1200000)).toBe('1.2 ล้านครั้ง');
+    expect(formatYouTubeViewCount(4500, { includeViewedPrefix: true })).toBe('มีคนดูแล้ว 4.5 พันครั้ง');
   });
 
   test('reports ready status for backend-normalized YouTube API videos without engagement stats', () => {
