@@ -21,6 +21,7 @@ import {
   Tags,
   UserRound,
   UsersRound,
+  Youtube,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -564,6 +565,30 @@ export function AppHomePage({
               </div>
             )}
           </Card>
+        </section>
+
+        <section aria-labelledby="home-youtube-library-title">
+          <Link className="block min-w-0" to="/app/youtube">
+            <Card className="overflow-hidden border border-red-100 bg-white p-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-red-50 text-red-700">
+                  <Youtube aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 id="home-youtube-library-title" className="break-words text-base font-extrabold leading-6 text-kaset-ink">
+                    คลังความรู้จากช่อง YouTube
+                  </h2>
+                  <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-600 sm:text-sm sm:leading-6">
+                    รวมวีดีโอความรู้จากช่อง เรื่องเกษตรที่คนไทยควรรู้ ดูง่าย พาทำได้จริง ครบทั้งเรื่องดิน น้ำ ปุ๋ย เลี้ยงสัตว์ และเทคนิคการเกษตรต่าง ๆ
+                  </p>
+                  <span className="mt-3 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm">
+                    ดูคลังวิดีโอ
+                    <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
         </section>
 
         <section aria-labelledby="home-quick-actions-title" className="grid gap-3">

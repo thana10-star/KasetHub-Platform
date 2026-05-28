@@ -344,6 +344,43 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('views');
   });
 
+  test('renders a clear Home entry card for the full YouTube video library', () => {
+    const backendVideo: ChannelVideo = {
+      id: 'backend-owner-video',
+      videoId: 'backend-owner-video',
+      title: 'วิดีโอล่าสุดจากช่องจริง',
+      url: 'https://www.youtube.com/watch?v=backend-owner-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/backend-owner-video/hqdefault.jpg',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'เรื่องเกษตรที่คนไทยควรรู้',
+    };
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'เรื่องเกษตรที่คนไทยควรรู้',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [backendVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('คลังความรู้จากช่อง YouTube');
+    expect(text).toContain(
+      'รวมวีดีโอความรู้จากช่อง เรื่องเกษตรที่คนไทยควรรู้ ดูง่าย พาทำได้จริง ครบทั้งเรื่องดิน น้ำ ปุ๋ย เลี้ยงสัตว์ และเทคนิคการเกษตรต่าง ๆ',
+    );
+    expect(countText(text, 'ดูคลังวิดีโอ')).toBe(1);
+    expect(html).toContain('href="/app/youtube"');
+    expect(html).toContain('/app/youtube/backend-owner-video');
+    expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-owner-video"');
+    expect(countText(text, 'ดูวิดีโอ')).toBe(1);
+    expect(text).not.toContain('เปิด YouTube');
+    expect(text).not.toContain('เปิดใน YouTube');
+  });
+
   test('hides Home view count when backend does not provide one', () => {
     const backendVideo: ChannelVideo = {
       id: 'backend-no-view-count-video',

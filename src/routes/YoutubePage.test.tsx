@@ -108,6 +108,10 @@ describe('M124 YouTube latest video foundation route', () => {
     const text = visibleText(html);
 
     expect(text).toContain('วิดีโอจากช่องจริง');
+    expect(text).toContain('แสดงเฉพาะวีดีโอจากช่อง เรื่องเกษตรที่คนไทยควรรู้ เท่านั้น');
+    expect(text).not.toContain('คนไทน');
+    expect(text).not.toContain('API');
+    expect(text).not.toContain('backend');
     expect(text).toContain('วิดีโอล่าสุดจากช่อง');
     expect(text).toContain('เรื่องเกษตรที่คนไทยควรรู้');
     expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
