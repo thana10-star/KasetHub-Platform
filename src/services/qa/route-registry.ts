@@ -74,8 +74,8 @@ export const mvpRouteGroups: MvpRouteGroup[] = [
     label: 'Content / YouTube',
     description: 'บทความ วิดีโอ YouTube และตัวอย่างหลังบ้านคอนเทนต์',
     routes: [
-      { route: '/app/youtube', label: 'YouTube hub', milestone: 'M03/M22.5/M124/M125', notes: 'owner-curated latest-video foundation; source-pending until a verified real YouTube video URL/title is added, with no fake engagement stats', manualCheckPath: '/app/youtube' },
-      { route: '/app/youtube/:videoId', label: 'YouTube video detail', milestone: 'M03/M124', notes: 'safe detail shell for real owner-curated videos; unknown IDs remain source-pending with no mock video fallback', manualCheckPath: '/app/youtube/sample-video-id' },
+      { route: '/app/youtube', label: 'YouTube hub', milestone: 'M03/M22.5/M124/M125/M126/M127', notes: 'owner-curated fallback plus M127 Cloudflare Function video library adapter; source-pending until backend-normalized or verified manual videos are available, with no fake engagement stats', manualCheckPath: '/app/youtube' },
+      { route: '/app/youtube/:videoId', label: 'YouTube video detail', milestone: 'M03/M124/M126/M127', notes: 'safe detail shell for real owner-curated or backend-normalized videos; unknown IDs remain source-pending with no mock video fallback', manualCheckPath: '/app/youtube/sample-video-id' },
       { route: '/app/articles', label: 'Articles', milestone: 'M01/M20', notes: 'บทความตัวอย่างและ save action', manualCheckPath: '/app/articles' },
       { route: '/app/articles/offline', label: 'Offline Agriculture Article Library', milestone: 'M65', notes: 'คลังบทความเกษตรออฟไลน์แบบ bundled fixtures พร้อม taxonomy, image plan, safety notes, and CMS compatibility', manualCheckPath: '/app/articles/offline' },
       { route: '/app/articles/full-content-readiness', label: 'Offline Article Full Content Readiness', milestone: 'M67', notes: 'pilot full-content draft templates, source/review placeholders, image needs, and publish gate blockers before full articles', manualCheckPath: '/app/articles/full-content-readiness' },

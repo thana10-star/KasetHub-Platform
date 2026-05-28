@@ -37,3 +37,13 @@ Use `docs/content/YOUTUBE_OWNER_VIDEO_ENTRY_TEMPLATE_M125.md` as the entry check
 ## Future API / Backend Plan
 
 The YouTube API plan remains separate. Any future YouTube Data API key, OAuth token, import job, quota handling, and caching must live server-side. The frontend should consume only approved normalized video metadata.
+
+M126 documents the channel-based latest-video backend plan because the owner channel updates often and manual-per-video entry is not enough for the long-term workflow.
+
+Current M126 decision:
+
+- Keep `ownerCuratedYoutubeVideos` empty until a verified single video is provided.
+- Preserve manual entries as a fallback.
+- Add a server-side `GET /api/youtube/latest` contract for a future backend/Cloudflare Pages Function.
+- Do not expose a YouTube API key to Vite or browser code.
+- Do not call the live YouTube API until a safe backend route and server env are available.

@@ -51,6 +51,19 @@ A future milestone can add a backend-owned YouTube import path:
 - Add caching, quota handling, retries, and audit logs server-side.
 - Keep the frontend as a read-only consumer.
 
+M126 adds the planning contract for this path in:
+
+- `docs/content/YOUTUBE_CHANNEL_BACKEND_ADAPTER_M126.md`
+- `docs/content/YOUTUBE_API_KEY_SECURITY_M126.md`
+- `src/services/youtube/youtube-backend-adapter.types.ts`
+
+The recommended future endpoint was `GET /api/youtube/latest`. M127 adds Cloudflare Pages Function endpoints for:
+
+- `GET /api/youtube/latest`
+- `GET /api/youtube/videos`
+
+The frontend now tries the backend first and falls back to manual/source-pending behavior when the backend is unavailable, not configured, or empty.
+
 ## No Frontend API Key Rule
 
 Never expose a YouTube API key, OAuth refresh token, service-role key, or import secret in frontend code, Vite env values, bundled config, localStorage, or checked-in docs. Browser code may only read already-approved public video metadata.

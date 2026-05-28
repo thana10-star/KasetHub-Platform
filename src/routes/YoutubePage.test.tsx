@@ -34,6 +34,14 @@ function renderYoutubePage(videos?: ChannelVideo[]) {
   );
 }
 
+function renderYoutubePageWithProps(props: Parameters<typeof YoutubePage>[0]) {
+  return renderToString(
+    <MemoryRouter>
+      <YoutubePage {...props} />
+    </MemoryRouter>,
+  );
+}
+
 function renderYoutubeDetail(path: string) {
   return renderToString(
     <MemoryRouter initialEntries={[path]}>
@@ -86,6 +94,38 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).not.toContain('ยอดดู');
     expect(text).not.toContain('ไลก์');
     expect(text).not.toContain('คอมเมนต์');
+  });
+
+  test('renders backend video library results on /app/youtube without fake engagement', () => {
+    const backendVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'backend-video',
+      videoId: 'backend-video',
+      title: 'à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡',
+      url: 'https://www.youtube.com/watch?v=backend-video',
+      source: 'youtube_api',
+      fetchedAt: '2026-05-28T02:00:00.000Z',
+    };
+    const html = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [backendVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡');
+    expect(text).toContain('à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰');
+    expect(html).toContain('https://www.youtube.com/watch?v=backend-video');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
+    expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
+    expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');
   });
 
   test('keeps /app/youtube source-pending when provided entries are not real videos', () => {

@@ -1,9 +1,16 @@
 import { ExternalLink, Home, PlaySquare } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
-import { getYouTubeSourceStatus, listLatestVideos } from '@/services/youtube/youtube-service';
+import {
+  fetchYouTubeVideoLibraryResponse,
+  getYouTubeSourceStatus,
+  listLatestVideos,
+  listLatestVideosWithBackendFallback,
+} from '@/services/youtube/youtube-service';
+import type { YouTubeVideoLibraryBackendResponse } from '@/services/youtube/youtube-backend-adapter.types';
 import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
 function formatPublishedAt(publishedAt?: string) {
@@ -68,13 +75,43 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
 }
 
 type YoutubePageProps = {
+  backendResponse?: YouTubeVideoLibraryBackendResponse | null;
+  fetchVideoLibraryResponse?: () => Promise<YouTubeVideoLibraryBackendResponse | undefined>;
   videos?: ChannelVideo[];
 };
 
-export function YoutubePage({ videos: videoInput }: YoutubePageProps = {}) {
-  const videos = listLatestVideos(videoInput);
-  const sourceStatus = getYouTubeSourceStatus(videoInput);
+function getBackendChannelDisplayName(response?: YouTubeVideoLibraryBackendResponse | null) {
+  return response?.channel.title ?? response?.channel.channelName ?? response?.channel.handle ?? response?.channel.channelHandle;
+}
+
+export function YoutubePage({
+  backendResponse,
+  fetchVideoLibraryResponse = fetchYouTubeVideoLibraryResponse,
+  videos: videoInput,
+}: YoutubePageProps = {}) {
+  const [fetchedBackendResponse, setFetchedBackendResponse] = useState<YouTubeVideoLibraryBackendResponse | undefined>();
+  const effectiveBackendResponse = backendResponse ?? fetchedBackendResponse;
+  const videos =
+    videoInput === undefined ? listLatestVideosWithBackendFallback(effectiveBackendResponse) : listLatestVideos(videoInput);
+  const sourceStatus = getYouTubeSourceStatus(videos);
   const hasVideos = videos.length > 0;
+  const channelDisplayName = getBackendChannelDisplayName(effectiveBackendResponse) ?? videos[0]?.channelName;
+
+  useEffect(() => {
+    if (videoInput !== undefined || backendResponse !== undefined) return undefined;
+
+    let isActive = true;
+
+    fetchVideoLibraryResponse()
+      .then((response) => {
+        if (isActive) setFetchedBackendResponse(response);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isActive = false;
+    };
+  }, [backendResponse, fetchVideoLibraryResponse, videoInput]);
 
   return (
     <div>
@@ -95,6 +132,9 @@ export function YoutubePage({ videos: videoInput }: YoutubePageProps = {}) {
             <h2 id="youtube-video-list-title" className="text-lg font-extrabold leading-7 text-kaset-ink">
               วิดีโอล่าสุดจากช่อง
             </h2>
+            {channelDisplayName ? (
+              <p className="break-words text-sm font-semibold leading-6 text-slate-600">{channelDisplayName}</p>
+            ) : null}
             <div className="grid gap-3">
               {videos.map((video) => (
                 <ChannelVideoCard key={video.id} video={video} />

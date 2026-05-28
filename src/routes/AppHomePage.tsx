@@ -22,8 +22,15 @@ import {
   UserRound,
   UsersRound,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getLatestVideo, isUsableChannelVideo } from '@/services/youtube/youtube-service';
+import {
+  fetchLatestYouTubeVideoResponse,
+  getLatestVideo,
+  isUsableChannelVideo,
+  listLatestVideosWithBackendFallback,
+} from '@/services/youtube/youtube-service';
+import type { YouTubeLatestBackendResponse } from '@/services/youtube/youtube-backend-adapter.types';
 import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
 const quickActions = [
@@ -174,13 +181,25 @@ function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
 type AppHomePageProps = {
   priceSnapshot?: PriceAdapterSnapshot;
   latestVideo?: ChannelVideo | null;
+  latestVideoResponse?: YouTubeLatestBackendResponse | null;
+  fetchLatestVideoResponse?: () => Promise<YouTubeLatestBackendResponse | undefined>;
 };
 
-export function AppHomePage({ latestVideo, priceSnapshot = getPriceAdapterSnapshot() }: AppHomePageProps = {}) {
+export function AppHomePage({
+  fetchLatestVideoResponse = fetchLatestYouTubeVideoResponse,
+  latestVideo,
+  latestVideoResponse,
+  priceSnapshot = getPriceAdapterSnapshot(),
+}: AppHomePageProps = {}) {
+  const [backendLatestVideoResponse, setBackendLatestVideoResponse] = useState<YouTubeLatestBackendResponse | undefined>();
   const notificationCenter = useNotificationCenter();
   const farmHub = buildHomeFarmHubViewModel();
   const { forecast } = useWeather();
-  const configuredLatestVideo = latestVideo === undefined ? getLatestVideo() : latestVideo ?? undefined;
+  const effectiveLatestVideoResponse = latestVideoResponse ?? backendLatestVideoResponse;
+  const configuredLatestVideo =
+    latestVideo === undefined
+      ? getLatestVideo(listLatestVideosWithBackendFallback(effectiveLatestVideoResponse))
+      : latestVideo ?? undefined;
   const realLatestVideo = configuredLatestVideo && isUsableChannelVideo(configuredLatestVideo) ? configuredLatestVideo : undefined;
   const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
   const hasValidatedPriceRows = priceSnapshot.hasValidatedCommodityPrices;
@@ -199,6 +218,22 @@ export function AppHomePage({ latestVideo, priceSnapshot = getPriceAdapterSnapsh
     hasWeatherDisplayValues,
     rainChancePercent,
   });
+
+  useEffect(() => {
+    if (latestVideo !== undefined || latestVideoResponse !== undefined) return undefined;
+
+    let isActive = true;
+
+    fetchLatestVideoResponse()
+      .then((response) => {
+        if (isActive) setBackendLatestVideoResponse(response);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isActive = false;
+    };
+  }, [fetchLatestVideoResponse, latestVideo, latestVideoResponse]);
 
   return (
     <div className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-kaset-mist/70">

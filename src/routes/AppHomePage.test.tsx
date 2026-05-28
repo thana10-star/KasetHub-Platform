@@ -277,6 +277,42 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('views');
   });
 
+  test('renders a backend latest video response without fake engagement', () => {
+    const backendVideo: ChannelVideo = {
+      id: 'backend-owner-video',
+      videoId: 'backend-owner-video',
+      title: 'à¸§à¸´à¸”à¸µà¹‚à¸­à¸¥à¹ˆà¸²à¸ªà¸¸à¸”à¸ˆà¸²à¸ backend YouTube',
+      url: 'https://www.youtube.com/watch?v=backend-owner-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/backend-owner-video/hqdefault.jpg',
+      publishedAt: '2026-05-28T00:00:00.000Z',
+      description: 'à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰',
+      fetchedAt: '2026-05-28T02:00:00.000Z',
+    };
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [backendVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­à¸¥à¹ˆà¸²à¸ªà¸¸à¸”à¸ˆà¸²à¸ backend YouTube');
+    expect(text).toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
+    expect(html).toContain('https://www.youtube.com/watch?v=backend-owner-video');
+    expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
+    expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
+    expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');
+    expect(text).not.toContain('views');
+  });
+
   test('keeps source-pending video state when a provided entry is not real', () => {
     const unrealVideo: ChannelVideo = {
       id: 'not-real-video',

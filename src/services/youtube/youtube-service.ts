@@ -1,5 +1,10 @@
 import { youtubeChannelHandle, youtubeChannelUrl } from '@/config/channel';
 import { ownerCuratedYoutubeVideos } from '@/services/youtube/youtube-manual-data';
+import {
+  youtubeLatestBackendEndpointPath,
+  youtubeVideoLibraryBackendEndpointPath,
+  type YouTubeLatestBackendResponse,
+} from '@/services/youtube/youtube-backend-adapter.types';
 import type { ChannelVideo, YouTubeSourceStatus } from '@/services/youtube/youtube.types';
 
 function cleanOptionalValue(value?: string) {
@@ -74,6 +79,61 @@ export function getLatestVideo(videos?: ChannelVideo[]) {
   return listLatestVideos(videos)[0];
 }
 
+export function listBackendVideosFromResponse(response?: YouTubeLatestBackendResponse | null) {
+  if (!response || !['ready', 'stale'].includes(response.status)) return [];
+
+  return listLatestVideos(response.videos);
+}
+
+export function listLatestVideosWithBackendFallback(
+  response?: YouTubeLatestBackendResponse | null,
+  manualVideos: ChannelVideo[] = ownerCuratedYoutubeVideos,
+) {
+  const backendVideos = listBackendVideosFromResponse(response);
+
+  return backendVideos.length > 0 ? backendVideos : listLatestVideos(manualVideos);
+}
+
+type YouTubeBackendFetchOptions = {
+  endpointPath?: string;
+  fetcher?: typeof fetch;
+};
+
+async function fetchYouTubeBackendResponse(options: YouTubeBackendFetchOptions) {
+  const fetcher = options.fetcher ?? globalThis.fetch;
+
+  if (!fetcher) return undefined;
+
+  try {
+    const response = await fetcher(options.endpointPath ?? youtubeVideoLibraryBackendEndpointPath, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) return undefined;
+
+    const payload = (await response.json()) as YouTubeLatestBackendResponse;
+    return payload;
+  } catch {
+    return undefined;
+  }
+}
+
+export function fetchLatestYouTubeVideoResponse(options: YouTubeBackendFetchOptions = {}) {
+  return fetchYouTubeBackendResponse({
+    ...options,
+    endpointPath: options.endpointPath ?? youtubeLatestBackendEndpointPath,
+  });
+}
+
+export function fetchYouTubeVideoLibraryResponse(options: YouTubeBackendFetchOptions = {}) {
+  return fetchYouTubeBackendResponse({
+    ...options,
+    endpointPath: options.endpointPath ?? youtubeVideoLibraryBackendEndpointPath,
+  });
+}
+
 export function getChannelVideoById(videoId: string, videos: ChannelVideo[] = ownerCuratedYoutubeVideos) {
   return listLatestVideos(videos).find((video) => video.id === videoId);
 }
@@ -86,17 +146,25 @@ export function getYouTubeSourceStatus(videos: ChannelVideo[] = ownerCuratedYout
   if (latestVideo) {
     return {
       state: 'ready',
+      status: 'ready',
+      source: latestVideo.source,
       hasChannelConfig,
       channelUrl: cleanOptionalValue(youtubeChannelUrl),
       channelHandle: cleanOptionalValue(youtubeChannelHandle),
       videoCount: latestVideos.length,
       latestVideo,
-      message: 'Owner-curated YouTube videos are ready.',
+      lastFetchedAt: latestVideo.fetchedAt,
+      message:
+        latestVideo.source === 'youtube_api'
+          ? 'Backend-normalized YouTube videos are ready.'
+          : 'Owner-curated YouTube videos are ready.',
     };
   }
 
   return {
     state: 'source_pending',
+    status: 'not_configured',
+    source: 'none',
     hasChannelConfig,
     channelUrl: cleanOptionalValue(youtubeChannelUrl),
     channelHandle: cleanOptionalValue(youtubeChannelHandle),
