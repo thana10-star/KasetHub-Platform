@@ -42,11 +42,11 @@ function renderYoutubePageWithProps(props: Parameters<typeof YoutubePage>[0]) {
   );
 }
 
-function renderYoutubeDetail(path: string) {
+function renderYoutubeDetail(path: string, props: Parameters<typeof YoutubeVideoDetailPage>[0] = {}) {
   return renderToString(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/app/youtube/:videoId" element={<YoutubeVideoDetailPage />} />
+        <Route path="/app/youtube/:videoId" element={<YoutubeVideoDetailPage {...props} />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -132,6 +132,7 @@ describe('M124 YouTube latest video foundation route', () => {
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡');
     expect(text).toContain('à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰');
+    expect(html).toContain('/app/youtube/backend-video');
     expect(html).toContain('https://www.youtube.com/watch?v=backend-video');
     expect(text).not.toContain('views');
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
@@ -142,6 +143,7 @@ describe('M124 YouTube latest video foundation route', () => {
   test('renders /app/youtube video items as compact title-only rows', () => {
     const compactVideo: ChannelVideo = {
       id: 'm128-compact-library-video',
+      videoId: 'm128-compact-library-video',
       title: 'M128 compact video list title that can wrap cleanly without a description block',
       url: 'https://www.youtube.com/watch?v=m128-compact-library-video',
       thumbnailUrl: 'https://img.youtube.com/vi/m128-compact-library-video/hqdefault.jpg',
@@ -157,6 +159,8 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('M128 Channel');
     expect(text).toContain('M128 compact video list title that can wrap cleanly without a description block');
     expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
+    expect(html).toContain('/app/youtube/m128-compact-library-video');
+    expect(html).toContain('https://www.youtube.com/watch?v=m128-compact-library-video');
     expect(text).not.toContain('M128 library full description should not render in compact list cards');
     expect(html).toContain('grid-cols-[112px_minmax(0,1fr)]');
     expect(html).toContain('[-webkit-line-clamp:3]');
@@ -245,11 +249,32 @@ describe('M124 YouTube latest video foundation route', () => {
   });
 
   test('keeps unknown /app/youtube detail routes honest instead of falling back to mock data', () => {
-    const text = visibleText(renderYoutubeDetail('/app/youtube/sample-video-id'));
+    const html = renderYoutubeDetail('/app/youtube/sample-video-id', { videos: [] });
+    const text = visibleText(html);
 
-    expect(text).toContain('ยังไม่มีวิดีโอจริงสำหรับรายการนี้');
+    expect(text).toContain('ยังไม่พบวิดีโอนี้');
     expect(text).toContain('กำลังเตรียมเชื่อมวิดีโอจากช่อง');
+    expect(html).not.toContain('youtube.com/embed/sample-video-id');
     expect(text).not.toContain('จัดการน้ำในนาข้าวช่วงฝนแปรปรวน');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
+  });
+
+  test('renders /app/youtube/:videoId with the official YouTube iframe player', () => {
+    const detailVideo: ChannelVideo = {
+      ...realVideo,
+      videoId: 'real-owner-video',
+    };
+    const html = renderYoutubeDetail('/app/youtube/real-owner-video', { videos: [detailVideo] });
+    const text = visibleText(html);
+
+    expect(html).toContain('https://www.youtube.com/embed/real-owner-video');
+    expect(html).not.toContain('autoplay=1');
+    expect(html).toContain('allowfullscreen=""');
+    expect(html).toContain('referrerPolicy="strict-origin-when-cross-origin"');
+    expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
+    expect(text).toContain('เปิดใน YouTube');
+    expect(text).toContain('วิดีโอทั้งหมด');
     expect(text).not.toContain('views');
     expect(text).not.toContain('ยอดดู');
   });

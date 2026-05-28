@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   fetchLatestYouTubeVideoResponse,
+  getChannelVideoDetailPath,
   getLatestVideo,
   isUsableChannelVideo,
   listLatestVideosWithBackendFallback,
@@ -502,50 +503,58 @@ export function AppHomePage({
               </div>
             ) : (
               <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2.5 p-2.5 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-3">
-              {realLatestVideo?.thumbnailUrl ? (
-                <img
-                  alt=""
-                  className="h-20 w-full rounded-lg object-cover sm:h-24"
-                  src={realLatestVideo.thumbnailUrl}
-                />
-              ) : (
-                <div className="grid h-20 place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep sm:h-24">
-                  <PlaySquare aria-hidden="true" className="h-8 w-8" />
-                </div>
-              )}
-              <div className="min-w-0 self-center">
-                <p className="text-xs font-extrabold leading-5 text-sky-800">
-                  {realLatestVideo?.channelName ?? latestVideoPlaceholder.subtitle}
-                </p>
-                <h2
-                  id="home-video-title"
-                  className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6"
-                >
-                  {realLatestVideo?.title ?? latestVideoPlaceholder.title}
-                </h2>
-                {isLatestVideoStale ? (
-                  <p className="mt-1 text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
-                ) : null}
-                {realLatestVideo ? (
-                  <a
-                    className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
-                    href={realLatestVideo.url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    ดูวิดีโอ
-                    <ExternalLink aria-hidden="true" className="h-4 w-4" />
-                  </a>
+                {realLatestVideo?.thumbnailUrl ? (
+                  <img
+                    alt=""
+                    className="h-20 w-full rounded-lg object-cover sm:h-24"
+                    src={realLatestVideo.thumbnailUrl}
+                  />
                 ) : (
-                  <Link
-                    className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
-                    to={latestVideoPlaceholder.ctaHref}
-                  >
-                    ดูวิดีโอ
-                    <ChevronRight aria-hidden="true" className="h-4 w-4" />
-                  </Link>
+                  <div className="grid h-20 place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep sm:h-24">
+                    <PlaySquare aria-hidden="true" className="h-8 w-8" />
+                  </div>
                 )}
-              </div>
+                <div className="min-w-0 self-center">
+                  <p className="text-xs font-extrabold leading-5 text-sky-800">
+                    {realLatestVideo?.channelName ?? latestVideoPlaceholder.subtitle}
+                  </p>
+                  <h2
+                    id="home-video-title"
+                    className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6"
+                  >
+                    {realLatestVideo?.title ?? latestVideoPlaceholder.title}
+                  </h2>
+                  {isLatestVideoStale ? (
+                    <p className="mt-1 text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
+                  ) : null}
+                  {realLatestVideo?.videoId ? (
+                    <Link
+                      className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                      to={getChannelVideoDetailPath(realLatestVideo)}
+                    >
+                      ดูวิดีโอ
+                      <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                    </Link>
+                  ) : realLatestVideo ? (
+                    <a
+                      className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                      href={realLatestVideo.url}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      ดูวิดีโอ
+                      <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <Link
+                      className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                      to={latestVideoPlaceholder.ctaHref}
+                    >
+                      ดูวิดีโอ
+                      <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
           </Card>

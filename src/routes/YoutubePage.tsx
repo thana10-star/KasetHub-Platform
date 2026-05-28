@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import {
   fetchYouTubeVideoLibraryResponse,
+  getChannelVideoDetailPath,
   getYouTubeSourceStatus,
   listLatestVideos,
   listLatestVideosWithBackendFallback,
@@ -45,6 +46,7 @@ function VideoPreview({ video }: { video: ChannelVideo }) {
 
 function ChannelVideoCard({ video }: { video: ChannelVideo }) {
   const publishedAtLabel = formatPublishedAt(video.publishedAt);
+  const canOpenInApp = Boolean(video.videoId?.trim());
 
   return (
     <Card className="overflow-hidden p-2.5">
@@ -58,15 +60,38 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
           {publishedAtLabel ? (
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
           ) : null}
-          <a
-            className="mt-2 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
-            href={video.url}
-            rel="noreferrer"
-            target="_blank"
-          >
-            ดูวิดีโอ
-            <ExternalLink aria-hidden="true" className="h-4 w-4" />
-          </a>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {canOpenInApp ? (
+              <Link
+                className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                to={getChannelVideoDetailPath(video)}
+              >
+                ดูในแอพ
+                <PlaySquare aria-hidden="true" className="h-4 w-4" />
+              </Link>
+            ) : (
+              <a
+                className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                href={video.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                ดูวิดีโอ
+                <ExternalLink aria-hidden="true" className="h-4 w-4" />
+              </a>
+            )}
+            {canOpenInApp ? (
+              <a
+                className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-xs font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12 sm:text-sm"
+                href={video.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                เปิด YouTube
+                <ExternalLink aria-hidden="true" className="h-4 w-4" />
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
     </Card>

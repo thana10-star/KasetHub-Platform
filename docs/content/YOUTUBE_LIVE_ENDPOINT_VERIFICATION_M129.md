@@ -54,7 +54,7 @@ This is 6 hours. The function also sends cache headers for ready/stale responses
 Home:
 
 - Loading: shows `กำลังโหลดวิดีโอล่าสุด` in a compact skeleton card.
-- Ready: shows the latest real video with compact thumbnail, title, channel/source label, and `ดูวิดีโอ`.
+- Ready: shows the latest real video with compact thumbnail, title, channel/source label, and after M130 routes `ดูวิดีโอ` to the in-app player when `videoId` is available.
 - Stale: keeps showing real cached video data and adds `ข้อมูลอาจไม่ล่าสุด`.
 - Error with no fallback video: shows `ยังโหลดวิดีโอจากช่องไม่ได้ กรุณาลองใหม่ภายหลัง` and links to the owner channel when available.
 - Not configured/no data: keeps the source-pending copy.
@@ -68,6 +68,8 @@ Home:
 - Not configured/no data: keeps the source-pending copy and owner channel link.
 
 Descriptions are not rendered as long blocks in Home or the `/app/youtube` list.
+
+M130 adds `/app/youtube/:videoId` as the official YouTube iframe player page. The player route keeps `เปิดใน YouTube` visible and does not add autoplay, custom playback controls, or fake engagement stats.
 
 ## Test URLs
 

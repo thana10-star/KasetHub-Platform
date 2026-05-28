@@ -327,7 +327,8 @@ describe('M116.9 home dashboard polish', () => {
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­à¸¥à¹ˆà¸²à¸ªà¸¸à¸”à¸ˆà¸²à¸ backend YouTube');
     expect(text).not.toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
-    expect(html).toContain('https://www.youtube.com/watch?v=backend-owner-video');
+    expect(html).toContain('/app/youtube/backend-owner-video');
+    expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-owner-video"');
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
     expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');

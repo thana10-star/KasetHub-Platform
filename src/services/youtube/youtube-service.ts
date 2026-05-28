@@ -134,8 +134,22 @@ export function fetchYouTubeVideoLibraryResponse(options: YouTubeBackendFetchOpt
   });
 }
 
+export function getChannelVideoRouteId(video: ChannelVideo) {
+  return video.videoId?.trim() || video.id;
+}
+
+export function getChannelVideoDetailPath(video: ChannelVideo) {
+  return `/app/youtube/${encodeURIComponent(getChannelVideoRouteId(video))}`;
+}
+
 export function getChannelVideoById(videoId: string, videos: ChannelVideo[] = ownerCuratedYoutubeVideos) {
-  return listLatestVideos(videos).find((video) => video.id === videoId);
+  const requestedVideoId = videoId.trim();
+
+  if (!requestedVideoId) return undefined;
+
+  return listLatestVideos(videos).find(
+    (video) => video.id === requestedVideoId || video.videoId?.trim() === requestedVideoId,
+  );
 }
 
 export function getYouTubeSourceStatus(videos: ChannelVideo[] = ownerCuratedYoutubeVideos): YouTubeSourceStatus {

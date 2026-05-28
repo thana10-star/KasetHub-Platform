@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest';
 import {
   fetchLatestYouTubeVideoResponse,
   fetchYouTubeVideoLibraryResponse,
+  getChannelVideoById,
+  getChannelVideoDetailPath,
   getLatestVideo,
   getYouTubeSourceStatus,
   listLatestVideos,
@@ -113,6 +115,19 @@ describe('YouTube latest video service', () => {
     };
 
     expect(getLatestVideo([olderVideo, newerVideo])).toEqual(newerVideo);
+  });
+
+  test('resolves backend videos by YouTube videoId for in-app detail routes', () => {
+    const backendVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'playlist-item-id',
+      videoId: 'youtube-video-id',
+      url: 'https://www.youtube.com/watch?v=youtube-video-id',
+      source: 'youtube_api',
+    };
+
+    expect(getChannelVideoById('youtube-video-id', [backendVideo])).toEqual(backendVideo);
+    expect(getChannelVideoDetailPath(backendVideo)).toBe('/app/youtube/youtube-video-id');
   });
 
   test('reports ready status for backend-normalized YouTube API videos without engagement stats', () => {

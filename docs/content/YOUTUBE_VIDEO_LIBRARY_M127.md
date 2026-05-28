@@ -27,9 +27,12 @@ Cards can show:
 - title
 - published date if provided by the backend
 - channel name if provided
-- `ดูวิดีโอ` link to the real YouTube URL
+- `ดูในแอพ` link to `/app/youtube/:videoId` when a real YouTube `videoId` is available
+- `เปิด YouTube` fallback link to the real YouTube URL
 
 After M128/M129, Home and the `/app/youtube` list intentionally do not render long description blocks. Descriptions may remain in normalized data for future detail surfaces, but list cards stay title-focused.
+
+After M130, the primary video path is the in-app official YouTube player detail route. The external YouTube URL remains visible as a fallback; the app does not autoplay, self-host, proxy, or modify YouTube playback.
 
 Cards must not show:
 
