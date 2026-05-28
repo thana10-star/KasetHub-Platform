@@ -10,6 +10,7 @@ import {
   getYouTubeSourceStatus,
   listLatestVideos,
   listLatestVideosWithBackendFallback,
+  mergeUniqueChannelVideos,
 } from '@/services/youtube/youtube-service';
 import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
@@ -263,5 +264,50 @@ describe('YouTube latest video service', () => {
     await fetchYouTubeVideoLibraryResponse({ fetcher });
 
     expect(calls).toEqual(['/api/youtube/latest', '/api/youtube/videos']);
+  });
+
+  test('fetches paginated library responses with a page token query parameter', async () => {
+    const calls: string[] = [];
+    const fetcher = async (input: RequestInfo | URL) => {
+      calls.push(String(input));
+
+      return new Response(
+        JSON.stringify({
+          status: 'ready',
+          channel: { handle: '@ruengkaset', url: 'https://www.youtube.com/@ruengkaset' },
+          videos: [],
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    };
+
+    await fetchYouTubeVideoLibraryResponse({ fetcher, pageToken: 'NEXT TOKEN' });
+
+    expect(calls).toEqual(['/api/youtube/videos?pageToken=NEXT%20TOKEN']);
+  });
+
+  test('merges paginated videos without duplicating overlapping video IDs', () => {
+    const firstVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'playlist-item-one',
+      videoId: 'youtube-video-one',
+      url: 'https://www.youtube.com/watch?v=youtube-video-one',
+      source: 'youtube_api',
+    };
+    const duplicateVideo: ChannelVideo = {
+      ...firstVideo,
+      id: 'different-playlist-item-for-same-video',
+    };
+    const secondVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'playlist-item-two',
+      videoId: 'youtube-video-two',
+      url: 'https://www.youtube.com/watch?v=youtube-video-two',
+      source: 'youtube_api',
+    };
+
+    expect(mergeUniqueChannelVideos([firstVideo], [duplicateVideo, secondVideo])).toEqual([firstVideo, secondVideo]);
   });
 });

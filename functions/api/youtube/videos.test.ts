@@ -138,6 +138,91 @@ describe('M127 YouTube Cloudflare Pages Functions', () => {
     expect(response.headers.get('Cache-Control')).toContain('max-age=21600');
   });
 
+  test('passes pageToken to playlistItems pagination and keeps real view counts', async () => {
+    const pagedRequest = new Request('https://kasethub.example/api/youtube/videos?pageToken=NEXT_PAGE');
+    let requestedPlaylistPageToken: string | null = null;
+    const fetcher = async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+
+      if (url.pathname.endsWith('/channels')) {
+        return createJsonResponse({
+          items: [
+            {
+              id: 'UCownerPaged',
+              snippet: {
+                title: 'Owner channel paged',
+                customUrl: '@ruengkaset',
+              },
+              contentDetails: {
+                relatedPlaylists: {
+                  uploads: 'UUownerPaged',
+                },
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname.endsWith('/videos')) {
+        return createJsonResponse({
+          items: [
+            {
+              id: 'paged-video',
+              statistics: {
+                viewCount: '4500',
+              },
+            },
+          ],
+        });
+      }
+
+      requestedPlaylistPageToken = url.searchParams.get('pageToken');
+
+      return createJsonResponse({
+        nextPageToken: 'AFTER_NEXT_PAGE',
+        items: [
+          {
+            contentDetails: {
+              videoId: 'paged-video',
+              videoPublishedAt: '2026-05-21T01:00:00.000Z',
+            },
+            snippet: {
+              title: 'Paged video',
+              channelTitle: 'Owner channel paged',
+            },
+          },
+        ],
+      });
+    };
+
+    const response = await handleYouTubeVideosRequest(
+      {
+        request: pagedRequest,
+        env: {
+          YOUTUBE_API_KEY: 'test-key',
+          YOUTUBE_CHANNEL_HANDLE: '@ruengkaset-m134-paged',
+        },
+      },
+      {
+        fetcher,
+        now: new Date('2026-05-28T05:00:00.000Z'),
+      },
+    );
+    const payload = await jsonResponse(response);
+    const videos = payload.videos as Array<Record<string, unknown>>;
+
+    expect(payload.status).toBe('ready');
+    expect(payload.nextPageToken).toBe('AFTER_NEXT_PAGE');
+    expect(requestedPlaylistPageToken).toBe('NEXT_PAGE');
+    expect(videos).toHaveLength(1);
+    expect(videos[0]).toMatchObject({
+      videoId: 'paged-video',
+      viewCount: 4500,
+    });
+    expect(videos[0].likeCount).toBeUndefined();
+    expect(videos[0].commentCount).toBeUndefined();
+  });
+
   test('ignores missing or invalid view count statistics without fake defaults', async () => {
     const fetcher = async (input: RequestInfo | URL) => {
       const url = new URL(String(input));

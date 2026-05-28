@@ -117,10 +117,19 @@ export function listLatestVideosWithBackendFallback(
   return backendVideos.length > 0 ? backendVideos : listLatestVideos(manualVideos);
 }
 
-type YouTubeBackendFetchOptions = {
+export type YouTubeBackendFetchOptions = {
   endpointPath?: string;
   fetcher?: typeof fetch;
+  pageToken?: string;
 };
+
+function buildYouTubeBackendEndpointPath(endpointPath: string, pageToken?: string) {
+  const cleanedPageToken = cleanOptionalValue(pageToken);
+  if (!cleanedPageToken) return endpointPath;
+
+  const separator = endpointPath.includes('?') ? '&' : '?';
+  return `${endpointPath}${separator}pageToken=${encodeURIComponent(cleanedPageToken)}`;
+}
 
 async function fetchYouTubeBackendResponse(options: YouTubeBackendFetchOptions) {
   const fetcher = options.fetcher ?? globalThis.fetch;
@@ -128,7 +137,11 @@ async function fetchYouTubeBackendResponse(options: YouTubeBackendFetchOptions) 
   if (!fetcher) return undefined;
 
   try {
-    const response = await fetcher(options.endpointPath ?? youtubeVideoLibraryBackendEndpointPath, {
+    const endpointPath = buildYouTubeBackendEndpointPath(
+      options.endpointPath ?? youtubeVideoLibraryBackendEndpointPath,
+      options.pageToken,
+    );
+    const response = await fetcher(endpointPath, {
       headers: {
         Accept: 'application/json',
       },
@@ -159,6 +172,21 @@ export function fetchYouTubeVideoLibraryResponse(options: YouTubeBackendFetchOpt
 
 export function getChannelVideoRouteId(video: ChannelVideo) {
   return video.videoId?.trim() || video.id;
+}
+
+export function mergeUniqueChannelVideos(existingVideos: ChannelVideo[], incomingVideos: ChannelVideo[]) {
+  const seenVideoIds = new Set<string>();
+  const mergedVideos: ChannelVideo[] = [];
+
+  [...existingVideos, ...incomingVideos].forEach((video) => {
+    const videoIdentity = getChannelVideoRouteId(video).trim();
+    if (!videoIdentity || seenVideoIds.has(videoIdentity)) return;
+
+    seenVideoIds.add(videoIdentity);
+    mergedVideos.push(video);
+  });
+
+  return mergedVideos;
 }
 
 export function getChannelVideoDetailPath(video: ChannelVideo) {

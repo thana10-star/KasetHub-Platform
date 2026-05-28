@@ -225,8 +225,12 @@ function getRequestedMaxResults(context: YouTubeFunctionContext, options: YouTub
   return Math.max(1, Math.min(Math.floor(requested), options.maxResults ?? MAX_RESULTS_LIMIT, MAX_RESULTS_LIMIT));
 }
 
-function buildCacheKey(env: YouTubeFunctionEnv | undefined, maxResults: number) {
-  return `${getEnvValue(env, 'YOUTUBE_CHANNEL_ID') ?? getOwnerHandle(env)}:${maxResults}`;
+function getRequestedPageToken(context: YouTubeFunctionContext) {
+  return cleanOptionalValue(new URL(context.request.url).searchParams.get('pageToken') ?? undefined);
+}
+
+function buildCacheKey(env: YouTubeFunctionEnv | undefined, maxResults: number, pageToken?: string) {
+  return `${getEnvValue(env, 'YOUTUBE_CHANNEL_ID') ?? getOwnerHandle(env)}:${maxResults}:${pageToken ?? 'first'}`;
 }
 
 function getFreshCachedResponse(cacheKey: string, nowMs: number) {
@@ -262,7 +266,8 @@ export async function handleYouTubeVideosRequest(
   }
 
   const maxResults = getRequestedMaxResults(context, options);
-  const cacheKey = buildCacheKey(env, maxResults);
+  const pageToken = getRequestedPageToken(context);
+  const cacheKey = buildCacheKey(env, maxResults, pageToken);
   const freshCachedResponse = getFreshCachedResponse(cacheKey, now.getTime());
 
   if (freshCachedResponse) {
@@ -278,6 +283,7 @@ export async function handleYouTubeVideosRequest(
         part: 'snippet,contentDetails',
         playlistId: uploadsPlaylistId,
         maxResults: String(maxResults),
+        ...(pageToken ? { pageToken } : {}),
       },
       apiKey,
       fetcher,
