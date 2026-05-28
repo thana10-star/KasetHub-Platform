@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import { YoutubePage } from '@/routes/YoutubePage';
 import { YoutubeVideoDetailPage } from '@/routes/YoutubeVideoDetailPage';
+import { filterChannelVideosBySearch } from '@/services/youtube/youtube-service';
 import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
 const realVideo: ChannelVideo = {
@@ -24,6 +25,10 @@ function visibleText(html: string) {
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function countText(text: string, needle: string) {
+  return text.split(needle).length - 1;
 }
 
 function renderYoutubePage(videos: ChannelVideo[] = []) {
@@ -133,7 +138,10 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡');
     expect(text).toContain('à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰');
     expect(html).toContain('/app/youtube/backend-video');
-    expect(html).toContain('https://www.youtube.com/watch?v=backend-video');
+    expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-video"');
+    expect(text).toContain('ดูวิดีโอ');
+    expect(text).not.toContain('ดูในแอพ');
+    expect(text).not.toContain('เปิด YouTube');
     expect(text).not.toContain('views');
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
@@ -160,11 +168,86 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('M128 compact video list title that can wrap cleanly without a description block');
     expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
     expect(html).toContain('/app/youtube/m128-compact-library-video');
-    expect(html).toContain('https://www.youtube.com/watch?v=m128-compact-library-video');
+    expect(html).not.toContain('href="https://www.youtube.com/watch?v=m128-compact-library-video"');
+    expect(countText(text, 'ดูวิดีโอ')).toBe(1);
+    expect(text).not.toContain('ดูในแอพ');
+    expect(text).not.toContain('เปิด YouTube');
     expect(text).not.toContain('M128 library full description should not render in compact list cards');
     expect(html).toContain('grid-cols-[112px_minmax(0,1fr)]');
     expect(html).toContain('[-webkit-line-clamp:3]');
     expect(text).not.toContain('views');
+  });
+
+  test('renders compact in-channel search controls for loaded videos', () => {
+    const html = renderYoutubePage([realVideo]);
+    const text = visibleText(html);
+
+    expect(text).toContain('ค้นหาวิดีโอในช่อง');
+    expect(html).toContain('id="youtube-channel-search"');
+    expect(html).toContain('placeholder="ค้นหาเรื่องที่สนใจ เช่น ขุดสระ ปุ๋ย น้ำ"');
+  });
+
+  test('filters loaded channel videos by title and description without calling YouTube search', () => {
+    const pondVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'pond-video',
+      videoId: 'pond-video',
+      title: 'ขุดสระให้เก็บน้ำได้ดี',
+      url: 'https://www.youtube.com/watch?v=pond-video',
+      description: 'วางผังบ่อและคันดิน',
+    };
+    const fertilizerVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'fertilizer-video',
+      videoId: 'fertilizer-video',
+      title: 'ดูแลดินก่อนปลูก',
+      url: 'https://www.youtube.com/watch?v=fertilizer-video',
+      description: 'สูตรปุ๋ยหมักและน้ำหมักสำหรับแปลงผัก',
+    };
+
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'ขุดสระ')).toEqual([pondVideo]);
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'น้ำหมัก')).toEqual([fertilizerVideo]);
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], '')).toEqual([pondVideo, fertilizerVideo]);
+  });
+
+  test('renders search results and no-match state from already loaded videos', () => {
+    const pondVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm131-pond-video',
+      videoId: 'm131-pond-video',
+      title: 'M131 ขุดสระเก็บน้ำ',
+      url: 'https://www.youtube.com/watch?v=m131-pond-video',
+      description: 'เลือกมุมบ่อให้เหมาะกับพื้นที่',
+    };
+    const fertilizerVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm131-fertilizer-video',
+      videoId: 'm131-fertilizer-video',
+      title: 'M131 ปุ๋ยหมักในสวน',
+      url: 'https://www.youtube.com/watch?v=m131-fertilizer-video',
+      description: 'วิธีทำปุ๋ยหมักให้ปลอดภัย',
+    };
+    const matchHtml = renderYoutubePageWithProps({
+      initialSearchTerm: 'ขุดสระ',
+      videos: [pondVideo, fertilizerVideo],
+    });
+    const matchText = visibleText(matchHtml);
+
+    expect(matchText).toContain('M131 ขุดสระเก็บน้ำ');
+    expect(matchText).not.toContain('M131 ปุ๋ยหมักในสวน');
+    expect(matchText).toContain('ล้างคำค้น');
+    expect(matchHtml).not.toContain('search.list');
+
+    const noMatchHtml = renderYoutubePageWithProps({
+      initialSearchTerm: 'แตงโม',
+      videos: [pondVideo, fertilizerVideo],
+    });
+    const noMatchText = visibleText(noMatchHtml);
+
+    expect(noMatchText).toContain('ไม่พบวิดีโอที่ตรงกับคำค้น');
+    expect(noMatchText).toContain('ล้างคำค้น');
+    expect(noMatchText).not.toContain('M131 ขุดสระเก็บน้ำ');
+    expect(noMatchText).not.toContain('M131 ปุ๋ยหมักในสวน');
   });
 
   test('renders stale /app/youtube backend videos with stale copy', () => {

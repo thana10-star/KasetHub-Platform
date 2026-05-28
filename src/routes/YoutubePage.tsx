@@ -1,4 +1,4 @@
-import { ExternalLink, Home, PlaySquare } from 'lucide-react';
+import { ExternalLink, Home, PlaySquare, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import {
   fetchYouTubeVideoLibraryResponse,
+  filterChannelVideosBySearch,
   getChannelVideoDetailPath,
   getYouTubeSourceStatus,
   listLatestVideos,
@@ -66,7 +67,7 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
                 className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
                 to={getChannelVideoDetailPath(video)}
               >
-                ดูในแอพ
+                ดูวิดีโอ
                 <PlaySquare aria-hidden="true" className="h-4 w-4" />
               </Link>
             ) : (
@@ -80,17 +81,6 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
                 <ExternalLink aria-hidden="true" className="h-4 w-4" />
               </a>
             )}
-            {canOpenInApp ? (
-              <a
-                className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-xs font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12 sm:text-sm"
-                href={video.url}
-                rel="noreferrer"
-                target="_blank"
-              >
-                เปิด YouTube
-                <ExternalLink aria-hidden="true" className="h-4 w-4" />
-              </a>
-            ) : null}
           </div>
         </div>
       </div>
@@ -101,6 +91,7 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
 type YoutubePageProps = {
   backendResponse?: YouTubeVideoLibraryBackendResponse | null;
   fetchVideoLibraryResponse?: () => Promise<YouTubeVideoLibraryBackendResponse | undefined>;
+  initialSearchTerm?: string;
   videos?: ChannelVideo[];
 };
 
@@ -115,15 +106,20 @@ function getBackendChannelUrl(response?: YouTubeVideoLibraryBackendResponse | nu
 export function YoutubePage({
   backendResponse,
   fetchVideoLibraryResponse = fetchYouTubeVideoLibraryResponse,
+  initialSearchTerm = '',
   videos: videoInput,
 }: YoutubePageProps = {}) {
   const [fetchedBackendResponse, setFetchedBackendResponse] = useState<YouTubeVideoLibraryBackendResponse | undefined>();
   const [hasFetchedVideoLibraryResponse, setHasFetchedVideoLibraryResponse] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const effectiveBackendResponse = backendResponse ?? fetchedBackendResponse;
   const videos =
     videoInput === undefined ? listLatestVideosWithBackendFallback(effectiveBackendResponse) : listLatestVideos(videoInput);
+  const filteredVideos = filterChannelVideosBySearch(videos, searchTerm);
   const sourceStatus = getYouTubeSourceStatus(videos);
   const hasVideos = videos.length > 0;
+  const hasSearchTerm = searchTerm.trim().length > 0;
+  const hasFilteredVideos = filteredVideos.length > 0;
   const channelDisplayName = getBackendChannelDisplayName(effectiveBackendResponse) ?? videos[0]?.channelName;
   const shouldFetchVideoLibrary = videoInput === undefined && backendResponse === undefined;
   const isVideoLibraryLoading = shouldFetchVideoLibrary && !hasFetchedVideoLibraryResponse;
@@ -201,10 +197,54 @@ export function YoutubePage({
             {isVideoLibraryStale ? (
               <p className="text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
             ) : null}
+            <Card className="p-3">
+              <label className="text-sm font-extrabold leading-6 text-kaset-ink" htmlFor="youtube-channel-search">
+                ค้นหาวิดีโอในช่อง
+              </label>
+              <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="relative min-w-0">
+                  <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    className="min-h-11 w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm font-semibold text-kaset-ink outline-none transition placeholder:text-slate-400 focus:border-kaset-deep focus:ring-2 focus:ring-kaset-deep/10"
+                    id="youtube-channel-search"
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="ค้นหาเรื่องที่สนใจ เช่น ขุดสระ ปุ๋ย น้ำ"
+                    type="search"
+                    value={searchTerm}
+                  />
+                </div>
+                {hasSearchTerm ? (
+                  <button
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12"
+                    onClick={() => setSearchTerm('')}
+                    type="button"
+                  >
+                    ล้างคำค้น
+                  </button>
+                ) : null}
+              </div>
+            </Card>
             <div className="grid gap-3">
-              {videos.map((video) => (
-                <ChannelVideoCard key={video.id} video={video} />
-              ))}
+              {hasFilteredVideos ? (
+                filteredVideos.map((video) => <ChannelVideoCard key={video.id} video={video} />)
+              ) : (
+                <Card className="p-5 text-center">
+                  <h3 className="text-lg font-extrabold leading-7 text-kaset-ink">ไม่พบวิดีโอที่ตรงกับคำค้น</h3>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                    ลองใช้คำค้นอื่น หรือดูรายการวิดีโอทั้งหมดจากช่อง
+                  </p>
+                  <button
+                    className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"
+                    onClick={() => setSearchTerm('')}
+                    type="button"
+                  >
+                    ล้างคำค้น
+                  </button>
+                </Card>
+              )}
             </div>
           </section>
         ) : (

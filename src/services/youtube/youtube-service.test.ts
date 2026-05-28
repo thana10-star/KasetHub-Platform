@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   fetchLatestYouTubeVideoResponse,
   fetchYouTubeVideoLibraryResponse,
+  filterChannelVideosBySearch,
   getChannelVideoById,
   getChannelVideoDetailPath,
   getLatestVideo,
@@ -128,6 +129,27 @@ describe('YouTube latest video service', () => {
 
     expect(getChannelVideoById('youtube-video-id', [backendVideo])).toEqual(backendVideo);
     expect(getChannelVideoDetailPath(backendVideo)).toBe('/app/youtube/youtube-video-id');
+  });
+
+  test('filters already-loaded videos by local title and description search', () => {
+    const pondVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'pond-search-video',
+      title: 'ขุดสระเก็บน้ำ',
+      url: 'https://www.youtube.com/watch?v=pond-search-video',
+      description: 'วางผังบ่อให้เหมาะกับพื้นที่',
+    };
+    const fertilizerVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'fertilizer-search-video',
+      title: 'ดูแลดินก่อนปลูก',
+      url: 'https://www.youtube.com/watch?v=fertilizer-search-video',
+      description: 'สูตรปุ๋ยหมักและน้ำหมัก',
+    };
+
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'ขุดสระ')).toEqual([pondVideo]);
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'น้ำหมัก')).toEqual([fertilizerVideo]);
+    expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], '')).toEqual([pondVideo, fertilizerVideo]);
   });
 
   test('reports ready status for backend-normalized YouTube API videos without engagement stats', () => {

@@ -26,6 +26,10 @@ function visibleText(html: string) {
     .trim();
 }
 
+function countText(text: string, needle: string) {
+  return text.split(needle).length - 1;
+}
+
 describe('M116.9 home dashboard polish', () => {
   test('renders a premium branded Home header with logo and controls', () => {
     const html = renderHome();
@@ -329,6 +333,9 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
     expect(html).toContain('/app/youtube/backend-owner-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-owner-video"');
+    expect(countText(text, 'ดูวิดีโอ')).toBe(1);
+    expect(text).not.toContain('เปิด YouTube');
+    expect(text).not.toContain('เปิดใน YouTube');
     expect(text).not.toContain('à¸¢à¸­à¸”à¸”à¸¹');
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
     expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');

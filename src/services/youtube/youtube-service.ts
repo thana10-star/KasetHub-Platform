@@ -152,6 +152,22 @@ export function getChannelVideoById(videoId: string, videos: ChannelVideo[] = ow
   );
 }
 
+function normalizeVideoSearchTerm(searchTerm: string) {
+  return searchTerm.trim().toLocaleLowerCase('th-TH');
+}
+
+export function filterChannelVideosBySearch(videos: ChannelVideo[], searchTerm: string) {
+  const normalizedSearchTerm = normalizeVideoSearchTerm(searchTerm);
+
+  if (!normalizedSearchTerm) return videos;
+
+  return videos.filter((video) =>
+    [video.title, video.description ?? ''].some((value) =>
+      value.toLocaleLowerCase('th-TH').includes(normalizedSearchTerm),
+    ),
+  );
+}
+
 export function getYouTubeSourceStatus(videos: ChannelVideo[] = ownerCuratedYoutubeVideos): YouTubeSourceStatus {
   const latestVideos = listLatestVideos(videos);
   const latestVideo = latestVideos[0];

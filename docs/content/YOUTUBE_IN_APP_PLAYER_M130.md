@@ -19,6 +19,8 @@ The app does not download, proxy, self-host, or alter YouTube video streams. Pla
 
 When a video has a real `videoId`, Home and `/app/youtube` route to `/app/youtube/:videoId` first. If a video does not have a `videoId`, the UI falls back to the real YouTube URL instead of inventing an embed.
 
+After M131, Home and `/app/youtube` list cards use one CTA label, `ดูวิดีโอ`. The external `เปิดใน YouTube` fallback remains on the detail/player page, not on every list card.
+
 ## Detail Page Behavior
 
 The detail page:
