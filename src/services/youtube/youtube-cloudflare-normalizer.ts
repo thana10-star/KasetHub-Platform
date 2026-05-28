@@ -32,8 +32,20 @@ export type YouTubePlaylistItemsApiResponse = {
   nextPageToken?: string;
 };
 
+type YouTubeVideoStatisticsItem = {
+  id?: string;
+  statistics?: {
+    viewCount?: string;
+  };
+};
+
+export type YouTubeVideosListApiResponse = {
+  items?: YouTubeVideoStatisticsItem[];
+};
+
 type NormalizeYouTubePlaylistItemsInput = {
   apiResponse: YouTubePlaylistItemsApiResponse;
+  statisticsResponse?: YouTubeVideosListApiResponse;
   channelName?: string;
   fetchedAt: string;
   sourceUrl: string;
@@ -60,11 +72,43 @@ function getVideoId(item: YouTubePlaylistItem) {
   return cleanOptionalValue(item.contentDetails?.videoId) ?? cleanOptionalValue(item.snippet?.resourceId?.videoId);
 }
 
+function parseYouTubeViewCount(value?: string) {
+  const trimmed = cleanOptionalValue(value);
+  if (!trimmed || !/^\d+$/.test(trimmed)) return undefined;
+
+  const parsed = Number(trimmed);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function buildViewCountByVideoId(apiResponse?: YouTubeVideosListApiResponse) {
+  const viewCountByVideoId = new Map<string, number>();
+
+  (apiResponse?.items ?? []).forEach((item) => {
+    const videoId = cleanOptionalValue(item.id);
+    const viewCount = parseYouTubeViewCount(item.statistics?.viewCount);
+
+    if (videoId && viewCount !== undefined) {
+      viewCountByVideoId.set(videoId, viewCount);
+    }
+  });
+
+  return viewCountByVideoId;
+}
+
+export function getYouTubePlaylistVideoIds(apiResponse: YouTubePlaylistItemsApiResponse) {
+  return Array.from(
+    new Set((apiResponse.items ?? []).map(getVideoId).filter((videoId): videoId is string => Boolean(videoId))),
+  );
+}
+
 export function normalizeYouTubePlaylistItems(input: NormalizeYouTubePlaylistItemsInput): ChannelVideo[] {
+  const viewCountByVideoId = buildViewCountByVideoId(input.statisticsResponse);
+
   return (input.apiResponse.items ?? [])
     .map((item): ChannelVideo | undefined => {
       const videoId = getVideoId(item);
       const title = cleanOptionalValue(item.snippet?.title);
+      const viewCount = videoId ? viewCountByVideoId.get(videoId) : undefined;
 
       if (!videoId || !title) return undefined;
 
@@ -81,6 +125,7 @@ export function normalizeYouTubePlaylistItems(input: NormalizeYouTubePlaylistIte
         channelName: cleanOptionalValue(item.snippet?.channelTitle) ?? input.channelName,
         fetchedAt: input.fetchedAt,
         sourceUrl: input.sourceUrl,
+        ...(viewCount === undefined ? {} : { viewCount }),
       } satisfies ChannelVideo;
     })
     .filter((video): video is ChannelVideo => Boolean(video));

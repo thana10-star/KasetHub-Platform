@@ -13,6 +13,7 @@ export type ChannelVideo = {
   channelName?: string;
   fetchedAt?: string;
   sourceUrl?: string;
+  viewCount?: number;
 };
 
 export type YouTubeSourceState = 'ready' | 'source_pending';

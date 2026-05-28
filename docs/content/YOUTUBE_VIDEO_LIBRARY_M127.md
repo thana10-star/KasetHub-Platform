@@ -26,6 +26,7 @@ Cards can show:
 - thumbnail
 - title
 - published date if provided by the backend
+- real view count if provided by the backend after M132
 - channel name if provided
 - one `ดูวิดีโอ` action per card
 
@@ -34,6 +35,8 @@ After M128/M129, Home and the `/app/youtube` list intentionally do not render lo
 After M130, the primary video path is the in-app official YouTube player detail route. The external YouTube URL remains visible as a fallback; the app does not autoplay, self-host, proxy, or modify YouTube playback.
 
 After M131, `/app/youtube` cards no longer show a second `เปิด YouTube` button. The single `ดูวิดีโอ` button opens the in-app player when `videoId` exists, or the real YouTube URL when `videoId` is missing. The page also includes local in-channel search over the videos already loaded from the owner channel; it does not call YouTube `search.list`.
+
+After M132, cards may show compact real view counts from backend `videos.list` statistics, such as `1.2 หมื่นครั้ง`. If `viewCount` is missing, the card shows no view label and does not invent `0`.
 
 Cards must not show:
 

@@ -315,6 +315,7 @@ describe('M116.9 home dashboard polish', () => {
       isReal: true,
       channelName: 'à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰',
       fetchedAt: '2026-05-28T02:00:00.000Z',
+      viewCount: 12300,
     };
     const html = renderHome({
       latestVideoResponse: {
@@ -331,6 +332,7 @@ describe('M116.9 home dashboard polish', () => {
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­à¸¥à¹ˆà¸²à¸ªà¸¸à¸”à¸ˆà¸²à¸ backend YouTube');
     expect(text).not.toContain('à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸£à¸´à¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸ˆà¸²à¸ backend à¸‚à¸­à¸‡à¸Šà¹ˆà¸­à¸‡');
+    expect(text).toContain('1.2 หมื่นครั้ง');
     expect(html).toContain('/app/youtube/backend-owner-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-owner-video"');
     expect(countText(text, 'ดูวิดีโอ')).toBe(1);
@@ -340,6 +342,38 @@ describe('M116.9 home dashboard polish', () => {
     expect(text).not.toContain('à¹„à¸¥à¸à¹Œ');
     expect(text).not.toContain('à¸„à¸­à¸¡à¹€à¸¡à¸™à¸•à¹Œ');
     expect(text).not.toContain('views');
+  });
+
+  test('hides Home view count when backend does not provide one', () => {
+    const backendVideo: ChannelVideo = {
+      id: 'backend-no-view-count-video',
+      videoId: 'backend-no-view-count-video',
+      title: 'M132 backend latest video without view count',
+      url: 'https://www.youtube.com/watch?v=backend-no-view-count-video',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'M132 Channel',
+    };
+    const html = renderHome({
+      latestVideoResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M132 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [backendVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('M132 backend latest video without view count');
+    expect(text).not.toContain('0 ครั้ง');
+    expect(text).not.toContain('พันครั้ง');
+    expect(text).not.toContain('หมื่นครั้ง');
+    expect(text).not.toContain('ล้านครั้ง');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
   });
 
   test('renders the Home latest video card as compact title-only content', () => {

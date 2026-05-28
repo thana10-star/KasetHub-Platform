@@ -7,6 +7,7 @@ import { NoticeBox } from '@/components/ui/NoticeBox';
 import {
   fetchYouTubeVideoLibraryResponse,
   filterChannelVideosBySearch,
+  formatYouTubeViewCount,
   getChannelVideoDetailPath,
   getYouTubeSourceStatus,
   listLatestVideos,
@@ -47,6 +48,11 @@ function VideoPreview({ video }: { video: ChannelVideo }) {
 
 function ChannelVideoCard({ video }: { video: ChannelVideo }) {
   const publishedAtLabel = formatPublishedAt(video.publishedAt);
+  const viewCountLabel = formatYouTubeViewCount(video.viewCount);
+  const metaParts = [
+    publishedAtLabel ? `เผยแพร่ ${publishedAtLabel}` : undefined,
+    viewCountLabel ?? undefined,
+  ].filter((part): part is string => Boolean(part));
   const canOpenInApp = Boolean(video.videoId?.trim());
 
   return (
@@ -58,8 +64,8 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
           <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden sm:text-base sm:leading-6">
             {video.title}
           </h2>
-          {publishedAtLabel ? (
-            <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
+          {metaParts.length > 0 ? (
+            <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{metaParts.join(' · ')}</p>
           ) : null}
           <div className="mt-2 flex flex-wrap gap-2">
             {canOpenInApp ? (

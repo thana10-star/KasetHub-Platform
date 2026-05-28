@@ -36,14 +36,15 @@ Search behavior:
 - Shows `ไม่พบวิดีโอที่ตรงกับคำค้น` when there is no match.
 - Shows `ล้างคำค้น` when a query is active.
 
-## Deferred View Count
+## View Count Follow-Up
 
-View counts are intentionally deferred. Real view counts require a separate `videos.list` / `statistics` design, quota review, cache behavior, and UI rules. M131 does not add view counts and does not invent engagement.
+View counts were intentionally deferred in M131. M132 adds them through backend-only `videos.list` / `statistics` with cache and UI rules. The M131 search behavior remains unchanged: it still filters only already-loaded videos and still does not use YouTube `search.list`.
 
 ## Safety
 
 - No YouTube API key is exposed to frontend code.
 - No `VITE_YOUTUBE_API_KEY` is added.
 - No `search.list` call is added.
-- No view, like, comment, subscriber, or fake engagement data is shown.
+- View counts may be shown after M132 only when the backend returns real `viewCount`.
+- No fake view, like, comment, subscriber, or fake engagement data is shown.
 - No autoplay is added.

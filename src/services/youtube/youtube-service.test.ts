@@ -3,6 +3,7 @@ import {
   fetchLatestYouTubeVideoResponse,
   fetchYouTubeVideoLibraryResponse,
   filterChannelVideosBySearch,
+  formatYouTubeViewCount,
   getChannelVideoById,
   getChannelVideoDetailPath,
   getLatestVideo,
@@ -150,6 +151,16 @@ describe('YouTube latest video service', () => {
     expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'ขุดสระ')).toEqual([pondVideo]);
     expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], 'น้ำหมัก')).toEqual([fertilizerVideo]);
     expect(filterChannelVideosBySearch([pondVideo, fertilizerVideo], '')).toEqual([pondVideo, fertilizerVideo]);
+  });
+
+  test('formats real YouTube view counts with Thai-friendly labels', () => {
+    expect(formatYouTubeViewCount()).toBeNull();
+    expect(formatYouTubeViewCount(-1)).toBeNull();
+    expect(formatYouTubeViewCount(0)).toBe('0 ครั้ง');
+    expect(formatYouTubeViewCount(999)).toBe('999 ครั้ง');
+    expect(formatYouTubeViewCount(1200)).toBe('1.2 พันครั้ง');
+    expect(formatYouTubeViewCount(12300)).toBe('1.2 หมื่นครั้ง');
+    expect(formatYouTubeViewCount(1200000)).toBe('1.2 ล้านครั้ง');
   });
 
   test('reports ready status for backend-normalized YouTube API videos without engagement stats', () => {

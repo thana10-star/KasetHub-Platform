@@ -1,5 +1,11 @@
-import { normalizeYouTubePlaylistItems } from '../../../src/services/youtube/youtube-cloudflare-normalizer';
-import type { YouTubePlaylistItemsApiResponse } from '../../../src/services/youtube/youtube-cloudflare-normalizer';
+import {
+  getYouTubePlaylistVideoIds,
+  normalizeYouTubePlaylistItems,
+} from '../../../src/services/youtube/youtube-cloudflare-normalizer';
+import type {
+  YouTubePlaylistItemsApiResponse,
+  YouTubeVideosListApiResponse,
+} from '../../../src/services/youtube/youtube-cloudflare-normalizer';
 import type {
   YouTubeLatestBackendChannel,
   YouTubeLatestBackendResponse,
@@ -276,8 +282,28 @@ export async function handleYouTubeVideosRequest(
       apiKey,
       fetcher,
     );
+    const playlistVideoIds = getYouTubePlaylistVideoIds(playlistResponse);
+    let statisticsResponse: YouTubeVideosListApiResponse | undefined;
+
+    if (playlistVideoIds.length > 0) {
+      try {
+        statisticsResponse = await fetchYouTubeJson<YouTubeVideosListApiResponse>(
+          'videos',
+          {
+            part: 'statistics',
+            id: playlistVideoIds.join(','),
+          },
+          apiKey,
+          fetcher,
+        );
+      } catch {
+        statisticsResponse = undefined;
+      }
+    }
+
     const videos = normalizeYouTubePlaylistItems({
       apiResponse: playlistResponse,
+      statisticsResponse,
       channelName: channel.title ?? channel.channelName,
       fetchedAt,
       sourceUrl: `${YOUTUBE_API_BASE_URL}/playlistItems`,

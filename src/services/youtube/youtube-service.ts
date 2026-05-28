@@ -56,6 +56,23 @@ function getPublishedAtTime(video: ChannelVideo) {
   return Number.isFinite(publishedAtTime) ? publishedAtTime : 0;
 }
 
+function formatCompactViewCount(value: number, divisor: number) {
+  const rounded = Math.round((value / divisor) * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+export function formatYouTubeViewCount(value?: number) {
+  if (value === undefined || !Number.isFinite(value) || value < 0) return null;
+
+  const viewCount = Math.floor(value);
+
+  if (viewCount < 1_000) return `${viewCount.toLocaleString('en-US')} ครั้ง`;
+  if (viewCount < 10_000) return `${formatCompactViewCount(viewCount, 1_000)} พันครั้ง`;
+  if (viewCount < 995_000) return `${formatCompactViewCount(viewCount, 10_000)} หมื่นครั้ง`;
+
+  return `${formatCompactViewCount(viewCount, 1_000_000)} ล้านครั้ง`;
+}
+
 export function isUsableChannelVideo(video: ChannelVideo) {
   return Boolean(
     video.isReal &&

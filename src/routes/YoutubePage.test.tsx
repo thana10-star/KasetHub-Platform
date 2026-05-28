@@ -121,6 +121,7 @@ describe('M124 YouTube latest video foundation route', () => {
       url: 'https://www.youtube.com/watch?v=backend-video',
       source: 'youtube_api',
       fetchedAt: '2026-05-28T02:00:00.000Z',
+      viewCount: 1200,
     };
     const html = renderYoutubePageWithProps({
       backendResponse: {
@@ -136,6 +137,7 @@ describe('M124 YouTube latest video foundation route', () => {
     const text = visibleText(html);
 
     expect(text).toContain('à¸§à¸´à¸”à¸µà¹‚à¸­ backend à¸ˆà¸²à¸à¸Šà¹ˆà¸­à¸‡');
+    expect(text).toContain('1.2 พันครั้ง');
     expect(text).toContain('à¹€à¸£à¸·à¹ˆà¸­à¸‡à¹€à¸à¸©à¸•à¸£à¸—à¸µà¹ˆà¸„à¸™à¹„à¸—à¸¢à¸„à¸§à¸£à¸£à¸¹à¹‰');
     expect(html).toContain('/app/youtube/backend-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=backend-video"');
@@ -160,6 +162,7 @@ describe('M124 YouTube latest video foundation route', () => {
       source: 'youtube_api',
       isReal: true,
       channelName: 'M128 Channel',
+      viewCount: 12300,
     };
     const html = renderYoutubePage([compactVideo]);
     const text = visibleText(html);
@@ -167,6 +170,7 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('M128 Channel');
     expect(text).toContain('M128 compact video list title that can wrap cleanly without a description block');
     expect(text).toContain('เผยแพร่ 20 พ.ค. 2569');
+    expect(text).toContain('1.2 หมื่นครั้ง');
     expect(html).toContain('/app/youtube/m128-compact-library-video');
     expect(html).not.toContain('href="https://www.youtube.com/watch?v=m128-compact-library-video"');
     expect(countText(text, 'ดูวิดีโอ')).toBe(1);
@@ -347,6 +351,7 @@ describe('M124 YouTube latest video foundation route', () => {
     const detailVideo: ChannelVideo = {
       ...realVideo,
       videoId: 'real-owner-video',
+      viewCount: 1200000,
     };
     const html = renderYoutubeDetail('/app/youtube/real-owner-video', { videos: [detailVideo] });
     const text = visibleText(html);
@@ -356,6 +361,7 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(html).toContain('allowfullscreen=""');
     expect(html).toContain('referrerPolicy="strict-origin-when-cross-origin"');
     expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
+    expect(text).toContain('1.2 ล้านครั้ง');
     expect(text).toContain('เปิดใน YouTube');
     expect(text).toContain('วิดีโอทั้งหมด');
     expect(text).not.toContain('views');

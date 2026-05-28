@@ -29,6 +29,7 @@ The detail page:
 - finds the video by `videoId` or internal `id`
 - renders a responsive 16:9 official YouTube iframe when `videoId` is available
 - shows the title, source/channel label, and published date if already available
+- after M132, shows real backend view count when `viewCount` is available
 - always shows `เปิดใน YouTube` as a fallback
 - links back to `วิดีโอทั้งหมด`
 - shows a safe not-found/source-pending state for unknown IDs
@@ -42,6 +43,7 @@ Ads, monetization, and playback eligibility are controlled by YouTube and by the
 - No `YOUTUBE_API_KEY` is exposed in frontend code.
 - No `VITE_YOUTUBE_API_KEY` is added.
 - No fake views, likes, comments, subscriber counts, duration, or engagement are shown.
+- Real view counts may be displayed after M132 only when they come from backend `videos.list` statistics.
 - No autoplay is added.
 - No scraping is added.
 - No backend API key handling is changed.

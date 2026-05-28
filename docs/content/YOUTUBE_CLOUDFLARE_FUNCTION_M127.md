@@ -15,6 +15,7 @@ Official API references:
 
 - `channels.list`: https://developers.google.com/youtube/v3/docs/channels/list
 - `playlistItems.list`: https://developers.google.com/youtube/v3/docs/playlistItems/list
+- `videos.list`: https://developers.google.com/youtube/v3/docs/videos/list
 
 ## Files
 
@@ -68,8 +69,9 @@ When ready, the function returns normalized `ChannelVideo` rows with:
 - `isReal: true`
 - `fetchedAt`
 - `sourceUrl`
+- `viewCount` when YouTube `videos.list` returns a valid real count
 
-No views, likes, comments, subscriber counts, or fake engagement fields are returned.
+After M132, real view counts may be returned as `viewCount`. Likes, comments, subscriber counts, guessed durations, and fake engagement fields are still not returned.
 
 ## YouTube API Flow
 
@@ -78,8 +80,10 @@ No views, likes, comments, subscriber counts, or fake engagement fields are retu
 3. Call `channels.list` with `part=contentDetails,snippet`.
 4. Read `contentDetails.relatedPlaylists.uploads`.
 5. Call `playlistItems.list` with `part=snippet,contentDetails`.
-6. Return one latest video from `/api/youtube/latest`.
-7. Return up to 50 videos from `/api/youtube/videos`.
+6. After M132, collect video IDs and call `videos.list` with `part=statistics` to read real `statistics.viewCount`.
+7. If the statistics request fails, keep returning the playlist videos without `viewCount`.
+8. Return one latest video from `/api/youtube/latest`.
+9. Return up to 50 videos from `/api/youtube/videos`.
 
 ## Cache And Quota Notes
 
@@ -92,6 +96,8 @@ Cache-Control: public, max-age=21600, stale-while-revalidate=21600
 It also uses a simple in-memory cache for warm isolates. Cloudflare Pages Functions do not guarantee that memory persists, so response cache headers are the reliable V1 cache layer. No KV, D1, or backend storage writes are added in M127.
 
 If the YouTube API fails and a warm cached response exists, the endpoint returns `status: 'stale'` with cached videos. Without a cache, it returns `status: 'error'` and `videos: []`.
+
+The M132 statistics call adds one low-cost `videos.list` request per cache refresh for up to 50 video IDs. The response cache stores the normalized `viewCount` values when they exist.
 
 ## Local Runtime Note
 

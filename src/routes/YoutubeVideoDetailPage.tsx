@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
 import {
   fetchYouTubeVideoLibraryResponse,
+  formatYouTubeViewCount,
   getChannelVideoById,
   getYouTubeSourceStatus,
   listLatestVideos,
@@ -55,6 +56,11 @@ export function YoutubeVideoDetailPage({
   const video = getChannelVideoById(videoId, videos);
   const embedVideoId = video?.videoId?.trim();
   const publishedAtLabel = formatPublishedAt(video?.publishedAt);
+  const viewCountLabel = formatYouTubeViewCount(video?.viewCount);
+  const videoMetaParts = [
+    publishedAtLabel ? `เผยแพร่ ${publishedAtLabel}` : undefined,
+    viewCountLabel ?? undefined,
+  ].filter((part): part is string => Boolean(part));
   const channelDisplayName = video?.channelName ?? getBackendChannelDisplayName(effectiveBackendResponse) ?? 'KasetHub';
   const channelUrl = getBackendChannelUrl(effectiveBackendResponse) ?? sourceStatus.channelUrl;
   const shouldFetchVideoLibrary = videoInput === undefined && backendResponse === undefined;
@@ -115,8 +121,8 @@ export function YoutubeVideoDetailPage({
             <div className="grid gap-3 p-4">
               <p className="text-xs font-extrabold leading-5 text-sky-800">{channelDisplayName}</p>
               <h1 className="break-words text-xl font-extrabold leading-7 text-kaset-ink">{video.title}</h1>
-              {publishedAtLabel ? (
-                <p className="text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
+              {videoMetaParts.length > 0 ? (
+                <p className="text-xs font-semibold leading-5 text-slate-500">{videoMetaParts.join(' · ')}</p>
               ) : null}
               <p className="text-sm font-semibold leading-6 text-slate-600">
                 ถ้าวิดีโอเล่นไม่ได้ในแอพ ให้เปิดดูบน YouTube
@@ -148,6 +154,9 @@ export function YoutubeVideoDetailPage({
             <Card className="p-5">
               <p className="text-xs font-extrabold leading-5 text-sky-800">{channelDisplayName}</p>
               <h1 className="mt-1 break-words text-xl font-extrabold leading-7 text-kaset-ink">{video.title}</h1>
+              {videoMetaParts.length > 0 ? (
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{videoMetaParts.join(' · ')}</p>
+              ) : null}
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 <a
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"

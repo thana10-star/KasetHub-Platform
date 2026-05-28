@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   fetchLatestYouTubeVideoResponse,
+  formatYouTubeViewCount,
   getChannelVideoDetailPath,
   getLatestVideo,
   isUsableChannelVideo,
@@ -212,6 +213,7 @@ export function AppHomePage({
   const isLatestVideoStale = latestVideoBackendStatus === 'stale' && realLatestVideo?.source === 'youtube_api';
   const isLatestVideoError = latestVideoBackendStatus === 'error' && !realLatestVideo;
   const latestVideoChannelUrl = getLatestVideoChannelUrl(effectiveLatestVideoResponse);
+  const latestVideoViewCountLabel = formatYouTubeViewCount(realLatestVideo?.viewCount);
   const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
   const hasValidatedPriceRows = priceSnapshot.hasValidatedCommodityPrices;
   const hasEligibleHomePrices = homeCommodityPrices.length > 0;
@@ -526,6 +528,9 @@ export function AppHomePage({
                   </h2>
                   {isLatestVideoStale ? (
                     <p className="mt-1 text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
+                  ) : null}
+                  {latestVideoViewCountLabel ? (
+                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{latestVideoViewCountLabel}</p>
                   ) : null}
                   {realLatestVideo?.videoId ? (
                     <Link
