@@ -10,6 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_ADMIN_EMAILS?: string;
   readonly VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK?: string;
   readonly VITE_AI_PROXY_MODE?: string;
+  readonly VITE_AI_BACKEND_CONTRACT_ENABLED?: string;
   readonly VITE_ENABLE_AI_BACKEND_PROXY?: string;
   readonly VITE_ENABLE_LOCAL_AI_PROXY_HANDLER?: string;
   readonly VITE_ENABLE_REAL_AI_TEXT?: string;

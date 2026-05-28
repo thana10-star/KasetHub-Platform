@@ -11,6 +11,7 @@ export type PublicRuntimeEnv = {
   adminEmails: string[];
   enableSupabaseDryRunNetworkCheck: boolean;
   aiProxyMode: string;
+  aiBackendContractEnabled: boolean;
   enableAIBackendProxy: boolean;
   enableLocalAIProxyHandler: boolean;
   enableRealAIText: boolean;
@@ -90,6 +91,7 @@ export const publicEnv: PublicRuntimeEnv = Object.freeze({
   adminEmails: readStringListEnv('VITE_ADMIN_EMAILS'),
   enableSupabaseDryRunNetworkCheck: readBooleanEnv('VITE_ENABLE_SUPABASE_DRY_RUN_NETWORK_CHECK', false),
   aiProxyMode: readStringEnv('VITE_AI_PROXY_MODE') || 'local_fixture',
+  aiBackendContractEnabled: readBooleanEnv('VITE_AI_BACKEND_CONTRACT_ENABLED', false),
   enableAIBackendProxy: readBooleanEnv('VITE_ENABLE_AI_BACKEND_PROXY', false),
   enableLocalAIProxyHandler: readBooleanEnv('VITE_ENABLE_LOCAL_AI_PROXY_HANDLER', false),
   enableRealAIText: readBooleanEnv('VITE_ENABLE_REAL_AI_TEXT', false),

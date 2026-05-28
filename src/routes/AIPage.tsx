@@ -28,7 +28,15 @@ import {
   AI_FARMER_ASSISTANT_SAFETY_NOTE,
   isHighRiskFarmerPrompt,
 } from '@/services/ai/ai-farmer-assistant-copy';
+import {
+  askFarmerAssistantViaBackend,
+  isAIBackendContractEnabled,
+  type FarmerAssistantResponse,
+  type FarmerAssistantStatus,
+  type FarmerAssistantTopic,
+} from '@/services/ai/ai-farmer-assistant-client';
 import { buildAIRequestPlan } from '@/services/ai/ai-request-planner';
+import type { AIRequestType } from '@/services/ai/ai-request.types';
 import { askTextQuestion, getAIProxyAdapterStatus } from '@/services/ai-proxy/ai-proxy-adapter';
 import type { AIProxyStatus, AITextProxyResponse } from '@/services/ai-proxy/ai-proxy.types';
 
@@ -49,6 +57,129 @@ const statusCopy: Record<AIProxyStatus, string> = {
   safety_blocked: 'บล็อกเพื่อความปลอดภัย',
   failed: 'ล้มเหลว',
 };
+
+const farmerAssistantStatusTone: Record<FarmerAssistantStatus, 'green' | 'gold' | 'rose' | 'neutral'> = {
+  ready: 'green',
+  not_configured: 'gold',
+  rate_limited: 'gold',
+  blocked: 'rose',
+  error: 'rose',
+};
+
+const farmerAssistantStatusCopy: Record<FarmerAssistantStatus, string> = {
+  ready: 'ตัวอย่างทดสอบ',
+  not_configured: 'ยังไม่เปิดใช้งานเต็มรูปแบบ',
+  rate_limited: 'ลองใหม่ภายหลัง',
+  blocked: 'ต้องระวังความปลอดภัย',
+  error: 'ยังตอบไม่ได้',
+};
+
+function mapRequestTypeToFarmerAssistantTopic(requestType: AIRequestType): FarmerAssistantTopic {
+  const topicByRequestType: Record<AIRequestType, FarmerAssistantTopic> = {
+    normal_text_question: 'general',
+    risky_or_complex_question: 'plant_problem',
+    plant_image_analysis: 'plant_problem',
+    video_summary: 'general',
+    article_summary: 'general',
+    price_explanation: 'price',
+  };
+
+  return topicByRequestType[requestType];
+}
+
+function getFarmerAssistantDisplayAnswer(response: FarmerAssistantResponse) {
+  if (response.status === 'not_configured') {
+    return 'ตอนนี้ผู้ช่วย AI เกษตรยังไม่ได้เปิดใช้งานเต็มรูปแบบ เรากำลังเตรียมระบบให้ตอบได้อย่างปลอดภัยและน่าเชื่อถือ';
+  }
+
+  if (response.status === 'rate_limited') {
+    return response.retryAfterSeconds
+      ? `ถามถี่เกินไป ลองใหม่อีกครั้งในอีก ${response.retryAfterSeconds} วินาที`
+      : 'ถามถี่เกินไป ลองใหม่อีกครั้งในอีกสักครู่';
+  }
+
+  if (response.status === 'error') {
+    return response.answer || 'ยังตอบคำถามนี้ไม่ได้ ลองใหม่อีกครั้ง';
+  }
+
+  return response.answer || 'ยังไม่มีคำตอบจากผู้ช่วย AI ในตอนนี้';
+}
+
+export function FarmerAssistantContractResponseCard({
+  onRetry,
+  response,
+}: {
+  onRetry: () => void;
+  response: FarmerAssistantResponse;
+}) {
+  const displayAnswer = getFarmerAssistantDisplayAnswer(response);
+  const isMockPreview = response.provider === 'mock' || (response.status === 'ready' && response.provider !== 'openai');
+
+  return (
+    <Card className="overflow-hidden" data-ai-contract-status={response.status} data-testid="ai-contract-response-card">
+      <div className="bg-kaset-deep p-5 text-white">
+        <div className="flex items-start gap-3">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-kaset-deep">
+            <Bot aria-hidden="true" className="h-6 w-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap gap-2">
+              <Badge className="bg-white/15 text-white" tone="green">
+                ผู้ช่วย AI เกษตร
+              </Badge>
+              <Badge tone={farmerAssistantStatusTone[response.status]}>{farmerAssistantStatusCopy[response.status]}</Badge>
+            </div>
+            <h2 className="mt-3 text-lg font-extrabold leading-7">ผลตอบกลับจากผู้ช่วย</h2>
+            <p className="mt-1 text-xs text-emerald-50/90">
+              ใช้เป็นคำแนะนำเบื้องต้น และตรวจสอบกับผู้เชี่ยวชาญหรือแหล่งข้อมูลจริงเมื่อมีความเสี่ยง
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 p-5">
+        {isMockPreview ? (
+          <div className="rounded-lg bg-sky-50 p-3 text-sm font-semibold leading-6 text-sky-950">
+            ตัวอย่างสำหรับทดสอบระบบเท่านั้น ยังไม่ใช่คำตอบจาก AI จริง
+          </div>
+        ) : null}
+
+        <div className="rounded-lg bg-kaset-mist p-4 text-sm leading-6 text-slate-700">{displayAnswer}</div>
+
+        {response.followUpQuestions?.length ? (
+          <div>
+            <h3 className="text-sm font-extrabold text-kaset-ink">คำถามเพิ่มเติมที่ช่วยให้ตอบได้ดีขึ้น</h3>
+            <div className="mt-2 grid gap-2">
+              {response.followUpQuestions.map((question) => (
+                <p className="rounded-lg bg-white p-3 text-sm leading-6 text-slate-700 ring-1 ring-kaset-deep/10" key={question}>
+                  {question}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {response.disclaimers?.length ? (
+          <div className="grid gap-2">
+            {response.disclaimers.map((disclaimer) => (
+              <div className="flex gap-2 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900" key={disclaimer}>
+                <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{disclaimer}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {response.status === 'error' || response.status === 'rate_limited' ? (
+          <Button className="w-full" onClick={onRetry} variant="soft">
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            ลองส่งอีกครั้ง
+          </Button>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
 
 function ProxyResponseCard({
   question,
@@ -135,11 +266,14 @@ export function AIPage() {
   const [savedMessage, setSavedMessage] = useState('');
   const [showLimitReached, setShowLimitReached] = useState(false);
   const [proxyResponse, setProxyResponse] = useState<AITextProxyResponse | null>(null);
+  const [farmerAssistantResponse, setFarmerAssistantResponse] = useState<FarmerAssistantResponse | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addRecentAIQuestion, saveItem } = useGuestMemory();
   const { addUsageLog, consumeCredits, grantRewardedCredit, summary } = useAICredits();
   const requestPlan = useMemo(() => buildAIRequestPlan({ prompt: question, sourceRoute: '/app/ai' }), [question]);
   const aiStatus = getAIProxyAdapterStatus();
-  const isRealAIUnavailable = !aiStatus.canAttemptBackend && !aiStatus.canUseLocalBackendHandler;
+  const backendContractEnabled = isAIBackendContractEnabled();
+  const isRealAIUnavailable = !backendContractEnabled && !aiStatus.canAttemptBackend && !aiStatus.canUseLocalBackendHandler;
 
   function handleRewardedUnlock() {
     grantRewardedCredit({
@@ -213,6 +347,7 @@ export function AIPage() {
       return;
     }
 
+    setFarmerAssistantResponse(null);
     const response = askTextQuestion({
       question: cleanQuestion,
       creditSummary: summary,
@@ -234,6 +369,42 @@ export function AIPage() {
     }
 
     persistSuccessfulAnswer(cleanQuestion, response);
+  }
+
+  async function askAI(nextQuestion: string) {
+    const cleanQuestion = nextQuestion.trim();
+
+    if (!cleanQuestion) {
+      setSavedMessage('พิมพ์คำถามก่อนถาม AI');
+      return;
+    }
+
+    if (!backendContractEnabled) {
+      askMockAI(cleanQuestion);
+      return;
+    }
+
+    const nextPlan = buildAIRequestPlan({ prompt: cleanQuestion, sourceRoute: '/app/ai' });
+
+    setIsSubmitting(true);
+    setProxyResponse(null);
+    setFarmerAssistantResponse(null);
+    setShowLimitReached(false);
+    setSavedMessage('');
+
+    try {
+      const response = await askFarmerAssistantViaBackend({
+        question: cleanQuestion,
+        topic: mapRequestTypeToFarmerAssistantTopic(nextPlan.requestType),
+        userMode: 'guest',
+        clientRequestId: `app-ai-${Date.now().toString(36)}`,
+      });
+
+      setFarmerAssistantResponse(response);
+      setSavedMessage(getFarmerAssistantDisplayAnswer(response));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -303,9 +474,9 @@ export function AIPage() {
             <p className="text-xs text-slate-500">
               ประมาณ {requestPlan.creditCost} เครดิต · วันนี้ถามฟรีได้อีก {summary.dailyFreeRemaining} ครั้ง
             </p>
-            <Button className="shrink-0 px-4" onClick={() => askMockAI(question)}>
+            <Button className="shrink-0 px-4" disabled={isSubmitting} onClick={() => void askAI(question)}>
               <SendHorizonal aria-hidden="true" className="h-4 w-4" />
-              ถาม AI
+              {isSubmitting ? 'กำลังถาม...' : 'ถาม AI'}
             </Button>
           </div>
           {savedMessage ? <p className="mt-3 text-xs font-semibold text-kaset-deep">{savedMessage}</p> : null}
@@ -333,7 +504,10 @@ export function AIPage() {
           </div>
         </Card>
 
-        {proxyResponse ? <ProxyResponseCard question={question} onRetry={() => askMockAI(question)} response={proxyResponse} /> : null}
+        {proxyResponse ? <ProxyResponseCard question={question} onRetry={() => void askAI(question)} response={proxyResponse} /> : null}
+        {farmerAssistantResponse ? (
+          <FarmerAssistantContractResponseCard onRetry={() => void askAI(question)} response={farmerAssistantResponse} />
+        ) : null}
 
         <section className="grid gap-3">
           <h2 className="text-lg font-extrabold text-kaset-ink">เริ่มจากหัวข้อยอดนิยม</h2>
@@ -347,7 +521,7 @@ export function AIPage() {
                   key={prompt}
                   onClick={() => {
                     setQuestion(prompt);
-                    askMockAI(prompt);
+                    void askAI(prompt);
                   }}
                   type="button"
                 >
