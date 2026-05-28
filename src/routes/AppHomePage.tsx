@@ -15,6 +15,7 @@ import {
   Calculator,
   ChevronRight,
   CloudSun,
+  ExternalLink,
   PlaySquare,
   Sprout,
   Tags,
@@ -22,6 +23,8 @@ import {
   UsersRound,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getLatestVideo, isUsableChannelVideo } from '@/services/youtube/youtube-service';
+import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
 const quickActions = [
   {
@@ -100,7 +103,7 @@ const priceSnapshotItems = [
   },
 ] as const;
 
-const latestVideoPreview = {
+const latestVideoPlaceholder = {
   ctaHref: '/app/youtube',
   description: 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง',
   subtitle: 'วิดีโอจากช่อง KasetHub',
@@ -170,12 +173,15 @@ function formatHomePriceUpdatedLabel(rows: CommodityPrice[]) {
 
 type AppHomePageProps = {
   priceSnapshot?: PriceAdapterSnapshot;
+  latestVideo?: ChannelVideo | null;
 };
 
-export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHomePageProps = {}) {
+export function AppHomePage({ latestVideo, priceSnapshot = getPriceAdapterSnapshot() }: AppHomePageProps = {}) {
   const notificationCenter = useNotificationCenter();
   const farmHub = buildHomeFarmHubViewModel();
   const { forecast } = useWeather();
+  const configuredLatestVideo = latestVideo === undefined ? getLatestVideo() : latestVideo ?? undefined;
+  const realLatestVideo = configuredLatestVideo && isUsableChannelVideo(configuredLatestVideo) ? configuredLatestVideo : undefined;
   const homeCommodityPrices = getHomeCommodityPrices(priceSnapshot);
   const hasValidatedPriceRows = priceSnapshot.hasValidatedCommodityPrices;
   const hasEligibleHomePrices = homeCommodityPrices.length > 0;
@@ -402,24 +408,46 @@ export function AppHomePage({ priceSnapshot = getPriceAdapterSnapshot() }: AppHo
         <section aria-labelledby="home-video-title">
           <Card className="overflow-hidden p-0">
             <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 p-3">
-              <div className="grid min-h-[116px] place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
-                <PlaySquare aria-hidden="true" className="h-10 w-10" />
-              </div>
+              {realLatestVideo?.thumbnailUrl ? (
+                <img
+                  alt=""
+                  className="h-full min-h-[116px] w-full rounded-lg object-cover"
+                  src={realLatestVideo.thumbnailUrl}
+                />
+              ) : (
+                <div className="grid min-h-[116px] place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
+                  <PlaySquare aria-hidden="true" className="h-10 w-10" />
+                </div>
+              )}
               <div className="min-w-0 self-center">
-                <p className="text-xs font-extrabold leading-5 text-sky-800">{latestVideoPreview.subtitle}</p>
+                <p className="text-xs font-extrabold leading-5 text-sky-800">
+                  {realLatestVideo?.channelName ?? latestVideoPlaceholder.subtitle}
+                </p>
                 <h2 id="home-video-title" className="break-words text-base font-extrabold leading-6 text-kaset-ink">
-                  {latestVideoPreview.title}
+                  {realLatestVideo?.title ?? latestVideoPlaceholder.title}
                 </h2>
                 <p className="mt-1 break-words text-sm font-semibold leading-5 text-slate-600">
-                  {latestVideoPreview.description}
+                  {realLatestVideo?.description ?? latestVideoPlaceholder.description}
                 </p>
-                <Link
-                  className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
-                  to={latestVideoPreview.ctaHref}
-                >
-                  ดูวิดีโอ
-                  <ChevronRight aria-hidden="true" className="h-4 w-4" />
-                </Link>
+                {realLatestVideo ? (
+                  <a
+                    className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+                    href={realLatestVideo.url}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    ดูวิดีโอ
+                    <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <Link
+                    className="mt-3 inline-flex min-h-10 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+                    to={latestVideoPlaceholder.ctaHref}
+                  >
+                    ดูวิดีโอ
+                    <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                  </Link>
+                )}
               </div>
             </div>
           </Card>

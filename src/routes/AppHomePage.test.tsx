@@ -7,6 +7,7 @@ import { MyFarmPage } from '@/routes/MyFarmPage';
 import { buildHomeFarmHubViewModel } from '@/routes/home-farm-hub-model';
 import { getPriceAdapterSnapshot } from '@/services/prices/price-adapter-service';
 import type { ManualCommodityPriceRow } from '@/services/prices/price.types';
+import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
 function renderHome(props?: Parameters<typeof AppHomePage>[0]) {
   return renderToString(
@@ -243,7 +244,53 @@ describe('M116.9 home dashboard polish', () => {
     expect(html).toContain('/app/youtube');
     expect(text).not.toContain('24K');
     expect(text).not.toContain('ยอดดู');
+    expect(text).not.toContain('ไลก์');
+    expect(text).not.toContain('คอมเมนต์');
     expect(text).not.toContain('views');
+  });
+
+  test('renders a real owner-curated latest video only when provided', () => {
+    const realVideo: ChannelVideo = {
+      id: 'real-owner-video',
+      title: 'ปลูกผักให้รอดช่วงฝนจริงจากช่อง',
+      url: 'https://www.youtube.com/watch?v=real-owner-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/real-owner-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      description: 'วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงบนหน้าแรก',
+      source: 'owner_curated',
+      isReal: true,
+      channelName: 'ช่องเรื่องเกษตร',
+    };
+    const html = renderHome({ latestVideo: realVideo });
+    const text = visibleText(html);
+
+    expect(text).toContain('ช่องเรื่องเกษตร');
+    expect(text).toContain('ปลูกผักให้รอดช่วงฝนจริงจากช่อง');
+    expect(text).toContain('วิดีโอจริงที่เจ้าของระบบเลือกให้แสดงบนหน้าแรก');
+    expect(text).toContain('ดูวิดีโอ');
+    expect(html).toContain('https://www.youtube.com/watch?v=real-owner-video');
+    expect(html).toContain('https://img.youtube.com/vi/real-owner-video/hqdefault.jpg');
+    expect(text).not.toContain('กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง');
+    expect(text).not.toContain('ยอดดู');
+    expect(text).not.toContain('ไลก์');
+    expect(text).not.toContain('คอมเมนต์');
+    expect(text).not.toContain('views');
+  });
+
+  test('keeps source-pending video state when a provided entry is not real', () => {
+    const unrealVideo: ChannelVideo = {
+      id: 'not-real-video',
+      title: 'หัวข้อที่ยังไม่ควรแสดง',
+      url: 'https://www.youtube.com/watch?v=not-real-video',
+      description: 'รายการนี้ยังไม่ยืนยันว่าเป็นวิดีโอจริง',
+      source: 'owner_curated',
+      isReal: false,
+    };
+    const text = visibleText(renderHome({ latestVideo: unrealVideo }));
+
+    expect(text).toContain('วิดีโอล่าสุดจากช่อง');
+    expect(text).toContain('กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง');
+    expect(text).not.toContain('หัวข้อที่ยังไม่ควรแสดง');
   });
 
   test('keeps all primary home links available', () => {

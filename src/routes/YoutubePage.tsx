@@ -1,165 +1,132 @@
-import { Search, Sparkles, Tv } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { YouTubeChannelHero } from '@/components/kaset/YouTubeChannelHero';
-import { YouTubeVideoCard } from '@/components/kaset/YouTubeVideoCard';
+import { ExternalLink, Home, PlaySquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NoticeBox } from '@/components/ui/NoticeBox';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { youtubeCategories, youtubeChannelProfile, youtubePlaylists, youtubeVideos } from '@/data/youtubeData';
-import type { VideoCategory } from '@/types/youtube';
+import { getYouTubeSourceStatus, listLatestVideos } from '@/services/youtube/youtube-service';
+import type { ChannelVideo } from '@/services/youtube/youtube.types';
 
-type ActiveCategory = 'ทั้งหมด' | VideoCategory;
+function formatPublishedAt(publishedAt?: string) {
+  if (!publishedAt) return '';
+
+  const publishedAtTime = Date.parse(publishedAt);
+  if (!Number.isFinite(publishedAtTime)) return publishedAt;
+
+  return new Intl.DateTimeFormat('th-TH', {
+    dateStyle: 'medium',
+    timeZone: 'Asia/Bangkok',
+  }).format(new Date(publishedAtTime));
+}
+
+function VideoPreview({ video }: { video: ChannelVideo }) {
+  if (video.thumbnailUrl) {
+    return (
+      <img
+        alt=""
+        className="aspect-video w-full rounded-lg object-cover"
+        src={video.thumbnailUrl}
+      />
+    );
+  }
+
+  return (
+    <div className="grid aspect-video place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
+      <PlaySquare aria-hidden="true" className="h-12 w-12" />
+    </div>
+  );
+}
+
+function ChannelVideoCard({ video }: { video: ChannelVideo }) {
+  const publishedAtLabel = formatPublishedAt(video.publishedAt);
+
+  return (
+    <Card className="overflow-hidden p-3">
+      <div className="grid gap-3 sm:grid-cols-[168px_minmax(0,1fr)]">
+        <VideoPreview video={video} />
+        <div className="min-w-0">
+          <p className="text-xs font-extrabold leading-5 text-sky-800">{video.channelName ?? 'KasetHub'}</p>
+          <h2 className="break-words text-base font-extrabold leading-6 text-kaset-ink">{video.title}</h2>
+          {video.description ? (
+            <p className="mt-1 break-words text-sm font-semibold leading-6 text-slate-600">{video.description}</p>
+          ) : null}
+          {publishedAtLabel ? (
+            <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">เผยแพร่ {publishedAtLabel}</p>
+          ) : null}
+          <a
+            className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-kaset-deep px-3 text-sm font-extrabold text-white"
+            href={video.url}
+            rel="noreferrer"
+            target="_blank"
+          >
+            ดูวิดีโอ
+            <ExternalLink aria-hidden="true" className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export function YoutubePage() {
-  const [activeCategory, setActiveCategory] = useState<ActiveCategory>('ทั้งหมด');
-  const [searchQuery, setSearchQuery] = useState('');
-  const featuredVideo = youtubeVideos.find((video) => video.videoId === youtubeChannelProfile.latestVideoId) ?? youtubeVideos[0];
-
-  const filteredVideos = useMemo(() => {
-    return youtubeVideos.filter((video) => {
-      const matchesCategory = activeCategory === 'ทั้งหมด' ? true : video.category === activeCategory;
-      const matchesSearch = searchQuery.trim()
-        ? `${video.title} ${video.description} ${video.tags.join(' ')}`
-            .toLowerCase()
-            .includes(searchQuery.trim().toLowerCase())
-        : true;
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, searchQuery]);
-
-  const shorts = filteredVideos.filter((video) => video.isShort);
-  const latestVideos = filteredVideos.filter((video) => !video.isShort && video.videoId !== featuredVideo.videoId);
+  const videos = listLatestVideos();
+  const sourceStatus = getYouTubeSourceStatus();
+  const hasVideos = videos.length > 0;
 
   return (
     <div>
-      <PageHeader title="YouTube Hub" subtitle="ฐานช่องวิดีโอเกษตรพร้อมต่อ API" showBack />
+      <PageHeader title="วิดีโอเกษตร" subtitle="วิดีโอจริงจากช่องเจ้าของระบบ" showBack />
       <div className="grid gap-5 px-5 pb-6">
-        <YouTubeChannelHero channel={youtubeChannelProfile} />
+        {hasVideos ? (
+          <NoticeBox tone="success" title="วิดีโอจากช่องจริง">
+            แสดงเฉพาะรายการที่มี URL วิดีโอจริงจากเจ้าของระบบ หรือจาก backend YouTube API ที่ปลอดภัยแล้วเท่านั้น
+          </NoticeBox>
+        ) : (
+          <NoticeBox tone="warning" title="กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง">
+            ยังไม่มีรายการวิดีโอจริงให้แสดง จึงไม่เติมข้อมูลตัวอย่างแทนข้อมูลจากช่องจริง
+          </NoticeBox>
+        )}
 
-        <NoticeBox tone="info" title="รวมวิดีโอเกษตรไว้หาเจอง่าย">
-          ค้นหา เลือกหมวด บันทึกวิดีโอ และแชร์ให้เพื่อนได้ หน้านี้ยังใช้ข้อมูลตัวอย่างเพื่อเตรียมต่อ YouTube API
-        </NoticeBox>
-
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-3 text-center">
-            <p className="text-xl font-extrabold text-kaset-deep">{youtubeChannelProfile.subscriberCountLabel}</p>
-            <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">Subscribers</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-xl font-extrabold text-kaset-deep">{youtubeChannelProfile.dailyViewsLabel}</p>
-            <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">Daily views</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-xl font-extrabold text-kaset-deep">{youtubeChannelProfile.contentPillars.length}</p>
-            <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">หมวดวิดีโอ</p>
-          </Card>
-        </div>
-
-        <Card className="p-3">
-          <label className="flex min-h-12 items-center gap-3 rounded-lg bg-kaset-mist px-3 text-sm text-slate-500">
-            <Search aria-hidden="true" className="h-5 w-5 text-kaset-deep" />
-            <input
-              className="min-w-0 flex-1 bg-transparent text-kaset-ink outline-none placeholder:text-slate-400"
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="ค้นหาวิดีโอ เช่น โรคใบจุด ปุ๋ย ดิน"
-              value={searchQuery}
-            />
-          </label>
-        </Card>
-
-        <div className="-mx-5 overflow-x-auto px-5">
-          <div className="flex min-w-max gap-2">
-            {youtubeCategories.map((category) => (
-              <button key={category} onClick={() => setActiveCategory(category)} type="button">
-                <Badge className={activeCategory === category ? 'bg-kaset-deep text-white' : ''} tone="neutral">
-                  {category}
-                </Badge>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {filteredVideos.length === 0 ? (
+        {hasVideos ? (
+          <section className="grid gap-3" aria-labelledby="youtube-video-list-title">
+            <h2 id="youtube-video-list-title" className="text-lg font-extrabold leading-7 text-kaset-ink">
+              วิดีโอล่าสุดจากช่อง
+            </h2>
+            <div className="grid gap-3">
+              {videos.map((video) => (
+                <ChannelVideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          </section>
+        ) : (
           <Card className="p-5 text-center">
             <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-              <Search aria-hidden="true" className="h-7 w-7" />
+              <PlaySquare aria-hidden="true" className="h-7 w-7" />
             </span>
-            <h2 className="mt-4 text-lg font-extrabold text-kaset-ink">ยังไม่พบวิดีโอที่ตรงกับการค้นหา</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">ลองเปลี่ยนคำค้นหรือเลือกหมวด “ทั้งหมด”</p>
+            <h2 className="mt-4 text-lg font-extrabold leading-7 text-kaset-ink">วิดีโอเกษตรกำลังเตรียมเชื่อมต่อ</h2>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+              เจ้าของระบบสามารถเพิ่มวิดีโอจริงได้เมื่อเลือกคลิปแรกพร้อม URL และภาพหน้าปกแล้ว
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <Link
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"
+                to="/app"
+              >
+                <Home aria-hidden="true" className="h-4 w-4" />
+                กลับหน้าแรก
+              </Link>
+              {sourceStatus.channelUrl ? (
+                <a
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12"
+                  href={sourceStatus.channelUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  เปิดช่อง YouTube
+                  <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                </a>
+              ) : null}
+            </div>
           </Card>
-        ) : (
-          <>
-            <section className="grid gap-3">
-              <SectionHeader eyebrow="Featured" title="วิดีโอแนะนำจากช่อง" />
-              <YouTubeVideoCard featured video={featuredVideo} />
-            </section>
-
-            <section className="grid gap-3">
-              <SectionHeader eyebrow="Playlists" title="เพลย์ลิสต์หลัก" />
-              <div className="grid gap-3">
-                {youtubePlaylists.map((playlist) => {
-                  const count = playlist.videoIds.length;
-
-                  return (
-                    <Card className="p-4" key={playlist.playlistId}>
-                      <div className="flex items-start gap-3">
-                        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-kaset-mint text-kaset-deep">
-                          <Tv aria-hidden="true" className="h-5 w-5" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <Badge className="mb-2" tone="green">
-                            {playlist.category}
-                          </Badge>
-                          <h3 className="font-extrabold leading-6 text-kaset-ink">{playlist.title}</h3>
-                          <p className="mt-1 text-sm leading-6 text-slate-600">{playlist.description}</p>
-                          <p className="mt-2 text-xs font-semibold text-slate-500">
-                            {count} วิดีโอ · {playlist.sourceStatus}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="grid gap-3">
-              <SectionHeader eyebrow="Latest" title="วิดีโอล่าสุด" />
-              <div className="grid gap-3">
-                {latestVideos.map((video) => (
-                  <YouTubeVideoCard key={video.videoId} video={video} />
-                ))}
-              </div>
-            </section>
-
-            {shorts.length > 0 ? (
-              <section className="grid gap-3">
-                <SectionHeader eyebrow="Shorts" title="คลิปสั้นเกษตร" />
-                <div className="grid gap-3">
-                  {shorts.map((video) => (
-                    <YouTubeVideoCard compact key={video.videoId} video={video} />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            <Card className="p-4">
-              <div className="flex gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
-                  <Sparkles aria-hidden="true" className="h-5 w-5" />
-                </span>
-                <div>
-                  <h2 className="font-extrabold text-kaset-ink">พร้อมต่อ YouTube Data API</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    หน้านี้ใช้ mock data ที่จัดรูปแบบให้รองรับ channel, playlist, video, shorts และสถิติจริงในอนาคต
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </>
         )}
       </div>
     </div>
