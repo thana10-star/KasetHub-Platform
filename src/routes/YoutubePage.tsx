@@ -1,5 +1,5 @@
 import { ExternalLink, Home, PlaySquare, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -12,9 +12,25 @@ import {
   getYouTubeSourceStatus,
   listLatestVideos,
   listLatestVideosWithBackendFallback,
+  mergeUniqueChannelVideos,
+  type YouTubeBackendFetchOptions,
 } from '@/services/youtube/youtube-service';
 import type { YouTubeVideoLibraryBackendResponse } from '@/services/youtube/youtube-backend-adapter.types';
 import type { ChannelVideo } from '@/services/youtube/youtube.types';
+
+const loadMoreErrorCopy = 'ยังโหลดวิดีโอเพิ่มเติมไม่ได้ ลองใหม่อีกครั้ง';
+const videoLoadingCopy = 'กำลังโหลดวิดีโอจากช่อง';
+const videoLoadingDescription = 'กำลังโหลดวิดีโอจริงจากช่องเจ้าของระบบ';
+const videoReadyCopy = 'วิดีโอจากช่องจริง';
+const videoReadyDescription = 'แสดงเฉพาะวิดีโอจริงจากช่องเจ้าของระบบเท่านั้น';
+const videoStaleCopy = 'แสดงข้อมูลล่าสุดที่เคยโหลดได้';
+const videoStaleDescription = 'ข้อมูลอาจไม่ล่าสุด แต่รายการที่แสดงยังเป็นวิดีโอจริงจากช่อง';
+const videoErrorCopy = 'ยังโหลดวิดีโอจากช่องไม่ได้';
+const videoErrorDescription = 'กรุณาลองใหม่ภายหลัง หรือเปิดช่อง YouTube โดยตรง';
+const videoPendingCopy = 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง';
+const videoPendingDescription = 'ยังไม่มีวิดีโอจริงให้แสดงในตอนนี้';
+const videoNoSearchCopy = 'ยังไม่มีวิดีโอที่ตรงกับคำค้น';
+const videoNoSearchDescription = 'ลองใช้คำค้นอื่น หรือดูรายการวิดีโอทั้งหมดจากช่อง';
 
 function formatPublishedAt(publishedAt?: string) {
   if (!publishedAt) return '';
@@ -33,14 +49,14 @@ function VideoPreview({ video }: { video: ChannelVideo }) {
     return (
       <img
         alt=""
-        className="h-16 w-full rounded-lg object-cover sm:h-20"
+        className="aspect-video w-full rounded-lg object-cover"
         src={video.thumbnailUrl}
       />
     );
   }
 
   return (
-    <div className="grid h-16 place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep sm:h-20">
+    <div className="grid aspect-video w-full place-items-center rounded-lg bg-gradient-to-br from-sky-100 via-emerald-100 to-orange-100 text-kaset-deep">
       <PlaySquare aria-hidden="true" className="h-7 w-7" />
     </div>
   );
@@ -63,7 +79,7 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
           {thumbnailMetaRows.length > 0 ? (
             <div className="mt-1.5 grid gap-0.5 text-[11px] font-semibold leading-4 text-slate-500 sm:text-xs sm:leading-5">
               {thumbnailMetaRows.map((row) => (
-                <p className="break-words" key={row}>
+                <p className="break-words [overflow-wrap:anywhere]" key={row}>
                   {row}
                 </p>
               ))}
@@ -71,14 +87,15 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
           ) : null}
         </div>
         <div className="min-w-0 pt-0.5">
-          <p className="text-xs font-extrabold leading-5 text-sky-800">{video.channelName ?? 'KasetHub'}</p>
-          <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6">
+          <p className="break-words text-xs font-extrabold leading-5 text-sky-800 [overflow-wrap:anywhere]">{video.channelName ?? 'KasetHub'}</p>
+          <h2 className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [overflow-wrap:anywhere] overflow-hidden sm:text-base sm:leading-6">
             {video.title}
           </h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {canOpenInApp ? (
               <Link
                 className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                state={{ video }}
                 to={getChannelVideoDetailPath(video)}
               >
                 ดูวิดีโอ
@@ -104,7 +121,7 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
 
 type YoutubePageProps = {
   backendResponse?: YouTubeVideoLibraryBackendResponse | null;
-  fetchVideoLibraryResponse?: () => Promise<YouTubeVideoLibraryBackendResponse | undefined>;
+  fetchVideoLibraryResponse?: (options?: YouTubeBackendFetchOptions) => Promise<YouTubeVideoLibraryBackendResponse | undefined>;
   initialSearchTerm?: string;
   videos?: ChannelVideo[];
 };
@@ -123,10 +140,13 @@ export function YoutubePage({
   initialSearchTerm = '',
   videos: videoInput,
 }: YoutubePageProps = {}) {
-  const [fetchedBackendResponse, setFetchedBackendResponse] = useState<YouTubeVideoLibraryBackendResponse | undefined>();
+  const [loadedBackendResponse, setLoadedBackendResponse] = useState<YouTubeVideoLibraryBackendResponse | undefined>();
   const [hasFetchedVideoLibraryResponse, setHasFetchedVideoLibraryResponse] = useState(false);
+  const [isLoadingMoreVideos, setIsLoadingMoreVideos] = useState(false);
+  const [loadMoreErrorMessage, setLoadMoreErrorMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const effectiveBackendResponse = backendResponse ?? fetchedBackendResponse;
+  const isLoadingMoreVideosRef = useRef(false);
+  const effectiveBackendResponse = loadedBackendResponse ?? backendResponse;
   const videos =
     videoInput === undefined ? listLatestVideosWithBackendFallback(effectiveBackendResponse) : listLatestVideos(videoInput);
   const filteredVideos = filterChannelVideosBySearch(videos, searchTerm);
@@ -138,19 +158,70 @@ export function YoutubePage({
   const shouldFetchVideoLibrary = videoInput === undefined && backendResponse === undefined;
   const isVideoLibraryLoading = shouldFetchVideoLibrary && !hasFetchedVideoLibraryResponse;
   const backendStatus = effectiveBackendResponse?.status;
+  const nextPageToken = effectiveBackendResponse?.nextPageToken?.trim();
+  const canLoadMoreVideos =
+    videoInput === undefined &&
+    ['ready', 'stale'].includes(backendStatus ?? '') &&
+    Boolean(nextPageToken) &&
+    hasVideos &&
+    !isVideoLibraryLoading;
   const isVideoLibraryStale = backendStatus === 'stale' && videos.some((video) => video.source === 'youtube_api');
   const isVideoLibraryError = backendStatus === 'error' && !hasVideos;
   const channelUrl = getBackendChannelUrl(effectiveBackendResponse) ?? sourceStatus.channelUrl;
+
+  function handleLoadMoreVideos() {
+    if (!nextPageToken || isLoadingMoreVideosRef.current) return;
+
+    isLoadingMoreVideosRef.current = true;
+    setIsLoadingMoreVideos(true);
+    setLoadMoreErrorMessage('');
+
+    fetchVideoLibraryResponse({ pageToken: nextPageToken })
+      .then((response) => {
+        if (!response || !['ready', 'stale'].includes(response.status)) {
+          setLoadMoreErrorMessage(loadMoreErrorCopy);
+          return;
+        }
+
+        setLoadedBackendResponse((currentResponse) => {
+          const baseResponse = currentResponse ?? effectiveBackendResponse;
+
+          return {
+            ...response,
+            channel: response.channel ?? baseResponse?.channel ?? {},
+            fetchedAt: response.fetchedAt ?? baseResponse?.fetchedAt,
+            cacheTtlSeconds: response.cacheTtlSeconds ?? baseResponse?.cacheTtlSeconds,
+            videos: mergeUniqueChannelVideos(baseResponse?.videos ?? [], response.videos),
+          };
+        });
+      })
+      .catch(() => {
+        setLoadMoreErrorMessage(loadMoreErrorCopy);
+      })
+      .finally(() => {
+        isLoadingMoreVideosRef.current = false;
+        setIsLoadingMoreVideos(false);
+      });
+  }
+
+  useEffect(() => {
+    setLoadedBackendResponse(undefined);
+    setLoadMoreErrorMessage('');
+    setIsLoadingMoreVideos(false);
+    isLoadingMoreVideosRef.current = false;
+  }, [backendResponse, videoInput]);
 
   useEffect(() => {
     if (videoInput !== undefined || backendResponse !== undefined) return undefined;
 
     let isActive = true;
     setHasFetchedVideoLibraryResponse(false);
+    setLoadedBackendResponse(undefined);
+    setLoadMoreErrorMessage('');
 
     fetchVideoLibraryResponse()
       .then((response) => {
-        if (isActive) setFetchedBackendResponse(response);
+        if (isActive) setLoadedBackendResponse(response);
       })
       .catch(() => undefined)
       .finally(() => {
@@ -167,20 +238,20 @@ export function YoutubePage({
       <PageHeader title="วิดีโอเกษตร" subtitle="วิดีโอจริงจากช่องเจ้าของระบบ" showBack />
       <div className="grid gap-5 px-5 pb-6">
         {isVideoLibraryLoading ? (
-          <NoticeBox tone="info" title="กำลังโหลดวิดีโอจากช่อง">
-            กำลังเชื่อมวิดีโอจริงจากช่องเจ้าของระบบ โดยยังไม่เติมรายการตัวอย่างแทนข้อมูลจริง
+          <NoticeBox tone="info" title={videoLoadingCopy}>
+            {videoLoadingDescription}
           </NoticeBox>
         ) : hasVideos ? (
-          <NoticeBox tone={isVideoLibraryStale ? 'warning' : 'success'} title={isVideoLibraryStale ? 'แสดงข้อมูลล่าสุดที่เคยโหลดได้' : 'วิดีโอจากช่องจริง'}>
+          <NoticeBox tone={isVideoLibraryStale ? 'warning' : 'success'} title={isVideoLibraryStale ? videoStaleCopy : videoReadyCopy}>
             {isVideoLibraryStale
-              ? 'ข้อมูลอาจไม่ล่าสุด แต่รายการที่แสดงยังเป็นวิดีโอจริงที่เคยโหลดได้จากช่อง'
-              : 'แสดงเฉพาะรายการที่มี URL วิดีโอจริงจากเจ้าของระบบ หรือจาก backend YouTube API ที่ปลอดภัยแล้วเท่านั้น'}
+              ? videoStaleDescription
+              : videoReadyDescription}
           </NoticeBox>
         ) : (
-          <NoticeBox tone={isVideoLibraryError ? 'danger' : 'warning'} title={isVideoLibraryError ? 'ยังโหลดวิดีโอจากช่องไม่ได้' : 'กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง'}>
+          <NoticeBox tone={isVideoLibraryError ? 'danger' : 'warning'} title={isVideoLibraryError ? videoErrorCopy : videoPendingCopy}>
             {isVideoLibraryError
-              ? 'กรุณาลองใหม่ภายหลัง ระบบจะไม่แสดงข้อผิดพลาดดิบหรือเติมวิดีโอตัวอย่างแทน'
-              : 'ยังไม่มีรายการวิดีโอจริงให้แสดง จึงไม่เติมข้อมูลตัวอย่างแทนข้อมูลจากช่องจริง'}
+              ? videoErrorDescription
+              : videoPendingDescription}
           </NoticeBox>
         )}
 
@@ -206,7 +277,7 @@ export function YoutubePage({
               วิดีโอล่าสุดจากช่อง
             </h2>
             {channelDisplayName ? (
-              <p className="break-words text-sm font-semibold leading-6 text-slate-600">{channelDisplayName}</p>
+              <p className="break-words text-sm font-semibold leading-6 text-slate-600 [overflow-wrap:anywhere]">{channelDisplayName}</p>
             ) : null}
             {isVideoLibraryStale ? (
               <p className="text-xs font-extrabold leading-5 text-amber-700">ข้อมูลอาจไม่ล่าสุด</p>
@@ -246,9 +317,9 @@ export function YoutubePage({
                 filteredVideos.map((video) => <ChannelVideoCard key={video.id} video={video} />)
               ) : (
                 <Card className="p-5 text-center">
-                  <h3 className="text-lg font-extrabold leading-7 text-kaset-ink">ไม่พบวิดีโอที่ตรงกับคำค้น</h3>
+                  <h3 className="text-lg font-extrabold leading-7 text-kaset-ink">{videoNoSearchCopy}</h3>
                   <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                    ลองใช้คำค้นอื่น หรือดูรายการวิดีโอทั้งหมดจากช่อง
+                    {videoNoSearchDescription}
                   </p>
                   <button
                     className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-kaset-deep px-4 text-sm font-extrabold text-white"
@@ -260,6 +331,25 @@ export function YoutubePage({
                 </Card>
               )}
             </div>
+            {canLoadMoreVideos || loadMoreErrorMessage ? (
+              <div className="grid justify-items-center gap-2 pt-1">
+                {loadMoreErrorMessage ? (
+                  <p className="text-center text-xs font-extrabold leading-5 text-rose-700" role="status">
+                    {loadMoreErrorMessage}
+                  </p>
+                ) : null}
+                {canLoadMoreVideos ? (
+                  <button
+                    className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-lg bg-white px-4 text-sm font-extrabold text-kaset-deep ring-1 ring-kaset-deep/12 transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                    disabled={isLoadingMoreVideos}
+                    onClick={handleLoadMoreVideos}
+                    type="button"
+                  >
+                    {isLoadingMoreVideos ? 'กำลังโหลด...' : 'โหลดเพิ่มเติม'}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </section>
         ) : (
           <Card className="p-5 text-center">

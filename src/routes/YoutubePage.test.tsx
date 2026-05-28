@@ -57,6 +57,16 @@ function renderYoutubeDetail(path: string, props: Parameters<typeof YoutubeVideo
   );
 }
 
+function renderYoutubeDetailWithState(path: string, video: ChannelVideo) {
+  return renderToString(
+    <MemoryRouter initialEntries={[{ pathname: path, state: { video } }]}>
+      <Routes>
+        <Route path="/app/youtube/:videoId" element={<YoutubeVideoDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
 describe('M124 YouTube latest video foundation route', () => {
   test('renders /app/youtube with a source-pending state when no real videos exist', () => {
     const html = renderYoutubePage();
@@ -75,7 +85,7 @@ describe('M124 YouTube latest video foundation route', () => {
     const text = visibleText(html);
 
     expect(text).toContain('กำลังโหลดวิดีโอจากช่อง');
-    expect(text).toContain('กำลังเชื่อมวิดีโอจริงจากช่องเจ้าของระบบ');
+    expect(text).toContain('กำลังโหลดวิดีโอจริงจากช่องเจ้าของระบบ');
     expect(text).not.toContain('กำลังเตรียมเชื่อมวิดีโอล่าสุดจากช่อง');
     expect(text).not.toContain('views');
     expect(text).not.toContain('ยอดดู');
@@ -188,6 +198,35 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).not.toContain('views');
   });
 
+  test('keeps long Thai list titles clamped while preserving the video CTA', () => {
+    const longThaiTitle =
+      'แจกแบบแปลนขุดสระสามไร่มีเกาะกลางน้ำพร้อมเทคนิคคำนวณสโลปกันดินสไลด์และการจัดพื้นที่รอบสระสำหรับเกษตรกรที่ต้องการเก็บน้ำใช้ทั้งปี';
+    const longTitleVideo: ChannelVideo = {
+      id: 'm135-long-thai-title-video',
+      videoId: 'm135-long-thai-title-video',
+      title: longThaiTitle,
+      url: 'https://www.youtube.com/watch?v=m135-long-thai-title-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m135-long-thai-title-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      source: 'youtube_api',
+      isReal: true,
+      channelName: 'เรื่องเกษตรที่คนไทยควรรู้',
+      viewCount: 4445,
+    };
+    const html = renderYoutubePage([longTitleVideo]);
+    const text = visibleText(html);
+
+    expect(text).toContain(longThaiTitle);
+    expect(text).toContain('ดูวิดีโอ');
+    expect(countText(text, 'ดูวิดีโอ')).toBe(1);
+    expect(html).toContain('[-webkit-line-clamp:2]');
+    expect(html).toContain('[overflow-wrap:anywhere]');
+    expect(html).toContain('/app/youtube/m135-long-thai-title-video');
+    expect(text).toContain('มีคนดูแล้ว 4.4 พันครั้ง');
+    expect(text).not.toContain('views');
+    expect(text).not.toContain('ยอดดู');
+  });
+
   test('hides list card view count gracefully when viewCount is missing', () => {
     const noViewCountVideo: ChannelVideo = {
       id: 'm133-no-view-count-video',
@@ -212,6 +251,99 @@ describe('M124 YouTube latest video foundation route', () => {
       html.indexOf('เผยแพร่ 20 พ.ค. 2569'),
     );
     expect(html.indexOf('เผยแพร่ 20 พ.ค. 2569')).toBeLessThan(html.indexOf('M133 video without backend view count'));
+  });
+
+  test('shows the load-more button only when the backend provides a next page token', () => {
+    const pagedVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-first-page-video',
+      videoId: 'm134-first-page-video',
+      title: 'M134 first page video',
+      url: 'https://www.youtube.com/watch?v=m134-first-page-video',
+      source: 'youtube_api',
+      viewCount: 4500,
+    };
+    const htmlWithMore = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M134 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        nextPageToken: 'NEXT_PAGE',
+        videos: [pagedVideo],
+      },
+    });
+    const textWithMore = visibleText(htmlWithMore);
+
+    expect(textWithMore).toContain('M134 first page video');
+    expect(textWithMore).toContain('โหลดเพิ่มเติม');
+    expect(textWithMore).toContain('มีคนดูแล้ว 4.5 พันครั้ง');
+    expect(countText(textWithMore, 'ดูวิดีโอ')).toBe(1);
+
+    const htmlWithoutMore = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M134 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [pagedVideo],
+      },
+    });
+
+    expect(visibleText(htmlWithoutMore)).not.toContain('โหลดเพิ่มเติม');
+  });
+
+  test('keeps M133 metadata layout and one CTA for videos from multiple loaded pages', () => {
+    const firstVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-page-one-video',
+      videoId: 'm134-page-one-video',
+      title: 'M134 page one compact title',
+      url: 'https://www.youtube.com/watch?v=m134-page-one-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m134-page-one-video/hqdefault.jpg',
+      publishedAt: '2026-05-21T00:00:00.000Z',
+      source: 'youtube_api',
+      viewCount: 39000,
+    };
+    const appendedVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-page-two-video',
+      videoId: 'm134-page-two-video',
+      title: 'M134 appended compact title',
+      url: 'https://www.youtube.com/watch?v=m134-page-two-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m134-page-two-video/hqdefault.jpg',
+      publishedAt: '2026-05-20T00:00:00.000Z',
+      source: 'youtube_api',
+      viewCount: 12300,
+    };
+    const html = renderYoutubePageWithProps({
+      backendResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M134 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        videos: [firstVideo, appendedVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('M134 page one compact title');
+    expect(text).toContain('M134 appended compact title');
+    expect(text).toContain('มีคนดูแล้ว 3.9 หมื่นครั้ง');
+    expect(text).toContain('มีคนดูแล้ว 1.2 หมื่นครั้ง');
+    expect(html.indexOf('https://img.youtube.com/vi/m134-page-two-video/hqdefault.jpg')).toBeLessThan(
+      html.indexOf('มีคนดูแล้ว 1.2 หมื่นครั้ง'),
+    );
+    expect(html.indexOf('มีคนดูแล้ว 1.2 หมื่นครั้ง')).toBeLessThan(html.indexOf('M134 appended compact title'));
+    expect(countText(text, 'ดูวิดีโอ')).toBe(2);
+    expect(text).not.toContain('เปิด YouTube');
+    expect(text).not.toContain('views');
   });
 
   test('renders compact in-channel search controls for loaded videos', () => {
@@ -280,10 +412,50 @@ describe('M124 YouTube latest video foundation route', () => {
     });
     const noMatchText = visibleText(noMatchHtml);
 
-    expect(noMatchText).toContain('ไม่พบวิดีโอที่ตรงกับคำค้น');
+    expect(noMatchText).toContain('ยังไม่มีวิดีโอที่ตรงกับคำค้น');
     expect(noMatchText).toContain('ล้างคำค้น');
     expect(noMatchText).not.toContain('M131 ขุดสระเก็บน้ำ');
     expect(noMatchText).not.toContain('M131 ปุ๋ยหมักในสวน');
+  });
+
+  test('search filters the currently loaded paginated videos only', () => {
+    const firstVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-loaded-first-video',
+      videoId: 'm134-loaded-first-video',
+      title: 'M134 rice field video',
+      url: 'https://www.youtube.com/watch?v=m134-loaded-first-video',
+      description: 'already loaded first page',
+      source: 'youtube_api',
+    };
+    const loadedMoreVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-loaded-more-video',
+      videoId: 'm134-loaded-more-video',
+      title: 'M134 pond planning video',
+      url: 'https://www.youtube.com/watch?v=m134-loaded-more-video',
+      description: 'loaded page about pond slopes',
+      source: 'youtube_api',
+    };
+    const html = renderYoutubePageWithProps({
+      initialSearchTerm: 'pond',
+      backendResponse: {
+        status: 'ready',
+        channel: {
+          handle: '@ruengkaset',
+          title: 'M134 Channel',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+        nextPageToken: 'NEXT_PAGE',
+        videos: [firstVideo, loadedMoreVideo],
+      },
+    });
+    const text = visibleText(html);
+
+    expect(text).toContain('M134 pond planning video');
+    expect(text).not.toContain('M134 rice field video');
+    expect(text).toContain('โหลดเพิ่มเติม');
+    expect(html).not.toContain('search.list');
   });
 
   test('renders stale /app/youtube backend videos with stale copy', () => {
@@ -372,7 +544,7 @@ describe('M124 YouTube latest video foundation route', () => {
     const text = visibleText(html);
 
     expect(text).toContain('ยังไม่พบวิดีโอนี้');
-    expect(text).toContain('กำลังเตรียมเชื่อมวิดีโอจากช่อง');
+    expect(text).toContain('วิดีโอนี้อาจถูกลบ เปลี่ยนรหัส หรือยังไม่อยู่ในรายการที่โหลดได้');
     expect(html).not.toContain('youtube.com/embed/sample-video-id');
     expect(text).not.toContain('จัดการน้ำในนาข้าวช่วงฝนแปรปรวน');
     expect(text).not.toContain('views');
@@ -398,5 +570,63 @@ describe('M124 YouTube latest video foundation route', () => {
     expect(text).toContain('วิดีโอทั้งหมด');
     expect(text).not.toContain('views');
     expect(text).not.toContain('ยอดดู');
+  });
+
+  test('keeps long Thai detail titles readable with the official player and fallback link', () => {
+    const longThaiTitle =
+      'แจกแบบแปลนขุดสระสามไร่มีเกาะกลางน้ำพร้อมเทคนิคคำนวณสโลปกันดินสไลด์และการจัดพื้นที่รอบสระสำหรับเกษตรกรที่ต้องการเก็บน้ำใช้ทั้งปี';
+    const detailVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm135-long-detail-video',
+      videoId: 'm135-long-detail-video',
+      title: longThaiTitle,
+      url: 'https://www.youtube.com/watch?v=m135-long-detail-video',
+      source: 'youtube_api',
+      viewCount: 12300,
+    };
+    const html = renderYoutubeDetail('/app/youtube/m135-long-detail-video', { videos: [detailVideo] });
+    const text = visibleText(html);
+
+    expect(html).toContain('https://www.youtube.com/embed/m135-long-detail-video');
+    expect(html).not.toContain('autoplay=1');
+    expect(html).toContain('[overflow-wrap:anywhere]');
+    expect(text).toContain(longThaiTitle);
+    expect(text).toContain('เปิดใน YouTube');
+    expect(text).toContain('1.2 หมื่นครั้ง');
+    expect(text).not.toContain('views');
+  });
+
+  test('keeps direct unknown detail access safe without technical wording', () => {
+    const html = renderYoutubeDetail('/app/youtube/m135-unknown-video', { videos: [] });
+    const text = visibleText(html);
+
+    expect(text).toContain('ยังไม่พบวิดีโอนี้');
+    expect(text).toContain('วิดีโอนี้อาจถูกลบ เปลี่ยนรหัส หรือยังไม่อยู่ในรายการที่โหลดได้');
+    expect(html).not.toContain('youtube.com/embed/m135-unknown-video');
+    expect(text).not.toContain('backend');
+    expect(text).not.toContain('API');
+    expect(text).not.toContain('undefined');
+    expect(text).not.toContain('null');
+  });
+
+  test('renders a loaded-more video from route state on the detail page', () => {
+    const loadedMoreVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'm134-loaded-more-detail-video',
+      videoId: 'm134-loaded-more-detail-video',
+      title: 'M134 loaded-more detail video',
+      url: 'https://www.youtube.com/watch?v=m134-loaded-more-detail-video',
+      thumbnailUrl: 'https://img.youtube.com/vi/m134-loaded-more-detail-video/hqdefault.jpg',
+      source: 'youtube_api',
+      viewCount: 4500,
+    };
+    const html = renderYoutubeDetailWithState('/app/youtube/m134-loaded-more-detail-video', loadedMoreVideo);
+    const text = visibleText(html);
+
+    expect(html).toContain('https://www.youtube.com/embed/m134-loaded-more-detail-video');
+    expect(html).toContain('href="https://www.youtube.com/watch?v=m134-loaded-more-detail-video"');
+    expect(text).toContain('M134 loaded-more detail video');
+    expect(text).toContain('4.5 พันครั้ง');
+    expect(text).not.toContain('views');
   });
 });

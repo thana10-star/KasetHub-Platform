@@ -522,7 +522,7 @@ export function AppHomePage({
                   </p>
                   <h2
                     id="home-video-title"
-                    className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden sm:text-base sm:leading-6"
+                    className="break-words text-sm font-extrabold leading-5 text-kaset-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [overflow-wrap:anywhere] overflow-hidden sm:text-base sm:leading-6"
                   >
                     {realLatestVideo?.title ?? latestVideoPlaceholder.title}
                   </h2>
@@ -535,6 +535,7 @@ export function AppHomePage({
                   {realLatestVideo?.videoId ? (
                     <Link
                       className="mt-2 inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-kaset-deep px-3 text-xs font-extrabold text-white sm:text-sm"
+                      state={{ video: realLatestVideo }}
                       to={getChannelVideoDetailPath(realLatestVideo)}
                     >
                       ดูวิดีโอ
