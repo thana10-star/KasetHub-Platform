@@ -67,9 +67,13 @@ function ChannelVideoCard({ video }: { video: ChannelVideo }) {
   );
 }
 
-export function YoutubePage() {
-  const videos = listLatestVideos();
-  const sourceStatus = getYouTubeSourceStatus();
+type YoutubePageProps = {
+  videos?: ChannelVideo[];
+};
+
+export function YoutubePage({ videos: videoInput }: YoutubePageProps = {}) {
+  const videos = listLatestVideos(videoInput);
+  const sourceStatus = getYouTubeSourceStatus(videoInput);
   const hasVideos = videos.length > 0;
 
   return (

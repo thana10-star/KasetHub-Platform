@@ -40,13 +40,55 @@ describe('YouTube latest video service', () => {
       },
       {
         ...realVideo,
-        id: 'invalid-url',
+        id: 'unsafe-url',
         title: 'URL ไม่ปลอดภัย',
         url: 'javascript:alert(1)',
+      },
+      {
+        ...realVideo,
+        id: 'non-youtube-url',
+        title: 'ไม่ใช่ YouTube',
+        url: 'https://example.com/watch?v=real-owner-video',
+      },
+      {
+        ...realVideo,
+        id: 'channel-homepage',
+        title: 'หน้าแรกช่องไม่ใช่วิดีโอ',
+        url: 'https://www.youtube.com/@ruengkaset',
+      },
+      {
+        ...realVideo,
+        id: 'unsafe-thumbnail',
+        title: 'ภาพหน้าปกไม่ปลอดภัย',
+        thumbnailUrl: 'javascript:alert(1)',
       },
     ]);
 
     expect(videos).toEqual([realVideo]);
+  });
+
+  test('accepts short YouTube video links but not channel-only links', () => {
+    const shortLinkVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'short-link-video',
+      url: 'https://youtu.be/realOwnerVideoId',
+    };
+    const shortsVideo: ChannelVideo = {
+      ...realVideo,
+      id: 'shorts-video',
+      url: 'https://www.youtube.com/shorts/realOwnerVideoId',
+    };
+
+    expect(listLatestVideos([shortLinkVideo, shortsVideo])).toEqual([shortLinkVideo, shortsVideo]);
+    expect(
+      listLatestVideos([
+        {
+          ...realVideo,
+          id: 'channel-only',
+          url: 'https://www.youtube.com/@ruengkaset',
+        },
+      ]),
+    ).toEqual([]);
   });
 
   test('returns the newest real video by published date', () => {

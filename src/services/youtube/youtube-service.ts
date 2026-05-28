@@ -24,7 +24,20 @@ function hasSafeVideoUrl(url: string) {
   const parsedUrl = parseSafeHttpUrl(url);
   if (!parsedUrl) return false;
 
-  return ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'].includes(parsedUrl.hostname);
+  if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(parsedUrl.hostname)) {
+    if (parsedUrl.pathname === '/watch') {
+      return Boolean(parsedUrl.searchParams.get('v')?.trim());
+    }
+
+    const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
+    return ['shorts', 'embed'].includes(pathParts[0] ?? '') && Boolean(pathParts[1]?.trim());
+  }
+
+  if (parsedUrl.hostname === 'youtu.be') {
+    return parsedUrl.pathname.split('/').filter(Boolean).length === 1;
+  }
+
+  return false;
 }
 
 function hasSafeThumbnailUrl(url?: string) {
