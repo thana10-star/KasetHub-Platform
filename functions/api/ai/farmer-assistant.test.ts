@@ -159,7 +159,7 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     }
   });
 
-  test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M143', async () => {
+  test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M147', async () => {
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.fn(async () => new Response('{}'));
     globalThis.fetch = fetchSpy as typeof fetch;
@@ -179,6 +179,36 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
       expect(payload.status).toBe('ready');
       expect(payload.provider).toBe('mock');
       expect(payload.providerMode).toBe('dry_run');
+      expect(serialized).not.toContain('GEMINI_API_KEY');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('does not live-call Gemini from the endpoint even when a server-side placeholder key is present', async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi.fn(async () => new Response('{}'));
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    try {
+      const response = await handleFarmerAssistantRequest({
+        request: request({ question: 'ช่วยแนะนำการตรวจใบมันสำปะหลังเหลือง', clientRequestId: 'gemini-secret-live-blocked' }),
+        env: {
+          AI_PROVIDER: 'gemini',
+          AI_LIVE_ENABLED: 'true',
+          AI_MODEL: 'gemini-test-model',
+          GEMINI_API_KEY: 'test-gemini-key-placeholder',
+        },
+      });
+      const payload = await jsonResponse(response);
+      const serialized = JSON.stringify(payload);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(payload.status).toBe('ready');
+      expect(payload.provider).toBe('mock');
+      expect(payload.providerMode).toBe('dry_run');
+      expect(serialized).not.toContain('test-gemini-key-placeholder');
+      expect(serialized).not.toContain('x-goog-api-key');
       expect(serialized).not.toContain('GEMINI_API_KEY');
     } finally {
       globalThis.fetch = originalFetch;

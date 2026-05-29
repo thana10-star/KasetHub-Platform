@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { selectFarmerAssistantProvider } from './provider-factory';
 
-describe('M143 AI provider factory', () => {
+describe('M147 AI provider factory', () => {
   test('selects Gemini dry-run adapter for AI_PROVIDER=gemini', () => {
     const provider = selectFarmerAssistantProvider({
       AI_PROVIDER: ' gemini ',
@@ -25,7 +25,31 @@ describe('M143 AI provider factory', () => {
 
     expect(provider.providerName).toBe('gemini');
     expect(provider.providerMode).toBe('dry_run');
-    expect(provider.getHealth().reasonCode).toBe('live_execution_not_available_in_m143');
+    expect(provider.getHealth().reasonCode).toBe('live_execution_not_available_in_m147');
+  });
+
+  test('selects internal live-capable adapter only when explicit test gates are provided', () => {
+    const fetcher = async () => new Response('{}');
+    const provider = selectFarmerAssistantProvider(
+      {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        GEMINI_API_KEY: 'test-gemini-key-placeholder',
+      },
+      {
+        allowLiveExecution: true,
+        fetcher,
+      },
+    );
+
+    expect(provider.providerName).toBe('gemini');
+    expect(provider.providerMode).toBe('live');
+    expect(provider.getHealth()).toMatchObject({
+      providerName: 'gemini',
+      providerMode: 'live',
+      status: 'live_ready',
+      reasonCode: 'gemini_live_allowed_internal_m147',
+    });
   });
 
   test('selects disabled adapter for missing, disabled, or unknown providers', () => {

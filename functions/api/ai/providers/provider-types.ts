@@ -10,10 +10,10 @@ export type FarmerAssistantTopic =
 export type FarmerAssistantUserMode = 'guest' | 'signed_in';
 export type FarmerAssistantStatus = 'ready' | 'not_configured' | 'rate_limited' | 'blocked' | 'error';
 export type FarmerAssistantSafetyLevel = 'normal' | 'caution' | 'high_risk';
-export type FarmerAssistantResponseProvider = 'openai' | 'disabled' | 'mock';
+export type FarmerAssistantResponseProvider = 'gemini' | 'openai' | 'disabled' | 'mock';
 export type FarmerAssistantProviderName = 'gemini' | 'openai' | 'disabled' | 'mock';
 export type FarmerAssistantProviderMode = 'disabled' | 'dry_run' | 'live';
-export type FarmerAssistantProviderHealthStatus = 'disabled' | 'dry_run_ready' | 'live_unavailable';
+export type FarmerAssistantProviderHealthStatus = 'disabled' | 'dry_run_ready' | 'live_ready' | 'live_unavailable';
 
 export type FarmerAssistantProviderRequest = {
   question: string;
@@ -46,4 +46,7 @@ export type FarmerAssistantProviderHealth = {
 export type FarmerAssistantProviderEnv = {
   AI_PROVIDER?: string;
   AI_LIVE_ENABLED?: string;
+  GEMINI_API_KEY?: string;
+  AI_MODEL?: string;
+  AI_MAX_OUTPUT_TOKENS?: string;
 };
