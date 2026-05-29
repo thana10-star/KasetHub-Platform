@@ -1,10 +1,14 @@
 import { mapGuardrailFailureToResponse } from './guardrails/safety-fallbacks';
 import { parseProviderTimeoutMs, runProviderWithTimeout } from './guardrails/provider-timeout';
 import { validateAIOutput } from './guardrails/output-validator';
+import { evaluateAIRolloutGate } from './guardrails/rollout-gate';
 import type { FarmerAssistantProviderAdapter } from './providers/ai-provider';
 import { selectFarmerAssistantProvider } from './providers/provider-factory';
 import type {
+  FarmerAssistantDebugInfo,
+  FarmerAssistantDebugLiveGate,
   FarmerAssistantProviderEnv,
+  FarmerAssistantProviderMode,
   FarmerAssistantResponse,
   FarmerAssistantTopic,
   FarmerAssistantUserMode,
@@ -75,6 +79,10 @@ function isEnabledEnv(value?: string) {
   return ['true', '1', 'yes', 'on'].includes(cleanOptionalEnv(value)?.toLowerCase() ?? '');
 }
 
+function isDebugResponseEnabled(env?: FarmerAssistantEnv) {
+  return isEnabledEnv(env?.AI_DEBUG_RESPONSE);
+}
+
 function parsePositiveInteger(value: string | undefined, fallback: number, max: number) {
   const parsed = Number(cleanOptionalEnv(value));
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.floor(parsed), max) : fallback;
@@ -104,6 +112,87 @@ function hasGeminiApiKey(env?: FarmerAssistantEnv) {
   return Boolean(cleanOptionalEnv(env?.GEMINI_API_KEY));
 }
 
+function safeDebugModelLabel(value?: string) {
+  const model = cleanOptionalEnv(value);
+
+  if (!model || model.length > 80) {
+    return undefined;
+  }
+
+  if (/(AIza[0-9A-Za-z_-]{10,}|sk-[A-Za-z0-9_-]{10,}|GEMINI_API_KEY|OPENAI_API_KEY|VITE_|https?:\/\/|x-goog-api-key)/i.test(model)) {
+    return undefined;
+  }
+
+  return /^[A-Za-z0-9._:/-]+$/.test(model) ? model : undefined;
+}
+
+function safeDebugReasonCodes(reasonCodes: string[]) {
+  return reasonCodes
+    .map((reasonCode) => reasonCode.trim().slice(0, 80))
+    .filter((reasonCode) => /^[a-z0-9_.:-]+$/i.test(reasonCode));
+}
+
+function safeDebugSummary(value?: string) {
+  const summary = value?.trim();
+
+  if (!summary || summary.length > 180) {
+    return undefined;
+  }
+
+  if (/(AIza[0-9A-Za-z_-]{10,}|sk-[A-Za-z0-9_-]{10,}|GEMINI_API_KEY|OPENAI_API_KEY|VITE_|https?:\/\/|x-goog-api-key)/i.test(summary)) {
+    return undefined;
+  }
+
+  return summary;
+}
+
+function getDebugLiveGate(env?: FarmerAssistantEnv, hasInjectedFetch = Boolean(globalThis.fetch)): FarmerAssistantDebugLiveGate {
+  return evaluateAIRolloutGate(env, {
+    allowLiveExecution: isGeminiLiveActivationRequested(env),
+    hasInjectedFetch,
+    hasProviderSecret: hasGeminiApiKey(env),
+  }).mode;
+}
+
+function createDebugInfo(
+  env: FarmerAssistantEnv | undefined,
+  debug: FarmerAssistantDebugInfo,
+  hasInjectedFetch?: boolean,
+): FarmerAssistantDebugInfo {
+  return {
+    stage: debug.stage,
+    reasonCodes: safeDebugReasonCodes(debug.reasonCodes),
+    providerMode: debug.providerMode,
+    model: safeDebugModelLabel(debug.model ?? env?.AI_MODEL),
+    liveGate: debug.liveGate ?? getDebugLiveGate(env, hasInjectedFetch),
+    safeSummary: safeDebugSummary(debug.safeSummary),
+  };
+}
+
+function finalizeResponseForDebug(
+  response: FarmerAssistantResponse,
+  env?: FarmerAssistantEnv,
+  debug?: FarmerAssistantDebugInfo,
+  hasInjectedFetch?: boolean,
+): FarmerAssistantResponse {
+  const { debug: responseDebug, internalDebug, ...publicResponse } = response;
+
+  if (!isDebugResponseEnabled(env)) {
+    return publicResponse;
+  }
+
+  const finalDebug = debug ?? internalDebug ?? responseDebug;
+
+  if (!finalDebug) {
+    return publicResponse;
+  }
+
+  return {
+    ...publicResponse,
+    debug: createDebugInfo(env, finalDebug, hasInjectedFetch),
+  };
+}
+
 function getProviderFetch(context: FarmerAssistantFunctionContext) {
   if (!isGeminiLiveActivationRequested(context.env)) {
     return undefined;
@@ -127,8 +216,14 @@ function createRequestId(clientRequestId?: string) {
   return `ai-farmer-stub-${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 8)}`;
 }
 
-function jsonResponse(body: FarmerAssistantResponse, status = 200) {
-  return new Response(JSON.stringify(body), {
+function jsonResponse(
+  body: FarmerAssistantResponse,
+  status = 200,
+  env?: FarmerAssistantEnv,
+  debug?: FarmerAssistantDebugInfo,
+  hasInjectedFetch?: boolean,
+) {
+  return new Response(JSON.stringify(finalizeResponseForDebug(body, env, debug, hasInjectedFetch)), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -327,33 +422,101 @@ async function parseJsonBody(request: Request) {
 
 export async function handleFarmerAssistantRequest(context: FarmerAssistantFunctionContext) {
   const { request, env } = context;
+  const providerFetchAvailable = Boolean(context.providerFetch ?? globalThis.fetch);
 
   if (request.method.toUpperCase() !== 'POST') {
-    return jsonResponse(fixtureResponse('validation_error', createRequestId()), 405);
+    return jsonResponse(
+      fixtureResponse('validation_error', createRequestId()),
+      405,
+      env,
+      {
+        stage: 'validation',
+        reasonCodes: ['method_not_allowed'],
+        providerMode: 'disabled',
+        safeSummary: 'Request method is not supported for the AI endpoint.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   const parsedBody = await parseJsonBody(request);
   if (!parsedBody.ok) {
-    return jsonResponse(fixtureResponse('validation_error', createRequestId()), 400);
+    return jsonResponse(
+      fixtureResponse('validation_error', createRequestId()),
+      400,
+      env,
+      {
+        stage: 'validation',
+        reasonCodes: ['invalid_json'],
+        providerMode: 'disabled',
+        safeSummary: 'Request body was not valid JSON.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   const validation = validateRequestBody(parsedBody.value, env);
   if (!validation.ok) {
-    return jsonResponse(validation.response, 400);
+    return jsonResponse(
+      validation.response,
+      400,
+      env,
+      {
+        stage: 'validation',
+        reasonCodes: ['validation_error'],
+        providerMode: 'disabled',
+        safeSummary: 'Request body failed the farmer assistant contract validation.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   const requestId = createRequestId(validation.value.clientRequestId);
 
   if (isObviousSpam(validation.value.question)) {
-    return jsonResponse(fixtureResponse('rate_limited', requestId, getCooldownSeconds(env)), 429);
+    return jsonResponse(
+      fixtureResponse('rate_limited', requestId, getCooldownSeconds(env)),
+      429,
+      env,
+      {
+        stage: 'rate_limit',
+        reasonCodes: ['spam_rate_limited'],
+        providerMode: 'disabled',
+        safeSummary: 'Question matched the V1 spam/rate-limit fixture.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   if (isBlockedHighRiskQuestion(validation.value.question)) {
-    return jsonResponse(fixtureResponse('blocked_high_risk', requestId));
+    return jsonResponse(
+      fixtureResponse('blocked_high_risk', requestId),
+      200,
+      env,
+      {
+        stage: 'input_safety_block',
+        reasonCodes: ['input_high_risk_blocked'],
+        providerMode: 'disabled',
+        safeSummary: 'High-risk input was blocked before provider execution.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   if (!context.providerOverride && isGeminiLiveActivationRequested(env) && !hasGeminiApiKey(env)) {
-    return jsonResponse(fixtureResponse('not_configured', requestId));
+    return jsonResponse(
+      fixtureResponse('not_configured', requestId),
+      200,
+      env,
+      {
+        stage: 'provider_select',
+        reasonCodes: ['live_key_missing'],
+        providerMode: 'live_blocked',
+        liveGate: 'live_blocked',
+        safeSummary: 'Live Gemini gates were requested but the backend secret was missing.',
+      },
+      providerFetchAvailable,
+    );
   }
 
   const providerFetch = getProviderFetch(context);
@@ -383,6 +546,14 @@ export async function handleFarmerAssistantRequest(context: FarmerAssistantFunct
         providerMode: provider.providerMode,
       }),
       providerResult.reasonCode === 'provider_timeout' ? 504 : 502,
+      env,
+      {
+        stage: providerResult.reasonCode === 'provider_timeout' ? 'provider_timeout' : 'provider_error',
+        reasonCodes: [providerResult.reasonCode],
+        providerMode: provider.providerMode,
+        safeSummary: 'Provider execution did not return a safe response before the endpoint fallback.',
+      },
+      providerFetchAvailable,
     );
   }
 
@@ -404,14 +575,40 @@ export async function handleFarmerAssistantRequest(context: FarmerAssistantFunct
         requestId,
         providerMode: provider.providerMode,
       }),
+      200,
+      env,
+      {
+        stage: 'output_validator',
+        reasonCodes: outputValidation.reasonCodes,
+        providerMode: provider.providerMode,
+        safeSummary: 'Provider answer was replaced by a safety fallback after output validation.',
+      },
+      providerFetchAvailable,
     );
   }
+
+  const responseDebug =
+    providerResult.response.internalDebug && providerResult.response.internalDebug.stage !== 'provider_call'
+      ? providerResult.response.internalDebug
+      : provider.providerMode === 'disabled' && providerResult.response.status === 'not_configured'
+        ? ({
+            stage: 'provider_select',
+            reasonCodes: [provider.getHealth().reasonCode],
+            providerMode: provider.providerMode,
+            safeSummary: 'Provider selection did not choose a live provider.',
+          } satisfies FarmerAssistantDebugInfo)
+        : ({
+            stage: 'success',
+            reasonCodes: [provider.providerMode === 'live' ? 'success_live_validated' : 'success_validated'],
+            providerMode: provider.providerMode as FarmerAssistantProviderMode,
+            safeSummary: 'Provider answer passed endpoint output validation.',
+          } satisfies FarmerAssistantDebugInfo);
 
   return jsonResponse({
     ...providerResult.response,
     answer: outputValidation.sanitizedAnswer ?? providerResult.response.answer,
     safetyLevel: outputValidation.safetyLevel,
-  });
+  }, 200, env, responseDebug, providerFetchAvailable);
 }
 
 export function onRequest(context: FarmerAssistantFunctionContext) {

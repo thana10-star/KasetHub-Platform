@@ -9,6 +9,7 @@ import {
 } from './gemini-request-builder';
 import { parseGeminiFarmerAssistantResponse } from './gemini-response-parser';
 import type {
+  FarmerAssistantDebugInfo,
   FarmerAssistantProviderEnv,
   FarmerAssistantProviderHealth,
   FarmerAssistantProviderRequest,
@@ -44,6 +45,23 @@ function mapGeminiFailure(reasonCode: Parameters<typeof mapGuardrailFailureToRes
     requestId,
     providerMode: 'live',
   });
+}
+
+function withInternalDebug(response: FarmerAssistantResponse, debug: FarmerAssistantDebugInfo): FarmerAssistantResponse {
+  return Object.defineProperty({ ...response }, 'internalDebug', {
+    value: debug,
+    enumerable: false,
+  });
+}
+
+function stageForGeminiFailure(
+  reasonCode: Parameters<typeof mapGeminiFailure>[0],
+): FarmerAssistantDebugInfo['stage'] {
+  if (['gemini_malformed_response', 'gemini_missing_text', 'gemini_empty_candidates', 'gemini_safety_blocked'].includes(reasonCode)) {
+    return 'parser';
+  }
+
+  return 'provider_error';
 }
 
 async function parseJsonSafely(response: Response) {
@@ -91,6 +109,11 @@ export function createGeminiLiveCapableProvider(options: GeminiLiveProviderOptio
         model: cleanEnvValue(env.AI_MODEL) ?? GEMINI_MODEL_TO_VERIFY_BEFORE_LIVE,
         maxOutputTokens: parsePositiveInteger(env.AI_MAX_OUTPUT_TOKENS, 700, 2000),
       });
+      const baseDebug = {
+        providerMode: 'live',
+        model: plan.model,
+        liveGate: gate.mode,
+      } as const;
       let response: Response;
       try {
         response = await fetcher(buildGeminiGenerateContentUrl(plan.endpointPath, options.apiBaseUrl), {
@@ -103,30 +126,58 @@ export function createGeminiLiveCapableProvider(options: GeminiLiveProviderOptio
         });
       } catch (error) {
         const mapped = mapGeminiProviderError(error);
-        return mapGeminiFailure(mapped.reasonCode, request.requestId);
+        return withInternalDebug(mapGeminiFailure(mapped.reasonCode, request.requestId), {
+          ...baseDebug,
+          stage: stageForGeminiFailure(mapped.reasonCode),
+          reasonCodes: [mapped.reasonCode],
+          safeSummary: 'Gemini request failed before a safe parsed answer was available.',
+        });
       }
 
       if (!response.ok) {
         const mapped = mapGeminiProviderError({ status: response.status });
-        return mapGeminiFailure(mapped.reasonCode, request.requestId);
+        return withInternalDebug(mapGeminiFailure(mapped.reasonCode, request.requestId), {
+          ...baseDebug,
+          stage: stageForGeminiFailure(mapped.reasonCode),
+          reasonCodes: [mapped.reasonCode],
+          safeSummary: 'Gemini returned a non-success status that was mapped to a safe response.',
+        });
       }
 
       const parsedJson = await parseJsonSafely(response);
       if (!parsedJson.ok) {
-        return mapGeminiFailure('gemini_malformed_response', request.requestId);
+        return withInternalDebug(mapGeminiFailure('gemini_malformed_response', request.requestId), {
+          ...baseDebug,
+          stage: 'parser',
+          reasonCodes: ['gemini_malformed_response'],
+          safeSummary: 'Gemini response JSON could not be parsed safely.',
+        });
       }
 
       const parsed = parseGeminiFarmerAssistantResponse(parsedJson.value);
       if (!parsed.ok) {
-        return mapGeminiFailure(parsed.reasonCode, request.requestId);
+        return withInternalDebug(mapGeminiFailure(parsed.reasonCode, request.requestId), {
+          ...baseDebug,
+          stage: 'parser',
+          reasonCodes: parsed.reasonCodes,
+          safeSummary: 'Gemini response did not contain a usable safe answer.',
+        });
       }
 
-      return {
-        ...parsed.response,
-        provider: 'gemini',
-        providerMode: 'live',
-        requestId: request.requestId,
-      };
+      return withInternalDebug(
+        {
+          ...parsed.response,
+          provider: 'gemini',
+          providerMode: 'live',
+          requestId: request.requestId,
+        },
+        {
+          ...baseDebug,
+          stage: 'provider_call',
+          reasonCodes: ['gemini_response_parsed'],
+          safeSummary: 'Gemini returned parsed text for endpoint validation.',
+        },
+      );
     },
   };
 }

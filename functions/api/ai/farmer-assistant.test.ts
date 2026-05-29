@@ -32,6 +32,10 @@ async function jsonResponse(response: Response) {
 
 const fakeGeminiKey = 'test-gemini-key-placeholder';
 
+function debugFrom(payload: Record<string, unknown>) {
+  return payload.debug as Record<string, unknown>;
+}
+
 function geminiTextResponse(
   answer = 'ควรเริ่มจากตรวจดิน น้ำ ใบ และแมลงก่อน แล้วค่อยสรุปสาเหตุอย่างระมัดระวัง',
 ) {
@@ -200,6 +204,47 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     }
   });
 
+  test('does not include debug metadata by default', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question: 'à¹ƒà¸šà¸¡à¸°à¸™à¸²à¸§à¹€à¸«à¸¥à¸·à¸­à¸‡à¸„à¸§à¸£à¸•à¸£à¸§à¸ˆà¸­à¸°à¹„à¸£',
+        topic: 'plant_problem',
+        clientRequestId: 'debug-default-off',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'false',
+      },
+    });
+    const payload = await jsonResponse(response);
+
+    expect(payload.status).toBe('ready');
+    expect(payload.debug).toBeUndefined();
+    expect(JSON.stringify(payload)).not.toContain('internalDebug');
+  });
+
+  test('includes safe validation debug metadata only when enabled', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: '' }),
+      env: {
+        AI_DEBUG_RESPONSE: 'true',
+        AI_MODEL: 'gemini-test-model',
+      },
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(400);
+    expect(payload.status).toBe('error');
+    expect(debug.stage).toBe('validation');
+    expect(debug.reasonCodes).toEqual(['validation_error']);
+    expect(debug.liveGate).toBe('disabled');
+    expect(debug.model).toBe('gemini-test-model');
+    expect(serialized).not.toContain(fakeGeminiKey);
+    expect(serialized).not.toContain('internalDebug');
+  });
+
   test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M147', async () => {
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.fn(async () => new Response('{}'));
@@ -302,6 +347,35 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(serialized).not.toContain('x-goog-api-key');
   });
 
+  test('debug shows live key missing without exposing frontend or backend secrets', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'à¹ƒà¸šà¸¡à¸±à¸™à¸ªà¸³à¸›à¸°à¸«à¸¥à¸±à¸‡à¹€à¸«à¸¥à¸·à¸­à¸‡à¸„à¸§à¸£à¹€à¸£à¸´à¹ˆà¸¡à¸•à¸£à¸§à¸ˆà¸­à¸°à¹„à¸£', clientRequestId: 'debug-missing-gemini-key' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_MODEL: 'gemini-2.5-flash',
+        AI_DEBUG_RESPONSE: 'true',
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(payload.status).toBe('not_configured');
+    expect(debug.stage).toBe('provider_select');
+    expect(debug.reasonCodes).toEqual(['live_key_missing']);
+    expect(debug.providerMode).toBe('live_blocked');
+    expect(debug.liveGate).toBe('live_blocked');
+    expect(debug.model).toBe('gemini-2.5-flash');
+    expect(serialized).not.toContain('GEMINI_API_KEY');
+    expect(serialized).not.toContain('x-goog-api-key');
+    expect(serialized).not.toContain(fakeGeminiKey);
+  });
+
   test('ignores frontend Gemini key env names and never uses them for live execution', async () => {
     const fetchSpy = vi.fn(async () => geminiTextResponse());
     const envWithFrontendKey: Record<string, string> = {
@@ -368,6 +442,42 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(serializedPayload).not.toContain(fakeGeminiKey);
     expect(serializedPayload).not.toContain('x-goog-api-key');
     expect(serializedPayload).not.toContain('GEMINI_API_KEY');
+  });
+
+  test('debug marks successful mocked live response after output validation', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question: 'à¹ƒà¸šà¸¡à¸±à¸™à¸ªà¸³à¸›à¸°à¸«à¸¥à¸±à¸‡à¹€à¸«à¸¥à¸·à¸­à¸‡à¸„à¸§à¸£à¹€à¸£à¸´à¹ˆà¸¡à¸•à¸£à¸§à¸ˆà¸­à¸°à¹„à¸£',
+        topic: 'plant_problem',
+        clientRequestId: 'm152-debug-live-success',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_MODEL: 'gemini-2.5-flash',
+        AI_DEBUG_RESPONSE: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(payload.status).toBe('ready');
+    expect(payload.provider).toBe('gemini');
+    expect(payload.providerMode).toBe('live');
+    expect(debug.stage).toBe('success');
+    expect(debug.reasonCodes).toEqual(['success_live_validated']);
+    expect(debug.providerMode).toBe('live');
+    expect(debug.liveGate).toBe('live');
+    expect(debug.model).toBe('gemini-2.5-flash');
+    expect(serialized).not.toContain(fakeGeminiKey);
+    expect(serialized).not.toContain('https://gemini');
+    expect(serialized).not.toContain('x-goog-api-key');
+    expect(serialized).not.toContain('internalDebug');
   });
 
   test('sends M151 cassava question with crop/problem direct-answer context in mocked live endpoint request body', async () => {
@@ -488,6 +598,34 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(payload.provider).toBe('disabled');
   });
 
+  test('debug marks high-risk input block before mocked live provider fetch', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question: 'mix pesticide chemical acid for insects',
+        topic: 'plant_problem',
+        clientRequestId: 'm152-debug-high-risk',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_DEBUG_RESPONSE: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(payload.status).toBe('blocked');
+    expect(debug.stage).toBe('input_safety_block');
+    expect(debug.reasonCodes).toEqual(['input_high_risk_blocked']);
+    expect(serialized).not.toContain(fakeGeminiKey);
+  });
+
   test('maps unsafe mocked live Gemini output through the safety fallback', async () => {
     const fetchSpy = vi.fn(async () => geminiTextResponse('ให้ผสมสารเคมีกับกรดแรง ๆ เพื่อให้แมลงตายเร็ว'));
     const response = await handleFarmerAssistantRequest({
@@ -509,6 +647,66 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(payload.provider).toBe('disabled');
     expect(serialized).not.toContain('กรดแรง');
     expect(serialized).not.toContain('แมลงตายเร็ว');
+    expect(serialized).not.toContain(fakeGeminiKey);
+  });
+
+  test('debug marks unsafe mocked live Gemini output as output validator fallback', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse('mix pesticide chemical acid to kill insects faster'));
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'à¸Šà¹ˆà¸§à¸¢à¸”à¸¹à¹à¸¡à¸¥à¸‡à¹ƒà¸™à¹à¸›à¸¥à¸‡à¸œà¸±à¸', clientRequestId: 'm152-debug-unsafe-live-output' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_DEBUG_RESPONSE: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(payload.status).toBe('blocked');
+    expect(debug.stage).toBe('output_validator');
+    expect(debug.reasonCodes).toContain('dangerous_chemical_mixing');
+    expect(debug.providerMode).toBe('live');
+    expect(serialized).not.toContain('chemical acid');
+    expect(serialized).not.toContain(fakeGeminiKey);
+  });
+
+  test('debug marks parser failures without leaking raw Gemini response', async () => {
+    const fetchSpy = vi.fn(async () =>
+      new Response(JSON.stringify({ candidates: [{ content: { parts: [] }, finishReason: 'STOP' }] }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    );
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'à¹ƒà¸šà¸¡à¸±à¸™à¸ªà¸³à¸›à¸°à¸«à¸¥à¸±à¸‡à¹€à¸«à¸¥à¸·à¸­à¸‡à¸„à¸§à¸£à¹€à¸£à¸´à¹ˆà¸¡à¸•à¸£à¸§à¸ˆà¸­à¸°à¹„à¸£', clientRequestId: 'm152-debug-parser' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_MODEL: 'gemini-2.5-pro',
+        AI_DEBUG_RESPONSE: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(payload.status).toBe('error');
+    expect(payload.provider).toBe('disabled');
+    expect(debug.stage).toBe('parser');
+    expect(debug.reasonCodes).toEqual(['gemini_missing_text']);
+    expect(debug.model).toBe('gemini-2.5-pro');
+    expect(serialized).not.toContain('parts');
+    expect(serialized).not.toContain('finishReason');
     expect(serialized).not.toContain(fakeGeminiKey);
   });
 
@@ -619,6 +817,50 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(payload.provider).toBe('disabled');
     expect(serialized).not.toContain('provider_timeout');
     expect(serialized).not.toContain('คำตอบช้า');
+  });
+
+  test('debug marks provider timeout without leaking slow provider output', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'à¸Šà¹ˆà¸§à¸¢à¹à¸™à¸°à¸™à¸³à¸à¸²à¸£à¹ƒà¸«à¹‰à¸™à¹‰à¸³à¸œà¸±à¸', clientRequestId: 'm152-debug-timeout' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_PROVIDER_TIMEOUT_MS: '5',
+        AI_DEBUG_RESPONSE: 'true',
+      },
+      providerOverride: {
+        providerName: 'gemini',
+        providerMode: 'dry_run',
+        getHealth: () => ({
+          providerName: 'gemini',
+          providerMode: 'dry_run',
+          status: 'dry_run_ready',
+          reasonCode: 'test_timeout',
+        }),
+        async generateAnswer(providerRequest) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 30);
+          });
+
+          return {
+            status: 'ready',
+            answer: 'à¸„à¸³à¸•à¸­à¸šà¸Šà¹‰à¸²',
+            safetyLevel: 'normal',
+            provider: 'mock',
+            providerMode: 'dry_run',
+            requestId: providerRequest.requestId,
+          };
+        },
+      },
+    });
+    const payload = await jsonResponse(response);
+    const debug = debugFrom(payload);
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(504);
+    expect(payload.status).toBe('error');
+    expect(debug.stage).toBe('provider_timeout');
+    expect(debug.reasonCodes).toEqual(['provider_timeout']);
+    expect(serialized).not.toContain('à¸„à¸³à¸•à¸­à¸šà¸Šà¹‰à¸²');
   });
 
   test('returns disabled state for unknown providers', async () => {
