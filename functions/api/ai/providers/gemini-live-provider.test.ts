@@ -83,10 +83,13 @@ describe('M147 Gemini live-capable provider', () => {
     expect(serializedBody).toContain(request.question);
     expect(serializedBody).toContain('มันสำปะหลัง');
     expect(serializedBody).toContain('นครราชสีมา');
-    expect(serializedBody).toContain('Direct task');
-    expect(serializedBody).toContain('Detected problem: ใบเหลือง');
-    expect(serializedBody).toContain('do not answer only with clarification questions');
-    expect(directTaskPart).toContain('Required answer opening: "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."');
+    expect(serializedBody).toContain('TASK_TYPE: farmer_advice_direct_answer');
+    expect(serializedBody).toContain('MUST_ANSWER_DIRECTLY: true');
+    expect(serializedBody).toContain(`QUESTION: ${request.question}`);
+    expect(serializedBody).toContain('DETECTED_CROP: มันสำปะหลัง');
+    expect(serializedBody).toContain('DETECTED_PROBLEM: ใบเหลือง');
+    expect(serializedBody).toContain('Do not only ask follow-up questions');
+    expect(directTaskPart).toContain('REQUIRED_OPENING:\nใบมันสำปะหลังเหลือง ควรเริ่มตรวจ...');
     expect((body.generationConfig as { maxOutputTokens?: number }).maxOutputTokens).toBe(512);
     expect(response.status).toBe('ready');
     expect(response.provider).toBe('gemini');

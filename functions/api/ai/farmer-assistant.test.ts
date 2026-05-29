@@ -480,7 +480,7 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(serialized).not.toContain('internalDebug');
   });
 
-  test('sends M151 cassava question with crop/problem direct-answer context in mocked live endpoint request body', async () => {
+  test('sends M153 cassava question with structured crop/problem direct-answer payload in mocked live endpoint request body', async () => {
     const question = 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร';
     const fetchSpy = vi.fn(async () =>
       geminiTextResponse(
@@ -517,13 +517,18 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(parts).toHaveLength(4);
-    expect(directTaskPart).toContain('Direct task');
-    expect(directTaskPart).toContain('ตอบคำถามนี้โดยตรง');
-    expect(directTaskPart).toContain('Detected crop: มันสำปะหลัง');
-    expect(directTaskPart).toContain('Detected problem: ใบเหลือง');
-    expect(directTaskPart).toContain('Task: ให้คำแนะนำเบื้องต้นว่าใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร');
-    expect(directTaskPart).toContain('Required answer opening: "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."');
-    expect(directTaskPart).toContain('do not answer only with clarification questions');
+    expect(directTaskPart).toContain('TASK_TYPE: farmer_advice_direct_answer');
+    expect(directTaskPart).toContain('MUST_ANSWER_DIRECTLY: true');
+    expect(directTaskPart).toContain(`QUESTION: ${question}`);
+    expect(directTaskPart).toContain('DETECTED_CROP: มันสำปะหลัง');
+    expect(directTaskPart).toContain('DETECTED_PROBLEM: ใบเหลือง');
+    expect(directTaskPart).toContain('TOPIC: plant_problem');
+    expect(directTaskPart).toContain('PROVINCE: not_provided');
+    expect(directTaskPart).toContain('Because DETECTED_CROP and DETECTED_PROBLEM are present, give safe first-check steps immediately');
+    expect(directTaskPart).toContain('Do not only ask follow-up questions');
+    expect(directTaskPart).toContain('never respond as if no question was provided');
+    expect(directTaskPart).toContain('REQUIRED_OPENING:\nใบมันสำปะหลังเหลือง ควรเริ่มตรวจ...');
+    expect(directTaskPart).toContain('TASK: ให้คำแนะนำเบื้องต้นว่าใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร');
     expect(questionPart).toContain('Farmer question');
     expect(questionPart).toContain(question);
     expect(contextPart).toContain('topic: plant_problem');
@@ -535,8 +540,8 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(instructionPart).toContain('Answer the farmer question directly first');
     expect(instructionPart).toContain('Do not say the question is unclear or missing');
     expect(instructionPart).toContain('Do not answer only with clarification questions');
-    expect(instructionPart).toContain('1. ตรวจใบและตำแหน่งที่เหลือง');
-    expect(instructionPart).toContain('6. ข้อมูลที่ควรถามเพิ่ม');
+    expect(instructionPart).toContain('1. ตรวจตำแหน่งใบเหลือง');
+    expect(instructionPart).toContain('6. คำถามที่ควรถามเพิ่ม');
     expect(payload.status).toBe('ready');
     expect(payload.provider).toBe('gemini');
     expect(payload.providerMode).toBe('live');
