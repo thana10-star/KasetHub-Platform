@@ -370,6 +370,54 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(serializedPayload).not.toContain('GEMINI_API_KEY');
   });
 
+  test('sends M150 cassava question clearly in mocked live endpoint request body', async () => {
+    const question = 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร';
+    const fetchSpy = vi.fn(async () =>
+      geminiTextResponse(
+        '1. สิ่งที่ควรตรวจเช็กก่อน\nดูว่าใบเหลืองที่ใบล่างหรือใบอ่อน ดินแฉะหรือน้ำขังไหม และมีรากหรือโคนเน่าหรือไม่\n2. สาเหตุที่พบบ่อย\nน้ำมาก ดินแน่น ขาดธาตุอาหาร โรคหรือแมลง\n3. วิธีเริ่มแก้แบบปลอดภัย\nถ่ายรูปอาการ ตรวจดินและน้ำก่อน ยังไม่ควรใช้สารเคมีแบบเดาสาเหตุ\n4. ข้อมูลที่ควรถามเพิ่ม\nอายุพืช จังหวัด และเริ่มเหลืองมากี่วัน',
+      ),
+    );
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question,
+        topic: 'plant_problem',
+        userMode: 'guest',
+        clientRequestId: 'm150-cassava-live-body',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_MODEL: 'gemini-test-model',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(String(init.body)) as {
+      contents?: Array<{ parts?: Array<{ text?: string }> }>;
+    };
+    const parts = body.contents?.[0]?.parts ?? [];
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(parts[0]?.text).toContain('Farmer question');
+    expect(parts[0]?.text).toContain(question);
+    expect(parts[1]?.text).toContain('topic: plant_problem');
+    expect(parts[1]?.text).toContain('crop: มันสำปะหลัง');
+    expect(parts[1]?.text).toContain('cropContextSource: detected_from_question');
+    expect(parts[1]?.text).toContain('province: not provided');
+    expect(parts[2]?.text).toContain('Answer the farmer question directly first');
+    expect(parts[2]?.text).toContain('Do not say the question is unclear or missing');
+    expect(payload.status).toBe('ready');
+    expect(payload.provider).toBe('gemini');
+    expect(payload.providerMode).toBe('live');
+    expect(String(payload.answer)).toContain('สิ่งที่ควรตรวจเช็กก่อน');
+    expect(serializedPayload).not.toContain(fakeGeminiKey);
+    expect(serializedPayload).not.toContain('GEMINI_API_KEY');
+  });
+
   test('uses Cloudflare-style global fetch only after all live gates are enabled', async () => {
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.fn(async () => geminiTextResponse('ควรตรวจดิน น้ำ ใบ และแมลงก่อนตัดสินใจแก้ปัญหา'));

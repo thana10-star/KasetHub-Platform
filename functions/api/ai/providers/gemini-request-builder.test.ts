@@ -3,6 +3,8 @@ import {
   GEMINI_FIELD_SHAPE_VERIFICATION_NOTE,
   GEMINI_FARMER_ASSISTANT_SYSTEM_INSTRUCTION,
   buildGeminiFarmerAssistantRequest,
+  buildGeminiFarmerAssistantUserParts,
+  detectThaiCropFromQuestion,
 } from './gemini-request-builder';
 
 const baseRequest = {
@@ -14,7 +16,9 @@ const baseRequest = {
   requestId: 'm145-request-builder',
 } as const;
 
-describe('M145 Gemini request builder', () => {
+const m150SmokeQuestion = 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร';
+
+describe('M145/M150 Gemini request builder', () => {
   test('builds a planned Gemini generateContent request with Thai farmer assistant instructions', () => {
     const plan = buildGeminiFarmerAssistantRequest(baseRequest, {
       model: 'gemini-model-under-test',
@@ -27,7 +31,8 @@ describe('M145 Gemini request builder', () => {
     expect(plan.verificationNote).toBe(GEMINI_FIELD_SHAPE_VERIFICATION_NOTE);
     expect(plan.body.systemInstruction.parts[0]?.text).toBe(GEMINI_FARMER_ASSISTANT_SYSTEM_INSTRUCTION);
     expect(plan.body.systemInstruction.parts[0]?.text).toMatch(/[\u0E00-\u0E7F]/);
-    expect(plan.body.systemInstruction.parts[0]?.text).toContain('สิ่งที่อาจเกิดขึ้น');
+    expect(plan.body.systemInstruction.parts[0]?.text).toContain('สิ่งที่ควรตรวจเช็กก่อน');
+    expect(plan.body.systemInstruction.parts[0]?.text).toContain('ตอบคำถามของเกษตรกรโดยตรงก่อนเสมอ');
     expect(serialized).toContain(baseRequest.question);
     expect(serialized).toContain(baseRequest.crop);
     expect(serialized).toContain(baseRequest.province);
@@ -36,6 +41,60 @@ describe('M145 Gemini request builder', () => {
     expect(plan.body.generationConfig.temperature).toBe(0.3);
     expect(plan.body.generationConfig.responseMimeType).toBe('text/plain');
     expect(plan.body.safetySettings.length).toBeGreaterThan(0);
+  });
+
+  test('keeps the exact farmer question in its own prompt part', () => {
+    const plan = buildGeminiFarmerAssistantRequest({
+      ...baseRequest,
+      question: m150SmokeQuestion,
+      crop: undefined,
+      province: undefined,
+      requestId: 'm150-question-clarity',
+    });
+    const parts = plan.body.contents[0]?.parts ?? [];
+    const questionPart = parts[0]?.text ?? '';
+    const contextPart = parts[1]?.text ?? '';
+    const instructionPart = parts[2]?.text ?? '';
+
+    expect(parts).toHaveLength(3);
+    expect(questionPart).toContain('Farmer question');
+    expect(questionPart).toContain(m150SmokeQuestion);
+    expect(questionPart.length).toBeLessThan(140);
+    expect(contextPart).not.toContain(m150SmokeQuestion);
+    expect(instructionPart).not.toContain(m150SmokeQuestion);
+    expect(instructionPart).toContain('Answer the farmer question directly first');
+    expect(instructionPart).toContain('Do not say the question is unclear or missing');
+  });
+
+  test('derives cassava crop context from the M150 smoke question', () => {
+    const plan = buildGeminiFarmerAssistantRequest({
+      ...baseRequest,
+      question: m150SmokeQuestion,
+      crop: undefined,
+      province: undefined,
+      requestId: 'm150-cassava-detected',
+    });
+    const contextPart = plan.body.contents[0]?.parts[1]?.text ?? '';
+
+    expect(detectThaiCropFromQuestion(m150SmokeQuestion)).toBe('มันสำปะหลัง');
+    expect(contextPart).toContain('topic: plant_problem');
+    expect(contextPart).toContain('crop: มันสำปะหลัง');
+    expect(contextPart).toContain('cropContextSource: detected_from_question');
+    expect(contextPart).toContain('province: not provided');
+    expect(contextPart).toContain('userMode: guest');
+  });
+
+  test('uses provided crop over detected crop context', () => {
+    const parts = buildGeminiFarmerAssistantUserParts({
+      ...baseRequest,
+      question: 'ใบมันสำปะหลังเหลืองในแปลงทดลอง',
+      crop: 'ข้าว',
+      requestId: 'provided-crop-wins',
+    });
+    const contextPart = parts[1]?.text ?? '';
+
+    expect(contextPart).toContain('crop: ข้าว');
+    expect(contextPart).toContain('cropContextSource: provided_by_client');
   });
 
   test('uses conservative generation defaults and clamps unsafe numeric config', () => {

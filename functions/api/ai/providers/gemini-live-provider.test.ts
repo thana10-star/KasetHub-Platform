@@ -87,6 +87,39 @@ describe('M147 Gemini live-capable provider', () => {
     expect(serializedResponse).not.toContain('x-goog-api-key');
   });
 
+  test('parses mocked cassava yellow leaves response cleanly without leaking the key', async () => {
+    const answer = [
+      '1. สิ่งที่ควรตรวจเช็กก่อน',
+      'ดูว่าใบมันสำปะหลังเหลืองที่ใบล่างหรือใบอ่อน ดินแฉะหรือน้ำขังไหม และมีรากหรือโคนเน่าหรือไม่',
+      '2. สาเหตุที่พบบ่อย',
+      'น้ำมาก ดินแน่น ขาดธาตุอาหาร โรคหรือแมลง',
+      '3. วิธีเริ่มแก้แบบปลอดภัย',
+      'ตรวจดิน น้ำ และรากก่อน ยังไม่ควรใช้สารเคมีแบบเดาสาเหตุ',
+      '4. ข้อมูลที่ควรถามเพิ่ม',
+      'อายุพืช จังหวัด และเริ่มเหลืองมากี่วัน',
+    ].join('\n');
+    const fetcher = vi.fn(async () => jsonResponse(normalGeminiBody(answer)));
+    const provider = createLiveProvider(fetcher as unknown as typeof fetch);
+    const response = await provider.generateAnswer({
+      ...request,
+      question: 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร',
+      crop: undefined,
+      province: undefined,
+      requestId: 'ai-farmer-m150-cassava-live',
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe('ready');
+    expect(response.provider).toBe('gemini');
+    expect(response.providerMode).toBe('live');
+    expect(response.requestId).toBe('ai-farmer-m150-cassava-live');
+    expect(response.answer).toContain('ใบมันสำปะหลังเหลือง');
+    expect(response.answer).toContain('สิ่งที่ควรตรวจเช็กก่อน');
+    expect(serializedResponse).not.toContain(fakeGeminiKey);
+    expect(serializedResponse).not.toContain('x-goog-api-key');
+  });
+
   test('stays dry-run when live gates are missing and never uses global fetch', async () => {
     const originalFetch = globalThis.fetch;
     const globalFetchSpy = vi.fn(async () => jsonResponse(normalGeminiBody()));

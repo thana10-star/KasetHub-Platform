@@ -9,15 +9,29 @@ export const GEMINI_MODEL_TO_VERIFY_BEFORE_LIVE = 'gemini-model-to-verify-before
 export const GEMINI_FIELD_SHAPE_VERIFICATION_NOTE =
   'Verify Gemini generateContent field names, model name, and safety categories against current Gemini documentation before live activation.';
 
+export const COMMON_THAI_CROP_NAMES = [
+  'มันสำปะหลัง',
+  'ข้าวโพด',
+  'ยางพารา',
+  'ทุเรียน',
+  'มะม่วง',
+  'พริก',
+  'อ้อย',
+  'ข้าว',
+] as const;
+
 export const GEMINI_FARMER_ASSISTANT_SYSTEM_INSTRUCTION = [
   'คุณคือผู้ช่วยเกษตรของ KasetHub สำหรับเกษตรกรไทย',
   'ตอบเป็นภาษาไทย ใช้ภาษาง่าย เป็นมิตร และปฏิบัติได้จริง',
-  'ตอบไม่ยาวเกินไป และแยกคำตอบเป็น 4 ส่วนนี้เสมอ:',
-  '1. สิ่งที่อาจเกิดขึ้น',
-  '2. สิ่งที่ควรตรวจเช็ก',
+  'ตอบสั้นพอดี ไม่ยาวเกินไป และเน้นสิ่งที่เกษตรกรเริ่มตรวจได้ทันที',
+  'ตอบคำถามของเกษตรกรโดยตรงก่อนเสมอ ถ้าข้อความคำถามไม่ว่าง ห้ามตอบว่าไม่ได้รับคำถามที่ชัดเจน',
+  'ถ้ารายละเอียดบางอย่างยังขาด ให้ตอบด้วยขั้นตอนตรวจเช็กเบื้องต้นที่ปลอดภัยก่อน แล้วค่อยถามข้อมูลเพิ่มท้ายคำตอบ',
+  'ใช้รูปแบบ 4 ส่วนนี้เสมอ:',
+  '1. สิ่งที่ควรตรวจเช็กก่อน',
+  '2. สาเหตุที่พบบ่อย',
   '3. วิธีเริ่มแก้แบบปลอดภัย',
-  '4. เมื่อไหร่ควรถามผู้เชี่ยวชาญ',
-  'ถ้าข้อมูลยังไม่พอ ให้ถามต่อเรื่องพืช จังหวัด อาการ ระยะเวลาที่พบ และสิ่งที่ลองทำแล้ว',
+  '4. ข้อมูลที่ควรถามเพิ่ม',
+  'สำหรับปัญหาใบเหลือง ให้เริ่มจากการตรวจว่าเหลืองทั้งต้นหรือเฉพาะใบล่าง/ใบอ่อน ดินแฉะหรือน้ำขังหรือไม่ รากหรือโคนเน่าหรือไม่ มีแมลงหรือโรคหรือไม่ อายุพืชเท่าไร และช่วงนี้ฝนหรือแล้งผิดปกติหรือไม่',
   'ห้ามให้ความมั่นใจเรื่องอัตราสารเคมีหรือปุ๋ยโดยไม่มีฉลากหรือแหล่งข้อมูลที่ตรวจสอบแล้ว',
   'ห้ามสอนการผสมสารเคมีอันตรายหรือการใช้ที่เสี่ยงต่อคน สัตว์ หรือสิ่งแวดล้อม',
   'ห้ามอ้างราคาสินค้า สภาพอากาศ แหล่งข่าว หรือข้อมูลสด หากระบบไม่ได้ส่งข้อมูลนั้นมาให้โดยตรง',
@@ -89,35 +103,94 @@ function normalizeTopP(value: number | undefined): number {
   return Math.min(1, Math.max(0.1, value));
 }
 
-function optionalContextLine(label: string, value?: string) {
-  const trimmed = value?.trim();
+function normalizeThaiSearchText(value: string) {
+  return value.replace(/\s+/g, '').trim();
+}
 
-  if (!trimmed) {
-    return undefined;
+export function detectThaiCropFromQuestion(question: string) {
+  const normalizedQuestion = normalizeThaiSearchText(question);
+
+  return COMMON_THAI_CROP_NAMES.find((crop) => normalizedQuestion.includes(normalizeThaiSearchText(crop)));
+}
+
+function cleanOptionalText(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function resolveCropContext(request: FarmerAssistantProviderRequest) {
+  const providedCrop = cleanOptionalText(request.crop);
+
+  if (providedCrop) {
+    return {
+      value: providedCrop,
+      source: 'provided_by_client',
+    };
   }
 
-  return `- ${label}: ${trimmed}`;
+  const detectedCrop = detectThaiCropFromQuestion(request.question);
+
+  if (detectedCrop) {
+    return {
+      value: detectedCrop,
+      source: 'detected_from_question',
+    };
+  }
+
+  return {
+    value: 'not provided',
+    source: 'not_provided',
+  };
+}
+
+function buildDetectedContextPrompt(request: FarmerAssistantProviderRequest) {
+  const crop = resolveCropContext(request);
+  const province = cleanOptionalText(request.province) ?? 'not provided';
+
+  return [
+    'Detected context / บริบทที่ระบบรู้:',
+    `- topic: ${request.topic}`,
+    `- crop: ${crop.value}`,
+    `- cropContextSource: ${crop.source}`,
+    `- province: ${province}`,
+    `- userMode: ${request.userMode}`,
+  ].join('\n');
+}
+
+function buildAnswerInstructionPrompt() {
+  return [
+    'Answer instruction / วิธีตอบ:',
+    '- Answer the farmer question directly first.',
+    '- Do not say the question is unclear or missing when Farmer question has text.',
+    '- If crop, province, age, or symptom details are missing, still provide safe first-check steps first, then ask follow-up questions.',
+    '- Use exactly these sections:',
+    '1. สิ่งที่ควรตรวจเช็กก่อน',
+    '2. สาเหตุที่พบบ่อย',
+    '3. วิธีเริ่มแก้แบบปลอดภัย',
+    '4. ข้อมูลที่ควรถามเพิ่ม',
+    '- For cassava yellow leaves, mention safe checks such as leaf position, waterlogging/wet soil, nutrient stress, root/stem rot, insect/disease signs, crop age, and recent rain/dry conditions.',
+    '- Do not give chemical dosage certainty, dangerous mixing instructions, fake citations, fake live weather, fake price, or fake source claims.',
+  ].join('\n');
+}
+
+export function buildGeminiFarmerAssistantUserParts(request: FarmerAssistantProviderRequest): GeminiGenerateContentPart[] {
+  return [
+    {
+      text: ['Farmer question / คำถามเกษตรกรที่ต้องตอบโดยตรง:', request.question.trim()].join('\n'),
+    },
+    {
+      text: buildDetectedContextPrompt(request),
+    },
+    {
+      text: buildAnswerInstructionPrompt(),
+    },
+  ];
 }
 
 export function buildGeminiFarmerAssistantUserPrompt(request: FarmerAssistantProviderRequest): string {
-  const contextLines = [
-    `- หัวข้อ: ${request.topic}`,
-    `- โหมดผู้ใช้: ${request.userMode}`,
-    optionalContextLine('พืช', request.crop),
-    optionalContextLine('จังหวัด', request.province),
-  ].filter((line): line is string => Boolean(line));
-
-  return [
-    'คำถามจากเกษตรกร:',
-    request.question.trim(),
-    '',
-    'บริบทที่ระบบรู้:',
-    ...contextLines,
-    '',
-    'คำเตือนสำหรับคำตอบ:',
-    '- ถ้าเป็นคำถามเรื่องราคาหรืออากาศ ให้บอกว่าไม่มีข้อมูลสด เว้นแต่ระบบส่งข้อมูลสดมาให้',
-    '- ถ้าเป็นคำถามเรื่องสารเคมี ให้หลีกเลี่ยงตัวเลขอัตราใช้ที่มั่นใจเกินไป และให้ยึดฉลากหรือผู้เชี่ยวชาญ',
-  ].join('\n');
+  return buildGeminiFarmerAssistantUserParts(request)
+    .map((part) => part.text)
+    .join('\n\n');
 }
 
 export function buildGeminiFarmerAssistantRequest(
@@ -145,11 +218,7 @@ export function buildGeminiFarmerAssistantRequest(
       contents: [
         {
           role: 'user',
-          parts: [
-            {
-              text: buildGeminiFarmerAssistantUserPrompt(request),
-            },
-          ],
+          parts: buildGeminiFarmerAssistantUserParts(request),
         },
       ],
       generationConfig: {
