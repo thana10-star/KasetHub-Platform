@@ -159,7 +159,7 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     }
   });
 
-  test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M142', async () => {
+  test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M143', async () => {
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.fn(async () => new Response('{}'));
     globalThis.fetch = fetchSpy as typeof fetch;
@@ -183,6 +183,87 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     } finally {
       globalThis.fetch = originalFetch;
     }
+  });
+
+  test('maps unsafe mocked provider output to safe fallback', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยดูแมลงในแปลงผัก', clientRequestId: 'unsafe-provider-output' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'false',
+      },
+      providerOverride: {
+        providerName: 'gemini',
+        providerMode: 'dry_run',
+        getHealth: () => ({
+          providerName: 'gemini',
+          providerMode: 'dry_run',
+          status: 'dry_run_ready',
+          reasonCode: 'test_unsafe_output',
+        }),
+        async generateAnswer(providerRequest) {
+          return {
+            status: 'ready',
+            answer: 'ให้ผสมสารเคมีกับกรดแรง ๆ เพื่อให้แมลงตายเร็ว',
+            safetyLevel: 'normal',
+            provider: 'mock',
+            providerMode: 'dry_run',
+            requestId: providerRequest.requestId,
+          };
+        },
+      },
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(200);
+    expect(payload.status).toBe('blocked');
+    expect(payload.safetyLevel).toBe('high_risk');
+    expect(payload.provider).toBe('disabled');
+    expect(serialized).not.toContain('กรดแรง');
+    expect(serialized).not.toContain('แมลงตายเร็ว');
+  });
+
+  test('maps slow mocked provider output to timeout fallback', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยแนะนำการให้น้ำผัก', clientRequestId: 'timeout-provider' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_PROVIDER_TIMEOUT_MS: '5',
+      },
+      providerOverride: {
+        providerName: 'gemini',
+        providerMode: 'dry_run',
+        getHealth: () => ({
+          providerName: 'gemini',
+          providerMode: 'dry_run',
+          status: 'dry_run_ready',
+          reasonCode: 'test_timeout',
+        }),
+        async generateAnswer(providerRequest) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 30);
+          });
+
+          return {
+            status: 'ready',
+            answer: 'คำตอบช้า',
+            safetyLevel: 'normal',
+            provider: 'mock',
+            providerMode: 'dry_run',
+            requestId: providerRequest.requestId,
+          };
+        },
+      },
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(504);
+    expect(payload.status).toBe('error');
+    expect(payload.provider).toBe('disabled');
+    expect(serialized).not.toContain('provider_timeout');
+    expect(serialized).not.toContain('คำตอบช้า');
   });
 
   test('returns disabled state for unknown providers', async () => {

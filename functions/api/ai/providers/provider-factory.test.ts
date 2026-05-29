@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { selectFarmerAssistantProvider } from './provider-factory';
 
-describe('M142 AI provider factory', () => {
+describe('M143 AI provider factory', () => {
   test('selects Gemini dry-run adapter for AI_PROVIDER=gemini', () => {
     const provider = selectFarmerAssistantProvider({
       AI_PROVIDER: ' gemini ',
@@ -25,7 +25,7 @@ describe('M142 AI provider factory', () => {
 
     expect(provider.providerName).toBe('gemini');
     expect(provider.providerMode).toBe('dry_run');
-    expect(provider.getHealth().reasonCode).toBe('gemini_live_flag_ignored_in_m142');
+    expect(provider.getHealth().reasonCode).toBe('live_execution_not_available_in_m143');
   });
 
   test('selects disabled adapter for missing, disabled, or unknown providers', () => {

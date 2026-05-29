@@ -1,3 +1,7 @@
+import { mapGuardrailFailureToResponse } from './guardrails/safety-fallbacks';
+import { parseProviderTimeoutMs, runProviderWithTimeout } from './guardrails/provider-timeout';
+import { validateAIOutput } from './guardrails/output-validator';
+import type { FarmerAssistantProviderAdapter } from './providers/ai-provider';
 import { selectFarmerAssistantProvider } from './providers/provider-factory';
 import type {
   FarmerAssistantProviderEnv,
@@ -30,10 +34,12 @@ type FarmerAssistantEnv = FarmerAssistantProviderEnv & {
   OPENAI_API_KEY?: string;
   AI_MAX_INPUT_CHARS?: string;
   AI_COOLDOWN_SECONDS?: string;
+  AI_PROVIDER_TIMEOUT_MS?: string;
 };
 
 type FarmerAssistantFunctionContext = {
   env?: FarmerAssistantEnv;
+  providerOverride?: FarmerAssistantProviderAdapter;
   request: Request;
 };
 
@@ -75,6 +81,10 @@ function getMaxInputChars(env?: FarmerAssistantEnv) {
 
 function getCooldownSeconds(env?: FarmerAssistantEnv) {
   return parsePositiveInteger(env?.AI_COOLDOWN_SECONDS, DEFAULT_COOLDOWN_SECONDS, 86_400);
+}
+
+function getProviderTimeoutMs(env?: FarmerAssistantEnv) {
+  return parseProviderTimeoutMs(env?.AI_PROVIDER_TIMEOUT_MS);
 }
 
 function sanitizeClientRequestId(value?: string) {
@@ -317,22 +327,56 @@ export async function handleFarmerAssistantRequest(context: FarmerAssistantFunct
     return jsonResponse(fixtureResponse('blocked_high_risk', requestId));
   }
 
-  const provider = selectFarmerAssistantProvider(env);
+  const provider = context.providerOverride ?? selectFarmerAssistantProvider(env);
+  const providerRequest = {
+    question: validation.value.question,
+    crop: validation.value.crop,
+    province: validation.value.province,
+    topic: validation.value.topic,
+    userMode: validation.value.userMode,
+    requestId,
+  };
+  const providerResult = await runProviderWithTimeout(() => provider.generateAnswer(providerRequest), {
+    timeoutMs: getProviderTimeoutMs(env),
+  });
 
-  try {
-    const providerResponse = await provider.generateAnswer({
-      question: validation.value.question,
-      crop: validation.value.crop,
-      province: validation.value.province,
-      topic: validation.value.topic,
-      userMode: validation.value.userMode,
-      requestId,
-    });
-
-    return jsonResponse(providerResponse);
-  } catch {
-    return jsonResponse(fixtureResponse('provider_error', requestId), 502);
+  if (!providerResult.ok) {
+    return jsonResponse(
+      mapGuardrailFailureToResponse({
+        reasonCodes: [providerResult.reasonCode],
+        requestId,
+        providerMode: provider.providerMode,
+      }),
+      providerResult.reasonCode === 'provider_timeout' ? 504 : 502,
+    );
   }
+
+  const outputValidation = validateAIOutput({
+    answer: providerResult.response.answer ?? '',
+    question: validation.value.question,
+    crop: validation.value.crop,
+    province: validation.value.province,
+    topic: validation.value.topic,
+    inputSafetyLevel: providerResult.response.safetyLevel,
+    providerName: provider.providerName,
+    providerMode: provider.providerMode,
+  });
+
+  if (!outputValidation.allowed) {
+    return jsonResponse(
+      mapGuardrailFailureToResponse({
+        reasonCodes: outputValidation.reasonCodes,
+        requestId,
+        providerMode: provider.providerMode,
+      }),
+    );
+  }
+
+  return jsonResponse({
+    ...providerResult.response,
+    answer: outputValidation.sanitizedAnswer ?? providerResult.response.answer,
+    safetyLevel: outputValidation.safetyLevel,
+  });
 }
 
 export function onRequest(context: FarmerAssistantFunctionContext) {

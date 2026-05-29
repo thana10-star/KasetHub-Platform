@@ -1,27 +1,18 @@
 import type { FarmerAssistantProviderAdapter } from './ai-provider';
+import { evaluateAIRolloutGate } from '../guardrails/rollout-gate';
 import { createDisabledProvider } from './disabled-provider';
 import { createGeminiDryRunProvider } from './gemini-provider';
 import type { FarmerAssistantProviderEnv } from './provider-types';
 
-function cleanEnvValue(value?: string) {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : undefined;
-}
-
-function isEnabled(value?: string) {
-  return ['true', '1', 'yes', 'on'].includes(cleanEnvValue(value)?.toLowerCase() ?? '');
-}
-
 export function selectFarmerAssistantProvider(env: FarmerAssistantProviderEnv = {}): FarmerAssistantProviderAdapter {
-  const provider = cleanEnvValue(env.AI_PROVIDER)?.toLowerCase();
+  const gate = evaluateAIRolloutGate(env);
 
-  if (!provider || provider === 'disabled' || provider === 'off' || provider === 'none') {
-    return createDisabledProvider('provider_not_selected');
+  if (gate.providerName === 'gemini') {
+    return createGeminiDryRunProvider({
+      liveFlagEnabled: gate.liveEnabled,
+      reasonCode: gate.reasonCode,
+    });
   }
 
-  if (provider === 'gemini') {
-    return createGeminiDryRunProvider({ liveFlagEnabled: isEnabled(env.AI_LIVE_ENABLED) });
-  }
-
-  return createDisabledProvider('unknown_provider');
+  return createDisabledProvider(gate.reasonCode === 'unknown_provider' ? 'unknown_provider' : 'provider_not_selected');
 }

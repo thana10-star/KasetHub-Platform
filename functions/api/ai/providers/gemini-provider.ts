@@ -3,10 +3,11 @@ import type { FarmerAssistantProviderHealth, FarmerAssistantProviderRequest, Far
 
 export type GeminiDryRunProviderOptions = {
   liveFlagEnabled?: boolean;
+  reasonCode?: string;
 };
 
 export function createGeminiDryRunProvider(options: GeminiDryRunProviderOptions = {}): FarmerAssistantProviderAdapter {
-  const reasonCode = options.liveFlagEnabled ? 'gemini_live_flag_ignored_in_m142' : 'gemini_dry_run_only';
+  const reasonCode = options.reasonCode ?? (options.liveFlagEnabled ? 'gemini_live_flag_ignored_in_m142' : 'gemini_dry_run_only');
 
   return {
     providerName: 'gemini',
