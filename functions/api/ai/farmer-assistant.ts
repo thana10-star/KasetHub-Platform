@@ -1,16 +1,13 @@
-type FarmerAssistantTopic =
-  | 'plant_problem'
-  | 'soil_fertilizer'
-  | 'water'
-  | 'weather'
-  | 'price'
-  | 'livestock'
-  | 'general';
+import { selectFarmerAssistantProvider } from './providers/provider-factory';
+import type {
+  FarmerAssistantProviderEnv,
+  FarmerAssistantResponse,
+  FarmerAssistantTopic,
+  FarmerAssistantUserMode,
+} from './providers/provider-types';
 
-type FarmerAssistantUserMode = 'guest' | 'signed_in';
-type FarmerAssistantStatus = 'ready' | 'not_configured' | 'rate_limited' | 'blocked' | 'error';
-type FarmerAssistantSafetyLevel = 'normal' | 'caution' | 'high_risk';
-type FarmerAssistantProvider = 'openai' | 'disabled' | 'mock';
+export type { FarmerAssistantResponse } from './providers/provider-types';
+
 type FarmerAssistantFixtureState =
   | 'ready_mock'
   | 'not_configured'
@@ -29,19 +26,7 @@ type FarmerAssistantRequestBody = {
   clientRequestId?: unknown;
 };
 
-export type FarmerAssistantResponse = {
-  status: FarmerAssistantStatus;
-  answer?: string;
-  safetyLevel?: FarmerAssistantSafetyLevel;
-  followUpQuestions?: string[];
-  disclaimers?: string[];
-  provider?: FarmerAssistantProvider;
-  requestId?: string;
-  retryAfterSeconds?: number;
-};
-
-type FarmerAssistantEnv = {
-  AI_PROVIDER?: string;
+type FarmerAssistantEnv = FarmerAssistantProviderEnv & {
   OPENAI_API_KEY?: string;
   AI_MAX_INPUT_CHARS?: string;
   AI_COOLDOWN_SECONDS?: string;
@@ -130,6 +115,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
         'คำตอบจริงควรตรวจสอบกับผู้เชี่ยวชาญหรือหน่วยงานเกษตรในพื้นที่ก่อนใช้จริง',
       ],
       provider: 'mock',
+      providerMode: 'dry_run',
     },
     not_configured: {
       status: 'not_configured',
@@ -138,6 +124,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: [],
       disclaimers: ['ยังไม่มีการเรียกผู้ให้บริการ AI จริงในรุ่นนี้'],
       provider: 'disabled',
+      providerMode: 'disabled',
     },
     rate_limited: {
       status: 'rate_limited',
@@ -146,6 +133,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: [],
       disclaimers: ['ระบบจำกัดจำนวนคำถามเพื่อควบคุมค่าใช้จ่ายและให้บริการได้เสถียร'],
       provider: 'disabled',
+      providerMode: 'disabled',
       retryAfterSeconds,
     },
     blocked_high_risk: {
@@ -156,6 +144,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: ['ต้องการให้ช่วยเตรียมรายการข้อมูลสำหรับคุยกับผู้เชี่ยวชาญไหม'],
       disclaimers: ['ไม่ควรผสมหรือใช้สารเคมีโดยไม่มีฉลากจริงและคำแนะนำจากผู้เชี่ยวชาญ'],
       provider: 'disabled',
+      providerMode: 'disabled',
     },
     provider_error: {
       status: 'error',
@@ -164,6 +153,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: [],
       disclaimers: ['ระบบไม่แสดงรายละเอียดข้อผิดพลาดทางเทคนิคให้ผู้ใช้เห็น'],
       provider: 'disabled',
+      providerMode: 'disabled',
     },
     timeout: {
       status: 'error',
@@ -172,6 +162,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: [],
       disclaimers: ['ยังไม่มีคำตอบจากผู้ให้บริการ AI และไม่ควรหักเครดิตถ้าไม่มีคำตอบ'],
       provider: 'disabled',
+      providerMode: 'disabled',
     },
     validation_error: {
       status: 'error',
@@ -180,6 +171,7 @@ function fixtureResponse(state: FarmerAssistantFixtureState, requestId: string, 
       followUpQuestions: [],
       disclaimers: ['คำถามต้องไม่ว่างและควรยาวไม่เกิน 1,200 ตัวอักษรใน V1'],
       provider: 'disabled',
+      providerMode: 'disabled',
     },
   };
 
@@ -325,15 +317,22 @@ export async function handleFarmerAssistantRequest(context: FarmerAssistantFunct
     return jsonResponse(fixtureResponse('blocked_high_risk', requestId));
   }
 
-  const provider = cleanOptionalEnv(env?.AI_PROVIDER);
-  const apiKeyConfigured = Boolean(cleanOptionalEnv(env?.OPENAI_API_KEY));
+  const provider = selectFarmerAssistantProvider(env);
 
-  if (provider !== 'openai' || !apiKeyConfigured) {
-    return jsonResponse(fixtureResponse('not_configured', requestId));
+  try {
+    const providerResponse = await provider.generateAnswer({
+      question: validation.value.question,
+      crop: validation.value.crop,
+      province: validation.value.province,
+      topic: validation.value.topic,
+      userMode: validation.value.userMode,
+      requestId,
+    });
+
+    return jsonResponse(providerResponse);
+  } catch {
+    return jsonResponse(fixtureResponse('provider_error', requestId), 502);
   }
-
-  // M138 intentionally stops before provider execution, even when server-side env is present.
-  return jsonResponse(fixtureResponse('not_configured', requestId));
 }
 
 export function onRequest(context: FarmerAssistantFunctionContext) {

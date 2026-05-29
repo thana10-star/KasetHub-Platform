@@ -122,6 +122,85 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(payload.answer).toBe('ระบบ AI กำลังเตรียมเปิดใช้งาน ตอนนี้ยังไม่มีการเรียกผู้ให้บริการ AI จริง');
   });
 
+  test('returns Gemini dry-run response without requiring GEMINI_API_KEY', async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi.fn(async () => new Response('{}'));
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    try {
+      const response = await handleFarmerAssistantRequest({
+        request: request({
+          question: 'ใบมะนาวเหลืองหลังฝนตกควรตรวจอะไร',
+          crop: 'มะนาว',
+          province: 'นครปฐม',
+          topic: 'plant_problem',
+          clientRequestId: 'gemini-dry-run',
+        }),
+        env: {
+          AI_PROVIDER: 'gemini',
+          AI_LIVE_ENABLED: 'false',
+        },
+      });
+      const payload = await jsonResponse(response);
+      const serialized = JSON.stringify(payload);
+
+      expect(response.status).toBe(200);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(payload.status).toBe('ready');
+      expect(payload.provider).toBe('mock');
+      expect(payload.providerMode).toBe('dry_run');
+      expect(payload.requestId).toBe('ai-farmer-gemini-dry-run');
+      expect(payload.answer).toBe('นี่เป็นคำตอบทดสอบจากระบบ AI เกษตรรุ่นทดลอง ขณะนี้ยังไม่ได้เปิดใช้งาน Gemini จริง');
+      expect(serialized).toContain('dry-run');
+      expect(serialized).not.toContain('GEMINI_API_KEY');
+      expect(serialized).not.toContain('AIza');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('keeps Gemini in dry-run mode even when AI_LIVE_ENABLED is true in M142', async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi.fn(async () => new Response('{}'));
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    try {
+      const response = await handleFarmerAssistantRequest({
+        request: request({ question: 'ช่วยแนะนำการเตรียมดินก่อนปลูกผัก', clientRequestId: 'live-flag-check' }),
+        env: {
+          AI_PROVIDER: 'gemini',
+          AI_LIVE_ENABLED: 'true',
+        },
+      });
+      const payload = await jsonResponse(response);
+      const serialized = JSON.stringify(payload);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(payload.status).toBe('ready');
+      expect(payload.provider).toBe('mock');
+      expect(payload.providerMode).toBe('dry_run');
+      expect(serialized).not.toContain('GEMINI_API_KEY');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('returns disabled state for unknown providers', async () => {
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยดูอาการใบเหลือง', clientRequestId: 'unknown-provider' }),
+      env: {
+        AI_PROVIDER: 'unknown-provider',
+        AI_LIVE_ENABLED: 'true',
+      },
+    });
+    const payload = await jsonResponse(response);
+
+    expect(response.status).toBe(200);
+    expect(payload.status).toBe('not_configured');
+    expect(payload.provider).toBe('disabled');
+    expect(payload.providerMode).toBe('disabled');
+  });
+
   test('does not attempt a provider call even when server-side OpenAI env is present', async () => {
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.fn(async () => new Response('{}'));
@@ -207,4 +286,3 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     });
   });
 });
-
