@@ -39,6 +39,7 @@ type FarmerAssistantEnv = FarmerAssistantProviderEnv & {
 
 type FarmerAssistantFunctionContext = {
   env?: FarmerAssistantEnv;
+  providerFetch?: typeof fetch;
   providerOverride?: FarmerAssistantProviderAdapter;
   request: Request;
 };
@@ -70,6 +71,10 @@ function cleanOptionalEnv(value?: string) {
   return trimmed ? trimmed : undefined;
 }
 
+function isEnabledEnv(value?: string) {
+  return ['true', '1', 'yes', 'on'].includes(cleanOptionalEnv(value)?.toLowerCase() ?? '');
+}
+
 function parsePositiveInteger(value: string | undefined, fallback: number, max: number) {
   const parsed = Number(cleanOptionalEnv(value));
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.floor(parsed), max) : fallback;
@@ -85,6 +90,26 @@ function getCooldownSeconds(env?: FarmerAssistantEnv) {
 
 function getProviderTimeoutMs(env?: FarmerAssistantEnv) {
   return parseProviderTimeoutMs(env?.AI_PROVIDER_TIMEOUT_MS);
+}
+
+function isGeminiProvider(env?: FarmerAssistantEnv) {
+  return cleanOptionalEnv(env?.AI_PROVIDER)?.toLowerCase() === 'gemini';
+}
+
+function isGeminiLiveActivationRequested(env?: FarmerAssistantEnv) {
+  return isGeminiProvider(env) && isEnabledEnv(env?.AI_LIVE_ENABLED) && isEnabledEnv(env?.AI_ALLOW_LIVE_EXECUTION);
+}
+
+function hasGeminiApiKey(env?: FarmerAssistantEnv) {
+  return Boolean(cleanOptionalEnv(env?.GEMINI_API_KEY));
+}
+
+function getProviderFetch(context: FarmerAssistantFunctionContext) {
+  if (!isGeminiLiveActivationRequested(context.env)) {
+    return undefined;
+  }
+
+  return context.providerFetch ?? globalThis.fetch?.bind(globalThis);
 }
 
 function sanitizeClientRequestId(value?: string) {
@@ -327,7 +352,17 @@ export async function handleFarmerAssistantRequest(context: FarmerAssistantFunct
     return jsonResponse(fixtureResponse('blocked_high_risk', requestId));
   }
 
-  const provider = context.providerOverride ?? selectFarmerAssistantProvider(env);
+  if (!context.providerOverride && isGeminiLiveActivationRequested(env) && !hasGeminiApiKey(env)) {
+    return jsonResponse(fixtureResponse('not_configured', requestId));
+  }
+
+  const providerFetch = getProviderFetch(context);
+  const provider =
+    context.providerOverride ??
+    selectFarmerAssistantProvider(env, {
+      allowLiveExecution: isGeminiLiveActivationRequested(env),
+      fetcher: providerFetch,
+    });
   const providerRequest = {
     question: validation.value.question,
     crop: validation.value.crop,

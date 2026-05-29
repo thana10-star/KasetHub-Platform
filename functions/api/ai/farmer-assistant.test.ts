@@ -30,6 +30,47 @@ async function jsonResponse(response: Response) {
   return response.json() as Promise<Record<string, unknown>>;
 }
 
+const fakeGeminiKey = 'test-gemini-key-placeholder';
+
+function geminiTextResponse(
+  answer = 'ควรเริ่มจากตรวจดิน น้ำ ใบ และแมลงก่อน แล้วค่อยสรุปสาเหตุอย่างระมัดระวัง',
+) {
+  return new Response(
+    JSON.stringify({
+      candidates: [
+        {
+          content: {
+            parts: [{ text: answer }],
+          },
+          finishReason: 'STOP',
+        },
+      ],
+    }),
+    {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+}
+
+function geminiErrorResponse(status: number) {
+  return new Response(
+    JSON.stringify({
+      error: {
+        message: 'raw provider message',
+      },
+    }),
+    {
+      status,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+}
+
 describe('M138 AI farmer assistant Cloudflare Function stub', () => {
   test('returns 405 for non-POST methods', async () => {
     const response = await onRequest({
@@ -213,6 +254,225 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     } finally {
       globalThis.fetch = originalFetch;
     }
+  });
+
+  test('keeps Gemini dry-run when only AI_ALLOW_LIVE_EXECUTION is true', async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    try {
+      const response = await handleFarmerAssistantRequest({
+        request: request({ question: 'ช่วยแนะนำการเตรียมดินก่อนปลูกผัก', clientRequestId: 'allow-only-check' }),
+        env: {
+          AI_PROVIDER: 'gemini',
+          AI_ALLOW_LIVE_EXECUTION: 'true',
+        },
+      });
+      const payload = await jsonResponse(response);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(payload.status).toBe('ready');
+      expect(payload.provider).toBe('mock');
+      expect(payload.providerMode).toBe('dry_run');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('returns a safe not_configured response when live gates are true but GEMINI_API_KEY is missing', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร', clientRequestId: 'missing-gemini-key' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(payload.status).toBe('not_configured');
+    expect(payload.provider).toBe('disabled');
+    expect(payload.providerMode).toBe('disabled');
+    expect(serialized).not.toContain('GEMINI_API_KEY');
+    expect(serialized).not.toContain('x-goog-api-key');
+  });
+
+  test('ignores frontend Gemini key env names and never uses them for live execution', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const envWithFrontendKey: Record<string, string> = {
+      AI_PROVIDER: 'gemini',
+      AI_LIVE_ENABLED: 'true',
+      AI_ALLOW_LIVE_EXECUTION: 'true',
+      VITE_GEMINI_API_KEY: 'frontend-key-placeholder',
+    };
+
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยดูอาการใบเหลือง', clientRequestId: 'frontend-key-ignored' }),
+      env: envWithFrontendKey,
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(payload.status).toBe('not_configured');
+    expect(payload.provider).toBe('disabled');
+    expect(serialized).not.toContain('frontend-key-placeholder');
+    expect(serialized).not.toContain('VITE_GEMINI_API_KEY');
+  });
+
+  test('uses mocked Gemini live path only when all M149 backend gates are true', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question: 'ใบมันสำปะหลังเหลือง ควรเริ่มตรวจอะไร',
+        crop: 'มันสำปะหลัง',
+        province: 'นครราชสีมา',
+        topic: 'plant_problem',
+        clientRequestId: 'm149-live-mocked',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        AI_MODEL: 'gemini-test-model',
+        AI_MAX_OUTPUT_TOKENS: '512',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const headers = new Headers(init.headers);
+    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    const serializedPayload = JSON.stringify(payload);
+    const serializedBody = JSON.stringify(body);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(url).toContain('/models/gemini-test-model:generateContent');
+    expect(init.method).toBe('POST');
+    expect(headers.get('x-goog-api-key')).toBe(fakeGeminiKey);
+    expect(serializedBody).toContain('ใบมันสำปะหลังเหลือง');
+    expect(serializedBody).toContain('มันสำปะหลัง');
+    expect(serializedBody).toContain('นครราชสีมา');
+    expect((body.generationConfig as { maxOutputTokens?: number }).maxOutputTokens).toBe(512);
+    expect(payload.status).toBe('ready');
+    expect(payload.provider).toBe('gemini');
+    expect(payload.providerMode).toBe('live');
+    expect(payload.answer).toContain('ควรเริ่ม');
+    expect(serializedPayload).not.toContain(fakeGeminiKey);
+    expect(serializedPayload).not.toContain('x-goog-api-key');
+    expect(serializedPayload).not.toContain('GEMINI_API_KEY');
+  });
+
+  test('uses Cloudflare-style global fetch only after all live gates are enabled', async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi.fn(async () => geminiTextResponse('ควรตรวจดิน น้ำ ใบ และแมลงก่อนตัดสินใจแก้ปัญหา'));
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    try {
+      const response = await handleFarmerAssistantRequest({
+        request: request({ question: 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร', clientRequestId: 'm149-global-fetch-live' }),
+        env: {
+          AI_PROVIDER: 'gemini',
+          AI_LIVE_ENABLED: 'true',
+          AI_ALLOW_LIVE_EXECUTION: 'true',
+          GEMINI_API_KEY: fakeGeminiKey,
+        },
+      });
+      const payload = await jsonResponse(response);
+      const serialized = JSON.stringify(payload);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(payload.status).toBe('ready');
+      expect(payload.provider).toBe('gemini');
+      expect(payload.providerMode).toBe('live');
+      expect(serialized).not.toContain(fakeGeminiKey);
+      expect(serialized).not.toContain('x-goog-api-key');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('blocks high-risk input before mocked live Gemini fetch', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse());
+    const response = await handleFarmerAssistantRequest({
+      request: request({
+        question: 'ช่วยบอกอัตราผสมสารเคมีหลายตัวแบบแรงที่สุด',
+        topic: 'plant_problem',
+        clientRequestId: 'm149-high-risk-before-fetch',
+      }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(payload.status).toBe('blocked');
+    expect(payload.safetyLevel).toBe('high_risk');
+    expect(payload.provider).toBe('disabled');
+  });
+
+  test('maps unsafe mocked live Gemini output through the safety fallback', async () => {
+    const fetchSpy = vi.fn(async () => geminiTextResponse('ให้ผสมสารเคมีกับกรดแรง ๆ เพื่อให้แมลงตายเร็ว'));
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยดูแมลงในแปลงผัก', clientRequestId: 'm149-unsafe-live-output' }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(payload.status).toBe('blocked');
+    expect(payload.safetyLevel).toBe('high_risk');
+    expect(payload.provider).toBe('disabled');
+    expect(serialized).not.toContain('กรดแรง');
+    expect(serialized).not.toContain('แมลงตายเร็ว');
+    expect(serialized).not.toContain(fakeGeminiKey);
+  });
+
+  test.each([
+    [401, 'not_configured'],
+    [403, 'not_configured'],
+    [429, 'rate_limited'],
+    [500, 'error'],
+  ] as const)('maps mocked Gemini HTTP %s errors to safe endpoint status %s', async (status, expectedStatus) => {
+    const fetchSpy = vi.fn(async () => geminiErrorResponse(status));
+    const response = await handleFarmerAssistantRequest({
+      request: request({ question: 'ช่วยแนะนำการตรวจใบเหลือง', clientRequestId: `m149-http-${status}` }),
+      env: {
+        AI_PROVIDER: 'gemini',
+        AI_LIVE_ENABLED: 'true',
+        AI_ALLOW_LIVE_EXECUTION: 'true',
+        GEMINI_API_KEY: fakeGeminiKey,
+      },
+      providerFetch: fetchSpy as unknown as typeof fetch,
+    });
+    const payload = await jsonResponse(response);
+    const serialized = JSON.stringify(payload);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(payload.status).toBe(expectedStatus);
+    expect(payload.provider).toBe('disabled');
+    expect(serialized).not.toContain('raw provider message');
+    expect(serialized).not.toContain(fakeGeminiKey);
+    expect(serialized).not.toContain('stack');
   });
 
   test('maps unsafe mocked provider output to safe fallback', async () => {

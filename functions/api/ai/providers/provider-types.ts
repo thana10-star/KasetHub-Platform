@@ -46,6 +46,7 @@ export type FarmerAssistantProviderHealth = {
 export type FarmerAssistantProviderEnv = {
   AI_PROVIDER?: string;
   AI_LIVE_ENABLED?: string;
+  AI_ALLOW_LIVE_EXECUTION?: string;
   GEMINI_API_KEY?: string;
   AI_MODEL?: string;
   AI_MAX_OUTPUT_TOKENS?: string;
