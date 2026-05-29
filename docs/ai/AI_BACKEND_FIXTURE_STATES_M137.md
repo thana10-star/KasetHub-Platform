@@ -1,5 +1,7 @@
 # AI Backend Fixture States M137
 
+> M141 revision note: Future provider direction is now Gemini-first. Preserve these fixture states as historical contract examples; fixtures remain non-live and must not pretend to be Gemini or OpenAI output.
+
 Status: contract fixtures only. These examples are for future backend/UI tests. They are not live AI output and must not be presented as real provider answers.
 
 ## Fixture Rules
@@ -175,4 +177,3 @@ M138 endpoint tests should cover:
 - Timeout fixture returns safe user copy only.
 - Ready fixture uses `provider: "mock"` until live provider scope is explicitly approved.
 - No fixture contains fake live weather, fake prices, fake citations, fake diagnosis certainty, or fake chemical dosage.
-

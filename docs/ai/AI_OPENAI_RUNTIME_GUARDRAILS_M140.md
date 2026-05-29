@@ -1,5 +1,7 @@
 # AI OpenAI Runtime Guardrails M140
 
+> M141 revision note: OpenAI is no longer the primary implementation direction. Preserve this file as historical M140 guardrail context; use `docs/ai/AI_PROVIDER_DIRECTION_REVISION_M141.md` and `docs/ai/AI_GEMINI_RUNTIME_PLAN_M141.md` for Gemini-first runtime planning.
+
 Status: planning and guardrails only. M140 does not enable live OpenAI calls, does not add API key values, does not add frontend provider keys, and does not change `/app/ai` to produce live AI output.
 
 ## Current AI Implementation Summary

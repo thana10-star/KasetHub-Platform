@@ -1,5 +1,7 @@
 # AI Provider Decision And Backend Contract M137
 
+> M141 revision note: The owner decision has changed to Gemini-first. Preserve this file as historical M137 contract context; use `docs/ai/AI_PROVIDER_DIRECTION_REVISION_M141.md` and `docs/ai/AI_GEMINI_RUNTIME_PLAN_M141.md` for current provider planning.
+
 Status: contract/foundation only. M137 does not call OpenAI, does not add an API key, does not create a live AI endpoint, and does not change `/app/ai` runtime behavior.
 
 ## Owner Decision
@@ -316,4 +318,3 @@ M138 AI Backend Proxy Contract Stub / No Live Provider Call should:
 - No runtime `/app/ai` provider integration.
 - No Supabase writes.
 - No Community, Weather, Prices, YouTube, auth, or unrelated route changes.
-

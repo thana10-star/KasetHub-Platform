@@ -1,5 +1,7 @@
 # AI Real Provider Architecture M136
 
+> M141 revision note: Future provider direction is now Gemini-first. Preserve this file as historical M136 context; use `docs/ai/AI_PROVIDER_DIRECTION_REVISION_M141.md` and `docs/ai/AI_GEMINI_RUNTIME_PLAN_M141.md` for implementation planning after M141.
+
 Status: design only. M136 does not implement a real provider call, add an API key, create a production AI endpoint, or change `/app/ai` runtime behavior.
 
 ## Current KasetHub AI State
@@ -377,4 +379,3 @@ M140 AI Safety/Abuse/Rate Limit Hardening:
 M141 AI Production QA:
 
 - Owner staging test, mobile QA, cost monitoring, copy review, and release checklist.
-

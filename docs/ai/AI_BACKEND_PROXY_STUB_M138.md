@@ -1,5 +1,7 @@
 # AI Backend Proxy Stub M138
 
+> M141 revision note: Future provider direction is now Gemini-first. Preserve this file as historical M138 backend contract context; do not read its OpenAI-specific future notes as current implementation direction.
+
 Status: backend contract stub only. M138 creates the Cloudflare Pages Function endpoint and validates the request shape, but it does not call OpenAI, Gemini, or any external AI provider.
 
 ## Endpoint

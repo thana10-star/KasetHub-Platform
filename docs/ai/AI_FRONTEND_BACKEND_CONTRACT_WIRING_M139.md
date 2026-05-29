@@ -1,5 +1,7 @@
 # AI Frontend Backend Contract Wiring M139
 
+> M141 revision note: Future provider direction is now Gemini-first. The frontend contract flag remains valid, but the OpenAI-specific next-milestone wording below is superseded by `docs/ai/AI_ROADMAP_REVISION_M141.md`.
+
 Status: frontend contract wiring only. M139 lets `/app/ai` call the M138 backend contract stub when a frontend-safe flag is enabled, but it still does not enable live OpenAI, Gemini, or any external AI provider.
 
 ## Frontend Mode

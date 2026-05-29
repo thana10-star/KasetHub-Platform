@@ -1,5 +1,7 @@
 # AI System Prompt Spec M140
 
+> M141 revision note: The prompt behavior remains provider-agnostic and compatible with Gemini. Future implementation should use the M141 Gemini docs for provider direction instead of the OpenAI-specific wording below.
+
 Status: documentation only. This prompt is not wired into runtime in M140.
 
 ## Purpose

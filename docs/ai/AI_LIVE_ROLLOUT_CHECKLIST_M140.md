@@ -1,5 +1,7 @@
 # AI Live Rollout Checklist M140
 
+> M141 revision note: The rollout checklist is superseded for future implementation by the Gemini-first M141 direction and roadmap. Preserve this file as historical M140 rollout context.
+
 Status: rollout planning only. This checklist does not activate live provider execution.
 
 ## Activation Principle
