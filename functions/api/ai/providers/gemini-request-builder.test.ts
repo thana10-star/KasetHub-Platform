@@ -5,6 +5,7 @@ import {
   buildGeminiFarmerAssistantRequest,
   buildGeminiFarmerAssistantUserParts,
   detectThaiCropFromQuestion,
+  detectThaiProblemFromQuestion,
 } from './gemini-request-builder';
 
 const baseRequest = {
@@ -18,7 +19,7 @@ const baseRequest = {
 
 const m150SmokeQuestion = 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร';
 
-describe('M145/M150 Gemini request builder', () => {
+describe('M145/M151 Gemini request builder', () => {
   test('builds a planned Gemini generateContent request with Thai farmer assistant instructions', () => {
     const plan = buildGeminiFarmerAssistantRequest(baseRequest, {
       model: 'gemini-model-under-test',
@@ -31,7 +32,7 @@ describe('M145/M150 Gemini request builder', () => {
     expect(plan.verificationNote).toBe(GEMINI_FIELD_SHAPE_VERIFICATION_NOTE);
     expect(plan.body.systemInstruction.parts[0]?.text).toBe(GEMINI_FARMER_ASSISTANT_SYSTEM_INSTRUCTION);
     expect(plan.body.systemInstruction.parts[0]?.text).toMatch(/[\u0E00-\u0E7F]/);
-    expect(plan.body.systemInstruction.parts[0]?.text).toContain('สิ่งที่ควรตรวจเช็กก่อน');
+    expect(plan.body.systemInstruction.parts[0]?.text).toContain('ตรวจใบและตำแหน่งที่เหลือง');
     expect(plan.body.systemInstruction.parts[0]?.text).toContain('ตอบคำถามของเกษตรกรโดยตรงก่อนเสมอ');
     expect(serialized).toContain(baseRequest.question);
     expect(serialized).toContain(baseRequest.crop);
@@ -43,7 +44,7 @@ describe('M145/M150 Gemini request builder', () => {
     expect(plan.body.safetySettings.length).toBeGreaterThan(0);
   });
 
-  test('keeps the exact farmer question in its own prompt part', () => {
+  test('keeps the exact farmer question in its own prompt part after a direct task block', () => {
     const plan = buildGeminiFarmerAssistantRequest({
       ...baseRequest,
       question: m150SmokeQuestion,
@@ -52,11 +53,20 @@ describe('M145/M150 Gemini request builder', () => {
       requestId: 'm150-question-clarity',
     });
     const parts = plan.body.contents[0]?.parts ?? [];
-    const questionPart = parts[0]?.text ?? '';
-    const contextPart = parts[1]?.text ?? '';
-    const instructionPart = parts[2]?.text ?? '';
+    const directTaskPart = parts[0]?.text ?? '';
+    const questionPart = parts[1]?.text ?? '';
+    const contextPart = parts[2]?.text ?? '';
+    const instructionPart = parts[3]?.text ?? '';
 
-    expect(parts).toHaveLength(3);
+    expect(parts).toHaveLength(4);
+    expect(directTaskPart).toContain('Direct task');
+    expect(directTaskPart).toContain('ตอบคำถามนี้โดยตรง');
+    expect(directTaskPart).toContain('ห้ามตอบว่าคำถามไม่ชัด');
+    expect(directTaskPart).toContain('do not answer only with clarification questions');
+    expect(directTaskPart).toContain('Detected crop: มันสำปะหลัง');
+    expect(directTaskPart).toContain('Detected problem: ใบเหลือง');
+    expect(directTaskPart).toContain('Task: ให้คำแนะนำเบื้องต้นว่าใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร');
+    expect(directTaskPart).toContain('Required answer opening: "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."');
     expect(questionPart).toContain('Farmer question');
     expect(questionPart).toContain(m150SmokeQuestion);
     expect(questionPart.length).toBeLessThan(140);
@@ -64,9 +74,16 @@ describe('M145/M150 Gemini request builder', () => {
     expect(instructionPart).not.toContain(m150SmokeQuestion);
     expect(instructionPart).toContain('Answer the farmer question directly first');
     expect(instructionPart).toContain('Do not say the question is unclear or missing');
+    expect(instructionPart).toContain('Do not answer only with clarification questions');
+    expect(instructionPart).toContain('1. ตรวจใบและตำแหน่งที่เหลือง');
+    expect(instructionPart).toContain('2. ตรวจน้ำและดิน');
+    expect(instructionPart).toContain('3. ตรวจราก/โคนต้น');
+    expect(instructionPart).toContain('4. ตรวจแมลงหรือโรค');
+    expect(instructionPart).toContain('5. ตรวจธาตุอาหารและอายุพืช');
+    expect(instructionPart).toContain('6. ข้อมูลที่ควรถามเพิ่ม');
   });
 
-  test('derives cassava crop context from the M150 smoke question', () => {
+  test('derives cassava crop and yellow-leaf problem context from the M151 smoke question', () => {
     const plan = buildGeminiFarmerAssistantRequest({
       ...baseRequest,
       question: m150SmokeQuestion,
@@ -74,12 +91,15 @@ describe('M145/M150 Gemini request builder', () => {
       province: undefined,
       requestId: 'm150-cassava-detected',
     });
-    const contextPart = plan.body.contents[0]?.parts[1]?.text ?? '';
+    const contextPart = plan.body.contents[0]?.parts[2]?.text ?? '';
 
     expect(detectThaiCropFromQuestion(m150SmokeQuestion)).toBe('มันสำปะหลัง');
+    expect(detectThaiProblemFromQuestion(m150SmokeQuestion)).toBe('ใบเหลือง');
     expect(contextPart).toContain('topic: plant_problem');
     expect(contextPart).toContain('crop: มันสำปะหลัง');
     expect(contextPart).toContain('cropContextSource: detected_from_question');
+    expect(contextPart).toContain('problem: ใบเหลือง');
+    expect(contextPart).toContain('problemContextSource: detected_from_question');
     expect(contextPart).toContain('province: not provided');
     expect(contextPart).toContain('userMode: guest');
   });
@@ -91,7 +111,7 @@ describe('M145/M150 Gemini request builder', () => {
       crop: 'ข้าว',
       requestId: 'provided-crop-wins',
     });
-    const contextPart = parts[1]?.text ?? '';
+    const contextPart = parts[2]?.text ?? '';
 
     expect(contextPart).toContain('crop: ข้าว');
     expect(contextPart).toContain('cropContextSource: provided_by_client');

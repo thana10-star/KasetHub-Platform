@@ -20,18 +20,45 @@ export const COMMON_THAI_CROP_NAMES = [
   'ข้าว',
 ] as const;
 
+export const COMMON_THAI_PROBLEM_TERMS = [
+  'ใบเหลือง',
+  'ใบไหม้',
+  'ใบร่วง',
+  'ต้นแคระ',
+  'รากเน่า',
+  'โคนเน่า',
+  'เชื้อรา',
+  'น้ำขัง',
+  'ดินแฉะ',
+  'ขาดปุ๋ย',
+  'เพลี้ย',
+  'แมลง',
+] as const;
+
+type ResolvedPromptContext = {
+  value: string;
+  source: 'provided_by_client' | 'detected_from_question' | 'not_provided';
+};
+
 export const GEMINI_FARMER_ASSISTANT_SYSTEM_INSTRUCTION = [
   'คุณคือผู้ช่วยเกษตรของ KasetHub สำหรับเกษตรกรไทย',
   'ตอบเป็นภาษาไทย ใช้ภาษาง่าย เป็นมิตร และปฏิบัติได้จริง',
   'ตอบสั้นพอดี ไม่ยาวเกินไป และเน้นสิ่งที่เกษตรกรเริ่มตรวจได้ทันที',
-  'ตอบคำถามของเกษตรกรโดยตรงก่อนเสมอ ถ้าข้อความคำถามไม่ว่าง ห้ามตอบว่าไม่ได้รับคำถามที่ชัดเจน',
+  'หน้าที่หลักคือช่วยตอบคำถามที่ผู้ใช้ส่งมา ไม่ใช่เริ่มจากการทักทายทั่วไป',
+  'ห้ามเริ่มคำตอบด้วยคำทักทายทั่วไป เช่น "สวัสดีครับ" หรือ "KasetHub ยินดีช่วยเหลือ" เมื่อมีคำถามเกษตรชัดเจน',
+  'ตอบคำถามของเกษตรกรโดยตรงก่อนเสมอ ถ้าข้อความคำถามไม่ว่าง ห้ามตอบว่าคำถามไม่ชัดหรือยังไม่ได้รับคำถาม',
+  'ถ้าระบบตรวจพบพืชหรือปัญหาจากคำถาม ให้ใช้ข้อมูลนั้นเป็นบริบทและให้คำแนะนำตรวจเช็กเบื้องต้นทันที',
   'ถ้ารายละเอียดบางอย่างยังขาด ให้ตอบด้วยขั้นตอนตรวจเช็กเบื้องต้นที่ปลอดภัยก่อน แล้วค่อยถามข้อมูลเพิ่มท้ายคำตอบ',
-  'ใช้รูปแบบ 4 ส่วนนี้เสมอ:',
-  '1. สิ่งที่ควรตรวจเช็กก่อน',
-  '2. สาเหตุที่พบบ่อย',
-  '3. วิธีเริ่มแก้แบบปลอดภัย',
-  '4. ข้อมูลที่ควรถามเพิ่ม',
+  'ถ้าผู้ใช้ถามเรื่องมันสำปะหลังใบเหลือง ให้เริ่มคำตอบด้วยแนวทางประมาณ "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."',
+  'ใช้รูปแบบ 6 ส่วนนี้สำหรับปัญหาพืช:',
+  '1. ตรวจใบและตำแหน่งที่เหลือง',
+  '2. ตรวจน้ำและดิน',
+  '3. ตรวจราก/โคนต้น',
+  '4. ตรวจแมลงหรือโรค',
+  '5. ตรวจธาตุอาหารและอายุพืช',
+  '6. ข้อมูลที่ควรถามเพิ่ม',
   'สำหรับปัญหาใบเหลือง ให้เริ่มจากการตรวจว่าเหลืองทั้งต้นหรือเฉพาะใบล่าง/ใบอ่อน ดินแฉะหรือน้ำขังหรือไม่ รากหรือโคนเน่าหรือไม่ มีแมลงหรือโรคหรือไม่ อายุพืชเท่าไร และช่วงนี้ฝนหรือแล้งผิดปกติหรือไม่',
+  'ห้ามตอบเฉพาะคำถามกลับหรือขอข้อมูลเพิ่มอย่างเดียว หากคำถามมีเบาะแสพืชหรือปัญหาแล้ว',
   'ห้ามให้ความมั่นใจเรื่องอัตราสารเคมีหรือปุ๋ยโดยไม่มีฉลากหรือแหล่งข้อมูลที่ตรวจสอบแล้ว',
   'ห้ามสอนการผสมสารเคมีอันตรายหรือการใช้ที่เสี่ยงต่อคน สัตว์ หรือสิ่งแวดล้อม',
   'ห้ามอ้างราคาสินค้า สภาพอากาศ แหล่งข่าว หรือข้อมูลสด หากระบบไม่ได้ส่งข้อมูลนั้นมาให้โดยตรง',
@@ -113,12 +140,35 @@ export function detectThaiCropFromQuestion(question: string) {
   return COMMON_THAI_CROP_NAMES.find((crop) => normalizedQuestion.includes(normalizeThaiSearchText(crop)));
 }
 
+export function detectThaiProblemFromQuestion(question: string) {
+  const normalizedQuestion = normalizeThaiSearchText(question);
+  const directProblem = COMMON_THAI_PROBLEM_TERMS.find((problem) => normalizedQuestion.includes(normalizeThaiSearchText(problem)));
+
+  if (directProblem) {
+    return directProblem;
+  }
+
+  if (normalizedQuestion.includes('ใบ') && normalizedQuestion.includes('เหลือง')) {
+    return 'ใบเหลือง';
+  }
+
+  if (normalizedQuestion.includes('ใบ') && normalizedQuestion.includes('ไหม้')) {
+    return 'ใบไหม้';
+  }
+
+  if (normalizedQuestion.includes('ใบ') && normalizedQuestion.includes('ร่วง')) {
+    return 'ใบร่วง';
+  }
+
+  return undefined;
+}
+
 function cleanOptionalText(value?: string) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
 }
 
-function resolveCropContext(request: FarmerAssistantProviderRequest) {
+function resolveCropContext(request: FarmerAssistantProviderRequest): ResolvedPromptContext {
   const providedCrop = cleanOptionalText(request.crop);
 
   if (providedCrop) {
@@ -143,8 +193,75 @@ function resolveCropContext(request: FarmerAssistantProviderRequest) {
   };
 }
 
+function resolveProblemContext(request: FarmerAssistantProviderRequest): ResolvedPromptContext {
+  const detectedProblem = detectThaiProblemFromQuestion(request.question);
+
+  if (detectedProblem) {
+    return {
+      value: detectedProblem,
+      source: 'detected_from_question',
+    };
+  }
+
+  return {
+    value: 'not provided',
+    source: 'not_provided',
+  };
+}
+
+function hasDetectedValue(context: ResolvedPromptContext) {
+  return context.source !== 'not_provided';
+}
+
+function buildRequiredOpening(crop: ResolvedPromptContext, problem: ResolvedPromptContext) {
+  if (hasDetectedValue(crop) && problem.value === 'ใบเหลือง') {
+    return `ใบ${crop.value}เหลือง ควรเริ่มตรวจ...`;
+  }
+
+  if (hasDetectedValue(crop) && hasDetectedValue(problem)) {
+    return `${crop.value}มีอาการ${problem.value} ควรเริ่มตรวจ...`;
+  }
+
+  if (hasDetectedValue(problem)) {
+    return `อาการ${problem.value} ควรเริ่มตรวจ...`;
+  }
+
+  return 'ควรเริ่มตรวจ...';
+}
+
+function buildTaskSummary(crop: ResolvedPromptContext, problem: ResolvedPromptContext) {
+  if (hasDetectedValue(crop) && problem.value === 'ใบเหลือง') {
+    return `ให้คำแนะนำเบื้องต้นว่าใบ${crop.value}เหลืองควรเริ่มตรวจอะไร`;
+  }
+
+  if (hasDetectedValue(crop) && hasDetectedValue(problem)) {
+    return `ให้คำแนะนำเบื้องต้นสำหรับ${crop.value}ที่มีอาการ${problem.value}`;
+  }
+
+  return 'ให้คำแนะนำเบื้องต้นตามคำถามของเกษตรกร';
+}
+
+function buildDirectTaskPrompt(request: FarmerAssistantProviderRequest) {
+  const crop = resolveCropContext(request);
+  const problem = resolveProblemContext(request);
+
+  return [
+    'Direct task / งานที่ต้องทำทันที:',
+    'ตอบคำถามนี้โดยตรง ห้ามตอบว่าคำถามไม่ชัด ถ้ามีคำถามอยู่แล้ว ให้เริ่มด้วยคำแนะนำตรวจเช็กเบื้องต้นทันที',
+    'If the user provided a concrete crop/problem clue, do not answer only with clarification questions.',
+    'ห้ามเริ่มด้วยคำทักทายทั่วไป ให้เริ่มด้วยคำตอบของปัญหาโดยตรง',
+    `Detected crop: ${crop.value}`,
+    `Detected crop source: ${crop.source}`,
+    `Detected problem: ${problem.value}`,
+    `Detected problem source: ${problem.source}`,
+    `Task: ${buildTaskSummary(crop, problem)}`,
+    `Required answer opening: "${buildRequiredOpening(crop, problem)}"`,
+  ].join('\n');
+}
+
 function buildDetectedContextPrompt(request: FarmerAssistantProviderRequest) {
   const crop = resolveCropContext(request);
+  const problem = resolveProblemContext(request);
   const province = cleanOptionalText(request.province) ?? 'not provided';
 
   return [
@@ -152,6 +269,8 @@ function buildDetectedContextPrompt(request: FarmerAssistantProviderRequest) {
     `- topic: ${request.topic}`,
     `- crop: ${crop.value}`,
     `- cropContextSource: ${crop.source}`,
+    `- problem: ${problem.value}`,
+    `- problemContextSource: ${problem.source}`,
     `- province: ${province}`,
     `- userMode: ${request.userMode}`,
   ].join('\n');
@@ -160,14 +279,18 @@ function buildDetectedContextPrompt(request: FarmerAssistantProviderRequest) {
 function buildAnswerInstructionPrompt() {
   return [
     'Answer instruction / วิธีตอบ:',
+    '- Start with the required answer opening when it is specific.',
     '- Answer the farmer question directly first.',
     '- Do not say the question is unclear or missing when Farmer question has text.',
+    '- Do not answer only with clarification questions.',
     '- If crop, province, age, or symptom details are missing, still provide safe first-check steps first, then ask follow-up questions.',
-    '- Use exactly these sections:',
-    '1. สิ่งที่ควรตรวจเช็กก่อน',
-    '2. สาเหตุที่พบบ่อย',
-    '3. วิธีเริ่มแก้แบบปลอดภัย',
-    '4. ข้อมูลที่ควรถามเพิ่ม',
+    '- Use exactly these sections for plant-problem questions:',
+    '1. ตรวจใบและตำแหน่งที่เหลือง',
+    '2. ตรวจน้ำและดิน',
+    '3. ตรวจราก/โคนต้น',
+    '4. ตรวจแมลงหรือโรค',
+    '5. ตรวจธาตุอาหารและอายุพืช',
+    '6. ข้อมูลที่ควรถามเพิ่ม',
     '- For cassava yellow leaves, mention safe checks such as leaf position, waterlogging/wet soil, nutrient stress, root/stem rot, insect/disease signs, crop age, and recent rain/dry conditions.',
     '- Do not give chemical dosage certainty, dangerous mixing instructions, fake citations, fake live weather, fake price, or fake source claims.',
   ].join('\n');
@@ -175,6 +298,9 @@ function buildAnswerInstructionPrompt() {
 
 export function buildGeminiFarmerAssistantUserParts(request: FarmerAssistantProviderRequest): GeminiGenerateContentPart[] {
   return [
+    {
+      text: buildDirectTaskPrompt(request),
+    },
     {
       text: ['Farmer question / คำถามเกษตรกรที่ต้องตอบโดยตรง:', request.question.trim()].join('\n'),
     },

@@ -67,8 +67,12 @@ describe('M147 Gemini live-capable provider', () => {
     const response = await provider.generateAnswer(request);
     const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
     const headers = new Headers(init.headers);
-    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    const body = JSON.parse(String(init.body)) as Record<string, unknown> & {
+      contents?: Array<{ parts?: Array<{ text?: string }> }>;
+    };
     const serializedResponse = JSON.stringify(response);
+    const serializedBody = JSON.stringify(body);
+    const directTaskPart = body.contents?.[0]?.parts?.[0]?.text ?? '';
 
     expect(provider.providerMode).toBe('live');
     expect(fetcher).toHaveBeenCalledTimes(1);
@@ -76,9 +80,13 @@ describe('M147 Gemini live-capable provider', () => {
     expect(init.method).toBe('POST');
     expect(headers.get('Content-Type')).toBe('application/json');
     expect(headers.get('x-goog-api-key')).toBe(fakeGeminiKey);
-    expect(JSON.stringify(body)).toContain(request.question);
-    expect(JSON.stringify(body)).toContain('มันสำปะหลัง');
-    expect(JSON.stringify(body)).toContain('นครราชสีมา');
+    expect(serializedBody).toContain(request.question);
+    expect(serializedBody).toContain('มันสำปะหลัง');
+    expect(serializedBody).toContain('นครราชสีมา');
+    expect(serializedBody).toContain('Direct task');
+    expect(serializedBody).toContain('Detected problem: ใบเหลือง');
+    expect(serializedBody).toContain('do not answer only with clarification questions');
+    expect(directTaskPart).toContain('Required answer opening: "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."');
     expect((body.generationConfig as { maxOutputTokens?: number }).maxOutputTokens).toBe(512);
     expect(response.status).toBe('ready');
     expect(response.provider).toBe('gemini');

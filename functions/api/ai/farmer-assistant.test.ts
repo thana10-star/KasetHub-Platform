@@ -370,7 +370,7 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     expect(serializedPayload).not.toContain('GEMINI_API_KEY');
   });
 
-  test('sends M150 cassava question clearly in mocked live endpoint request body', async () => {
+  test('sends M151 cassava question with crop/problem direct-answer context in mocked live endpoint request body', async () => {
     const question = 'ใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร';
     const fetchSpy = vi.fn(async () =>
       geminiTextResponse(
@@ -400,16 +400,33 @@ describe('M138 AI farmer assistant Cloudflare Function stub', () => {
     };
     const parts = body.contents?.[0]?.parts ?? [];
     const serializedPayload = JSON.stringify(payload);
+    const directTaskPart = parts[0]?.text ?? '';
+    const questionPart = parts[1]?.text ?? '';
+    const contextPart = parts[2]?.text ?? '';
+    const instructionPart = parts[3]?.text ?? '';
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(parts[0]?.text).toContain('Farmer question');
-    expect(parts[0]?.text).toContain(question);
-    expect(parts[1]?.text).toContain('topic: plant_problem');
-    expect(parts[1]?.text).toContain('crop: มันสำปะหลัง');
-    expect(parts[1]?.text).toContain('cropContextSource: detected_from_question');
-    expect(parts[1]?.text).toContain('province: not provided');
-    expect(parts[2]?.text).toContain('Answer the farmer question directly first');
-    expect(parts[2]?.text).toContain('Do not say the question is unclear or missing');
+    expect(parts).toHaveLength(4);
+    expect(directTaskPart).toContain('Direct task');
+    expect(directTaskPart).toContain('ตอบคำถามนี้โดยตรง');
+    expect(directTaskPart).toContain('Detected crop: มันสำปะหลัง');
+    expect(directTaskPart).toContain('Detected problem: ใบเหลือง');
+    expect(directTaskPart).toContain('Task: ให้คำแนะนำเบื้องต้นว่าใบมันสำปะหลังเหลืองควรเริ่มตรวจอะไร');
+    expect(directTaskPart).toContain('Required answer opening: "ใบมันสำปะหลังเหลือง ควรเริ่มตรวจ..."');
+    expect(directTaskPart).toContain('do not answer only with clarification questions');
+    expect(questionPart).toContain('Farmer question');
+    expect(questionPart).toContain(question);
+    expect(contextPart).toContain('topic: plant_problem');
+    expect(contextPart).toContain('crop: มันสำปะหลัง');
+    expect(contextPart).toContain('cropContextSource: detected_from_question');
+    expect(contextPart).toContain('problem: ใบเหลือง');
+    expect(contextPart).toContain('problemContextSource: detected_from_question');
+    expect(contextPart).toContain('province: not provided');
+    expect(instructionPart).toContain('Answer the farmer question directly first');
+    expect(instructionPart).toContain('Do not say the question is unclear or missing');
+    expect(instructionPart).toContain('Do not answer only with clarification questions');
+    expect(instructionPart).toContain('1. ตรวจใบและตำแหน่งที่เหลือง');
+    expect(instructionPart).toContain('6. ข้อมูลที่ควรถามเพิ่ม');
     expect(payload.status).toBe('ready');
     expect(payload.provider).toBe('gemini');
     expect(payload.providerMode).toBe('live');
